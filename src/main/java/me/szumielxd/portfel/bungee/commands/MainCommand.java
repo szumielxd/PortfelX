@@ -20,8 +20,9 @@ import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
+import net.md_5.bungee.api.plugin.TabExecutor;
 
-public class MainCommand extends Command implements AbstractCommand {
+public class MainCommand extends Command implements TabExecutor, AbstractCommand {
 
 	
 	private final PortfelBungee plugin;
@@ -87,6 +88,12 @@ public class MainCommand extends Command implements AbstractCommand {
 	
 	public @NotNull List<SimpleCommand> getChildrens() {
 		return this.childrens.values().stream().distinct().collect(Collectors.toList());
+	}
+
+
+	@Override
+	public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
+		return this.onTabComplete(new BungeeSender(this.plugin, sender), new String[] {this.getName()}, args);
 	}
 
 }

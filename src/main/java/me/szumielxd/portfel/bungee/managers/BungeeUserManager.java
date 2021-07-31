@@ -67,7 +67,8 @@ public class BungeeUserManager extends UserManager {
 	 * @return already loaded user or new one if not loaded already
 	 * @throws Exception if something went wrong
 	 */
-	public @Nullable User getOrCreateUser(@NotNull UUID uuid) throws Exception {
+	@Override
+	public @NotNull User getOrCreateUser(@NotNull UUID uuid) throws Exception {
 		this.validate();
 		OperableUser user = this.users.get(uuid);
 		if (user != null) return user;

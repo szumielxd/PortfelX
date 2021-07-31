@@ -93,6 +93,16 @@ public abstract class UserManager {
 	public abstract @Nullable User getOrLoadUser(@NotNull UUID uuid) throws Exception;
 	
 	/**
+	 * Get loaded user or load user assigned to given UUID. When UUID doesn't match any existent user, new one is created.
+	 * 
+	 * @implNote <b>Thread Unsafe</b>
+	 * @param uuid unique identifier of user
+	 * @return already loaded user or new one if not loaded already
+	 * @throws Exception if something went wrong
+	 */
+	public abstract @NotNull User getOrCreateUser(@NotNull UUID uuid) throws Exception;
+	
+	/**
 	 * Get unmodifiable list of all currently loaded users.
 	 * 
 	 * @return list of users

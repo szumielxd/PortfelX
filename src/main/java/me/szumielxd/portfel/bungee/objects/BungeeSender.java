@@ -58,7 +58,7 @@ public class BungeeSender implements CommonSender {
 	 * @param message message to send
 	 */
 	public void sendMessage(@NotNull Component message) {
-		this.plugin.getAdventure().sender(this.sender).sendMessage(message);
+		this.plugin.adventure().sender(this.sender).sendMessage(message);
 	}
 	
 	/**
@@ -67,7 +67,7 @@ public class BungeeSender implements CommonSender {
 	 * @param message message to send
 	 */
 	public void sendMessage(@NotNull Component... message) {
-		this.plugin.getAdventure().sender(this.sender).sendMessage(Component.empty().children(Arrays.asList(message)));
+		this.plugin.adventure().sender(this.sender).sendMessage(Component.empty().children(Arrays.asList(message)));
 	}
 	
 	/**
@@ -76,7 +76,7 @@ public class BungeeSender implements CommonSender {
 	 * @param message message to translate and send
 	 */
 	public void sendTranslated(@NotNull Component message) {
-		this.plugin.getAdventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(message));
+		this.plugin.adventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(message));
 	}
 	
 	/**
@@ -85,7 +85,7 @@ public class BungeeSender implements CommonSender {
 	 * @param message message to translate and send
 	 */
 	public void sendTranslated(@NotNull Component... message) {
-		this.plugin.getAdventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(Component.empty().children(Arrays.asList(message))));
+		this.plugin.adventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(Component.empty().children(Arrays.asList(message))));
 	}
 	
 	/**

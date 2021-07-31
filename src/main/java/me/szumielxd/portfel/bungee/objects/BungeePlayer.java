@@ -10,8 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.common.objects.CommonPlayer;
-import me.szumielxd.szchatfilter.api.SZChatFilterAPI;
-import me.szumielxd.szchatfilter.bungee.SZChatFilterBungee;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
@@ -117,7 +115,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @param message message to send
 	 */
 	public void sendActionBar(@NotNull Component message) {
-		this.plugin.getAdventure().player(this.player).sendActionBar(message);
+		this.plugin.adventure().player(this.player).sendActionBar(message);
 	}
 	
 	/**
@@ -128,7 +126,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @param times title timings (fade-in -> static -> fade-out)
 	 */
 	public void showTitle(@NotNull Component title, @NotNull Component subtitle, @NotNull Times times) {
-		this.plugin.getAdventure().player(this.player).showTitle(Title.title(title, subtitle, times));
+		this.plugin.adventure().player(this.player).showTitle(Title.title(title, subtitle, times));
 	}
 	
 	/**
@@ -143,7 +141,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 */
 	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
 		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, Set.of(flags));
-		final Audience a = this.plugin.getAdventure().player(player);
+		final Audience a = this.plugin.adventure().player(player);
 		a.showBossBar(bar);
 		plugin.getProxy().getScheduler().schedule(plugin, () -> a.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
 	}
