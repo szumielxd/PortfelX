@@ -73,6 +73,7 @@ public class ChannelListener implements Listener {
 				String subchannel = in.readUTF();
 				if ("Buy".equals(subchannel)) {
 					UUID serverKey = UUID.fromString(in.readUTF()); // serverKey
+					if (!this.plugin.getAccessManager().canAccess(serverKey)) return;
 					final String transactionId = in.readUTF(); // transaction id
 					String server = in.readUTF(); // server
 					long value = in.readLong(); // value
