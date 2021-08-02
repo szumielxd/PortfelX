@@ -43,7 +43,7 @@ public class Lang {
 		
 		ERROR_COMMAND_PERMISSION("error.command-permission", "No! You can't just run this command, you need the access!"),
 		ERROR_COMMAND_CONSOLE_ONLY("error.command-console-only", "You can do many things, but you must be a console to execute this command!"),
-		ERROR_COMMAND_PLAYERS_ONLY("error.command-players-only", "You're just only a console! This command requires something more... a player..."),
+		ERROR_COMMAND_PLAYERS_ONLY("error.command-players-only", "You're just only a console! This command requires something more... a PLAYER..."),
 		
 		COMMAND_ARGTYPES_USER_DISPLAY("command.arg-types.user.display", "user"),
 		COMMAND_ARGTYPES_USER_DESCRIPTION("command.arg-types.user.description", "user representated by name or unique id"),
@@ -55,11 +55,17 @@ public class Lang {
 		COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
 		
 		COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
+		COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT("command.system.registerserver.timeout", "Are you sure, server you want to register has actual version of Portfel? He's not responding..."),
+		COMMAND_SYSTEM_REGISTERSERVER_ALREADY("command.system.registerserver.already", "Is there any intelligent reason to register already registered server? Pro Tip: Check ID {0}."),
+		COMMAND_SYSTEM_REGISTERSERVER_SUCCESS("command.system.registerserver.success", "You did it! You registered new portfel server with friendly name {0} and id {1}!"),
+		COMMAND_SYSTEM_REGISTERSERVER_ERROR("command.system.registerserver.error", "This... This was very interesting. Server returned an unknown response."),
+		COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_NEEDED("command.system.registerserver.servername-needed", "We need a user friendly and memorable text for use as shorthand of server ID. Please provide id."),
+		COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY("command.system.registerserver.servername-already", "Did you remember this shorthand is already in use for another server?"),
 		
 		COMMAND_SYSTEM_UNREGISTERSERVER_DESCRIPTION("command.system.unregisterserver.description", "Unregister given server."),
 		
 		COMMAND_SUBCOMMANDS_TITLE("command.subcommands.title", "{0} Sub Commands:"),
-		COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.insertion", "Click to execute this command"),
+		COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.execution", "Click to execute this command"),
 		COMMAND_SUBCOMMANDS_INSERT("command.subcommands.insertion", "Shift+Click to insert this command"),
 		
 		COMMAND_MAIN_RUNNING("command.main.running", "Running {0}."),
@@ -75,6 +81,8 @@ public class Lang {
 		MAIN_VALUE_FALSE("main.value.false", "false"),
 		MAIN_VALUE_YES("main.value.yes", "yes"),
 		MAIN_VALUE_NO("main.value.no", "no"),
+		
+		MAIN_MESSAGE_INSERTION("main.message.insertion", "Click to insert the {0}."),
 		
 		// UNMODIFIABLE
 		EMPTY("", "", false),
