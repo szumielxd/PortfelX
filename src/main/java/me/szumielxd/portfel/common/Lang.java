@@ -41,10 +41,20 @@ public class Lang {
 		
 		
 		
+		ERROR_COMMAND_PERMISSION("error.command-permission", "No! You can't just run this command, you need the access!"),
+		ERROR_COMMAND_CONSOLE_ONLY("error.command-console-only", "You can do many things, but you must be a console to execute this command!"),
+		ERROR_COMMAND_PLAYERS_ONLY("error.command-players-only", "You're just only a console! This command requires something more... a player..."),
+		
 		COMMAND_ARGTYPES_USER_DISPLAY("command.arg-types.user.display", "user"),
-		COMMAND_ARGTYPES_USER_DESCRIPTION("command.arg-types.user.description", "representated by name or unique id"),
+		COMMAND_ARGTYPES_USER_DESCRIPTION("command.arg-types.user.description", "user representated by name or unique id"),
+		COMMAND_ARGTYPES_SERVERNAME_DISPLAY("command.arg-types.servername.display", "serverName"),
+		COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION("command.arg-types.servername.description", "user-friendly text representation of server instance (not the same as bungee serverName)"),
 		
 		COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
+		
+		COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
+		
+		COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
 		
 		COMMAND_SUBCOMMANDS_TITLE("command.subcommands.title", "{0} Sub Commands:"),
 		COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.insertion", "Click to execute this command"),

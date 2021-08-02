@@ -1,5 +1,7 @@
 package me.szumielxd.portfel.bungee.commands;
 
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,9 +15,10 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.objects.BungeeSender;
 import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
+import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
-import me.szumielxd.portfel.common.objects.CmdArg;
 import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.md_5.bungee.api.CommandSender;
@@ -48,6 +51,13 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 		if (args.length == 0) args = new String[] { this.help };
 		SimpleCommand cmd = this.childrens.get(args[0].toLowerCase());
 		if (cmd == null) cmd = this.childrens.get(this.help);
+		if (!cmd.hasPermission(sender)) {
+			sender.sendMessage(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_PERMISSION.component(RED)));
+			return;
+		} else if (!cmd.getAccess().canAccess(sender)) {
+			sender.sendMessage(Portfel.PREFIX.append(cmd.getAccess().getAccessMessage().component(RED)));
+			return;
+		}
 		cmd.onCommand(sender, parsedArgs, MiscUtils.mergeArrays(label, args[0]), MiscUtils.popArray(args));
 		return;
 	}

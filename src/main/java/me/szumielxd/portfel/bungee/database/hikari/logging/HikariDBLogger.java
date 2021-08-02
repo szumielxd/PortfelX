@@ -45,8 +45,8 @@ public class HikariDBLogger implements AbstractDBLogger {
 	}
 	
 	protected void validate() {
-		if (this.isDead()) throw new IllegalStateException("Cannot operate on dead UserManager");
-		if (!this.isInitialized()) throw new IllegalStateException("UserManager is not initialized");
+		if (this.isDead()) throw new IllegalStateException("Cannot operate on dead DBLogger");
+		if (!this.isInitialized()) throw new IllegalStateException("DBLogger is not initialized");
 	}
 	
 	/**

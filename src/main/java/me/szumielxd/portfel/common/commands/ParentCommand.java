@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.Portfel;
-import me.szumielxd.portfel.common.objects.CmdArg;
 import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
@@ -22,11 +21,14 @@ import net.kyori.adventure.text.format.TextDecoration;
 public abstract class ParentCommand extends SimpleCommand {
 
 	
-	private final HashMap<String, SimpleCommand> childrens;
+	private HashMap<String, SimpleCommand> childrens;
 	
 	
-	public ParentCommand(@NotNull AbstractCommand parent, @NotNull String name, @NotNull String[] aliases, @NotNull SimpleCommand... childrens) {
-		super(parent, name, aliases);
+	public ParentCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent, @NotNull String name, @NotNull String... aliases) {
+		super(plugin, parent, name, aliases);
+	}
+	
+	protected void register(@NotNull SimpleCommand... childrens) {
 		HashMap<String, SimpleCommand> childs = new HashMap<>();
 		for (final SimpleCommand cmd : childrens) {
 			childs.putIfAbsent(cmd.getName().toLowerCase(), cmd);
@@ -54,6 +56,13 @@ public abstract class ParentCommand extends SimpleCommand {
 		if (args.length > offset) {
 			SimpleCommand cmd = this.childrens.get(args[offset].toLowerCase());
 			if (cmd != null) {
+				if (!cmd.hasPermission(sender)) {
+					sender.sendMessage(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_PERMISSION.component(RED)));
+					return;
+				} else if (!cmd.getAccess().canAccess(sender)) {
+					sender.sendMessage(Portfel.PREFIX.append(cmd.getAccess().getAccessMessage().component(RED)));
+					return;
+				}
 				cmd.onCommand(sender, MiscUtils.mergeArrays(parsedArgs, newParsedArgs), MiscUtils.mergeArrays(label, Arrays.copyOf(args, ++offset)), MiscUtils.popArray(args, offset));
 				return;
 			}
@@ -85,7 +94,7 @@ public abstract class ParentCommand extends SimpleCommand {
 		sender.sendTranslated(comp);
 		Component linePrefix = Component.text("> ", LIGHT_PURPLE, TextDecoration.BOLD);
 		this.getChildrens().stream().sorted((a,b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName())).forEachOrdered(cmd -> {
-			if (!cmd.hasPermission(sender)) return;
+			if (!cmd.hasPermission(sender) || !cmd.getAccess().canAccess(sender)) return;
 			Component line = linePrefix.append(Component.text(cmd.getName(), AQUA)).append(Component.text(" - ", DARK_PURPLE))
 					.append(MiscUtils.join(" ", cmd.getArgs().stream().map(MiscUtils::argToComponent).toArray(Component[]::new)));
 			String cmdUsage = "/" + String.join(" ", suggestCmd) + " " + cmd.getName() + String.join(" ", cmd.getArgs().stream()
@@ -104,14 +113,14 @@ public abstract class ParentCommand extends SimpleCommand {
 		} else if (args.length == subCmds.size() + 1) {
 			List<String> list = new ArrayList<>();
 			this.childrens.forEach((name, cmd) -> {
-				if (cmd.hasPermission(sender) && name.toLowerCase().startsWith(lastArg)) list.add(name);
+				if (cmd.hasPermission(sender) && cmd.getAccess().canAccess(sender) && name.toLowerCase().startsWith(lastArg)) list.add(name);
 			});
 			list.sort(String.CASE_INSENSITIVE_ORDER);
 			return list;
 		} else {
 			String str = args[subCmds.size()];
 			SimpleCommand cmd = this.childrens.get(str.toLowerCase());
-			if (cmd != null && cmd.hasPermission(sender)) {
+			if (cmd != null && cmd.hasPermission(sender) && cmd.getAccess().canAccess(sender)) {
 				return cmd.onTabComplete(sender, MiscUtils.mergeArrays(label, Arrays.copyOf(args, subCmds.size()+1)), MiscUtils.popArray(args, subCmds.size()+1));
 			}
 		}

@@ -2,16 +2,20 @@ package me.szumielxd.portfel.common.commands;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.common.Portfel;
+
 public abstract class SimpleCommand implements AbstractCommand {
 	
 	
+	private final Portfel plugin;
 	private final AbstractCommand parent;
 	private final String name;
 	private final String permission;
 	private final String[] aliases;
 	
 	
-	public SimpleCommand(@NotNull AbstractCommand parent, @NotNull String name, @NotNull String... aliases) {
+	public SimpleCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent, @NotNull String name, @NotNull String... aliases) {
+		this.plugin = plugin;
 		this.name = name;
 		this.aliases = aliases;
 		this.permission = parent.getPermission() + "." + this.name;
@@ -36,6 +40,10 @@ public abstract class SimpleCommand implements AbstractCommand {
 	
 	public @NotNull AbstractCommand getParent() {
 		return this.parent;
+	}
+	
+	protected @NotNull Portfel getPlugin() {
+		return this.plugin;
 	}
 
 }

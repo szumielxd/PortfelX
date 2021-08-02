@@ -3,6 +3,7 @@ package me.szumielxd.portfel.bungee;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
@@ -14,6 +15,7 @@ import me.szumielxd.portfel.bungee.database.hikari.MariaDB;
 import me.szumielxd.portfel.bungee.database.hikari.logging.HikariDBLogger;
 import me.szumielxd.portfel.bungee.listeners.ChannelListener;
 import me.szumielxd.portfel.bungee.listeners.UserListener;
+import me.szumielxd.portfel.bungee.managers.AccessManager;
 import me.szumielxd.portfel.bungee.managers.BungeeTaskManager;
 import me.szumielxd.portfel.bungee.managers.BungeeUserManager;
 import me.szumielxd.portfel.common.Portfel;
@@ -26,6 +28,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 	
 	
 	private BungeeAudiences adventure;
+	private AccessManager accessManager;
 	private TaskManager taskManager;
 	private UserManager userManager;
 	private AbstractDB database;
@@ -38,6 +41,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 	public void onEnable() {
 		this.setupProxyId();
 		this.adventure = BungeeAudiences.create(this);
+		this.accessManager = new AccessManager(this).init();
 		this.taskManager = new BungeeTaskManager(this);
 		this.database = new MariaDB(this);
 		this.transactionLogger = new HikariDBLogger(this).init();
@@ -76,6 +80,11 @@ public class PortfelBungee extends Plugin implements Portfel {
 	public AbstractDB getDB() {
 		return this.database;
 	}
+	
+	
+	public AccessManager getAccessManager() {
+		return this.accessManager;
+	}
 
 
 	@Override
@@ -110,17 +119,19 @@ public class PortfelBungee extends Plugin implements Portfel {
 		final File f = new File(this.getDataFolder(), "server-id.dat");
 		if (f.exists()) {
 			try {
-				this.proxyID = UUID.fromString(Files.readString(f.toPath()));
+				this.proxyID = UUID.fromString(String.join("\n", Files.readAllLines(f.toPath())));
 				return;
 			} catch (IllegalArgumentException | IOException e) {
 				e.printStackTrace();
-				File to = new File(this.getDataFolder(), "server-id.dat.old");
+				File to = new File(this.getDataFolder(), "server-id.dat.broken");
 				if (to.exists()) to.delete();
 				f.renameTo(to);
 			}
 		}
 		try {
-			Files.writeString(f.toPath(), (this.proxyID = UUID.randomUUID()).toString());
+			File parent = f.getParentFile();
+			if (!parent.exists()) parent.mkdirs();
+			Files.write(f.toPath(), (this.proxyID = UUID.randomUUID()).toString().getBytes(StandardCharsets.UTF_8));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

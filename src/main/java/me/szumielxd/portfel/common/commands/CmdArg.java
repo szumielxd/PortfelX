@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.common.objects;
+package me.szumielxd.portfel.common.commands;
 
 import java.util.List;
 import java.util.function.Function;
@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.objects.CommonSender;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 
@@ -20,7 +21,7 @@ public class CmdArg {
 	private final Function<CommonSender, List<String>> argCompletions;
 	
 	
-	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, Function<String, Object> argParser, @NotNull Function<CommonSender, List<String>> argCompletions) {
+	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender, List<String>> argCompletions) {
 		this.name = name;
 		this.description = description;
 		this.argError = argError;
@@ -35,7 +36,7 @@ public class CmdArg {
 	 * 
 	 * @return language key to localized name
 	 */
-	public LangKey getDisplay() {
+	public @NotNull LangKey getDisplay() {
 		return this.name;
 	}
 	
@@ -44,7 +45,7 @@ public class CmdArg {
 	 * 
 	 * @return language key to localized description
 	 */
-	public LangKey getDescription() {
+	public @NotNull LangKey getDescription() {
 		return this.description;
 	}
 	
