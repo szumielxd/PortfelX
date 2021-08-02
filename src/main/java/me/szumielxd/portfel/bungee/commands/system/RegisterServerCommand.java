@@ -1,5 +1,7 @@
 package me.szumielxd.portfel.bungee.commands.system;
 
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,9 +10,11 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.managers.AccessManager;
 import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.objects.CommonPlayer;
 import me.szumielxd.portfel.common.objects.CommonSender;
 
 public class RegisterServerCommand extends SimpleCommand {
@@ -29,9 +33,16 @@ public class RegisterServerCommand extends SimpleCommand {
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		PortfelBungee pl = (PortfelBungee)this.getPlugin();
 		AccessManager access = pl.getAccessManager();
-		if (args.length == 0) return;
-		if (access.getServerByName(args[0]) != null) return;
+		if (args.length == 0) {
+			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_NEEDED.component(RED)));
+			return;
+		}
+		if (access.getServerByName(args[0]) != null) {
+			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY.component(RED)));
+			return;
+		}
 		// register
+		pl.getAccessManager().pendingRegistration((CommonPlayer) sender, args[0]);
 	}
 
 	@Override
