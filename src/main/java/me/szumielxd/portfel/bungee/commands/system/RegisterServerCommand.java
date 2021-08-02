@@ -21,7 +21,7 @@ public class RegisterServerCommand extends SimpleCommand {
 		super(plugin, parent, "registerserver", "createserver");
 		this.args = Arrays.asList(
 				// serverName
-				new CmdArg(LangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY, LangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION, null, s -> s, s -> new ArrayList<>())
+				new CmdArg(LangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY, LangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>())
 		);
 	}
 
