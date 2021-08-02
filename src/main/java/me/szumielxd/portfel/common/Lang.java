@@ -56,6 +56,8 @@ public class Lang {
 		
 		COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
 		
+		COMMAND_SYSTEM_UNREGISTERSERVER_DESCRIPTION("command.system.unregisterserver.description", "Unregister given server."),
+		
 		COMMAND_SUBCOMMANDS_TITLE("command.subcommands.title", "{0} Sub Commands:"),
 		COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.insertion", "Click to execute this command"),
 		COMMAND_SUBCOMMANDS_INSERT("command.subcommands.insertion", "Shift+Click to insert this command"),

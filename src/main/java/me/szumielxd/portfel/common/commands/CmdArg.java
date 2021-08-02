@@ -20,7 +20,15 @@ public class CmdArg {
 	private final Function<String, Object> argParser;
 	private final Function<CommonSender, List<String>> argCompletions;
 	
-	
+	/**
+	 * 
+	 * 
+	 * @param name
+	 * @param description
+	 * @param argError
+	 * @param argParser
+	 * @param argCompletions
+	 */
 	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender, List<String>> argCompletions) {
 		this.name = name;
 		this.description = description;

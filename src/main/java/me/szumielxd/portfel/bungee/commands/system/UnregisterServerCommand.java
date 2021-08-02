@@ -3,6 +3,8 @@ package me.szumielxd.portfel.bungee.commands.system;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bungee.PortfelBungee;
@@ -13,11 +15,11 @@ import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.objects.CommonSender;
 
-public class RegisterServerCommand extends SimpleCommand {
+public class UnregisterServerCommand extends SimpleCommand {
 	
 	public final List<CmdArg> args;
 
-	public RegisterServerCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
+	public UnregisterServerCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "registerserver", "createserver");
 		this.args = Arrays.asList(
 				// serverName
@@ -30,8 +32,16 @@ public class RegisterServerCommand extends SimpleCommand {
 		PortfelBungee pl = (PortfelBungee)this.getPlugin();
 		AccessManager access = pl.getAccessManager();
 		if (args.length == 0) return;
-		if (access.getServerByName(args[0]) != null) return;
-		// register
+		// unregister
+		UUID serverId;
+		try {
+			serverId = UUID.fromString(args[0]);
+		} catch (IllegalArgumentException e) {
+			serverId = access.getServerByName(args[0]);
+		}
+		if (serverId != null && access.canAccess(serverId)) {
+			access.unregister(serverId);
+		}
 	}
 
 	@Override
@@ -47,7 +57,7 @@ public class RegisterServerCommand extends SimpleCommand {
 
 	@Override
 	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION;
+		return LangKey.COMMAND_SYSTEM_UNREGISTERSERVER_DESCRIPTION;
 	}
 	
 	@Override
