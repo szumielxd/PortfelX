@@ -1,141 +1,79 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
+	<packaging>pom</packaging>
+
 	<groupId>me.szumielxd</groupId>
-	<artifactId>PortfelX</artifactId>
+	<artifactId>portfelx-parent</artifactId>
 	<version>3.0.0b</version>
-	<name>Portfel</name>
+	<url>https://github.com/szumielxd/PortfelX/</url>
+	<name>${pluginName}</name>
 	<description>Plugin do zarzadzania serwerowym portfelem</description>
+
 	<properties>
+		<java.version>1.8</java.version>
+		<pluginName>Portfel</pluginName>
 		<author>szumielxd</author>
-		<mainClass>me.szumielxd.portfel.Portfel</mainClass>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<bukkitMainClass>me.szumielxd.portfel.bukkit.PortfelBukkit</bukkitMainClass>
+		<bungeeMainClass>me.szumielxd.portfel.bukkit.PortfelBungee</bungeeMainClass>
 	</properties>
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.4</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<relocations>
-						<relocation>
-							<pattern>com.zaxxer</pattern>
-							<shadedPattern>me.szumielxd.portfel.lib.com.zaxxer</shadedPattern>
-						</relocation>
-						<relocation>
-							<pattern>net.kyori</pattern>
-							<shadedPattern>me.szumielxd.portfel.lib.net.kyori</shadedPattern>
-						</relocation>
-						<relocation>
-							<pattern>org.slf4j</pattern>
-							<shadedPattern>me.szumielxd.portfel.lib.org.slf4j</shadedPattern>
-						</relocation>
-					</relocations>
-				</configuration>
-			</plugin>
-		</plugins>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>plugin.yml</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>false</filtering>
-				<excludes>
-					<exclude>**/*.java</exclude>
-					<exclude>plugin.yml</exclude>
-				</excludes>
-			</resource>
-		</resources>
-	</build>
+
+	<!-- Repositories -->
 	<repositories>
 		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-		<repository>
-			<id>papermc</id>
-			<url>https://papermc.io/repo/repository/maven-public/</url>
-		</repository>
-		<repository>
-			<id>mvdw-software</id>
-			<name>MVdW Public Repositories</name>
-			<url>http://repo.mvdw-software.be/content/groups/public/</url>
-		</repository>
-		<repository>
-			<id>placeholderapi</id>
-			<url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-		</repository>
-		<repository>
-			<id>enginehub</id>
-			<url>https://maven.enginehub.org/repo/</url>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/groups/public</url>
 		</repository>
 		<repository>
 			<id>sonatype-oss-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</repository>
 	</repositories>
+
+	<!-- License -->
+	<licenses>
+		<license>
+			<name>GPL2</name>
+			<url>http://www.gnu.org/licenses/gpl-2.0.html</url>
+		</license>
+	</licenses>
+	
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-logging</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-api</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-bungee</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-bukkit</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<!-- Dependencies -->
 	<dependencies>
-		<dependency>
-			<groupId>io.papermc.paper</groupId>
-			<artifactId>paper-api</artifactId>
-			<version>1.17.1-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-			<type>jar</type>
-			<exclusions>
-				<exclusion>
-					<groupId>net.kyori</groupId>
-					<artifactId>adventure-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.kyori</groupId>
-					<artifactId>adventure-text-serializer-gson</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.kyori</groupId>
-					<artifactId>adventure-text-serializer-legacy</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.kyori</groupId>
-					<artifactId>adventure-text-serializer-plain</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
-            <version>1.17-R0.1-SNAPSHOT</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.md-5</groupId>
-            <artifactId>bungeecord-api</artifactId>
-            <version>1.17-R0.1-SNAPSHOT</version>
-            <type>javadoc</type>
-            <scope>provided</scope>
-        </dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
@@ -143,92 +81,68 @@
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>me.clip</groupId>
-			<artifactId>placeholderapi</artifactId>
-			<version>2.10.10</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>be.maximvdw</groupId>
-			<artifactId>MVdWPlaceholderAPI</artifactId>
-			<version>3.1.1-SNAPSHOT</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.spigotmc</groupId>
-					<artifactId>spigot</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.github.SkriptLang</groupId>
-			<artifactId>Skript</artifactId>
-			<version>2.5.3</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bukkit</groupId>
-					<artifactId>bukkit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sk89q.worldedit</groupId>
-					<artifactId>worldedit-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sk89q.worldguard</groupId>
-					<artifactId>worldguard-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sk89q</groupId>
-					<artifactId>commandbook</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.milkbowl.vault</groupId>
-					<artifactId>Vault</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bstats</groupId>
-					<artifactId>bstats-bukkit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.ow2.asm</groupId>
-					<artifactId>asm</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>net.kyori</groupId>
+			<artifactId>adventure-api</artifactId>
+			<version>4.8.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-bungeecord</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jetbrains</groupId>
-					<artifactId>annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.checkerframework</groupId>
-					<artifactId>checker-qual</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>adventure-text-serializer-legacy</artifactId>
+			<version>4.8.1</version>
 		</dependency>
 		<dependency>
 			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-bukkit</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jetbrains</groupId>
-					<artifactId>annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.checkerframework</groupId>
-					<artifactId>checker-qual</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>adventure-text-serializer-gson</artifactId>
+			<version>4.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>net.md-5</groupId>
+			<artifactId>bungeecord-chat</artifactId>
+			<version>1.17-R0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
+
+	<!-- Build -->
+	<build>
+		<defaultGoal>clean package</defaultGoal>
+
+		<pluginManagement>
+			<plugins>
+				<!-- Compile plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.1</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+						<showDeprecation>true</showDeprecation>
+					</configuration>
+				</plugin>
+				<!-- NotNull plugin -->
+				<plugin>
+					<groupId>se.eris</groupId>
+					<artifactId>notnull-instrumenter-maven-plugin</artifactId>
+					<version>1.0.0</version>
+					<executions>
+						<execution>
+							<id>instrument</id>
+							<goals>
+								<goal>instrument</goal>
+								<goal>tests-instrument</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<modules>
+		<module>portfelx-bukkit</module>
+		<module>portfelx-bungee</module>
+		<module>portfelx-common</module>
+		<module>portfelx-api</module>
+		<module>portfelx-assembly</module>
+	</modules>
 </project>
