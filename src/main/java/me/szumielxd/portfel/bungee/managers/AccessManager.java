@@ -192,6 +192,12 @@ public class AccessManager implements Listener {
 		return true;
 	}
 	
+	public Map<UUID, String> getServerNames() {
+		Map<UUID, String> serverNames = new HashMap<>();
+		this.accessMap.entrySet().forEach(e -> serverNames.put(UUID.fromString(e.getKey()), e.getValue().getAsJsonObject().get("display").getAsString()));
+		return serverNames;
+	}
+	
 	/**
 	 * Save servers list.
 	 */

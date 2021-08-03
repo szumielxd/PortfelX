@@ -84,6 +84,14 @@ public abstract class UserManager {
 	public abstract @Nullable User getUser(@NotNull UUID uuid);
 	
 	/**
+	 * Get loaded user from username.
+	 * 
+	 * @param username name of user
+	 * @return user if is loaded, otherwise null
+	 */
+	public abstract @Nullable User getUser(@NotNull String username);
+	
+	/**
 	 * Get loaded user or load user assigned to given UUID.
 	 * 
 	 * @param uuid unique identifier of user
@@ -91,6 +99,16 @@ public abstract class UserManager {
 	 * @throws Exception if something went wrong
 	 */
 	public abstract @Nullable User getOrLoadUser(@NotNull UUID uuid) throws Exception;
+	
+	/**
+	 * Get loaded user or load user assigned to given username.
+	 * 
+	 * @implNote <b>Thread Unsafe</b>
+	 * @param username name of user
+	 * @return already loaded user or new one if not loaded already
+	 * @throws Exception if something went wrong
+	 */
+	public abstract @Nullable User getOrLoadUser(@NotNull String username) throws Exception;
 	
 	/**
 	 * Get loaded user or load user assigned to given UUID. When UUID doesn't match any existent user, new one is created.

@@ -16,6 +16,7 @@ import me.szumielxd.portfel.bungee.objects.OperableUser;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.managers.UserManager;
 import me.szumielxd.portfel.common.objects.User;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class BungeeUserManager extends UserManager {
 
@@ -29,6 +30,15 @@ public class BungeeUserManager extends UserManager {
 		this.users = new HashMap<>();
 	}
 	
+	// TODO: loadOrCreate for array of UUIDs
+	@Override
+	public UserManager init() {
+		super.init();
+		this.plugin.getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId).toArray(UUID[]::new);
+		//this.plugin.getDB();
+		return this;
+	}
+	
 	/**
 	 * Get loaded user from UUID.
 	 * 
@@ -39,6 +49,18 @@ public class BungeeUserManager extends UserManager {
 	public @Nullable User getUser(@NotNull UUID uuid) {
 		this.validate();
 		return this.users.get(uuid);
+	}
+	
+	/**
+	 * Get loaded user from username.
+	 * 
+	 * @param username name of user
+	 * @return user if is loaded, otherwise null
+	 */
+	@Override
+	public @Nullable User getUser(@NotNull String username) {
+		this.validate();
+		return this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
 	}
 	
 	/**
@@ -56,6 +78,24 @@ public class BungeeUserManager extends UserManager {
 		if (user != null) return user;
 		user = (OperableUser) this.plugin.getDB().loadUser(uuid);
 		this.users.put(uuid, user);
+		return user;
+	}
+	
+	/**
+	 * Get loaded user or load user assigned to given username.
+	 * 
+	 * @implNote <b>Thread Unsafe</b>
+	 * @param username name of user
+	 * @return already loaded user or new one if not loaded already
+	 * @throws Exception if something went wrong
+	 */
+	@Override
+	public @Nullable User getOrLoadUser(@NotNull String username) throws Exception {
+		this.validate();
+		OperableUser user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
+		if (user != null) return user;
+		user = (OperableUser) this.plugin.getDB().loadUserByName(username, false);
+		this.users.put(user.getUniqueId(), user);
 		return user;
 	}
 	

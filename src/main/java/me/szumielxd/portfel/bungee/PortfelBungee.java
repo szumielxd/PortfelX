@@ -41,8 +41,8 @@ public class PortfelBungee extends Plugin implements Portfel {
 	public void onEnable() {
 		this.setupProxyId();
 		this.adventure = BungeeAudiences.create(this);
-		this.accessManager = new AccessManager(this).init();
 		this.taskManager = new BungeeTaskManager(this);
+		this.accessManager = new AccessManager(this).init();
 		this.database = new MariaDB(this);
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new BungeeUserManager(this).init();

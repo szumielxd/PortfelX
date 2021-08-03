@@ -1,5 +1,7 @@
 package me.szumielxd.portfel.bungee.commands.system;
 
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,12 +10,14 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.bungee.commands.CommonArgs;
 import me.szumielxd.portfel.bungee.managers.AccessManager;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.objects.CommonSender;
+import net.kyori.adventure.text.Component;
 
 public class UnregisterServerCommand extends SimpleCommand {
 	
@@ -21,10 +25,7 @@ public class UnregisterServerCommand extends SimpleCommand {
 
 	public UnregisterServerCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "registerserver", "createserver");
-		this.args = Arrays.asList(
-				// serverName
-				new CmdArg(LangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY, LangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>())
-		);
+		this.args = Arrays.asList(CommonArgs.SERVER);
 	}
 
 	@Override
@@ -33,15 +34,13 @@ public class UnregisterServerCommand extends SimpleCommand {
 		AccessManager access = pl.getAccessManager();
 		if (args.length == 0) return;
 		// unregister
-		UUID serverId;
-		try {
-			serverId = UUID.fromString(args[0]);
-		} catch (IllegalArgumentException e) {
-			serverId = access.getServerByName(args[0]);
+		CmdArg arg = this.args.get(0);
+		UUID serverId = (UUID) arg.parseArg(args[0]);
+		if (serverId == null) {
+			sender.sendTranslated(arg.getArgError(Component.text(args[0], DARK_RED)));
+			return;
 		}
-		if (serverId != null && access.canAccess(serverId)) {
-			access.unregister(serverId);
-		}
+		access.unregister(serverId);
 	}
 
 	@Override
@@ -58,11 +57,6 @@ public class UnregisterServerCommand extends SimpleCommand {
 	@Override
 	public @NotNull LangKey getDescription() {
 		return LangKey.COMMAND_SYSTEM_UNREGISTERSERVER_DESCRIPTION;
-	}
-	
-	@Override
-	public @NotNull CommandAccess getAccess() {
-		return CommandAccess.PLAYERS;
 	}
 
 }

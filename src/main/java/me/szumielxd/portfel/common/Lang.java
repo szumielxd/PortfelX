@@ -47,8 +47,16 @@ public class Lang {
 		
 		COMMAND_ARGTYPES_USER_DISPLAY("command.arg-types.user.display", "user"),
 		COMMAND_ARGTYPES_USER_DESCRIPTION("command.arg-types.user.description", "user representated by name or unique id"),
+		COMMAND_ARGTYPES_USER_ERROR("command.arg-types.user.error", "A user for {0} could not be found."),
 		COMMAND_ARGTYPES_SERVERNAME_DISPLAY("command.arg-types.servername.display", "serverName"),
 		COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION("command.arg-types.servername.description", "user-friendly text representation of server instance (not the same as bungee serverName)"),
+		COMMAND_ARGTYPES_SERVER_DISPLAY("command.arg-types.server.display", "server"),
+		COMMAND_ARGTYPES_SERVER_DESCRIPTION("command.arg-types.server.description", "server representated by friendly-name or unique id"),
+		COMMAND_ARGTYPES_SERVER_ERROR("command.arg-types.server.error", "A server for {0} could not be found."),
+		COMMAND_ARGTYPES_ORDER_DISPLAY("command.arg-types.order.display", "order"),
+		COMMAND_ARGTYPES_ORDER_DESCRIPTION("command.arg-types.order.description", "name of global order"),
+		COMMAND_ARGTYPES_ORDER_ERROR("command.arg-types.order.error", "A order for {0} could not be found. Remember to firstly create it in orders.yml file."),
+		
 		
 		COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
 		
