@@ -57,7 +57,7 @@ public class GrantOrderCommand extends SimpleCommand {
 	public @NotNull Iterable<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
 		if (args.length == 1) {
 			String arg = args[0].toLowerCase();
-			return this.getArgs().get(0).getTabCompletions(sender).stream().filter(s -> s.toLowerCase().startsWith(arg)).collect(Collectors.toList());
+			return this.getArgs().get(0).getTabCompletions(sender).stream().filter(s -> s.toLowerCase().startsWith(arg)).sorted().collect(Collectors.toList());
 		}
 		return new ArrayList<>();
 	}
