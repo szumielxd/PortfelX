@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.commands.CommonArgs;
 import me.szumielxd.portfel.bungee.commands.system.server.GrantOrderCommand;
+import me.szumielxd.portfel.bungee.commands.system.server.RevokeOrderCommand;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
@@ -19,7 +20,8 @@ public class ServerParentCommand extends ParentCommand {
 	public ServerParentCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "server", "srv");
 		this.register(
-				new GrantOrderCommand(plugin, this)
+				new GrantOrderCommand(plugin, this),
+				new RevokeOrderCommand(plugin, this)
 		);
 		this.args = Arrays.asList(CommonArgs.SERVER);
 	}

@@ -1,5 +1,7 @@
 package me.szumielxd.portfel.common.commands;
 
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -99,7 +101,7 @@ public class CmdArg {
 	 * @return translatable component with given replacements if this argument is not optional, otherwise null
 	 */
 	public @Nullable TranslatableComponent getArgError(@NotNull Component arg) {
-		return this.argError == null? null : this.argError.component(arg);
+		return this.argError == null? null : this.argError.component(RED, arg);
 	}
 	
 	/**

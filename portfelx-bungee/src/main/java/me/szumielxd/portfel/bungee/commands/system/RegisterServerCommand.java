@@ -31,24 +31,15 @@ public class RegisterServerCommand extends SimpleCommand {
 
 	@Override
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+		Object[] parsed = this.validateArgs(sender, args);
+		if (parsed == null) return;
 		PortfelBungee pl = (PortfelBungee)this.getPlugin();
 		AccessManager access = pl.getAccessManager();
-		if (args.length == 0) {
-			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_NEEDED.component(RED)));
-			return;
-		}
 		if (access.getServerByName(args[0]) != null) {
 			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY.component(RED)));
 			return;
 		}
-		// register
 		pl.getAccessManager().pendingRegistration((CommonPlayer) sender, args[0]);
-	}
-
-	@Override
-	public @NotNull Iterable<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
-		if (args.length == 1) return this.getArgs().get(0).getTabCompletions(sender);
-		return new ArrayList<>();
 	}
 
 	@Override

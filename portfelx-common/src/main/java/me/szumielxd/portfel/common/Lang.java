@@ -40,6 +40,7 @@ public class Lang {
 		
 		
 		
+		ERROR_COMMAND_EXECUTION("error.command-execution", "No way! An error occured while attempting to perform this command! See console for any usefull information."),
 		ERROR_COMMAND_PERMISSION("error.command-permission", "No! You can't just run this command, you need the access!"),
 		ERROR_COMMAND_CONSOLE_ONLY("error.command-console-only", "You can do many things, but you must be a console to execute this command!"),
 		ERROR_COMMAND_PLAYERS_ONLY("error.command-players-only", "You're just only a console! This command requires something more... a PLAYER..."),
@@ -47,38 +48,75 @@ public class Lang {
 		COMMAND_ARGTYPES_USER_DISPLAY("command.arg-types.user.display", "user"),
 		COMMAND_ARGTYPES_USER_DESCRIPTION("command.arg-types.user.description", "user representated by name or unique id"),
 		COMMAND_ARGTYPES_USER_ERROR("command.arg-types.user.error", "A user for {0} could not be found."),
+		//
 		COMMAND_ARGTYPES_SERVERNAME_DISPLAY("command.arg-types.servername.display", "serverName"),
 		COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION("command.arg-types.servername.description", "user-friendly text representation of server instance (not the same as bungee serverName)"),
+		//
 		COMMAND_ARGTYPES_SERVER_DISPLAY("command.arg-types.server.display", "server"),
 		COMMAND_ARGTYPES_SERVER_DESCRIPTION("command.arg-types.server.description", "server representated by friendly-name or unique id"),
 		COMMAND_ARGTYPES_SERVER_ERROR("command.arg-types.server.error", "A server for {0} could not be found."),
+		//
 		COMMAND_ARGTYPES_ORDER_DISPLAY("command.arg-types.order.display", "order"),
 		COMMAND_ARGTYPES_ORDER_DESCRIPTION("command.arg-types.order.description", "name of global order"),
 		COMMAND_ARGTYPES_ORDER_ERROR("command.arg-types.order.error", "A order for {0} could not be found. Remember to firstly create it in orders.yml file."),
+		//
+		COMMAND_ARGTYPES_ECO_AMOUNT_DISPLAY("command.arg-types.eco-amount.display", "amount"),
+		COMMAND_ARGTYPES_ECO_AMOUNT_DESCRIPTION("command.arg-types.eco-amount.description", "amount of money"),
+		COMMAND_ARGTYPES_ECO_AMOUNT_ERROR("command.arg-types.eco-amount.error", "Hey! {0} is not valid amount. Remember amount is represented by an positive integer."),
+		//
+		COMMAND_ARGTYPES_REASON_DISPLAY("command.arg-types.reason.display", "reason"),
+		COMMAND_ARGTYPES_REASON_DESCRIPTION("command.arg-types.reason.description", "reason of this action"),
+		COMMAND_ARGTYPES_REASON_ERROR("command.arg-types.reason.error", "You must provide a good reason to run this command."),
 		
 		
 		COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
 		
 		COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
-		
+		//
 		COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
 		COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT("command.system.registerserver.timeout", "Are you sure, server you want to register has actual version of Portfel? He's not responding..."),
 		COMMAND_SYSTEM_REGISTERSERVER_ALREADY("command.system.registerserver.already", "Is there any intelligent reason to register already registered server? Pro Tip: Check ID {0}."),
-		COMMAND_SYSTEM_REGISTERSERVER_SUCCESS("command.system.registerserver.success", "You did it! You registered new portfel server with friendly name {0} and id {1}!"),
+		COMMAND_SYSTEM_REGISTERSERVER_SUCCESS("command.system.registerserver.success", "You did it! You registered new portfel server with friendly name {0} and ID {1}!"),
 		COMMAND_SYSTEM_REGISTERSERVER_ERROR("command.system.registerserver.error", "This... This was very interesting. Server returned an unknown response."),
 		COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_NEEDED("command.system.registerserver.servername-needed", "We need a user friendly and memorable text for use as shorthand of server ID. Please provide id."),
 		COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY("command.system.registerserver.servername-already", "Did you remember this shorthand is already in use for another server?"),
-		
+		//
+		COMMAND_SYSTEM_UNREGISTERSERVER_DESCRIPTION("command.system.unregisterserver.description", "Unregister given server."),
+		COMMAND_SYSTEM_UNREGISTERSERVER_SUCCESS("command.system.unregisterserver.success", "Successfully unregistered server with friendly name {0} and ID {1}."),
+		//
 		COMMAND_SYSTEM_SERVER_GRANT_DESCRIPTION("command.system.server.grant.description", "Grant selected server access to specified globar order."),
 		COMMAND_SYSTEM_SERVER_GRANT_SUCCESS("command.system.server.grant.success", "Successfully granted {0} access to {1} global order."),
 		COMMAND_SYSTEM_SERVER_GRANT_ALREADY("command.system.server.grant.already", "The same global order cannot be granted twice for the same server."),
-		
+		//
 		COMMAND_SYSTEM_SERVER_REVOKE_DESCRIPTION("command.system.server.revoke.description", "Revoke selected server access to specified globar order."),
 		COMMAND_SYSTEM_SERVER_REVOKE_SUCCESS("command.system.server.revoke.success", "Successfully revoked {0} access to {1} global order."),
 		COMMAND_SYSTEM_SERVER_REVOKE_ALREADY("command.system.server.revoke.already", "To revoke an global order, you must first grant it."),
+		//
+		COMMAND_USER_DESCRIPTION("command.user.description", "User management main command."),
+		//
+		COMMAND_USER_INFO_DESCRIPTION("command.user.info.description", "Get extended info about user."),
+		COMMAND_USER_INFO_HEADER("command.user.info.header", "User Info: {0}"),
+		COMMAND_USER_INFO_UUID("command.user.info.uuid", "UUID: {0}"),
+		COMMAND_USER_INFO_UUIDTYPE("command.user.info.uuidtype", "(type: {0})"),
+		COMMAND_USER_INFO_STATUS("command.user.info.status", "Status: {0}"),
+		COMMAND_USER_INFO_USERDATA("command.user.info.userdata", "Userdata:"),
+		COMMAND_USER_INFO_BALANCE("command.user.info.balance", "Balance: {0}"),
+		COMMAND_USER_INFO_INTOP("command.user.info.intop", "Can be in Top: {0}"),
+		COMMAND_USER_INFO_SUGGEST("command.user.info.suggest", "Click to suggest command on chat"),
+		COMMAND_USER_INFO_INSERT("command.user.info.intop", "Click+Shift to insert above text on chat"),
+		//
+		COMMAND_USER_ECO_DESCRIPTION("command.user.eco.description", "Manage user's economy."),
+		//
+		COMMAND_USER_ECO_SET_DESCRIPTION("command.user.eco.set.description", "Set user's balance to given amount."),
+		COMMAND_USER_ECO_SET_SUCCESS("command.user.eco.set.success", "Set {0}'s balance to {1}$."),
+		//
+		COMMAND_USER_ECO_GIVE_DESCRIPTION("command.user.eco.give.description", "Add given amount to user's balance."),
+		COMMAND_USER_ECO_GIVE_SUCCESS("command.user.eco.give.success", "Add {1}$ to {0}'s balance."),
+		//
+		COMMAND_USER_ECO_TAKE_DESCRIPTION("command.user.eco.take.description", "Remove given amount from user's balance."),
+		COMMAND_USER_ECO_TAKE_SUCCESS("command.user.eco.take.success", "Remove {1}$ from {0}'s balance."),
+		COMMAND_USER_ECO_TAKE_SMALLER("command.user.eco.take.smaller", "User balance cannot be smaller than 0."),
 		
-		
-		COMMAND_SYSTEM_UNREGISTERSERVER_DESCRIPTION("command.system.unregisterserver.description", "Unregister given server."),
 		
 		COMMAND_USAGE_TITLE("command.usage.title", "Command Usage - {0}"),
 		COMMAND_USAGE_ALIASES("command.usage.aliases", "Aliases"),
@@ -86,7 +124,7 @@ public class Lang {
 		
 		COMMAND_SUBCOMMANDS_TITLE("command.subcommands.title", "{0} Sub Commands:"),
 		COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.execution", "Click to execute this command"),
-		COMMAND_SUBCOMMANDS_INSERT("command.subcommands.insertion", "Shift+Click to insert this command"),
+		COMMAND_SUBCOMMANDS_INSERT("command.subcommands.insertion", "Click+Shift to insert this command"),
 		
 		COMMAND_MAIN_RUNNING("command.main.running", "Running {0}."),
 		COMMAND_MAIN_USE("command.main.use", "Use {0} to view available commands."),
@@ -101,6 +139,8 @@ public class Lang {
 		MAIN_VALUE_FALSE("main.value.false", "false"),
 		MAIN_VALUE_YES("main.value.yes", "yes"),
 		MAIN_VALUE_NO("main.value.no", "no"),
+		MAIN_VALUE_ONLINE("main.value.online", "Online"),
+		MAIN_VALUE_OFFLINE("main.value.offline", "Offline"),
 		
 		MAIN_MESSAGE_INSERTION("main.message.insertion", "Click to insert the {0}."),
 		

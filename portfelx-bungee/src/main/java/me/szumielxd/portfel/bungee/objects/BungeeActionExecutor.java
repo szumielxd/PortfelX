@@ -5,6 +5,8 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.common.objects.ActionExecutor;
+import me.szumielxd.portfel.common.objects.CommonPlayer;
+import me.szumielxd.portfel.common.objects.CommonSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -52,6 +54,18 @@ public final class BungeeActionExecutor extends ActionExecutor {
 	 * @return ActionExecutor representation of console
 	 */
 	public static @NotNull BungeeActionExecutor console() {
+		return new BungeeActionExecutor("Console", ActionExecutor.CONSOLE_UUID);
+	}
+	
+	/**
+	 * Create ActionExecutor from console instance.
+	 * 
+	 * @return ActionExecutor representation of console
+	 */
+	public static @NotNull BungeeActionExecutor sender(CommonSender sender) {
+		if (sender instanceof CommonPlayer) {
+			return new BungeeActionExecutor(sender.getName(), ((CommonPlayer)sender).getUniqueId());
+		}
 		return new BungeeActionExecutor("Console", ActionExecutor.CONSOLE_UUID);
 	}
 

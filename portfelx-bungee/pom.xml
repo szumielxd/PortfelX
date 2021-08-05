@@ -9,7 +9,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>portfelx-common</artifactId>
+			<artifactId>portfelx-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.md-5</groupId>

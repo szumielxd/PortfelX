@@ -19,6 +19,7 @@ import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent.Action;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import net.kyori.adventure.text.format.TextColor;
@@ -36,7 +37,7 @@ public class MiscUtils {
 	 * @return true if this is premium UUID, otherwise false
 	 */
 	public static boolean isOnlineModeUUID(@Nullable UUID uuid) {
-		if(uuid != null && uuid.toString().charAt(14) == '4') return true;
+		if(uuid != null && uuid.version() == 4) return true;
 		return false;
 	}
 	
@@ -258,13 +259,20 @@ public class MiscUtils {
 				.append(Component.space())
 				.append(Component.text(command.getPermission(), GRAY));
 		hover = hover.append(Component.newline());
-		//click info
-		hover = hover.append(Component.newline()).append(Component.text("» ", DARK_GRAY))
-				.append(LangKey.COMMAND_SUBCOMMANDS_EXECUTE.component(GRAY));
-		//shift+click info
-		hover = hover.append(Component.newline()).append(Component.text("» ", DARK_GRAY))
-				.append(LangKey.COMMAND_SUBCOMMANDS_INSERT.component(GRAY));
-		return baseMessage.hoverEvent(hover).clickEvent(ClickEvent.runCommand(fullCommand)).insertion(fullCommand);
+		return bindCommand(baseMessage, fullCommand);
+	}
+	
+	public static @NotNull Component bindCommand(@NotNull Component baseMessage, String fullCommand) {
+		Component hover = Component.text("» ", DARK_GRAY).append(LangKey.COMMAND_SUBCOMMANDS_EXECUTE.component(GRAY))
+				.append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_SUBCOMMANDS_INSERT.component(GRAY));
+		if (baseMessage.hoverEvent() != null) {
+			if (baseMessage.hoverEvent().action().equals(Action.SHOW_TEXT)) {
+				baseMessage = baseMessage.hoverEvent(((Component) baseMessage.hoverEvent().value()).append(Component.newline()).append(hover));
+			}
+		} else {
+			baseMessage = baseMessage.hoverEvent(hover);
+		}
+		return baseMessage.clickEvent(ClickEvent.runCommand(fullCommand)).insertion(fullCommand);
 	}
 	
 	public static @NotNull Component extendedCommandUsage(@NotNull SimpleCommand command) {

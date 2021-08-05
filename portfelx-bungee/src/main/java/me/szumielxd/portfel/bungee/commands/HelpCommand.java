@@ -2,7 +2,6 @@ package me.szumielxd.portfel.bungee.commands;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,13 +60,8 @@ public class HelpCommand extends SimpleCommand {
 	}
 
 	@Override
-	public @NotNull Iterable<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
-		return new ArrayList<>();
-	}
-
-	@Override
 	public @NotNull List<CmdArg> getArgs() {
-		return new ArrayList<>();
+		return this.emptyArgList;
 	}
 
 	@Override
