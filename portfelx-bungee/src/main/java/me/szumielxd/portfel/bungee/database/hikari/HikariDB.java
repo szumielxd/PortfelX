@@ -320,6 +320,45 @@ public abstract class HikariDB implements AbstractDB {
 	}
 	
 	/**
+	 * Get position of given users in balance top. If user doesn't exist in top, then returned position is null.
+	 * 
+	 * @implNote Thread unsafe.
+	 * @param users array of users to get
+	 * @return array of positions in the same order as given users array
+	 * @throws SQLException when cannot establish the connection to the database
+	 */
+	public @NotNull Integer[] getTopPos(User... users) throws SQLException {
+		Integer[] arr = new Integer[users.length];
+		if (users.length == 0) return arr;
+		UUID[] uuids = Stream.of(users).map(User::getUniqueId).toArray(UUID[]::new);
+		this.checkConnection();
+		final String uuidMarks = String.join(", ", Stream.of(uuids).map(s -> "?").toArray(String[]::new));
+		final String sql = String.format("SELECT `pos`, `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `Nick` IN (%s)", USERS_UUID, USERS_UUID, TABLE_USERS, USERS_INTOP, USERS_BALANCE, uuidMarks);
+		try (Connection conn = this.connect(); PreparedStatement stm = conn.prepareStatement(sql)) {
+			int index = 0;
+			// fill query with UUIDs
+			for (; index < uuids.length; index++) {
+				stm.setString(index, uuids[index].toString());
+			}
+			try (ResultSet rs = stm.executeQuery()) {
+				while (rs.next()) {
+					int pos = rs.getInt(1);
+					UUID uuid = UUID.fromString(rs.getString(2));
+					for (int i = 0; i < uuids.length; i++) {
+						if (uuids[i] == uuid) arr[i] = pos;
+					}
+				}
+			}
+		}
+		return arr;
+		
+		
+		
+		
+		
+	}
+	
+	/**
 	 * Update given user
 	 * 
 	 * @implNote Internal use only, try {@link User} instead. Thread unsafe.

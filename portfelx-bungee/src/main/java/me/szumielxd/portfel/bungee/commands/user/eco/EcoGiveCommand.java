@@ -5,8 +5,6 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bungee.commands.CommonArgs;
@@ -41,15 +39,12 @@ public class EcoGiveCommand extends SimpleCommand {
 			CompletableFuture<Exception> future = user.addBalance(amount, BungeeActionExecutor.sender(sender), "Proxy", reason);
 			try {
 				Exception ex = future.get();
-				if (ex != null) {
-					sender.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_EXECUTION.component(RED)));
-					ex.printStackTrace();
-					return;
-				}
+				if (ex != null) throw ex;
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_USER_ECO_GIVE_SUCCESS.component(LIGHT_PURPLE,
 						Component.text(user.getName(), AQUA), Component.text(amount, AQUA))));
 				
-			} catch (InterruptedException | ExecutionException e) {
+			} catch (Exception e) {
+				sender.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_EXECUTION.component(DARK_RED)));
 				e.printStackTrace();
 			}
 		} else {

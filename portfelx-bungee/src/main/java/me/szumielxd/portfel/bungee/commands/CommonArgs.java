@@ -78,5 +78,10 @@ public class CommonArgs {
 	
 	public static final CmdArg REASON = new CmdArg(LangKey.COMMAND_ARGTYPES_REASON_DISPLAY, LangKey.COMMAND_ARGTYPES_REASON_DESCRIPTION, LangKey.COMMAND_ARGTYPES_REASON_ERROR, s -> s,
 	s -> Arrays.asList("Event", "Punishment", "Rollback", "\"BecauseIWant\"", "ErrorFix", "Test"));
+
+	//
+	
+	public static final CmdArg INTOP = new CmdArg(LangKey.COMMAND_ARGTYPES_INTOP_DISPLAY, LangKey.COMMAND_ARGTYPES_INTOP_DESCRIPTION, LangKey.COMMAND_ARGTYPES_INTOP_ERROR, s -> s,
+	s -> Arrays.asList("true", "false"));
 	
 }

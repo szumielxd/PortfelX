@@ -67,6 +67,10 @@ public class Lang {
 		COMMAND_ARGTYPES_REASON_DISPLAY("command.arg-types.reason.display", "reason"),
 		COMMAND_ARGTYPES_REASON_DESCRIPTION("command.arg-types.reason.description", "reason of this action"),
 		COMMAND_ARGTYPES_REASON_ERROR("command.arg-types.reason.error", "You must provide a good reason to run this command."),
+		//
+		COMMAND_ARGTYPES_INTOP_DISPLAY("command.arg-types.in-top.display", "reason"),
+		COMMAND_ARGTYPES_INTOP_DESCRIPTION("command.arg-types.in-top.description", "reason of this action"),
+		COMMAND_ARGTYPES_INTOP_ERROR("command.arg-types.in-top.error", "Did you know {0} is not true nor false?"),
 		
 		
 		COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
@@ -116,6 +120,16 @@ public class Lang {
 		COMMAND_USER_ECO_TAKE_DESCRIPTION("command.user.eco.take.description", "Remove given amount from user's balance."),
 		COMMAND_USER_ECO_TAKE_SUCCESS("command.user.eco.take.success", "Remove {1}$ from {0}'s balance."),
 		COMMAND_USER_ECO_TAKE_SMALLER("command.user.eco.take.smaller", "User balance cannot be smaller than 0."),
+		//
+		COMMAND_USER_TOP_DESCRIPTION("command.user.top.description", "Manage user's top position."),
+		//
+		COMMAND_USER_TOP_INFO_DESCRIPTION("command.user.top.info.description", "Get info about user's top."),
+		COMMAND_USER_TOP_INFO_INTOP("command.user.top.info.intop", "{0}'s allowed in Top status:"),
+		COMMAND_USER_TOP_INFO_POSITION("command.user.top.info.position", "{0}'s position:"),
+		//
+		COMMAND_USER_TOP_SET_DESCRIPTION("command.user.top.set.description", "Set wheter this user should by available in top."),
+		COMMAND_USER_TOP_SET_SUCCESS("command.user.top.set.success", "Set {0}'s in top visibility to {1}."),
+		COMMAND_USER_TOP_SET_ALREADY("command.user.top.set.already", "{0}'s in top visibility is already set to {1}."),
 		
 		
 		COMMAND_USAGE_TITLE("command.usage.title", "Command Usage - {0}"),

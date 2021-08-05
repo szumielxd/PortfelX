@@ -38,7 +38,8 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 		this.plugin = plugin;
 		this.register(
 				new HelpCommand(plugin, this, help),
-				new SystemParentCommand(plugin, this)
+				new SystemParentCommand(plugin, this),
+				new UserParentCommand(plugin, this)
 		);
 	}
 	

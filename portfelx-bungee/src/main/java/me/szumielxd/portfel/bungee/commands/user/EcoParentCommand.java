@@ -4,7 +4,9 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.bungee.commands.user.eco.EcoGiveCommand;
 import me.szumielxd.portfel.bungee.commands.user.eco.EcoSetCommand;
+import me.szumielxd.portfel.bungee.commands.user.eco.EcoTakeCommand;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
@@ -13,10 +15,12 @@ import me.szumielxd.portfel.common.commands.ParentCommand;
 
 public class EcoParentCommand extends ParentCommand {
 
-	public EcoParentCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent, @NotNull String name, @NotNull String[] aliases) {
-		super(plugin, parent, name, aliases);
+	public EcoParentCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+		super(plugin, parent, "eco", "economy", "bal", "balance");
 		this.register(
-				new EcoSetCommand(plugin, this)
+				new EcoGiveCommand(plugin, this),
+				new EcoSetCommand(plugin, this),
+				new EcoTakeCommand(plugin, this)
 		);
 	}
 

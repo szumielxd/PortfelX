@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.bungee.commands.user.EcoParentCommand;
+import me.szumielxd.portfel.bungee.commands.user.TopParentCommand;
+import me.szumielxd.portfel.bungee.commands.user.UserInfoCommand;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
@@ -19,6 +22,11 @@ public class UserParentCommand extends ParentCommand {
 
 	public UserParentCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "user");
+		this.register(
+				new UserInfoCommand(plugin, this),
+				new EcoParentCommand(plugin, this),
+				new TopParentCommand(plugin, this)
+		);
 	}
 
 	@Override

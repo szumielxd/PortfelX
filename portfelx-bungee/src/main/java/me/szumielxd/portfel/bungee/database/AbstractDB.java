@@ -1,6 +1,7 @@
 package me.szumielxd.portfel.bungee.database;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
@@ -81,6 +82,16 @@ public interface AbstractDB {
 	 * @throws Exception when something went wrong
 	 */
 	public @NotNull User loadOrCreateUser(@NotNull UUID uuid) throws Exception;
+	
+	/**
+	 * Get position of given users in balance top. If user doesn't exist in top, then returned position is null.
+	 * 
+	 * @implNote Thread unsafe.
+	 * @param users array of users to get
+	 * @return array of positions in the same order as given users array
+	 * @throws SQLException when something went wrong
+	 */
+	public @NotNull Integer[] getTopPos(User... users) throws Exception;
 	
 	/**
 	 * Update given user.
