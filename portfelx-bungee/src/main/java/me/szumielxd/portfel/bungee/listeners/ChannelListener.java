@@ -3,7 +3,6 @@ package me.szumielxd.portfel.bungee.listeners;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.io.ByteArrayDataInput;
@@ -88,8 +87,11 @@ public class ChannelListener implements Listener {
 							out.writeUTF(subchannel);
 							out.writeUTF(this.plugin.getProxyId().toString()); // proxy id
 							out.writeUTF(transactionId); // transaction id
+							int found = (int) this.plugin.getOrdersManager().getOrders().values().stream()
+									.filter(o -> o.examine(user, order)).count();
 							if (ex == null) {
 								out.writeUTF("Ok"); // status
+								out.writeInt(found);
 							} else {
 								out.writeUTF("Error");
 								out.writeUTF(this.gson.toJson(this.gson.toJsonTree(srv))); // status

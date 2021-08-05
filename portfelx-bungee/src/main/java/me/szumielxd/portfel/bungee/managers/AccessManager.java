@@ -10,10 +10,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +27,7 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -190,6 +194,12 @@ public class AccessManager implements Listener {
 		orders.remove(val);
 		this.save();
 		return true;
+	}
+	
+	public @Nullable List<String> getAllowedOrders(@NotNull UUID serverId) {
+		if (!this.canAccess(serverId)) return null;
+		JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
+		return StreamSupport.stream(obj.getAsJsonArray("orders").spliterator(), false).map(JsonElement::getAsString).collect(Collectors.toList());
 	}
 	
 	public Map<UUID, String> getServerNames() {

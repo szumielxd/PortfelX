@@ -9,7 +9,7 @@ public interface Portfel {
 	
 	
 	
-	public static Component PREFIX = LegacyComponentSerializer.legacySection().deserialize("§b[§5§lP§b] §3");
+	public static Component PREFIX = LegacyComponentSerializer.legacySection().deserialize("§b§l[§5§lP§b§l]§r §3");
 	public static String CHANNEL_USERS = "portfel:userdata";
 	public static String CHANNEL_SETUP = "portfel:setup";
 	public static String CHANNEL_TRANSACTIONS = "portfel:transactions";

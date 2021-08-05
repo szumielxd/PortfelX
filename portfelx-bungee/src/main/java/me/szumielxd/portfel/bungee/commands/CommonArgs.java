@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.managers.AccessManager;
+import me.szumielxd.portfel.bungee.managers.OrdersManager.GlobalOrder;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -50,5 +51,10 @@ public class CommonArgs {
 			return null;
 	},
 	s -> plugin.getProxy().getPlayers().stream().map(ProxiedPlayer::getName).collect(Collectors.toList()));
-
+	
+	public static final CmdArg ORDER = new CmdArg(LangKey.COMMAND_ARGTYPES_ORDER_DISPLAY, LangKey.COMMAND_ARGTYPES_ORDER_DESCRIPTION, LangKey.COMMAND_ARGTYPES_ORDER_ERROR, s -> {
+			return plugin.getOrdersManager().getOrders().get(s.toLowerCase());
+	},
+	s -> plugin.getOrdersManager().getOrders().values().stream().map(GlobalOrder::getName).collect(Collectors.toList()));
+	
 }

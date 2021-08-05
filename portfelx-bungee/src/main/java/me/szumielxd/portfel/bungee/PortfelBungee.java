@@ -18,6 +18,7 @@ import me.szumielxd.portfel.bungee.listeners.UserListener;
 import me.szumielxd.portfel.bungee.managers.AccessManager;
 import me.szumielxd.portfel.bungee.managers.BungeeTaskManager;
 import me.szumielxd.portfel.bungee.managers.BungeeUserManager;
+import me.szumielxd.portfel.bungee.managers.OrdersManager;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.managers.TaskManager;
 import me.szumielxd.portfel.common.managers.UserManager;
@@ -31,6 +32,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 	private AccessManager accessManager;
 	private TaskManager taskManager;
 	private UserManager userManager;
+	private OrdersManager ordersManager;
 	private AbstractDB database;
 	private AbstractDBLogger transactionLogger;
 	private MainCommand command;
@@ -46,6 +48,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 		this.database = new MariaDB(this);
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new BungeeUserManager(this).init();
+		this.ordersManager = new OrdersManager(this).init();
 		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
 		this.getProxy().getPluginManager().registerCommand(this, this.command);
 		this.getProxy().getPluginManager().registerListener(this, new UserListener(this));
@@ -96,6 +99,10 @@ public class PortfelBungee extends Plugin implements Portfel {
 	@Override
 	public TaskManager getTaskManager() {
 		return this.taskManager;
+	}
+	
+	public OrdersManager getOrdersManager() {
+		return this.ordersManager;
 	}
 	
 	

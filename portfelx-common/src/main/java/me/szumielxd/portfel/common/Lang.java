@@ -69,7 +69,20 @@ public class Lang {
 		COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_NEEDED("command.system.registerserver.servername-needed", "We need a user friendly and memorable text for use as shorthand of server ID. Please provide id."),
 		COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY("command.system.registerserver.servername-already", "Did you remember this shorthand is already in use for another server?"),
 		
+		COMMAND_SYSTEM_SERVER_GRANT_DESCRIPTION("command.system.server.grant.description", "Grant selected server access to specified globar order."),
+		COMMAND_SYSTEM_SERVER_GRANT_SUCCESS("command.system.server.grant.success", "Successfully granted {0} access to {1} global order."),
+		COMMAND_SYSTEM_SERVER_GRANT_ALREADY("command.system.server.grant.already", "The same global order cannot be granted twice for the same server."),
+		
+		COMMAND_SYSTEM_SERVER_REVOKE_DESCRIPTION("command.system.server.revoke.description", "Revoke selected server access to specified globar order."),
+		COMMAND_SYSTEM_SERVER_REVOKE_SUCCESS("command.system.server.revoke.success", "Successfully revoked {0} access to {1} global order."),
+		COMMAND_SYSTEM_SERVER_REVOKE_ALREADY("command.system.server.revoke.already", "To revoke an global order, you must first grant it."),
+		
+		
 		COMMAND_SYSTEM_UNREGISTERSERVER_DESCRIPTION("command.system.unregisterserver.description", "Unregister given server."),
+		
+		COMMAND_USAGE_TITLE("command.usage.title", "Command Usage - {0}"),
+		COMMAND_USAGE_ALIASES("command.usage.aliases", "Aliases"),
+		COMMAND_USAGE_ARGUMENTS("command.usage.arguments", "Arguments"),
 		
 		COMMAND_SUBCOMMANDS_TITLE("command.subcommands.title", "{0} Sub Commands:"),
 		COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.execution", "Click to execute this command"),

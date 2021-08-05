@@ -2,9 +2,6 @@ package me.szumielxd.portfel.bungee.commands.system;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bungee.PortfelBungee;
@@ -24,10 +21,6 @@ public class ServerParentCommand extends ParentCommand {
 		this.register(
 				new GrantOrderCommand(plugin, this)
 		);
-		Matcher matcher = Pattern.compile("GlobalEco x([1-9]\\d*)").matcher("GlobalEco x1000");
-		if (matcher.matches()) {
-			int value = Integer.parseInt(matcher.group(1));
-		}
 		this.args = Arrays.asList(CommonArgs.SERVER);
 	}
 

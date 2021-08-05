@@ -1,6 +1,7 @@
 package me.szumielxd.portfel.common.commands;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.NotNull;
@@ -18,16 +19,19 @@ public class CmdArg {
 	private final LangKey description;
 	private final LangKey argError;
 	private final Function<String, Object> argParser;
-	private final Function<CommonSender, List<String>> argCompletions;
+	private final BiFunction<CommonSender, String[], List<String>> argCompletions;
 	
 	
 	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender, List<String>> argCompletions) {
+		this(name, description, argError, argParser, (s, args) -> argCompletions.apply(s));
+	}
+	
+	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender, String[], List<String>> argCompletions) {
 		this.name = name;
 		this.description = description;
 		this.argError = argError;
 		this.argParser = argParser;
 		this.argCompletions = argCompletions;
-		
 	}
 	
 	
@@ -104,8 +108,8 @@ public class CmdArg {
 	 * @param sender sender to calculate accessibility
 	 * @return list of (maybe not all) text arguments available for this sender
 	 */
-	public @NotNull List<String> getTabCompletions(@NotNull CommonSender sender) {
-		return this.argCompletions.apply(sender);
+	public @NotNull List<String> getTabCompletions(@NotNull CommonSender sender, @Nullable String... label) {
+		return this.argCompletions.apply(sender, label);
 	}
 	
 

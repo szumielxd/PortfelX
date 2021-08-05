@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -45,7 +46,10 @@ public class UnregisterServerCommand extends SimpleCommand {
 
 	@Override
 	public @NotNull Iterable<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
-		if (args.length == 1) return this.getArgs().get(0).getTabCompletions(sender);
+		if (args.length == 1) {
+			String arg = args[0];
+			return this.getArgs().get(0).getTabCompletions(sender).stream().filter(s -> s.toLowerCase().startsWith(arg)).collect(Collectors.toList());
+		}
 		return new ArrayList<>();
 	}
 

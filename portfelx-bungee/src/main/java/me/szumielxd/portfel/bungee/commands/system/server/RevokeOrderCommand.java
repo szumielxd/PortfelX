@@ -22,30 +22,32 @@ import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
-public class GrantOrderCommand extends SimpleCommand {
+public class RevokeOrderCommand extends SimpleCommand {
 	
-	private final List<CmdArg> args = Arrays.asList(CommonArgs.SERVER);
+	private final List<CmdArg> args = Arrays.asList(
+			new CmdArg(LangKey.COMMAND_ARGTYPES_ORDER_DISPLAY, LangKey.COMMAND_ARGTYPES_ORDER_DESCRIPTION, LangKey.EMPTY, s -> s.toLowerCase(), (s, label) -> {
+				UUID server = (UUID) CommonArgs.SERVER.parseArg(label[3]);
+				if (server == null) return new ArrayList<>();
+				return ((PortfelBungee)this.getPlugin()).getAccessManager().getAllowedOrders(server);
+			})
+	);
 
-	public GrantOrderCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
-		super(plugin, parent, "grant");
+	public RevokeOrderCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+		super(plugin, parent, "revoke");
 	}
 
 	@Override
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		if (args.length > 0) {
 			String order = (String) this.getArgs().get(0).parseArg(args[0]);
-			if (order == null) {
-				sender.sendTranslated(Portfel.PREFIX.append(this.getArgs().get(0).getArgError(Component.text(args[0], DARK_RED))));
-				return;
-			}
 			UUID server = (UUID) parsedArgs[0];
 			AccessManager access = ((PortfelBungee)this.getPlugin()).getAccessManager();
-			if (access.canAccess(server, order)) {
-				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_SERVER_GRANT_ALREADY.component(RED)));
+			if (!access.canAccess(server, order)) {
+				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_SERVER_REVOKE_ALREADY.component(RED)));
 				return;
 			}
-			access.giveAccess(server, order);
-			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_SERVER_GRANT_SUCCESS.component(LIGHT_PURPLE,
+			access.takeAccess(server, order);
+			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_SERVER_REVOKE_SUCCESS.component(LIGHT_PURPLE,
 					Component.text(access.getServerNames().get(server), AQUA),
 					Component.text(order, AQUA))));
 			return;
@@ -57,7 +59,7 @@ public class GrantOrderCommand extends SimpleCommand {
 	public @NotNull Iterable<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
 		if (args.length == 1) {
 			String arg = args[0].toLowerCase();
-			return this.getArgs().get(0).getTabCompletions(sender).stream().filter(s -> s.toLowerCase().startsWith(arg)).collect(Collectors.toList());
+			return this.getArgs().get(0).getTabCompletions(sender, label).stream().filter(s -> s.toLowerCase().startsWith(arg)).collect(Collectors.toList());
 		}
 		return new ArrayList<>();
 	}
@@ -69,7 +71,7 @@ public class GrantOrderCommand extends SimpleCommand {
 
 	@Override
 	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_SYSTEM_SERVER_GRANT_DESCRIPTION;
+		return LangKey.COMMAND_SYSTEM_SERVER_REVOKE_DESCRIPTION;
 	}
 
 }

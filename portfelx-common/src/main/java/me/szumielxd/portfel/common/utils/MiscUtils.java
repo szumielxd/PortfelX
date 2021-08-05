@@ -8,8 +8,13 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSyntaxException;
+
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import net.kyori.adventure.text.Component;
@@ -17,6 +22,8 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 
 public class MiscUtils {
@@ -258,6 +265,40 @@ public class MiscUtils {
 		hover = hover.append(Component.newline()).append(Component.text("» ", DARK_GRAY))
 				.append(LangKey.COMMAND_SUBCOMMANDS_INSERT.component(GRAY));
 		return baseMessage.hoverEvent(hover).clickEvent(ClickEvent.runCommand(fullCommand)).insertion(fullCommand);
+	}
+	
+	public static @NotNull Component extendedCommandUsage(@NotNull SimpleCommand command) {
+		Component result = Portfel.PREFIX.append(LangKey.COMMAND_USAGE_TITLE.component(DARK_PURPLE, Component.text(command.getName(), LIGHT_PURPLE)));
+		result = result.append(Component.newline()).append(Portfel.PREFIX).append(Component.text("> ", LIGHT_PURPLE)).append(command.getDescription().component(GRAY));
+		if (command.getAliases().length > 0) {
+			result = result.append(Component.newline()).append(Portfel.PREFIX).append(LangKey.COMMAND_USAGE_ALIASES.component(DARK_PURPLE));
+			for (String alias : command.getAliases()) {
+				result = result.append(Component.newline()).append(Portfel.PREFIX).append(Component.text("- ", LIGHT_PURPLE)).append(Component.text(alias, GRAY));
+			}
+		}
+		if (!command.getArgs().isEmpty()) {
+			result = result.append(Component.newline()).append(Portfel.PREFIX).append(LangKey.COMMAND_USAGE_ARGUMENTS.component(DARK_PURPLE));
+			for (CmdArg arg : command.getArgs()) {
+				result = result.append(Component.newline()).append(Portfel.PREFIX).append(Component.text("- ", LIGHT_PURPLE)).append(MiscUtils.argToComponent(arg))
+						.append(Component.text(" -> ")).append(arg.getDescription().component(GRAY));
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Try to parse given text as JSON component, on fail fallback to plain legacy format.
+	 * 
+	 * @param text text to parse
+	 * @return parsed component
+	 */
+	public static @NotNull Component parseComponent(@NotNull String text) {
+		try {
+			JsonObject json = new Gson().fromJson(text, JsonObject.class);
+			return GsonComponentSerializer.gson().deserializeFromTree(json);
+		} catch (JsonSyntaxException e) {
+			return LegacyComponentSerializer.legacySection().deserialize(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1"));
+		}
 	}
 	
 
