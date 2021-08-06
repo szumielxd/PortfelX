@@ -10,15 +10,32 @@ import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.bungee.BungeeConfigKey;
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger;
 import me.szumielxd.portfel.bungee.database.hikari.HikariDB;
+import me.szumielxd.portfel.common.Config;
 import me.szumielxd.portfel.common.objects.ActionExecutor;
 import me.szumielxd.portfel.common.objects.ExecutedTask;
 import me.szumielxd.portfel.common.objects.User;
 
 public class HikariDBLogger implements AbstractDBLogger {
+	
+	
+	private final String TABLE_LOGS;
+	
+	private final String LOGS_ID;
+	private final String LOGS_UUID;
+	private final String LOGS_USERNAME;
+	private final String LOGS_SERVER;
+	private final String LOGS_EXECUTOR;
+	private final String LOGS_EXECUTORUUID;
+	private final String LOGS_TIME;
+	private final String LOGS_ORDERNAME;
+	private final String LOGS_ACTION;
+	private final String LOGS_VALUE;
+	private final String LOGS_BALANCE;
 	
 	
 	private final PortfelBungee plugin;
@@ -27,8 +44,28 @@ public class HikariDBLogger implements AbstractDBLogger {
 	private Boolean initialized;
 	
 	
+	private static @NotNull String escapeSql(@NotNull String text) {
+		return text.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
+	}
+	
 	public HikariDBLogger(PortfelBungee plugin) {
 		this.plugin = plugin;
+		Config cfg = this.plugin.getConfiguration();
+		
+		TABLE_LOGS = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_NAME));
+		
+		LOGS_ID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_ID));
+		LOGS_UUID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_UUID));
+		LOGS_USERNAME = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_USERNAME));
+		LOGS_SERVER = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_SERVER));
+		LOGS_EXECUTOR = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_EXECUTOR));
+		LOGS_EXECUTORUUID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_EXECUTORUUID));
+		LOGS_TIME = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_TIME));
+		LOGS_ORDERNAME = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_ORDERNAME));
+		LOGS_ACTION = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_ACTION));
+		LOGS_VALUE = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_VALUE));
+		LOGS_BALANCE = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_BALANCE));
+		
 	}
 	
 	
@@ -59,11 +96,11 @@ public class HikariDBLogger implements AbstractDBLogger {
 			AbstractDB db = this.plugin.getDB();
 			db.checkConnection();
 			long id = this.lastID; // multithread safety
-			final String sql = id < 0 ? String.format("SELECT `%s` FROM `%s` ORDER BY `%s` DESC LIMIT 1", HikariDB.LOGS_ID, HikariDB.TABLE_LOGS, HikariDB.LOGS_ID)
+			final String sql = id < 0 ? String.format("SELECT `%s` FROM `%s` ORDER BY `%s` DESC LIMIT 1", LOGS_ID, TABLE_LOGS, LOGS_ID)
 					: String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` > ? ORDER BY `%s` ASC",
-							HikariDB.LOGS_ID, HikariDB.LOGS_UUID, HikariDB.LOGS_USERNAME, HikariDB.LOGS_SERVER, HikariDB.LOGS_EXECUTOR,
-							HikariDB.LOGS_EXECUTORUUID, HikariDB.LOGS_TIME, HikariDB.LOGS_ORDERNAME, HikariDB.LOGS_ACTION,
-							HikariDB.LOGS_VALUE, HikariDB.LOGS_BALANCE, HikariDB.TABLE_LOGS, HikariDB.LOGS_ID, HikariDB.LOGS_ID);
+							LOGS_ID, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER, LOGS_EXECUTOR,
+							LOGS_EXECUTORUUID, LOGS_TIME, LOGS_ORDERNAME, LOGS_ACTION,
+							LOGS_VALUE, LOGS_BALANCE, TABLE_LOGS, LOGS_ID, LOGS_ID);
 			try (Connection conn = ((HikariDB)db).connect()) {
 				try (PreparedStatement stm = conn.prepareStatement(sql)) {
 					if (id >= 0) stm.setLong(1, id);
@@ -111,9 +148,9 @@ public class HikariDBLogger implements AbstractDBLogger {
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
 		String sql = String.format("INSERT INTO `%s` () VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				HikariDB.TABLE_LOGS, HikariDB.LOGS_UUID, HikariDB.LOGS_USERNAME, HikariDB.LOGS_SERVER,
-				HikariDB.LOGS_EXECUTOR, HikariDB.LOGS_EXECUTORUUID, HikariDB.LOGS_ORDERNAME,
-				HikariDB.LOGS_ACTION, HikariDB.LOGS_VALUE, HikariDB.LOGS_BALANCE);
+				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
+				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
+				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
 		try (Connection conn = ((HikariDB)db).connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, target.getName());
@@ -148,9 +185,9 @@ public class HikariDBLogger implements AbstractDBLogger {
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
 		String sql = String.format("INSERT INTO `%s` () VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				HikariDB.TABLE_LOGS, HikariDB.LOGS_UUID, HikariDB.LOGS_USERNAME, HikariDB.LOGS_SERVER,
-				HikariDB.LOGS_EXECUTOR, HikariDB.LOGS_EXECUTORUUID, HikariDB.LOGS_ORDERNAME,
-				HikariDB.LOGS_ACTION, HikariDB.LOGS_VALUE, HikariDB.LOGS_BALANCE);
+				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
+				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
+				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
 		try (Connection conn = ((HikariDB)db).connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, target.getName());
@@ -185,9 +222,9 @@ public class HikariDBLogger implements AbstractDBLogger {
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
 		String sql = String.format("INSERT INTO `%s` () VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				HikariDB.TABLE_LOGS, HikariDB.LOGS_UUID, HikariDB.LOGS_USERNAME, HikariDB.LOGS_SERVER,
-				HikariDB.LOGS_EXECUTOR, HikariDB.LOGS_EXECUTORUUID, HikariDB.LOGS_ORDERNAME,
-				HikariDB.LOGS_ACTION, HikariDB.LOGS_VALUE, HikariDB.LOGS_BALANCE);
+				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
+				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
+				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
 		try (Connection conn = ((HikariDB)db).connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, target.getName());

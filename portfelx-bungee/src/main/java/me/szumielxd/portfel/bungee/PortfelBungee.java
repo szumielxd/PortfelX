@@ -8,10 +8,13 @@ import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
 
+import org.jetbrains.annotations.NotNull;
+
 import me.szumielxd.portfel.bungee.commands.MainCommand;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger;
 import me.szumielxd.portfel.bungee.database.hikari.MariaDB;
+import me.szumielxd.portfel.bungee.database.hikari.MysqlDB;
 import me.szumielxd.portfel.bungee.database.hikari.logging.HikariDBLogger;
 import me.szumielxd.portfel.bungee.listeners.ChannelListener;
 import me.szumielxd.portfel.bungee.listeners.UserListener;
@@ -19,6 +22,9 @@ import me.szumielxd.portfel.bungee.managers.AccessManager;
 import me.szumielxd.portfel.bungee.managers.BungeeTaskManager;
 import me.szumielxd.portfel.bungee.managers.BungeeUserManager;
 import me.szumielxd.portfel.bungee.managers.OrdersManager;
+import me.szumielxd.portfel.common.Config;
+import me.szumielxd.portfel.common.Config.ConfigKey;
+import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.managers.TaskManager;
 import me.szumielxd.portfel.common.managers.UserManager;
@@ -31,6 +37,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 	private BungeeAudiences adventure;
 	private AccessManager accessManager;
 	private TaskManager taskManager;
+	private Config config;
 	private UserManager userManager;
 	private OrdersManager ordersManager;
 	private AbstractDB database;
@@ -45,7 +52,13 @@ public class PortfelBungee extends Plugin implements Portfel {
 		this.adventure = BungeeAudiences.create(this);
 		this.taskManager = new BungeeTaskManager(this);
 		this.accessManager = new AccessManager(this).init();
-		this.database = new MariaDB(this);
+		this.config = new Config(this).init(ConfigKey.values());
+		Lang.load(new File(this.getDataFolder(), "languages"), this);
+		
+		String dbType = this.getConfiguration().getString(BungeeConfigKey.DATABASE_TYPE).toLowerCase();
+		if ("mariadb".equals(dbType)) this.database = new MariaDB(this);
+		else this.database = new MysqlDB(this);
+		
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new BungeeUserManager(this).init();
 		this.ordersManager = new OrdersManager(this).init();
@@ -141,6 +154,12 @@ public class PortfelBungee extends Plugin implements Portfel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+
+	@Override
+	public @NotNull Config getConfiguration() {
+		return this.config;
 	}
 	
 

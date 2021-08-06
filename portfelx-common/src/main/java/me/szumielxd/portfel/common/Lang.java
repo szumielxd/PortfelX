@@ -306,11 +306,11 @@ public class Lang {
 	 * Setup Lang instances. Internal use only
 	 * @param locales directory
 	 */
-	public static void load(@NotNull File dir) {
+	public static void load(@NotNull File dir, @NotNull Portfel plugin) {
 		if (dir.isFile() && dir.exists()) dir.delete();
 		if (!dir.exists()) dir.mkdirs();
 		File[] files = dir.listFiles((d, name) -> FILE_PATTERN.matcher(name).matches());
-		DEFAULT_LOCALE = Translator.parseLocale(Config.getString(ConfigKey.LANG_DEFAULT_LOCALE));
+		DEFAULT_LOCALE = Translator.parseLocale(plugin.getConfiguration().getString(ConfigKey.LANG_DEFAULT_LOCALE));
 		if (DEFAULT_LOCALE == null) DEFAULT_LOCALE = Locale.US;
 		if (files.length > 0) for (File f : files) {
 			Locale loc = Translator.parseLocale(f.getName().substring(9, f.getName().length()-5));

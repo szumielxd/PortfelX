@@ -1,5 +1,9 @@
 package me.szumielxd.portfel.common;
 
+import java.io.File;
+
+import org.jetbrains.annotations.NotNull;
+
 import me.szumielxd.portfel.common.managers.TaskManager;
 import me.szumielxd.portfel.common.managers.UserManager;
 import net.kyori.adventure.text.Component;
@@ -24,6 +28,10 @@ public interface Portfel {
 	 * @return transaction logger
 	 */
 	/*public AbstractDBLogger getDBLogger();*/
+	
+	public @NotNull File getDataFolder();
+	
+	public @NotNull Config getConfiguration();
 	
 
 }

@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,9 +19,11 @@ import org.jetbrains.annotations.Nullable;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import me.szumielxd.portfel.bungee.BungeeConfigKey;
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.objects.OperableUser;
+import me.szumielxd.portfel.common.Config;
 import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -36,30 +37,30 @@ public abstract class HikariDB implements AbstractDB {
 	private boolean tablesChecked = false;
 	
 	
-	public static String TABLE_USERS = escapeSql("WalutaPrawdziwa_MF");
-	public static String TABLE_LOGS = escapeSql("PortfelLog_MF");
+	private final String TABLE_USERS;
+	private final String TABLE_LOGS;
 	
-	public static String USERS_NAME = escapeSql("Nick");
-	public static String USERS_UUID = escapeSql("UUID");
-	public static String USERS_BALANCE = escapeSql("Konto");
-	public static String USERS_INTOP = escapeSql("IGNORE_TOP");
+	private final String USERS_NAME;
+	private final String USERS_UUID;
+	private final String USERS_BALANCE;
+	private final String USERS_INTOP;
 	
-	public static String LOGS_ID = escapeSql("id");
-	public static String LOGS_UUID = escapeSql("uuid");
-	public static String LOGS_USERNAME = escapeSql("username");
-	public static String LOGS_SERVER = escapeSql("server");
-	public static String LOGS_EXECUTOR = escapeSql("executor");
-	public static String LOGS_EXECUTORUUID = escapeSql("executor_uuid");
-	public static String LOGS_TIME = escapeSql("time");
-	public static String LOGS_ORDERNAME = escapeSql("order_name");
-	public static String LOGS_ACTION = escapeSql("action");
-	public static String LOGS_VALUE = escapeSql("value");
-	public static String LOGS_BALANCE = escapeSql("balance");
+	private final String LOGS_ID;
+	private final String LOGS_UUID;
+	private final String LOGS_USERNAME;
+	private final String LOGS_SERVER;
+	private final String LOGS_EXECUTOR;
+	private final String LOGS_EXECUTORUUID;
+	private final String LOGS_TIME;
+	private final String LOGS_ORDERNAME;
+	private final String LOGS_ACTION;
+	private final String LOGS_VALUE;
+	private final String LOGS_BALANCE;
 	
-	private static String DB_HOST = "localhost";
-	private static String DB_NAME = "wallet";
-	private static String DB_USER = "root";
-	private static String DB_PASSWD = "";
+	private final String DB_HOST;
+	private final String DB_NAME;
+	private final String DB_USER;
+	private final String DB_PASSWD;
 
 	
 	private static @NotNull String escapeSql(@NotNull String text) {
@@ -69,6 +70,33 @@ public abstract class HikariDB implements AbstractDB {
 	
 	public HikariDB(PortfelBungee plugin) {
 		this.plugin = plugin;
+		Config cfg = this.plugin.getConfiguration();
+		
+		DB_HOST = cfg.getString(BungeeConfigKey.DATABASE_HOST);
+		DB_NAME = cfg.getString(BungeeConfigKey.DATABASE_DATABASE);
+		DB_USER = cfg.getString(BungeeConfigKey.DATABASE_USERNAME);
+		DB_PASSWD = cfg.getString(BungeeConfigKey.DATABASE_PASSWORD);
+		
+		TABLE_USERS = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_NAME));
+		TABLE_LOGS = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_NAME));
+		
+		USERS_NAME = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_USERNAME));
+		USERS_UUID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_UUID));
+		USERS_BALANCE = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_BALANCE));
+		USERS_INTOP = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_IGNORETOP));
+		
+		LOGS_ID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_ID));
+		LOGS_UUID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_UUID));
+		LOGS_USERNAME = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_USERNAME));
+		LOGS_SERVER = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_SERVER));
+		LOGS_EXECUTOR = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_EXECUTOR));
+		LOGS_EXECUTORUUID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_EXECUTORUUID));
+		LOGS_TIME = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_TIME));
+		LOGS_ORDERNAME = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_ORDERNAME));
+		LOGS_ACTION = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_ACTION));
+		LOGS_VALUE = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_VALUE));
+		LOGS_BALANCE = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_BALANCE));
+		
 	}
 	
 	
@@ -95,14 +123,15 @@ public abstract class HikariDB implements AbstractDB {
 		}
 		this.setupDatabase(config, host[0], port, DB_NAME, DB_USER, DB_PASSWD);
 		
-		Map<String, String> properties = new HashMap<>();
+		Config cfg = this.plugin.getConfiguration();
+		Map<String, String> properties = cfg.getStringMap(BungeeConfigKey.DATABASE_POOL_PROPERTIES);
 		this.setupProperties(config, properties);
 		
-		config.setMaximumPoolSize(10);
-		config.setMinimumIdle(10);
-		config.setMaxLifetime(1800000);
-		config.setKeepaliveTime(0);
-		config.setConnectionTimeout(5000);
+		config.setMaximumPoolSize(cfg.getInt(BungeeConfigKey.DATABASE_POOL_MAXSIZE));
+		config.setMinimumIdle(cfg.getInt(BungeeConfigKey.DATABASE_POOL_MINIDLE));
+		config.setMaxLifetime(cfg.getInt(BungeeConfigKey.DATABASE_POOL_MAXLIFETIME));
+		config.setKeepaliveTime(cfg.getInt(BungeeConfigKey.DATABASE_POOL_KEEPALIVE));
+		config.setConnectionTimeout(cfg.getInt(BungeeConfigKey.DATABASE_POOL_TIMEOUT));
 		config.setInitializationFailTimeout(-1);
 		
 		this.hikari = new HikariDataSource(config);
