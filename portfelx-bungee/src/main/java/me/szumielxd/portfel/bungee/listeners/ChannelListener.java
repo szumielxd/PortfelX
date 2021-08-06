@@ -49,6 +49,7 @@ public class ChannelListener implements Listener {
 						ByteArrayDataOutput out = ByteStreams.newDataOutput();
 						out.writeUTF(subchannel);
 						out.writeUTF(player.getUniqueId().toString());
+						out.writeUTF(player.getName());
 						out.writeLong(user.getBalance());
 						out.writeBoolean(user.isDeniedInTop());
 						srv.sendData(event.getTag(), out.toByteArray());
@@ -84,9 +85,10 @@ public class ChannelListener implements Listener {
 						try {
 							Exception ex = future.get();
 							ByteArrayDataOutput out = ByteStreams.newDataOutput();
-							out.writeUTF(subchannel);
+							out.writeUTF(subchannel); // subchannel
 							out.writeUTF(this.plugin.getProxyId().toString()); // proxy id
 							out.writeUTF(transactionId); // transaction id
+							out.writeLong(user.getBalance()); // new balance
 							int found = (int) this.plugin.getOrdersManager().getOrders().values().stream()
 									.filter(o -> o.examine(user, order)).count();
 							if (ex == null) {

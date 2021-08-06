@@ -22,7 +22,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import me.szumielxd.portfel.bungee.BungeeConfigKey;
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
-import me.szumielxd.portfel.bungee.objects.OperableUser;
+import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
 import me.szumielxd.portfel.common.Config;
 import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
@@ -228,7 +228,7 @@ public abstract class HikariDB implements AbstractDB {
 					if (rs.next()) {
 						UUID uuid = UUID.fromString(rs.getString(1));
 						ProxiedPlayer player = this.plugin.getProxy().getPlayer(uuid);
-						new OperableUser(this.plugin, uuid, rs.getString(2), player != null && player.isConnected(), rs.getBoolean(4), rs.getLong(3));
+						new BungeeOperableUser(this.plugin, uuid, rs.getString(2), player != null && player.isConnected(), rs.getBoolean(4), rs.getLong(3));
 					}
 					return null;
 				}
@@ -254,7 +254,7 @@ public abstract class HikariDB implements AbstractDB {
 				stm.setString(1, uuid.toString());
 				try (ResultSet rs = stm.executeQuery()) {
 					if (rs.next()) {
-						return new OperableUser(this.plugin, uuid, rs.getString(1), player != null && player.isConnected(), rs.getBoolean(3), rs.getLong(2));
+						return new BungeeOperableUser(this.plugin, uuid, rs.getString(1), player != null && player.isConnected(), rs.getBoolean(3), rs.getLong(2));
 					}
 				}
 			}
@@ -266,7 +266,7 @@ public abstract class HikariDB implements AbstractDB {
 					stm.setString(1, player.getName());
 					try (ResultSet rs = stm.executeQuery()) {
 						if (rs.next()) {
-							return new OperableUser(this.plugin, uuid, rs.getString(1), player.isConnected(), rs.getBoolean(3), rs.getLong(2));
+							return new BungeeOperableUser(this.plugin, uuid, rs.getString(1), player.isConnected(), rs.getBoolean(3), rs.getLong(2));
 						}
 					}
 				}
@@ -288,13 +288,13 @@ public abstract class HikariDB implements AbstractDB {
 		this.checkConnection();
 		String sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?", USERS_NAME, USERS_BALANCE, USERS_INTOP, TABLE_USERS, USERS_UUID);
 		ProxiedPlayer player = this.plugin.getProxy().getPlayer(uuid);
-		OperableUser user = null;
+		BungeeOperableUser user = null;
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, uuid.toString());
 				try (ResultSet rs = stm.executeQuery()) {
 					if (rs.next()) {
-						user = new OperableUser(this.plugin, uuid, rs.getString(1), player != null && player.isConnected(), rs.getBoolean(3), rs.getLong(2));
+						user = new BungeeOperableUser(this.plugin, uuid, rs.getString(1), player != null && player.isConnected(), rs.getBoolean(3), rs.getLong(2));
 					}
 				}
 			}
@@ -320,7 +320,7 @@ public abstract class HikariDB implements AbstractDB {
 					stm.setString(1, player.getName());
 					try (ResultSet rs = stm.executeQuery()) {
 						if (rs.next()) {
-							user = new OperableUser(this.plugin, uuid, rs.getString(1), player.isConnected(), rs.getBoolean(3), rs.getLong(2));
+							user = new BungeeOperableUser(this.plugin, uuid, rs.getString(1), player.isConnected(), rs.getBoolean(3), rs.getLong(2));
 						}
 					}
 				}
@@ -337,7 +337,7 @@ public abstract class HikariDB implements AbstractDB {
 			// create new user
 			sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?)", TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_INTOP);
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
-				if (user == null) user = new OperableUser(this.plugin, uuid, player.getName(), player.isConnected(), false, 0);
+				if (user == null) user = new BungeeOperableUser(this.plugin, uuid, player.getName(), player.isConnected(), false, 0);
 				stm.setString(1, user.getUniqueId().toString());
 				stm.setString(2, user.getName());
 				stm.setLong(3, user.getBalance());
@@ -396,13 +396,13 @@ public abstract class HikariDB implements AbstractDB {
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	@Override
-	public List<OperableUser> updateUsers(@NotNull OperableUser... users) throws SQLException {
-		List<OperableUser> updatedUsers = Collections.emptyList();
+	public List<BungeeOperableUser> updateUsers(@NotNull BungeeOperableUser... users) throws SQLException {
+		List<BungeeOperableUser> updatedUsers = Collections.emptyList();
 		if (users.length == 0) return updatedUsers;
 		this.checkConnection();
 		
 		// map users by UUID
-		final Map<UUID, OperableUser> map = Stream.of(users).collect(Collectors.toMap(User::getUniqueId, Function.identity(), (a, b) -> a));
+		final Map<UUID, BungeeOperableUser> map = Stream.of(users).collect(Collectors.toMap(User::getUniqueId, Function.identity(), (a, b) -> a));
 		// generate right amount of `?` characters to insert into query
 		final String uuidMarks = String.join(", ", map.keySet().stream().map(s -> "?").toArray(String[]::new));
 		final String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` IN (%s)", USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_INTOP, TABLE_USERS, USERS_UUID, uuidMarks);
@@ -415,10 +415,10 @@ public abstract class HikariDB implements AbstractDB {
 			try (ResultSet rs = stm.executeQuery()) {
 				while (rs.next()) {
 					UUID uuid = UUID.fromString(rs.getString(1));
-					OperableUser user = map.get(uuid);
+					BungeeOperableUser user = map.get(uuid);
 					user.setName(rs.getString(2));
 					user.setPlainBalance(rs.getLong(3));
-					user.setDeniedInTop(rs.getBoolean(4));
+					user.setPlainDeniedInTop(rs.getBoolean(4));
 					updatedUsers.add(user);
 				}
 			}
@@ -435,7 +435,7 @@ public abstract class HikariDB implements AbstractDB {
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	@Override
-	public void addBalance(@NotNull OperableUser user, long amount) throws Exception {
+	public void addBalance(@NotNull BungeeOperableUser user, long amount) throws Exception {
 		this.checkConnection();
 		String sql = String.format("UPDATE `%s` SET `%s` = `%s` + ? WHERE `%s` = ?", TABLE_USERS, USERS_BALANCE, USERS_UUID);
 		try (Connection conn = this.hikari.getConnection()) {
@@ -456,7 +456,7 @@ public abstract class HikariDB implements AbstractDB {
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	@Override
-	public void takeBalance(@NotNull OperableUser user, long amount) throws SQLException {
+	public void takeBalance(@NotNull BungeeOperableUser user, long amount) throws SQLException {
 		this.checkConnection();
 		String sql = String.format("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?", TABLE_USERS, USERS_BALANCE, USERS_UUID);
 		try (Connection conn = this.hikari.getConnection()) {
@@ -477,7 +477,7 @@ public abstract class HikariDB implements AbstractDB {
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	@Override
-	public void setBalance(@NotNull OperableUser user, long balance) throws SQLException {
+	public void setBalance(@NotNull BungeeOperableUser user, long balance) throws SQLException {
 		this.checkConnection();
 		String sql = String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?", TABLE_USERS, USERS_BALANCE, USERS_UUID);
 		try (Connection conn = this.hikari.getConnection()) {
@@ -498,7 +498,7 @@ public abstract class HikariDB implements AbstractDB {
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	@Override
-	public void setDeniedInTop(@NotNull OperableUser user, boolean deniedInTop) throws SQLException {
+	public void setDeniedInTop(@NotNull BungeeOperableUser user, boolean deniedInTop) throws SQLException {
 		this.checkConnection();
 		String sql = String.format("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?", TABLE_USERS, USERS_INTOP, USERS_UUID);
 		try (Connection conn = this.hikari.getConnection()) {

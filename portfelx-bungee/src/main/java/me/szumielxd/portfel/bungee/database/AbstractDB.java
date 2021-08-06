@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.bungee.PortfelBungee;
-import me.szumielxd.portfel.bungee.objects.OperableUser;
+import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
 import me.szumielxd.portfel.common.objects.User;
 
 public interface AbstractDB {
@@ -101,7 +101,7 @@ public interface AbstractDB {
 	 * @return list of all updated users
 	 * @throws Exception when something went wrong
 	 */
-	public List<OperableUser> updateUsers(@NotNull OperableUser... users) throws Exception;
+	public List<BungeeOperableUser> updateUsers(@NotNull BungeeOperableUser... users) throws Exception;
 	
 	/**
 	 * Add given amount of money to balance of specified user.
@@ -111,7 +111,7 @@ public interface AbstractDB {
 	 * @param amount amount of money to add
 	 * @throws Exception when something went wrong
 	 */
-	public void addBalance(@NotNull OperableUser user, long amount) throws Exception;
+	public void addBalance(@NotNull BungeeOperableUser user, long amount) throws Exception;
 	
 	/**
 	 * Take given amount of money from balance of specified user.
@@ -121,7 +121,7 @@ public interface AbstractDB {
 	 * @param amount amount of money to take
 	 * @throws Exception when something went wrong
 	 */
-	public void takeBalance(@NotNull OperableUser user, long amount) throws Exception;
+	public void takeBalance(@NotNull BungeeOperableUser user, long amount) throws Exception;
 	
 	/**
 	 * Set balance of specified user to given amount.
@@ -131,7 +131,7 @@ public interface AbstractDB {
 	 * @param balance new balance
 	 * @throws Exception when something went wrong
 	 */
-	public void setBalance(@NotNull OperableUser user, long balance) throws Exception;
+	public void setBalance(@NotNull BungeeOperableUser user, long balance) throws Exception;
 	
 	/**
 	 * Set whether user should be visible in balance top.
@@ -141,7 +141,7 @@ public interface AbstractDB {
 	 * @param deniedInTop true if user can be visible in top
 	 * @throws Exception when something went wrong
 	 */
-	public void setDeniedInTop(@NotNull OperableUser user, boolean deniedInTop) throws Exception;
+	public void setDeniedInTop(@NotNull BungeeOperableUser user, boolean deniedInTop) throws Exception;
 	
 	/**
 	 * Check if connection can be obtained, otherwise creates new one.

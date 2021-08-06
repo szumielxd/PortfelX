@@ -1,18 +1,19 @@
-package me.szumielxd.portfel.bungee.objects;
+package me.szumielxd.portfel.bukkit.objects;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.bukkit.PortfelBukkit;
 import me.szumielxd.portfel.common.objects.ActionExecutor;
 import me.szumielxd.portfel.common.objects.User;
 
-public class OperableUser extends User {
+public class BukkitOperableUser extends User {
 	
 	
-	private final PortfelBungee plugin;
+	private final PortfelBukkit plugin;
 	
 
 	/**
@@ -25,7 +26,7 @@ public class OperableUser extends User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public OperableUser(@NotNull PortfelBungee plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance) {
+	public BukkitOperableUser(@NotNull PortfelBukkit plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance) {
 		super(uuid, name, online, deniedInTop, balance);
 		this.plugin = plugin;
 	}
@@ -33,6 +34,7 @@ public class OperableUser extends User {
 	/**
 	 * Add specified amount of money to user's balance and log it.
 	 * 
+	 * @implNote <b>Unsupported for Bukkit instance</b>
 	 * @param amount amount of money to add
 	 * @param executor action executor
 	 * @param server server where action was triggered
@@ -42,23 +44,13 @@ public class OperableUser extends User {
 	 */
 	@Override
 	public @NotNull CompletableFuture<Exception> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (balance < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDB().updateUsers(this);
-				this.plugin.getDBLogger().logBalanceAdd(this, executor, server, orderName, amount);
-				this.plugin.getDB().addBalance(this, amount);
-			} catch (Exception e) {
-				return e;
-			}
-			super.addBalance(amount, executor, server, orderName);
-			return null;
-		});
+		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
 	}
 	
 	/**
 	 * Take specified amount of money from user's balance and log it.
 	 * 
+	 * @implNote <b>Unsupported for Bukkit instance</b>
 	 * @param amount amount of money to take
 	 * @param executor action executor
 	 * @param server server where action was triggered
@@ -68,24 +60,13 @@ public class OperableUser extends User {
 	 */
 	@Override
 	public @NotNull CompletableFuture<Exception> takeBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (amount < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
-		if (this.balance - amount < 0) throw new IllegalArgumentException("balance cannot be lower than 0");
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDB().updateUsers(this);
-				this.plugin.getDBLogger().logBalanceTake(this, executor, server, orderName, amount);
-				this.plugin.getDB().takeBalance(this, amount);
-			} catch (Exception e) {
-				return e;
-			}
-			super.takeBalance(amount, executor, server, orderName);
-			return null;
-		});
+		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
 	}
 	
 	/**
 	 * Set specified amount of money as user's balance and log it.
 	 * 
+	 * @implNote <b>Unsupported for Bukkit instance</b>
 	 * @param newBalance new user's balance
 	 * @param executor action executor
 	 * @param server server where action was triggered
@@ -95,27 +76,25 @@ public class OperableUser extends User {
 	 */
 	@Override
 	public @NotNull CompletableFuture<Exception> setBalance(long newBalance, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (newBalance < 0) throw new IllegalArgumentException("newBalance cannot be lower than 0");
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDB().updateUsers(this);
-				this.plugin.getDBLogger().logBalanceSet(this, executor, server, orderName, newBalance);
-				this.plugin.getDB().setBalance(this, newBalance);
-			} catch (Exception e) {
-				return e;
-			}
-			super.setBalance(newBalance, executor, server, orderName);
-			return null;
-		});
+		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
 	}
 	
 	/**
 	 * Set specified amount of money as user's balance.
 	 * 
-	 * @param newBalance
+	 * @param newBalance new user's balance
 	 */
 	public void setPlainBalance(long newBalance) {
 		this.balance = newBalance;
+	}
+	
+	/**
+	 * Set specified visibility state of user's top.
+	 * 
+	 * @param deniedInTop state of user's visibility in top
+	 */
+	public void setPlainDeniedInTop(boolean deniedInTop) {
+		this.deniedInTop = deniedInTop;
 	}
 	
 	/**
@@ -139,20 +118,13 @@ public class OperableUser extends User {
 	/**
 	 * Set whether user should be visible in top balance.
 	 * 
+	 * @implNote <b>Unsupported for Bukkit instance</b>
 	 * @param inTop set to true to allow this user in top
 	 * @return A future that will be completed with possible error that occurred during changing inTop flag
 	 */
 	@Override
 	public @NotNull CompletableFuture<Exception> setDeniedInTop(boolean inTop) {
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDB().setDeniedInTop(this, inTop);
-				super.setDeniedInTop(inTop);
-				return null;
-			} catch (Exception e) {
-				return e;
-			}
-		});
+		throw new UnsupportedOperationException("Bukkit instance cannot modify user's top by itself.");
 	}
 
 	/**
@@ -165,7 +137,8 @@ public class OperableUser extends User {
 		this.bumpLastUpdate();
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				this.plugin.getDB().updateUsers(this);
+				Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
+				this.plugin.getChannelManager().requestPlayer(player);
 				return null;
 			} catch (Exception e) {
 				return e;

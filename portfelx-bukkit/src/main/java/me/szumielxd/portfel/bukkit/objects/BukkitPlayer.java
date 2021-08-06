@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.bungee.objects;
+package me.szumielxd.portfel.bukkit.objects;
 
 import java.time.Duration;
 import java.util.Locale;
@@ -6,9 +6,15 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+
+import me.clip.placeholderapi.libs.kyori.adventure.translation.Translator;
+import me.szumielxd.portfel.bukkit.PortfelBukkit;
 import me.szumielxd.portfel.common.objects.CommonPlayer;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
@@ -18,17 +24,14 @@ import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public class BungeePlayer extends BungeeSender implements CommonPlayer {
+public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	
 	
-	private final ProxiedPlayer player;
+	private final Player player;
 	
 	
-	public BungeePlayer(@NotNull PortfelBungee plugin, @NotNull ProxiedPlayer player) {
+	public BukkitPlayer(@NotNull PortfelBukkit plugin, @NotNull Player player) {
 		super(plugin, player);
 		this.player = player;
 	}
@@ -58,7 +61,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @param reason kick message
 	 */
 	public void disconnect(@NotNull String reason) {
-		this.player.disconnect(TextComponent.fromLegacyText(reason));
+		this.player.kickPlayer(reason);
 	}
 	
 	/**
@@ -67,8 +70,11 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @param server the new server to connect to
 	 */
 	public void connect(@NotNull String server) {
-		ServerInfo info = this.plugin.getProxy().getServerInfo(server);
-		if (info != null) this.player.connect(info);
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("Connect");
+		out.writeUTF(this.getName());
+		out.writeUTF(server);
+		this.player.sendPluginMessage(this.plugin, "bungeecord:main", out.toByteArray());
 	}
 	
 	/**
@@ -77,8 +83,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @param command command to execute
 	 */
 	public void executeServerCommand(@NotNull String command) {
-		if (command.startsWith("/")) this.player.chat(command);
-		else this.player.chat('/'+command);
+		this.plugin.getServer().dispatchCommand(player, command);
 	}
 	
 	/**
@@ -87,7 +92,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @return name of player's current world/server
 	 */
 	public @NotNull String getWorldName() {
-		return this.player.getServer().getInfo().getName();
+		return this.player.getWorld().getName();
 	}
 	
 	/**
@@ -96,7 +101,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @return the player's locale
 	 */
 	public @NotNull Locale locale() {
-		return this.player.getLocale();
+		return Translator.parseLocale(this.player.spigot().getLocale());
 	}
 	
 	/**
@@ -105,8 +110,8 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @param worldName name of destination world/server
 	 */
 	public void sendToWorld(@NotNull String worldName) {
-		ServerInfo info = this.plugin.getProxy().getServerInfo(worldName);
-		if (info != null) this.player.connect(info);
+		World world = this.plugin.getServer().getWorld(worldName);
+		if (world != null) this.player.teleport(world.getSpawnLocation());
 	}
 	
 	/**

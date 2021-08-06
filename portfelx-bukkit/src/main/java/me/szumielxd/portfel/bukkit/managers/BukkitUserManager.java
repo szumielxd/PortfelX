@@ -1,42 +1,52 @@
-package me.szumielxd.portfel.bungee.managers;
+package me.szumielxd.portfel.bukkit.managers;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
-import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
+import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.managers.UserManager;
 import me.szumielxd.portfel.common.objects.User;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public class BungeeUserManager extends UserManager {
-
-	
-	private final PortfelBungee plugin;
-	private final Map<UUID, BungeeOperableUser> users;
+public class BukkitUserManager extends UserManager {
 	
 	
-	public BungeeUserManager(PortfelBungee plugin) {
+	private final PortfelBukkit plugin;
+	private final Map<UUID, BukkitOperableUser> users;
+	
+	
+	public BukkitUserManager(@NotNull PortfelBukkit plugin) {
 		this.plugin = plugin;
 		this.users = new HashMap<>();
 	}
 	
-	// TODO: loadOrCreate for array of UUIDs
-	@Override
+	
 	public UserManager init() {
 		super.init();
-		this.plugin.getProxy().getPlayers().stream().map(ProxiedPlayer::getUniqueId).toArray(UUID[]::new);
-		//this.plugin.getDB();
+		this.plugin.getChannelManager().setRegisterer(user -> {
+			BukkitOperableUser main = this.users.get(user.getUniqueId());
+			if (main != null) {
+				main.setPlainBalance(user.getBalance());
+				main.setPlainDeniedInTop(user.isDeniedInTop());
+				main.setOnline(this.plugin.getServer().getPlayer(user.getUniqueId()) != null);
+			} else {
+				this.users.put(user.getUniqueId(), user);
+			}
+		});
 		return this;
 	}
-	
+
 	/**
 	 * Get loaded user from UUID.
 	 * 
@@ -72,10 +82,12 @@ public class BungeeUserManager extends UserManager {
 	@Override
 	public @Nullable User getOrLoadUser(@NotNull UUID uuid) throws Exception {
 		this.validate();
-		BungeeOperableUser user = this.users.get(uuid);
+		BukkitOperableUser user = this.users.get(uuid);
 		if (user != null) return user;
-		user = (BungeeOperableUser) this.plugin.getDB().loadUser(uuid);
-		if (user != null) this.users.put(uuid, user);
+		Player player = this.plugin.getServer().getPlayer(uuid);
+		if (player == null) return null;
+		user = (BukkitOperableUser) this.plugin.getChannelManager().requestPlayer(player);
+		this.users.put(uuid, user);
 		return user;
 	}
 	
@@ -90,9 +102,12 @@ public class BungeeUserManager extends UserManager {
 	@Override
 	public @Nullable User getOrLoadUser(@NotNull String username) throws Exception {
 		this.validate();
-		BungeeOperableUser user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
+		BukkitOperableUser user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
 		if (user != null) return user;
-		user = (BungeeOperableUser) this.plugin.getDB().loadUserByName(username, false);
+		Player player = this.plugin.getServer().getPlayerExact(username);
+		if (player == null) throw new IllegalArgumentException("Bukkit implementation only allows online players");
+		
+		user = (BukkitOperableUser) this.plugin.getChannelManager().requestPlayer(player);
 		if (user != null) this.users.put(user.getUniqueId(), user);
 		return user;
 	}
@@ -100,19 +115,14 @@ public class BungeeUserManager extends UserManager {
 	/**
 	 * Get loaded user or load user assigned to given UUID. When UUID doesn't match any existent user, new one is created.
 	 * 
-	 * @implNote <b>Thread Unsafe</b>
+	 * @implNote <b>Unsupported for Bukkit instance</b>
 	 * @param uuid unique identifier of user
 	 * @return already loaded user or new one if not loaded already
 	 * @throws Exception if something went wrong
 	 */
 	@Override
 	public @NotNull User getOrCreateUser(@NotNull UUID uuid) throws Exception {
-		this.validate();
-		BungeeOperableUser user = this.users.get(uuid);
-		if (user != null) return user;
-		user = (BungeeOperableUser) this.plugin.getDB().loadOrCreateUser(uuid);
-		this.users.put(uuid, user);
-		return user;
+		throw new UnsupportedOperationException("Bukkit instance cannot create new users");
 	}
 	
 	/**
@@ -135,7 +145,15 @@ public class BungeeUserManager extends UserManager {
 	@Override
 	public void updateUsers(User... users) throws Exception {
 		this.validate();
-		this.plugin.getDB().updateUsers((BungeeOperableUser[]) users);
+		ChannelManager mgr = this.plugin.getChannelManager();
+		Server srv = this.plugin.getServer();
+		Stream.of(users).map(User::getUniqueId).map(srv::getPlayer).filter(Objects::nonNull).forEach(t -> {
+			try {
+				mgr.requestPlayer(t);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
 	}
 	
 	/**

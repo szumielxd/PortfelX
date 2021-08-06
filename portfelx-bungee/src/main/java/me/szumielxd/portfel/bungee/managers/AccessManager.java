@@ -7,6 +7,10 @@ import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
 import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -245,6 +249,48 @@ public class AccessManager implements Listener {
 	
 	
 	private Map<UUID, RegistrationHolder> registerRequests = new HashMap<>();
+	
+	
+	@EventHandler
+	private void onRegistrationValidCheck(PluginMessageEvent event) {
+		if ("bungeecord:main".equals(event.getTag())) {
+			if (event.getSender() instanceof Server) {
+				Server srv = (Server) event.getSender();
+				ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
+				String subchannel = in.readUTF(); // subchannel
+				if ("ForwardToPlayer".equals(subchannel)) {
+					in.readUTF(); // username
+					String channel = in.readUTF(); // custom channel
+					if (Portfel.CHANNEL_SETUP.equals(channel)) {
+						event.setCancelled(true);
+						byte[] bytes = new byte[in.readShort()];
+						in.readFully(bytes);
+						DataInputStream is = new DataInputStream(new ByteArrayInputStream(bytes));
+						try {
+							String ch = is.readUTF(); // 
+							if ("Validate".equals(ch)) { // subchannel...
+								UUID uuid = UUID.fromString(is.readUTF()); // actionId to validate
+								
+								ByteArrayDataOutput out = ByteStreams.newDataOutput();
+								out.writeUTF(subchannel);
+								ByteArrayOutputStream baos = new ByteArrayOutputStream();
+								DataOutputStream os = new DataOutputStream(baos);
+								os.writeUTF("Validate");
+								os.writeUTF(uuid.toString()); // validated actionId
+								os.writeBoolean(this.registerRequests.containsKey(uuid)); // validity result
+								out.writeShort(baos.toByteArray().length);
+								out.write(baos.toByteArray());
+								srv.sendData(channel, out.toByteArray());
+							}
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						
+					}
+				}
+			}
+		}
+	}
 	
 	
 	@EventHandler

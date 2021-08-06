@@ -23,11 +23,13 @@ import me.szumielxd.portfel.bungee.managers.BungeeTaskManager;
 import me.szumielxd.portfel.bungee.managers.BungeeUserManager;
 import me.szumielxd.portfel.bungee.managers.OrdersManager;
 import me.szumielxd.portfel.common.Config;
+import me.szumielxd.portfel.common.Config.AbstractKey;
 import me.szumielxd.portfel.common.Config.ConfigKey;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.managers.TaskManager;
 import me.szumielxd.portfel.common.managers.UserManager;
+import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -52,7 +54,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 		this.adventure = BungeeAudiences.create(this);
 		this.taskManager = new BungeeTaskManager(this);
 		this.accessManager = new AccessManager(this).init();
-		this.config = new Config(this).init(ConfigKey.values());
+		this.config = new Config(this).init(MiscUtils.mergeArrays((AbstractKey[])ConfigKey.values(), (AbstractKey[])BungeeConfigKey.values()));
 		Lang.load(new File(this.getDataFolder(), "languages"), this);
 		
 		String dbType = this.getConfiguration().getString(BungeeConfigKey.DATABASE_TYPE).toLowerCase();
