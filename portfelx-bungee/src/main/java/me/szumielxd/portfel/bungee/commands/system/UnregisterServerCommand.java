@@ -1,7 +1,9 @@
 package me.szumielxd.portfel.bungee.commands.system;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextDecoration.UNDERLINED;
+import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 
 import java.util.Arrays;
 import java.util.List;

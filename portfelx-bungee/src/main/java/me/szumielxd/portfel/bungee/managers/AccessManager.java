@@ -1,7 +1,11 @@
 package me.szumielxd.portfel.bungee.managers;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-import static net.kyori.adventure.text.format.TextDecoration.*;
+import static net.kyori.adventure.text.format.TextDecoration.UNDERLINED;
+import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
+import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 import java.io.File;
 import java.io.FileNotFoundException;

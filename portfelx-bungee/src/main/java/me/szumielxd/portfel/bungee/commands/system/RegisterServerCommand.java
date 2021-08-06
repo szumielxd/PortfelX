@@ -1,6 +1,6 @@
 package me.szumielxd.portfel.bungee.commands.system;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 import java.util.ArrayList;
 import java.util.Arrays;

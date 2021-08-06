@@ -1,6 +1,6 @@
 package me.szumielxd.portfel.bungee.managers;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 
 import java.io.File;
 import java.io.IOException;
