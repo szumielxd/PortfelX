@@ -33,7 +33,7 @@ public class Transaction {
 		
 		((BukkitOperableUser)this.user).setPlainBalance(this.result.newBalance);
 		
-		// TODO: end this point
+		// TODO: end this point 
 		
 		return true;
 	}
