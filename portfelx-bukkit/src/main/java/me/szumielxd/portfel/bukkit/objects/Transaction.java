@@ -43,7 +43,7 @@ public class Transaction {
 		
 		private final UUID transactionId;
 		private final String status;
-		private final int globalOrders; 
+		private final int globalOrders;
 		private final long newBalance;
 		
 		
