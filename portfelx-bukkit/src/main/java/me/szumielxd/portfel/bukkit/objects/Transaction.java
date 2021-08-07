@@ -33,9 +33,9 @@ public class Transaction {
 		
 		((BukkitOperableUser)this.user).setPlainBalance(this.result.newBalance);
 		
-		// TODO: end this point 
+		// TODO: end this point
 		
-		return true;
+		return true; 
 	}
 	
 	
@@ -43,7 +43,7 @@ public class Transaction {
 		
 		private final UUID transactionId;
 		private final String status;
-		private final int globalOrders;
+		private final int globalOrders; 
 		private final long newBalance;
 		
 		
