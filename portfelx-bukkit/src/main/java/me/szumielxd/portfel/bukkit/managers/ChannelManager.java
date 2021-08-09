@@ -7,7 +7,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -19,10 +22,17 @@ import org.jetbrains.annotations.NotNull;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.google.gson.Gson;
 
+import me.szumielxd.portfel.bukkit.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.PortfelBukkit;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
+import me.szumielxd.portfel.bukkit.objects.OrderData;
+import me.szumielxd.portfel.bukkit.objects.Transaction;
+import me.szumielxd.portfel.bukkit.objects.Transaction.TransactionResult;
 import me.szumielxd.portfel.common.Portfel;
+import me.szumielxd.portfel.common.enums.TransactionStatus;
+import me.szumielxd.portfel.common.objects.User;
 
 public class ChannelManager {
 	
@@ -52,6 +62,7 @@ public class ChannelManager {
 	
 	private final Map<UUID, CompletableFuture<Boolean>> waitingForValidation = new HashMap<>();
 	private final Map<UUID, CompletableFuture<BukkitOperableUser>> waitingUserUpdates = new HashMap<>();
+	private final Map<UUID, Entry<Transaction, CompletableFuture<TransactionResult>>> waitingTransactions = new HashMap<>();
 	
 	
 	private void onSetupValidator(@NotNull String channel, @NotNull Player player, byte[] message) {
@@ -79,6 +90,7 @@ public class ChannelManager {
 	
 	
 	private void onSetupChannel(@NotNull String channel, @NotNull Player player, byte[] message) {
+		if (!Portfel.CHANNEL_SETUP.equals(channel)) return;
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF();
 		if ("Register".equals(subchannel)) {
@@ -143,28 +155,64 @@ public class ChannelManager {
 	
 	
 	private void onTransactionsChannel(@NotNull String channel, @NotNull Player player, byte[] message) {
-		
+		if (!Portfel.CHANNEL_TRANSACTIONS.equals(channel)) return;
+		ByteArrayDataInput in = ByteStreams.newDataInput(message);
+		String subchannel = in.readUTF(); // subchannel
+		if ("Buy".equals(subchannel)) {
+			UUID proxyId = UUID.fromString(in.readUTF()); // proxy id
+			UUID transactionId = UUID.fromString(in.readUTF()); // transaction id
+			TransactionResult result = null;
+			if (this.plugin.getIdentifierManager().isValid(proxyId)) {
+				long newBalance = in.readLong();
+				Optional<TransactionStatus> status = TransactionStatus.parse(in.readUTF());
+				if (status.isPresent()) {
+					int globalOrders = 0;
+					Throwable throwable = null;
+					if (status.get().equals(TransactionStatus.OK)) {
+						globalOrders = in.readInt();
+					} else if (status.get().equals(TransactionStatus.OK)) {
+						try {
+							throwable = new Gson().fromJson(in.readUTF(), Throwable.class);
+						} catch (Exception e) {
+							throwable = e;
+						}
+					}
+					result = new TransactionResult(transactionId, status.get(), newBalance, globalOrders, throwable);
+				}
+			}
+			Entry<Transaction, CompletableFuture<TransactionResult>> entry = this.waitingTransactions.get(transactionId);
+			if (entry == null) return;
+			if (!proxyId.equals(((BukkitOperableUser)entry.getKey().getUser()).getProxyId())) result = null;
+			entry.getValue().complete(result);
+		}
 	}
 	
 	
 	private void onUsersChannel(@NotNull String channel, @NotNull Player player, byte[] message) {
+		if (!Portfel.CHANNEL_USERS.equals(channel)) return;
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF(); // subchannel
 		if ("User".equals(subchannel)) {
+			BukkitOperableUser user = null;
+			UUID proxyId = UUID.fromString(in.readUTF()); // proxyId
 			UUID uuid = UUID.fromString(in.readUTF()); // UUID
-			BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(uuid);
-			boolean online = this.plugin.getServer().getPlayer(uuid) != null;
-			if (user == null) {
-				String username = in.readUTF(); // username
-				long balance = in.readLong(); // balance
-				boolean deniedInTop = in.readBoolean(); // deniedInTop
-				user = new BukkitOperableUser(this.plugin, uuid, username, online, deniedInTop, balance);
-			} else {
-				user.setName(in.readUTF()); // username
-				user.setPlainBalance(in.readLong()); // balance
-				user.setPlainDeniedInTop(in.readBoolean()); // deniedInTop
-				user.setOnline(online);
+			if (this.plugin.getIdentifierManager().isValid(proxyId)) {
+				user = (BukkitOperableUser) this.plugin.getUserManager().getUser(uuid);
+				boolean online = this.plugin.getServer().getPlayer(uuid) != null;
+				if (user == null) {
+					String username = in.readUTF(); // username
+					long balance = in.readLong(); // balance
+					boolean deniedInTop = in.readBoolean(); // deniedInTop
+					user = new BukkitOperableUser(this.plugin, uuid, username, online, deniedInTop, balance, proxyId);
+				} else {
+					user.setName(in.readUTF()); // username
+					user.setPlainBalance(in.readLong()); // balance
+					user.setPlainDeniedInTop(in.readBoolean()); // deniedInTop
+					user.setOnline(online);
+				}
 			}
+			
+			
 			CompletableFuture<BukkitOperableUser> future = this.waitingUserUpdates.get(uuid);
 			if (future != null) {
 				future.complete(user);
@@ -196,6 +244,46 @@ public class ChannelManager {
 			this.waitingUserUpdates.remove(uuid);
 			throw e;
 		}
+	}
+	
+	
+	private void sendTransaction(Player player, Transaction transaction) {
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("Buy"); // subchannel
+		out.writeUTF(this.plugin.getIdentifierManager().getComplementary(((BukkitOperableUser)transaction.getUser()).getProxyId()).toString()); // serverId
+		out.writeUTF(transaction.getTransactionId().toString()); // transactionId
+		out.writeUTF(this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME)); // server
+		out.writeLong(transaction.getOrder().getPrice()); // value
+		out.writeUTF(this.plugin.getName()); // plugin
+		out.writeUTF(transaction.getOrder().getName()); // order
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+	}
+	
+	
+	public @NotNull Transaction requestTransaction(@NotNull Player player, @NotNull OrderData order) {
+		UUID transactionId = UUID.randomUUID();
+		try {
+			User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
+			if (user == null) return null;
+			Transaction trans = new Transaction(this.plugin, user, transactionId, order);
+			CompletableFuture<TransactionResult> future = new CompletableFuture<>();
+			this.waitingTransactions.put(transactionId, new SimpleEntry<>(trans, future));
+			this.sendTransaction(player, trans);
+			try {
+				TransactionResult result = future.get(5, TimeUnit.SECONDS);
+				this.waitingUserUpdates.remove(transactionId);
+				trans.finish(result);
+				return trans;
+			} catch (ExecutionException | InterruptedException | TimeoutException e) {
+				this.waitingUserUpdates.remove(transactionId);
+				throw e;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+		
 	}
 	
 	
