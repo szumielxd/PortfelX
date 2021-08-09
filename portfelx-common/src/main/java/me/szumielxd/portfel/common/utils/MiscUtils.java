@@ -1,15 +1,22 @@
 package me.szumielxd.portfel.common.utils;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
 import me.szumielxd.portfel.common.Lang;
@@ -307,6 +314,64 @@ public class MiscUtils {
 		} catch (JsonSyntaxException e) {
 			return LegacyComponentSerializer.legacySection().deserialize(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1"));
 		}
+	}
+	
+	/**
+	 * Try to parse given text as JSON component, on fail fallback to plain legacy format.
+	 * 
+	 * @param text text to parse
+	 * @return parsed component
+	 */
+	public static @NotNull Component parseComponent(@NotNull String text, @NotNull Pattern pattern, @NotNull Function<MatchResult, String> replacer) {
+		try {
+			JsonObject json = new Gson().fromJson(text, JsonObject.class);
+			replaceTextInJson(json, pattern, replacer);
+			return GsonComponentSerializer.gson().deserializeFromTree(json);
+		} catch (JsonSyntaxException e) {
+			return LegacyComponentSerializer.legacySection().deserialize(pattern.matcher(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1")).replaceAll(replacer));
+		}
+	}
+	
+	/**
+	 * Replace provided pattern with result of replacer function in given JSON.
+	 * 
+	 * @param json json object
+	 * @param pattern pattern to replace
+	 * @param replacer replacement function
+	 */
+	public static void replaceTextInJson(@NotNull JsonObject json, @NotNull Pattern pattern, @NotNull Function<MatchResult, String> replacer) {
+		json.entrySet().stream().forEach(e -> {
+			if (e.getValue().isJsonPrimitive() && e.getValue().getAsJsonPrimitive().isString()) {
+				String val = e.getValue().getAsString();
+				String newVal = pattern.matcher(val).replaceAll(replacer);
+				if (!newVal.equals(val)) json.addProperty(e.getKey(), newVal);
+			} else if (e.getValue().isJsonObject()) {
+				replaceTextInJson(e.getValue().getAsJsonObject(), pattern, replacer);
+			} else if (e.getValue().isJsonArray()) {
+				replaceTextInJson(e.getValue().getAsJsonArray(), pattern, replacer);
+			}
+		});
+	}
+	
+	/**
+	 * Replace provided pattern with result of replacer function in given JSON.
+	 * 
+	 * @param json json array
+	 * @param pattern pattern to replace
+	 * @param replacer replacement function
+	 */
+	public static void replaceTextInJson(@NotNull JsonArray json, Pattern pattern, Function<MatchResult, String> replacer) {
+		IntStream.range(0, json.size()).boxed().map(i -> new SimpleEntry<>(i, json.get(i))).forEach(e -> {
+			if (e.getValue().isJsonPrimitive() && e.getValue().getAsJsonPrimitive().isString()) {
+				String val = e.getValue().getAsString();
+				String newVal = pattern.matcher(val).replaceAll(replacer);
+				if (!newVal.equals(val)) json.getAsJsonArray().set(e.getKey(), new JsonPrimitive(newVal));
+			} else if (e.getValue().isJsonObject()) {
+				replaceTextInJson(e.getValue().getAsJsonObject(), pattern, replacer);
+			} else if (e.getValue().isJsonArray()) {
+				replaceTextInJson(e.getValue().getAsJsonArray(), pattern, replacer);
+			}
+		});
 	}
 	
 

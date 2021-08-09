@@ -90,33 +90,38 @@ public class PortfelBungee extends Plugin implements Portfel {
 	}
 	
 	
-	public UUID getProxyId() {
+	public @NotNull UUID getProxyId() {
 		return this.proxyID;
 	}
 	
 	
-	public AbstractDB getDB() {
+	public @NotNull AbstractDB getDB() {
 		return this.database;
 	}
 	
 	
-	public AccessManager getAccessManager() {
+	public @NotNull AccessManager getAccessManager() {
 		return this.accessManager;
 	}
 
 
 	@Override
-	public UserManager getUserManager() {
+	public @NotNull UserManager getUserManager() {
 		return this.userManager;
 	}
 	
 	
 	@Override
-	public TaskManager getTaskManager() {
+	public @NotNull TaskManager getTaskManager() {
 		return this.taskManager;
 	}
 	
-	public OrdersManager getOrdersManager() {
+	@Override
+	public @NotNull String getName() {
+		return this.getDescription().getName();
+	}
+	
+	public @NotNull OrdersManager getOrdersManager() {
 		return this.ordersManager;
 	}
 	
@@ -126,11 +131,11 @@ public class PortfelBungee extends Plugin implements Portfel {
 	 * 
 	 * @return transaction logger
 	 */
-	public AbstractDBLogger getDBLogger() {
+	public @NotNull AbstractDBLogger getDBLogger() {
 		return this.transactionLogger;
 	}
 	
-	public BungeeAudiences adventure() {
+	public @NotNull BungeeAudiences adventure() {
 		if (this.adventure == null) throw new IllegalStateException("Cannot retrieve audience provider while plugin is not enabled");
 		return this.adventure;
 	}

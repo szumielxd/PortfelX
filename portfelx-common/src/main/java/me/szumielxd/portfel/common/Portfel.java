@@ -18,9 +18,9 @@ public interface Portfel {
 	public static String CHANNEL_SETUP = "portfel:setup";
 	public static String CHANNEL_TRANSACTIONS = "portfel:transactions";
 	
-	public UserManager getUserManager();
+	public @NotNull UserManager getUserManager();
 	
-	public TaskManager getTaskManager();
+	public @NotNull TaskManager getTaskManager();
 	
 	/**
 	 * Get database-oriented transaction logger.
@@ -32,6 +32,8 @@ public interface Portfel {
 	public @NotNull File getDataFolder();
 	
 	public @NotNull Config getConfiguration();
+	
+	public @NotNull String getName();
 	
 
 }

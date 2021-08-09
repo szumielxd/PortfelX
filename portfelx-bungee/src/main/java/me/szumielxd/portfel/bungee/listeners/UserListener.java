@@ -35,7 +35,9 @@ public class UserListener implements Listener {
 			if (srv != player.getServer()) return;
 			ByteArrayDataOutput out = ByteStreams.newDataOutput();
 			out.writeUTF("User");
+			out.writeUTF(this.plugin.getProxyId().toString());
 			out.writeUTF(player.getUniqueId().toString());
+			out.writeUTF(player.getName());
 			out.writeLong(user.getBalance());
 			out.writeBoolean(user.isDeniedInTop());
 			srv.sendData(Portfel.CHANNEL_USERS, out.toByteArray());

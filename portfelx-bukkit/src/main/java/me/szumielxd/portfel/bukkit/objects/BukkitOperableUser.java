@@ -14,6 +14,7 @@ public class BukkitOperableUser extends User {
 	
 	
 	private final PortfelBukkit plugin;
+	private UUID proxyId;
 	
 
 	/**
@@ -26,9 +27,10 @@ public class BukkitOperableUser extends User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public BukkitOperableUser(@NotNull PortfelBukkit plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance) {
+	public BukkitOperableUser(@NotNull PortfelBukkit plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, @NotNull UUID proxyId) {
 		super(uuid, name, online, deniedInTop, balance);
 		this.plugin = plugin;
+		this.proxyId = proxyId;
 	}
 	
 	/**
@@ -113,6 +115,19 @@ public class BukkitOperableUser extends User {
 	 */
 	public void setOnline(boolean online) {
 		this.online = online;
+	}
+	
+	/**
+	 * Set user's proxy ID.
+	 * 
+	 * @param proxyId identifier of user's proxy
+	 */
+	public void setProxyId(@NotNull UUID proxyId) {
+		this.proxyId = proxyId;
+	}
+	
+	public @NotNull UUID getProxyId() {
+		return this.proxyId;
 	}
 	
 	/**

@@ -13,6 +13,7 @@ import com.google.gson.GsonBuilder;
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.objects.BungeeActionExecutor;
 import me.szumielxd.portfel.common.Portfel;
+import me.szumielxd.portfel.common.enums.TransactionStatus;
 import me.szumielxd.portfel.common.objects.ActionExecutor;
 import me.szumielxd.portfel.common.objects.User;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -48,6 +49,7 @@ public class ChannelListener implements Listener {
 						User user = this.plugin.getUserManager().getOrCreateUser(player.getUniqueId());
 						ByteArrayDataOutput out = ByteStreams.newDataOutput();
 						out.writeUTF(subchannel);
+						out.writeUTF(this.plugin.getProxyId().toString());
 						out.writeUTF(player.getUniqueId().toString());
 						out.writeUTF(player.getName());
 						out.writeLong(user.getBalance());
@@ -92,10 +94,10 @@ public class ChannelListener implements Listener {
 							int found = (int) this.plugin.getOrdersManager().getOrders().values().stream()
 									.filter(o -> o.examine(user, order)).count();
 							if (ex == null) {
-								out.writeUTF("Ok"); // status
+								out.writeUTF(TransactionStatus.OK.getText()); // status
 								out.writeInt(found);
 							} else {
-								out.writeUTF("Error");
+								out.writeUTF(TransactionStatus.ERROR.getText());
 								out.writeUTF(this.gson.toJson(this.gson.toJsonTree(srv))); // status
 							}
 							srv.sendData(event.getTag(), out.toByteArray());

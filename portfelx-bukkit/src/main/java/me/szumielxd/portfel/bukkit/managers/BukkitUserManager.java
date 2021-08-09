@@ -35,6 +35,7 @@ public class BukkitUserManager extends UserManager {
 	public UserManager init() {
 		super.init();
 		this.plugin.getChannelManager().setRegisterer(user -> {
+			if (user == null) return;
 			BukkitOperableUser main = this.users.get(user.getUniqueId());
 			if (main != null) {
 				main.setPlainBalance(user.getBalance());

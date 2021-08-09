@@ -39,7 +39,7 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 		this.adventure = BukkitAudiences.create(this);
 		this.taskManager = new BukkitTaskManager(this);
 		this.identifierManager = new IdentifierManager(this).init();
-		this.config = new Config(this).init(MiscUtils.mergeArrays(ConfigKey.values()));
+		this.config = new Config(this).init(MiscUtils.mergeArrays(ConfigKey.values(), BukkitConfigKey.values()));
 		Lang.load(new File(this.getDataFolder(), "languages"), this);
 		this.channelManager = new ChannelManager(this);
 		this.userManager = new BukkitUserManager(this).init();
@@ -70,12 +70,12 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 	}
 
 	@Override
-	public UserManager getUserManager() {
+	public @NotNull UserManager getUserManager() {
 		return this.userManager;
 	}
 
 	@Override
-	public TaskManager getTaskManager() {
+	public @NotNull TaskManager getTaskManager() {
 		return this.taskManager;
 	}
 
@@ -92,7 +92,7 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 		return this.identifierManager;
 	}
 	
-	public BukkitAudiences adventure() {
+	public @NotNull BukkitAudiences adventure() {
 		if (this.adventure == null) throw new IllegalStateException("Cannot retrieve audience provider while plugin is not enabled");
 		return this.adventure;
 	}
