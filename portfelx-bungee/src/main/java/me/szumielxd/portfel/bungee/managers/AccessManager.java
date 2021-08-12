@@ -12,7 +12,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -78,9 +77,10 @@ public class AccessManager implements Listener {
 		if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
 		if (!file.exists()) {
 			try {
+				file.createNewFile();
 				this.accessMap = GSON.fromJson(new FileReader(file), JsonObject.class);
 				return this;
-			} catch (JsonSyntaxException | JsonIOException | FileNotFoundException e) {
+			} catch (JsonSyntaxException | JsonIOException | IOException e) {
 				File to = new File(this.plugin.getDataFolder(), file.getName() + ".broken");
 				file.renameTo(to);
 				e.printStackTrace();
