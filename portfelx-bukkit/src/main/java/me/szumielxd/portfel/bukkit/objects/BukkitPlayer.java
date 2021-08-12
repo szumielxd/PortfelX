@@ -1,8 +1,10 @@
 package me.szumielxd.portfel.bukkit.objects;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -101,7 +103,17 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	 * @return the player's locale
 	 */
 	public @NotNull Locale locale() {
-		return Translator.parseLocale(this.player.spigot().getLocale());
+		String locale;
+		try {
+			locale = (String) this.player.getClass().getMethod("getLocale").invoke(this.player);
+		} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			try {
+				locale = (String) this.player.spigot().getClass().getMethod("getLocale").invoke(this.player.spigot());
+			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
+				throw new RuntimeException("Unsupported minecraft version. Missing method: getLocale", ex);
+			}
+		}
+		return Translator.parseLocale(locale);
 	}
 	
 	/**
@@ -145,7 +157,7 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	 * @param flags additional flags of bossbar
 	 */
 	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
-		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, Set.of(flags));
+		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, new HashSet<>(Arrays.asList(flags)));
 		final Audience a = this.plugin.adventure().player(player);
 		a.showBossBar(bar);
 		plugin.getTaskManager().runTaskLater(() -> a.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);

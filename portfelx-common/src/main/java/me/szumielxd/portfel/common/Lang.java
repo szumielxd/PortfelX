@@ -42,6 +42,7 @@ public class Lang {
 		
 		ERROR_COMMAND_EXECUTION("error.command-execution", "No way! An error occured while attempting to perform this command! See console for any usefull information."),
 		ERROR_COMMAND_PERMISSION("error.command-permission", "No! You can't just run this command, you need the access!"),
+		ERROR_COMMAND_USER_NOT_LOADED("error.user-not-loaded", "Sorry, but your data is not loaded. Are you a ghost?!"),
 		ERROR_COMMAND_CONSOLE_ONLY("error.command-console-only", "You can do many things, but you must be a console to execute this command!"),
 		ERROR_COMMAND_PLAYERS_ONLY("error.command-players-only", "You're just only a console! This command requires something more... a PLAYER..."),
 		
@@ -142,6 +143,19 @@ public class Lang {
 		
 		COMMAND_MAIN_RUNNING("command.main.running", "Running {0}."),
 		COMMAND_MAIN_USE("command.main.use", "Use {0} to view available commands."),
+		
+		SHOP_CURRENCYFORMAT("shop.currrency-format", "${0}"),
+		SHOP_TITLE("shop.title", "Wallet ({0})"),
+		SHOP_ORDER_PRICE("shop.order.price", "Price: {0}"),
+		SHOP_ORDER_DESCRIPTION("shop.order.description", "Description:"),
+		SHOP_ORDER_PURCHASED("shop.order.purchased", "Purchased"),
+		SHOP_ORDER_TERMS("shop.order.terms", "Terms of service:"),
+		//
+		SHOP_CONFIRM_TITLE("shop.confirm.title", "Are you sure? That's {0}!"),
+		SHOP_CONFIRM_YES_TITLE("shop.confirm.yes.title", "Yes"),
+		SHOP_CONFIRM_YES_DESCRIPTION("shop.confirm.yes.description", "I'm sure i want to spend {0} for {1}!"),
+		SHOP_CONFIRM_NO_TITLE("shop.confirm.no.title", "No"),
+		SHOP_CONFIRM_NO_DESCRIPTION("shop.confirm.no.description", "Wait! I must pay for it!?"),
 		
 		MAIN_VALUENAME_DESCRIPTION("main.value-name.description", "Description:"),
 		MAIN_VALUENAME_ALIASES("main.value-name.aliases", "Aliases:"),

@@ -1,0 +1,108 @@
+# Title of displayed gui. Yo can use 3 placeholders: %player%, %playerId% and %balance%
+# All colored texts in this config can be written in two different formats:
+#     LEGACY - ex. `&aThis text is lime!`
+#     JSON - ex. `{"text":"This text is totally red!","color":"#FF0000"}`
+title: '&eBuy Rank &6($%balance%)'
+# Type of category:
+#     NORMAL - simple gui with separable orders
+#     UPGRADE - all orders are dependent on each other. This is like ladder,
+#               where orders are sorted by theirs levels and prices are based
+#               on status of orders with lower level
+type: UPGRADE
+# An item that represents this category. This will be visible in main menu
+# An universal format for items is '[*]MATERIAL:[data]#[color]|[skin_data] [amount]'
+# properties:
+#     MATERIAL - Name of bukkit enum which represents given minecraft item type
+#     DATA - legacy data magic number or item durability for 1.13+
+#     COLOR - color used to dye leather armor
+#     SKIN_DATA - skin base64 used to set skull's texture
+#     AMOUNT - simply, amount of item
+# For glowing item append `*` at the beginning of material. For example `*LEATHER_BOOTS#ff00ff 10`
+# will return 10 glowing leather boots colored with pink
+icon: 'DIAMOND'
+# slot where this category's icon will be shown in main menu
+# Amount of rows in gui in range between 1 and 6
+rows: 5
+slot: 20
+# Name of this category. May contains colors. 
+name: '{"text":"Ranks","color":"green"}'
+# description of this category. Can be multiline
+description:
+- 'Buy better rank and earn new perks'
+
+
+# List of all orders in this category
+orders:
+    # Name of order used in logging. Remember, it should be unique.
+    iron:
+        # Slot where this order will be displayed.
+        # Remember that multiple orders cannot be displayed at the same slot.
+        slot: 10
+        # Level of order. Only used if type of category is UPGRADE.
+        # Exactly the same as in RPG. Higher levels are above lower levels and depend on them.
+        level: 1 # used in upgrades
+        # Displayed user-friendly named of order.
+        # Can parse internal placeholders and placeholders from PlaceholderAPI.
+        name: '&7Iron'
+        # Colored description of order.
+        # Can parse internal placeholders and placeholders from PlaceholderAPI.
+        description: 'To check priviliges try /iron'
+        # Normally displayed icon
+        icon: IRON_ORE
+        # Icon displayed when player has permission given in `done-permission` field.
+        icon-bought: *IRON_BLOCK
+        # Price of this order.
+        # When categor type is UPGRADE final price if built by iterating all orders
+        # with lower level and adding theirs price to this basic-price if user 
+        # doesn't already bought them
+        # In this default configuration price of gold will be 40, but if player
+        # has permission group.iron the final price will be 20
+        price: 20
+        # Permission which indicates wheather this order was already bought.
+        # Leave blank for unlimited amount of purchases.
+        done-permission: 'group.iron'
+        # List of texts to broadcast when player successfully buy this order.
+        broadcast:
+        - '&5Surprise! %player% bought Iron Rank!'
+        # List of texts to send to target-player on successfully purchase.
+        message:
+        - '{"text":"Congratultions %player%! You have bought Iron Rank!","color":"light_purple"}'
+        # Commands to execute on successful transaction.
+        command:
+        - '/lp user %playerId% parent add iron'
+    gold:
+        slot: 12
+        level: 2 # used in upgrades
+        name: '&eGold'
+        description: 'To check priviliges try /gold'
+        icon: GOLD_ORE
+        icon-bought: *GOLD_BLOCK
+        price: 20
+        done-permission: 'group.gold'
+        broadcast: '&5Surprise! %player% bought Gold Rank!'
+        message: '{"text":"Congratultions %player%! You have bought Gold Rank!","color":"light_purple"}'
+        command: '/lp user %playerId% parent add gold'
+    diamond:
+        slot: 14
+        level: 3 # used in upgrades
+        name: '&bDiament'
+        description: 'To check priviliges try /diament'
+        icon: DIAMOND_ORE
+        icon-bought: *DIAMOND_BLOCK
+        price: 40
+        done-permission: 'group.diamond'
+        broadcast: '&5Surprise! %player% bought Diamond Rank!'
+        message: '{"text":"Congratultions %player%! You have bought Diamond Rank!","color":"light_purple"}'
+        command: '/lp user %playerId% parent add diamond'
+    emerald:
+        slot: 16
+        level: 4 # used in upgrades
+        name: '&aEmerald'
+        description: 'To check priviliges try /emerald'
+        icon: EMERALD_ORE
+        icon-bought: *EMERALD_BLOCK
+        price: 70
+        done-permission: 'group.emerald'
+        broadcast: '&5Surprise! %player% bought Emerald Rank!'
+        message: '{"text":"Congratultions %player%! You have bought Emerald Rank!","color":"light_purple"}'
+        command: '/lp user %playerId% parent add emerald'

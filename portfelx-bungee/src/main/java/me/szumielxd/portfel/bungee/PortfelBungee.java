@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.bungee.commands.MainCommand;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger;
@@ -50,6 +51,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 	
 	@Override
 	public void onEnable() {
+		PortfelProvider.register(this);
 		this.setupProxyId();
 		this.adventure = BungeeAudiences.create(this);
 		this.taskManager = new BungeeTaskManager(this);

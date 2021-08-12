@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
@@ -328,7 +329,7 @@ public class MiscUtils {
 			replaceTextInJson(json, pattern, replacer);
 			return GsonComponentSerializer.gson().deserializeFromTree(json);
 		} catch (JsonSyntaxException e) {
-			return LegacyComponentSerializer.legacySection().deserialize(pattern.matcher(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1")).replaceAll(replacer));
+			return LegacyComponentSerializer.legacySection().deserialize(replaceAll(pattern.matcher(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1")), replacer));
 		}
 	}
 	
@@ -343,7 +344,7 @@ public class MiscUtils {
 		json.entrySet().stream().forEach(e -> {
 			if (e.getValue().isJsonPrimitive() && e.getValue().getAsJsonPrimitive().isString()) {
 				String val = e.getValue().getAsString();
-				String newVal = pattern.matcher(val).replaceAll(replacer);
+				String newVal = replaceAll(pattern.matcher(val), replacer);
 				if (!newVal.equals(val)) json.addProperty(e.getKey(), newVal);
 			} else if (e.getValue().isJsonObject()) {
 				replaceTextInJson(e.getValue().getAsJsonObject(), pattern, replacer);
@@ -364,14 +365,24 @@ public class MiscUtils {
 		IntStream.range(0, json.size()).boxed().map(i -> new SimpleEntry<>(i, json.get(i))).forEach(e -> {
 			if (e.getValue().isJsonPrimitive() && e.getValue().getAsJsonPrimitive().isString()) {
 				String val = e.getValue().getAsString();
-				String newVal = pattern.matcher(val).replaceAll(replacer);
-				if (!newVal.equals(val)) json.getAsJsonArray().set(e.getKey(), new JsonPrimitive(newVal));
+				String newVal = replaceAll(pattern.matcher(val), replacer);
+				if (!newVal.equals(val)) json.set(e.getKey(), new JsonPrimitive(newVal));
 			} else if (e.getValue().isJsonObject()) {
 				replaceTextInJson(e.getValue().getAsJsonObject(), pattern, replacer);
 			} else if (e.getValue().isJsonArray()) {
 				replaceTextInJson(e.getValue().getAsJsonArray(), pattern, replacer);
 			}
 		});
+	}
+	
+	public static String replaceAll(Matcher matcher, Function<MatchResult, String> replacement) {
+		StringBuffer sb = new StringBuffer(); 
+		while(matcher.find()){ 
+		    String repl = replacement.apply(matcher);
+		    matcher.appendReplacement(sb, repl); 
+		} 
+		matcher.appendTail(sb); 
+		return sb.toString();
 	}
 	
 

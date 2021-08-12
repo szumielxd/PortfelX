@@ -1,8 +1,9 @@
 package me.szumielxd.portfel.bungee.objects;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -140,7 +141,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	 * @param flags additional flags of bossbar
 	 */
 	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
-		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, Set.of(flags));
+		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, new HashSet<>(Arrays.asList(flags)));
 		final Audience a = this.plugin.adventure().player(player);
 		a.showBossBar(bar);
 		plugin.getTaskManager().runTaskLater(() -> a.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);

@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>me.szumielxd</groupId>
 		<artifactId>portfelx-parent</artifactId>
-		<version>3.0.0b</version>
+		<version>${revision}</version>
 	</parent>
 	<dependencies>
 		<dependency>

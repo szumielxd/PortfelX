@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.bukkit.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.common.enums.TransactionStatus;
 import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
@@ -19,11 +20,11 @@ public class Transaction {
 	private final PortfelBukkit plugin;
 	private final User user;
 	private final UUID transactionId;
-	private final OrderData order;
+	private final OrderDataOnAir order;
 	
 	private TransactionResult result = null;
 	
-	public Transaction(@NotNull PortfelBukkit plugin, @NotNull User user, @NotNull UUID transactionId, @NotNull OrderData order) {
+	public Transaction(@NotNull PortfelBukkit plugin, @NotNull User user, @NotNull UUID transactionId, @NotNull OrderDataOnAir order) {
 		this.plugin = plugin;
 		this.user = user;
 		this.transactionId = transactionId;
@@ -39,7 +40,7 @@ public class Transaction {
 		return this.transactionId;
 	}
 	
-	public @NotNull OrderData getOrder() {
+	public @NotNull OrderDataOnAir getOrder() {
 		return this.order;
 	}
 	
@@ -78,7 +79,7 @@ public class Transaction {
 		
 		// command
 		this.getOrder().getCommand().forEach(cmd -> {
-			this.plugin.getServer().dispatchCommand(this.plugin.getServer().getConsoleSender(), pattern.matcher(cmd).replaceAll(replacer));
+			this.plugin.getServer().dispatchCommand(this.plugin.getServer().getConsoleSender(), MiscUtils.replaceAll(pattern.matcher(cmd), replacer));
 		});
 		
 		return true; 

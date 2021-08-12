@@ -1,0 +1,132 @@
+# Title of displayed gui. Yo can use 3 placeholders: %player%, %playerId% and %balance%
+# All colored texts in this config can be written in two different formats:
+#     LEGACY - ex. `&aThis text is lime!`
+#     JSON - ex. `{"text":"This text is totally red!","color":"#FF0000"}`
+title: '&eBuy Money &6($%balance%)'
+# Type of category:
+#     NORMAL - simple gui with separable orders
+#     UPGRADE - all orders are dependent on each other. This is like ladder,
+#               where orders are sorted by theirs levels and prices are based
+#               on status of orders with lower level
+type: NORMAL
+# An item that represents this category. This will be visible in main menu
+# An universal format for items is '[*]MATERIAL:[data]#[color]|[skin_data] [amount]'
+# properties:
+#     MATERIAL - Name of bukkit enum which represents given minecraft item type
+#     DATA - legacy data magic number or item durability for 1.13+
+#     COLOR - color used to dye leather armor
+#     SKIN_DATA - skin base64 used to set skull's texture
+#     AMOUNT - simply, amount of item
+# For glowing item append `*` at the beginning of material. For example `*LEATHER_BOOTS#ff00ff 10`
+# will return 10 glowing leather boots colored with pink
+icon: '*GOLD_INGOT'
+# Amount of rows in gui in range between 1 and 6
+rows: 3
+# slot where this category's icon will be shown in main menu
+slot: 24
+# Name of this category. May contains colors. 
+name: '{"text":"Money","color":"gold"}'
+# description of this category. Can be multiline
+description:
+- 'Lack of money? Buy it!'
+
+
+# List of all orders in this category
+orders:
+    # Name of order used in logging. Remember, it should be unique.
+    'Money x3000':
+        # Slot where this order will be displayed.
+        # Remember that multiple orders cannot be displayed at the same slot.
+        slot: 10
+        # Level of order. Only used if type of category is UPGRADE.
+        # Exactly the same as in RPG. Higher levels are above lower levels and depend on them.
+        level: 1 # used in upgrades
+        # Displayed user-friendly named of order.
+        # Can parse internal placeholders and placeholders from PlaceholderAPI.
+        name: '&6$3000'
+        # Colored description of order.
+        # Can parse internal placeholders and placeholders from PlaceholderAPI.
+        description: 'Top up your account'
+        # Normally displayed icon
+        icon: GOLD_INGOT
+        # Icon displayed when player has permission given in `done-permission` field.
+        icon-bought: GOLD_INGOT
+        # Price of this order.
+        # When categor type is UPGRADE final price if built by iterating all orders
+        # with lower level and adding theirs price to this basic-price if user 
+        # doesn't already bought them
+        # In this default configuration price of gold will be 40, but if player
+        # has permission group.iron the final price will be 20
+        price: 3
+        # Permission which indicates wheather this order was already bought.
+        # Leave blank for unlimited amount of purchases.
+        done-permission: ''
+        # List of texts to broadcast when player successfully buy this order.
+        broadcast:
+        - '&5Surprise! %player% has bought $3000!'
+        # List of texts to send to target-player on successfully purchase.
+        message:
+        - '{"text":"Congratultions %player%! You have bought $3000!","color":"light_purple"}'
+        # Commands to execute on successful transaction.
+        command:
+        - '/eco give %playerId% 3000'
+    'Money x15000':
+        slot: 11
+        level: 2 # used in upgrades
+        name: '&6$15000'
+        description: 'Top up your account'
+        icon: GOLD_INGOT
+        icon-bought: GOLD_INGOT
+        price: 12
+        done-permission: ''
+        broadcast: '&5Surprise! %player% has bought $15000!'
+        message: '{"text":"Congratultions %player%! You have bought $15000!","color":"light_purple"}'
+        command: '/eco give %playerId% 15000'
+    'Money x35000':
+        slot: 12
+        level: 3 # used in upgrades
+        name: '&6$35000'
+        description: 'Top up your account'
+        icon: GOLD_INGOT
+        icon-bought: GOLD_INGOT
+        price: 24
+        done-permission: ''
+        broadcast: '&5Surprise! %player% has bought $35000!'
+        message: '{"text":"Congratultions %player%! You have bought $35000!","color":"light_purple"}'
+        command: '/eco give %playerId% 35000'
+    'Money x67000':
+        slot: 14
+        level: 4 # used in upgrades
+        name: '&6$67000'
+        description: 'Top up your account'
+        icon: GOLD_INGOT
+        icon-bought: GOLD_INGOT
+        price: 48
+        done-permission: ''
+        broadcast: '&5Surprise! %player% has bought $67000!'
+        message: '{"text":"Congratultions %player%! You have bought $67000!","color":"light_purple"}'
+        command: '/eco give %playerId% 67000'
+    'Money x100000':
+        slot: 15
+        level: 5 # used in upgrades
+        name: '&6$100000'
+        description: 'Top up your account'
+        icon: GOLD_INGOT
+        icon-bought: GOLD_INGOT
+        price: 65
+        done-permission: ''
+        broadcast: '&5Surprise! %player% has bought $100000!'
+        message: '{"text":"Congratultions %player%! You have bought $100000!","color":"light_purple"}'
+        command: '/eco give %playerId% 100000'
+    'Money x170000':
+        slot: 16
+        level: 6 # used in upgrades
+        name: '&6$170000'
+        description: 'Top up your account'
+        icon: GOLD_INGOT
+        icon-bought: GOLD_INGOT
+        price: 100
+        done-permission: ''
+        broadcast: '&5Surprise! %player% has bought $170000!'
+        message: '{"text":"Congratultions %player%! You have bought $170000!","color":"light_purple"}'
+        command: '/eco give %playerId% 170000'

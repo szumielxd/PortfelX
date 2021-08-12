@@ -27,7 +27,7 @@ import com.google.gson.Gson;
 import me.szumielxd.portfel.bukkit.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.PortfelBukkit;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
-import me.szumielxd.portfel.bukkit.objects.OrderData;
+import me.szumielxd.portfel.bukkit.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.objects.Transaction;
 import me.szumielxd.portfel.bukkit.objects.Transaction.TransactionResult;
 import me.szumielxd.portfel.common.Portfel;
@@ -260,7 +260,7 @@ public class ChannelManager {
 	}
 	
 	
-	public @NotNull Transaction requestTransaction(@NotNull Player player, @NotNull OrderData order) {
+	public @NotNull Transaction requestTransaction(@NotNull Player player, @NotNull OrderDataOnAir order) {
 		UUID transactionId = UUID.randomUUID();
 		try {
 			User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
