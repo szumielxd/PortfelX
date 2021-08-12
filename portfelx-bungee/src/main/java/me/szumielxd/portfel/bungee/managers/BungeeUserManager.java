@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -135,7 +136,7 @@ public class BungeeUserManager extends UserManager {
 	@Override
 	public void updateUsers(User... users) throws Exception {
 		this.validate();
-		this.plugin.getDB().updateUsers((BungeeOperableUser[]) users);
+		this.plugin.getDB().updateUsers(Stream.of(users).toArray(BungeeOperableUser[]::new));
 	}
 	
 	/**

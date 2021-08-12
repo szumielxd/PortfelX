@@ -1,6 +1,7 @@
 package me.szumielxd.portfel.common;
 
 import java.io.File;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +35,8 @@ public interface Portfel {
 	public @NotNull Config getConfiguration();
 	
 	public @NotNull String getName();
+	
+	public @NotNull Logger getLogger();
 	
 
 }
