@@ -108,6 +108,10 @@
 							<shadedPattern>me.szumielxd.portfel.lib.com.zaxxer</shadedPattern>
 						</relocation>
 						<relocation>
+							<pattern>com.google.gson</pattern>
+							<shadedPattern>me.szumielxd.portfel.lib.com.google.gson</shadedPattern>
+						</relocation>
+						<relocation>
 							<pattern>net.kyori</pattern>
 							<shadedPattern>me.szumielxd.portfel.lib.net.kyori</shadedPattern>
 						</relocation>
