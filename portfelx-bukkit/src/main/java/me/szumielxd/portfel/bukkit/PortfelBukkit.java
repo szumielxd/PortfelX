@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
@@ -22,6 +23,7 @@ import me.szumielxd.portfel.bukkit.managers.IdentifierManager;
 import me.szumielxd.portfel.bukkit.managers.OrdersManager;
 import me.szumielxd.portfel.common.Config;
 import me.szumielxd.portfel.common.Lang;
+import me.szumielxd.portfel.common.Config.AbstractKey;
 import me.szumielxd.portfel.common.Config.ConfigKey;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.managers.TaskManager;
@@ -47,7 +49,7 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 		this.adventure = BukkitAudiences.create(this);
 		this.taskManager = new BukkitTaskManager(this);
 		this.identifierManager = new IdentifierManager(this).init();
-		this.config = new Config(this).init(MiscUtils.mergeArrays(ConfigKey.values(), BukkitConfigKey.values()));
+		this.config = new Config(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(BukkitConfigKey.values()).toArray(AbstractKey[]::new)));
 		Lang.load(new File(this.getDataFolder(), "languages"), this);
 		this.channelManager = new ChannelManager(this);
 		this.ordersManager = new OrdersManager(this).init();

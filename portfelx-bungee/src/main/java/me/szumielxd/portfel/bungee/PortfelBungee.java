@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -57,7 +57,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 		this.adventure = BungeeAudiences.create(this);
 		this.taskManager = new BungeeTaskManager(this);
 		this.accessManager = new AccessManager(this).init();
-		this.config = new Config(this).init(MiscUtils.mergeArrays(Arrays.asList(ConfigKey.values()).toArray(new AbstractKey[0]), Arrays.asList(BungeeConfigKey.values()).toArray(new AbstractKey[0])));
+		this.config = new Config(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(BungeeConfigKey.values()).toArray(AbstractKey[]::new)));
 		Lang.load(new File(this.getDataFolder(), "languages"), this);
 		
 		String dbType = this.getConfiguration().getString(BungeeConfigKey.DATABASE_TYPE).toLowerCase();
