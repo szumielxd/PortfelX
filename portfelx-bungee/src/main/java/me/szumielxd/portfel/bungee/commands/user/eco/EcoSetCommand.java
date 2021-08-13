@@ -24,7 +24,7 @@ import net.kyori.adventure.text.Component;
 public class EcoSetCommand extends SimpleCommand {
 	
 	
-	private final List<CmdArg> args = Arrays.asList(CommonArgs.ECO_AMOUNT, CommonArgs.ORDER);
+	private final List<CmdArg> args = Arrays.asList(CommonArgs.ECO_AMOUNT, CommonArgs.REASON);
 	
 
 	public EcoSetCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {

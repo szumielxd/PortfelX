@@ -201,8 +201,8 @@ public class MiscUtils {
 	 * @return component representation of argument
 	 */
 	public static @NotNull Component argToComponent(@NotNull CmdArg arg, @Nullable TextColor argColor, @Nullable TextColor bracketsColor) {
-		String prefix = arg.isOptional() ? "[<" : "[";
-		String suffix = arg.isOptional() ? ">]" : "]";
+		String prefix = arg.isOptional() ? "[<" : "<";
+		String suffix = arg.isOptional() ? ">]" : ">";
 		return Component.empty().children(Arrays.asList(Component.text(prefix, bracketsColor),
 				arg.getDisplay().component(argColor), Component.text(suffix, bracketsColor)));
 	}
@@ -239,8 +239,8 @@ public class MiscUtils {
 	 * @return string visual representation of argument
 	 */
 	public static @NotNull String argToPlainText(@NotNull Lang lang, @NotNull CmdArg arg, @Nullable ChatColor argColor, @Nullable ChatColor bracketsColor) {
-		String prefix = (argColor!=null ? argColor.toString() : "") + (arg.isOptional() ? "[<" : "[") + (bracketsColor!=null ? bracketsColor.toString() : "");
-		String suffix = (argColor!=null ? argColor.toString() : "") + (arg.isOptional() ? ">]" : "]");
+		String prefix = (argColor!=null ? argColor.toString() : "") + (arg.isOptional() ? "[<" : "<") + (bracketsColor!=null ? bracketsColor.toString() : "");
+		String suffix = (argColor!=null ? argColor.toString() : "") + (arg.isOptional() ? ">]" : ">");
 		return prefix + lang.text(arg.getDisplay()) + suffix;
 	}
 	
@@ -272,7 +272,7 @@ public class MiscUtils {
 	
 	public static @NotNull Component bindCommand(@NotNull Component baseMessage, String fullCommand) {
 		Component hover = Component.text("» ", DARK_GRAY).append(LangKey.COMMAND_SUBCOMMANDS_EXECUTE.component(GRAY))
-				.append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_SUBCOMMANDS_INSERT.component(GRAY));
+				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_SUBCOMMANDS_INSERT.component(GRAY));
 		if (baseMessage.hoverEvent() != null) {
 			if (baseMessage.hoverEvent().action().equals(Action.SHOW_TEXT)) {
 				baseMessage = baseMessage.hoverEvent(((Component) baseMessage.hoverEvent().value()).append(Component.newline()).append(hover));

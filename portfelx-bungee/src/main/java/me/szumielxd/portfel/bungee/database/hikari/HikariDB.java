@@ -5,7 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -397,7 +397,7 @@ public abstract class HikariDB implements AbstractDB {
 	 */
 	@Override
 	public List<BungeeOperableUser> updateUsers(@NotNull BungeeOperableUser... users) throws SQLException {
-		List<BungeeOperableUser> updatedUsers = Collections.emptyList();
+		List<BungeeOperableUser> updatedUsers = new ArrayList<>();
 		if (users.length == 0) return updatedUsers;
 		this.checkConnection();
 		

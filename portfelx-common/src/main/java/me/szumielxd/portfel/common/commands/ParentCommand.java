@@ -48,7 +48,9 @@ public abstract class ParentCommand extends SimpleCommand {
 		if (args.length > offset) {
 			for (CmdArg arg : cmdArgs) {
 				Object obj = arg.parseArg(args[offset]);
-				if (obj == null && !arg.isOptional()) {
+				if (obj != null) {
+					offset++;
+				} else if (!arg.isOptional()) {
 					Component comp = Portfel.PREFIX.append(arg.getArgError(Component.text(args[offset], DARK_RED)));
 					sender.sendTranslated(comp);
 					return;
@@ -70,7 +72,7 @@ public abstract class ParentCommand extends SimpleCommand {
 				return;
 			}
 		}
-		List<String> suggestCmd = Arrays.asList(label.clone());
+		List<String> suggestCmd = new ArrayList<>(Arrays.asList(label.clone()));
 		List<Component> fullLabel = suggestCmd.stream().map(Component::text).collect(Collectors.toList());
 		offset = 0;
 		for (CmdArg arg : cmdArgs) {

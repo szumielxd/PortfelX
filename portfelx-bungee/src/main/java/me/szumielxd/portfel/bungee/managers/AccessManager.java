@@ -252,7 +252,7 @@ public class AccessManager implements Listener {
 	
 	
 	@EventHandler
-	private void onRegistrationValidCheck(PluginMessageEvent event) {
+	public void onRegistrationValidCheck(PluginMessageEvent event) {
 		if ("bungeecord:main".equals(event.getTag())) {
 			if (event.getSender() instanceof Server) {
 				Server srv = (Server) event.getSender();
@@ -294,7 +294,7 @@ public class AccessManager implements Listener {
 	
 	
 	@EventHandler
-	private void onRegistrationCallback(PluginMessageEvent event) {
+	public void onRegistrationCallback(PluginMessageEvent event) {
 		if (Portfel.CHANNEL_SETUP.equals(event.getTag())) {
 			event.setCancelled(true);
 			if (event.getSender() instanceof Server) {

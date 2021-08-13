@@ -24,7 +24,7 @@ import net.kyori.adventure.text.Component;
 public class EcoGiveCommand extends SimpleCommand {
 	
 	
-	private final List<CmdArg> args = Arrays.asList(CommonArgs.ECO_AMOUNT, CommonArgs.ORDER);
+	private final List<CmdArg> args = Arrays.asList(CommonArgs.ECO_AMOUNT, CommonArgs.REASON);
 	
 
 	public EcoGiveCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
