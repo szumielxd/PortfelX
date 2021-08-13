@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.bungee.objects.BungeePlayer;
 import me.szumielxd.portfel.bungee.objects.BungeeSender;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.Portfel;
@@ -22,6 +23,7 @@ import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
@@ -96,7 +98,7 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 
 	@Override
 	public void execute(CommandSender sender, String[] args) {
-		this.onCommand(new BungeeSender(this.plugin, sender), new Object[0], new String[] {this.getName()}, args);
+		this.onCommand(sender instanceof ProxiedPlayer ? new BungeePlayer(this.plugin, (ProxiedPlayer)sender) : new BungeeSender(this.plugin, sender), new Object[0], new String[] {this.getName()}, args);
 		
 	}
 	

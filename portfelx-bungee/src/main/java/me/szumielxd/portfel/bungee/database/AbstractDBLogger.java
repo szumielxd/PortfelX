@@ -1,5 +1,7 @@
 package me.szumielxd.portfel.bungee.database;
 
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+
 import java.sql.Date;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -9,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.common.objects.ActionExecutor;
 import me.szumielxd.portfel.common.objects.User;
+import net.kyori.adventure.text.format.TextColor;
 
 public interface AbstractDBLogger {
 	
@@ -76,9 +79,25 @@ public interface AbstractDBLogger {
 	
 	
 	public static enum ActionType {
-		ADD,
-		SET,
-		REMOVE;
+		ADD("+", GREEN),
+		SET("", GOLD),
+		REMOVE("-", RED);
+		
+		private final TextColor color;
+		private final String formattedPrefix;
+		
+		private ActionType(@NotNull String formattedPrefix, @NotNull TextColor color) {
+			this.color = color;
+			this.formattedPrefix = formattedPrefix;
+		}
+		
+		public TextColor getColor() {
+			return this.color;
+		}
+		
+		public String getFormattedPrefix() {
+			return this.formattedPrefix;
+		}
 		
 		public static @Nullable ActionType parse(@NotNull String text) {
 			return Stream.of(ActionType.values()).filter(t -> t.name().equalsIgnoreCase(text)).findAny().orElse(null);

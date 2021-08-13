@@ -43,7 +43,7 @@ public class EcoGiveCommand extends SimpleCommand {
 				Exception ex = future.get();
 				if (ex != null) throw ex;
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_USER_ECO_GIVE_SUCCESS.component(LIGHT_PURPLE,
-						Component.text(user.getName(), AQUA), Component.text(amount, AQUA))));
+						Component.text(user.getName(), AQUA), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Component.text(amount)))));
 				
 			} catch (Exception e) {
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_EXECUTION.component(DARK_RED)));

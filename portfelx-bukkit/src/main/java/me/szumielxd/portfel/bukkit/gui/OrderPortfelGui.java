@@ -153,7 +153,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		ItemMeta meta = item.getItemMeta();
 		BukkitUtils.setDisplayName(meta, order.getDisplay());
 		List<Component> lore = new ArrayList<>();
-		lore.add(LangKey.SHOP_ORDER_PRICE.component(GRAY, LangKey.SHOP_CURRENCYFORMAT.component((order.getPrice() <= user.getBalance() ? GREEN : RED), Component.text(order.getPrice()))));
+		lore.add(LangKey.SHOP_ORDER_PRICE.component(GRAY, LangKey.MAIN_CURRENCY_FORMAT.component((order.getPrice() <= user.getBalance() ? GREEN : RED), Component.text(order.getPrice()))));
 		lore.add(Component.empty());
 		lore.add(LangKey.SHOP_ORDER_DESCRIPTION.component(GRAY));
 		Component indentation = Component.text("  ", AQUA);
@@ -195,7 +195,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		}
 		
 		List<Component> lore = new ArrayList<>();
-		lore.add(LangKey.SHOP_ORDER_PRICE.component(GRAY, LangKey.SHOP_CURRENCYFORMAT.component((order.getPrice() <= price? GREEN : RED), Component.text(active? price : fullPrice))));
+		lore.add(LangKey.SHOP_ORDER_PRICE.component(GRAY, LangKey.MAIN_CURRENCY_FORMAT.component((order.getPrice() <= price? GREEN : RED), Component.text(active? price : fullPrice))));
 		if (active) lore.addAll(discounts);
 		lore.add(Component.empty());
 		lore.add(LangKey.SHOP_ORDER_DESCRIPTION.component(GRAY));

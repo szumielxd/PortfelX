@@ -40,15 +40,15 @@ public class EcoTakeCommand extends SimpleCommand {
 			String reason = (String) parsed[1];
 			User user = (User) parsedArgs[0];
 			if (user.getBalance() < amount) {
-				sender.sendTranslated(LangKey.COMMAND_USER_ECO_TAKE_SMALLER.component(RED));
+				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_USER_ECO_TAKE_SMALLER.component(RED)));
 				return;
 			}
-			CompletableFuture<Exception> future = user.addBalance(amount, BungeeActionExecutor.sender(sender), "Proxy", reason);
+			CompletableFuture<Exception> future = user.takeBalance(amount, BungeeActionExecutor.sender(sender), "Proxy", reason);
 			try {
 				Exception ex = future.get();
 				if (ex != null) throw ex;
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_USER_ECO_TAKE_SUCCESS.component(LIGHT_PURPLE,
-						Component.text(user.getName(), AQUA), Component.text(amount, AQUA))));
+						Component.text(user.getName(), AQUA), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Component.text(amount)))));
 				
 			} catch (Exception e) {
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_EXECUTION.component(DARK_RED)));

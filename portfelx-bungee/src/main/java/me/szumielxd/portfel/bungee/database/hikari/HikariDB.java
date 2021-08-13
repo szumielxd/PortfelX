@@ -437,7 +437,7 @@ public abstract class HikariDB implements AbstractDB {
 	@Override
 	public void addBalance(@NotNull BungeeOperableUser user, long amount) throws Exception {
 		this.checkConnection();
-		String sql = String.format("UPDATE `%s` SET `%s` = `%s` + ? WHERE `%s` = ?", TABLE_USERS, USERS_BALANCE, USERS_UUID);
+		String sql = String.format("UPDATE `%s` SET `%s` = `%s` + ? WHERE `%s` = ?", TABLE_USERS, USERS_BALANCE, USERS_BALANCE, USERS_UUID);
 		try (Connection conn = this.hikari.getConnection()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setLong(1, amount);
@@ -458,7 +458,7 @@ public abstract class HikariDB implements AbstractDB {
 	@Override
 	public void takeBalance(@NotNull BungeeOperableUser user, long amount) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?", TABLE_USERS, USERS_BALANCE, USERS_UUID);
+		String sql = String.format("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?", TABLE_USERS, USERS_BALANCE, USERS_BALANCE, USERS_UUID);
 		try (Connection conn = this.hikari.getConnection()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setLong(1, amount);
@@ -500,7 +500,7 @@ public abstract class HikariDB implements AbstractDB {
 	@Override
 	public void setDeniedInTop(@NotNull BungeeOperableUser user, boolean deniedInTop) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?", TABLE_USERS, USERS_INTOP, USERS_UUID);
+		String sql = String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?", TABLE_USERS, USERS_INTOP, USERS_UUID);
 		try (Connection conn = this.hikari.getConnection()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setBoolean(1, deniedInTop);

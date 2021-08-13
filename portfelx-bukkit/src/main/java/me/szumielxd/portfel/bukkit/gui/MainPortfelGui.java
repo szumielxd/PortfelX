@@ -3,7 +3,9 @@ package me.szumielxd.portfel.bukkit.gui;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextDecoration.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -19,11 +21,14 @@ import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.Sets;
 
+import me.szumielxd.portfel.bukkit.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.PortfelBukkit;
 import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
+import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.objects.User;
+import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
 public class MainPortfelGui implements AbstractPortfelGui {
@@ -56,7 +61,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	public @NotNull Component getTitle(User user) {
 		Player player = this.plugin.getServer().getPlayer(user.getUniqueId());
 		Lang lang = player != null ? Lang.get(new BukkitPlayer(this.plugin, player)) : Lang.def();
-		return lang.translateComponent(LangKey.SHOP_TITLE.component(DARK_PURPLE, Sets.newHashSet(BOLD), LangKey.SHOP_CURRENCYFORMAT.component(AQUA, Sets.newHashSet(BOLD), Component.text(user.getBalance()))));
+		return lang.translateComponent(LangKey.SHOP_TITLE.component(DARK_PURPLE, Sets.newHashSet(BOLD), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Sets.newHashSet(BOLD), Component.text(user.getBalance()))));
 	}
 
 	@Override
@@ -80,7 +85,19 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	public void setup(@NotNull Player player, @NotNull Inventory inventory) {
 		ItemStack[] background = new ItemStack[inventory.getSize()];
 		Arrays.fill(background, BACKGROUND);
-		this.guis.forEach((i, s) -> background[i] = s.getIcon());
+		this.guis.forEach((i, s) -> {
+			ItemStack item = s.getIcon(); {
+				ItemMeta meta = item.getItemMeta();
+				BukkitUtils.setDisplayName(meta, MiscUtils.parseComponent(s.getDisplayName()));
+				List<Component> lore = new ArrayList<>();
+				lore.addAll(s.getDescription().stream().map(MiscUtils::parseComponent).collect(Collectors.toList()));
+				lore.add(Component.empty());
+				lore.add(Component.text("/" + this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME) + " " + s.getName()));
+				BukkitUtils.setLore(meta, lore);
+				item.setItemMeta(meta);
+			}
+			background[i] = item;
+		});
 		inventory.setContents(background);
 	}
 

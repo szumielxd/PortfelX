@@ -62,11 +62,11 @@ public class UserInfoCommand extends SimpleCommand {
 		return LangKey.COMMAND_USER_INFO_DESCRIPTION;
 	}
 	
-	private Component prepareInteractive(Component comp, String[] label, String text) {
+	private @NotNull Component prepareInteractive(@NotNull Component comp, @NotNull String[] label, @NotNull String text) {
 		return comp.hoverEvent(Component.text(text, AQUA)
 				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_SUGGEST.component(GRAY))
 				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_INSERT.component(GRAY)))
-				.clickEvent(ClickEvent.suggestCommand("/" + String.join(" ", Arrays.copyOf(label, 2)) + "" + text)).insertion(text);
+				.clickEvent(ClickEvent.suggestCommand("/" + String.join(" ", Arrays.copyOf(label, 2)) + " " + text)).insertion(text);
 	}
 
 }

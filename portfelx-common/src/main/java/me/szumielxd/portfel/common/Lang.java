@@ -113,13 +113,13 @@ public class Lang {
 		COMMAND_USER_ECO_DESCRIPTION("command.user.eco.description", "Manage user's economy."),
 		//
 		COMMAND_USER_ECO_SET_DESCRIPTION("command.user.eco.set.description", "Set user's balance to given amount."),
-		COMMAND_USER_ECO_SET_SUCCESS("command.user.eco.set.success", "Set {0}'s balance to {1}$."),
+		COMMAND_USER_ECO_SET_SUCCESS("command.user.eco.set.success", "Set {1} as {0}'s balance."),
 		//
 		COMMAND_USER_ECO_GIVE_DESCRIPTION("command.user.eco.give.description", "Add given amount to user's balance."),
-		COMMAND_USER_ECO_GIVE_SUCCESS("command.user.eco.give.success", "Add {1}$ to {0}'s balance."),
+		COMMAND_USER_ECO_GIVE_SUCCESS("command.user.eco.give.success", "Add {1} to {0}'s balance."),
 		//
 		COMMAND_USER_ECO_TAKE_DESCRIPTION("command.user.eco.take.description", "Remove given amount from user's balance."),
-		COMMAND_USER_ECO_TAKE_SUCCESS("command.user.eco.take.success", "Remove {1}$ from {0}'s balance."),
+		COMMAND_USER_ECO_TAKE_SUCCESS("command.user.eco.take.success", "Remove {1} from {0}'s balance."),
 		COMMAND_USER_ECO_TAKE_SMALLER("command.user.eco.take.smaller", "User balance cannot be smaller than 0."),
 		//
 		COMMAND_USER_TOP_DESCRIPTION("command.user.top.description", "Manage user's top position."),
@@ -144,7 +144,6 @@ public class Lang {
 		COMMAND_MAIN_RUNNING("command.main.running", "Running {0}."),
 		COMMAND_MAIN_USE("command.main.use", "Use {0} to view available commands."),
 		
-		SHOP_CURRENCYFORMAT("shop.currrency-format", "${0}"),
 		SHOP_TITLE("shop.title", "Wallet ({0})"),
 		SHOP_ORDER_PRICE("shop.order.price", "Price: {0}"),
 		SHOP_ORDER_DESCRIPTION("shop.order.description", "Description:"),
@@ -157,12 +156,20 @@ public class Lang {
 		SHOP_CONFIRM_NO_TITLE("shop.confirm.no.title", "No"),
 		SHOP_CONFIRM_NO_DESCRIPTION("shop.confirm.no.description", "Wait! I must pay for it!?"),
 		
+		LOG_PREFIX("log.prefix", "LOG"),
+		LOG_SUGGEST("log.suggest", "Click to insert displayname on chat"),
+		LOG_INSERT("log.insert", "Click+Shift to insert unique ID on chat"),
+		LOG_VALUE_ACTION("log.value.action", "Action: {0}"),
+		LOG_VALUE_OLD_BALANCE("log.value.old-balance", "Old balance: {0}"),
+		LOG_VALUE_DATE("log.value.date", "Date: {0}"),
+		
 		MAIN_VALUENAME_DESCRIPTION("main.value-name.description", "Description:"),
 		MAIN_VALUENAME_ALIASES("main.value-name.aliases", "Aliases:"),
 		MAIN_VALUENAME_ENABLED("main.value-name.enabled", "Enabled:"),
 		MAIN_VALUENAME_AUTHORS("main.value-name.aliases", "Authors:"),
 		MAIN_VALUENAME_PERMISSION("main.value-name.permission", "Permission:"),
 		
+		MAIN_CURRENCY_FORMAT("main.currrency.format", "${0}"),
 		MAIN_VALUE_TRUE("main.value.true", "true"),
 		MAIN_VALUE_FALSE("main.value.false", "false"),
 		MAIN_VALUE_YES("main.value.yes", "yes"),

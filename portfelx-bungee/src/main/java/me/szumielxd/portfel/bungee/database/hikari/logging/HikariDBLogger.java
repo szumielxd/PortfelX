@@ -1,10 +1,13 @@
 package me.szumielxd.portfel.bungee.database.hikari.logging;
 
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -15,10 +18,15 @@ import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger;
 import me.szumielxd.portfel.bungee.database.hikari.HikariDB;
+import me.szumielxd.portfel.bungee.objects.BungeePlayer;
 import me.szumielxd.portfel.common.Config;
+import me.szumielxd.portfel.common.Portfel;
+import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.objects.ActionExecutor;
 import me.szumielxd.portfel.common.objects.ExecutedTask;
 import me.szumielxd.portfel.common.objects.User;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 
 public class HikariDBLogger implements AbstractDBLogger {
 	
@@ -147,14 +155,14 @@ public class HikariDBLogger implements AbstractDBLogger {
 		this.validate();
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
-		String sql = String.format("INSERT INTO `%s` () VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		String sql = String.format("INSERT INTO `%s` (%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
 				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
 		try (Connection conn = ((HikariDB)db).connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
-				stm.setString(1, target.getName());
-				stm.setString(2, target.getUniqueId().toString());
+				stm.setString(1, target.getUniqueId().toString());
+				stm.setString(2, target.getName());
 				stm.setString(3, server);
 				stm.setString(4, executor.getDisplayName());
 				stm.setString(5, executor.getUniqueId().toString());
@@ -184,14 +192,14 @@ public class HikariDBLogger implements AbstractDBLogger {
 		this.validate();
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
-		String sql = String.format("INSERT INTO `%s` () VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		String sql = String.format("INSERT INTO `%s` (%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
 				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
 		try (Connection conn = ((HikariDB)db).connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
-				stm.setString(1, target.getName());
-				stm.setString(2, target.getUniqueId().toString());
+				stm.setString(1, target.getUniqueId().toString());
+				stm.setString(2, target.getName());
 				stm.setString(3, server);
 				stm.setString(4, executor.getDisplayName());
 				stm.setString(5, executor.getUniqueId().toString());
@@ -221,14 +229,14 @@ public class HikariDBLogger implements AbstractDBLogger {
 		this.validate();
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
-		String sql = String.format("INSERT INTO `%s` () VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		String sql = String.format("INSERT INTO `%s` (%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
 				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
 		try (Connection conn = ((HikariDB)db).connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
-				stm.setString(1, target.getName());
-				stm.setString(2, target.getUniqueId().toString());
+				stm.setString(1, target.getUniqueId().toString());
+				stm.setString(2, target.getName());
 				stm.setString(3, server);
 				stm.setString(4, executor.getDisplayName());
 				stm.setString(5, executor.getUniqueId().toString());
@@ -257,6 +265,29 @@ public class HikariDBLogger implements AbstractDBLogger {
 	@Override
 	public void handleIncomingLog(@NotNull UUID targetId, @NotNull String targetName, @NotNull ActionExecutor executor, @NotNull String server, @NotNull Date time, @NotNull String orderName, @NotNull ActionType type, long value, long balance) {
 		this.validate();
+		Component prefix = Portfel.PREFIX.append(LangKey.LOG_PREFIX.component(DARK_AQUA)).append(Component.text(" > ", GRAY));
+		Component exec = this.prepareInteractive(Component.text(executor.getDisplayName() + "@" + server, GREEN), executor.getDisplayName(), executor.getUniqueId());
+		Component target = this.prepareInteractive(Component.text(targetName, AQUA), targetName, targetId);
+		Component valComp = Component.text(type.getFormattedPrefix()+value, type.getColor()).hoverEvent(Component.text(type.getFormattedPrefix()+value, type.getColor())
+				.append(Component.newline()).append(LangKey.LOG_VALUE_ACTION.component(GRAY, Component.text(type.name(), AQUA))).append(Component.newline())
+				.append(LangKey.LOG_VALUE_OLD_BALANCE.component(GRAY, Component.text(balance, AQUA))));
+		Component line1 = prefix.append(Component.text("(", DARK_GRAY)).append(exec).append(Component.text(") [", DARK_GRAY)).append(target).append(Component.text("]", DARK_GRAY));
+		Component line2 = prefix.append(Component.text(orderName, WHITE).hoverEvent(Component.text(orderName, WHITE).append(Component.newline())
+				.append(LangKey.LOG_VALUE_DATE.component(GRAY, Component.text(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(time.getTime())), AQUA))))).append(Component.space()).append(valComp);
+		this.plugin.getProxy().getPlayers().forEach(p -> {
+			if (p.isConnected() && p.hasPermission("portfel.verbose")) {
+				BungeePlayer player = new BungeePlayer(this.plugin, p);
+				player.sendTranslated(line1);
+				player.sendTranslated(line2);
+			}
+		});
+	}
+	
+	private @NotNull Component prepareInteractive(@NotNull Component comp, @NotNull String name, @NotNull UUID uuid) {
+		return comp.hoverEvent(Component.text(uuid.toString(), AQUA)
+				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.LOG_SUGGEST.component(GRAY))
+				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.LOG_INSERT.component(GRAY)))
+				.clickEvent(ClickEvent.suggestCommand(name)).insertion(uuid.toString());
 	}
 	
 
