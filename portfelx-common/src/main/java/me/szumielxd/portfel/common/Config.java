@@ -70,6 +70,7 @@ public class Config {
 		this.yaml.addDefaults(Stream.of(values).collect(Collectors.toMap(AbstractKey::getPath, AbstractKey::getDefault)));
 		try {
 			this.yaml.createOrLoadWithComments();
+			this.yaml.save();
 		} catch (IOException | InvalidConfigurationException e) {
 			e.printStackTrace();
 		}

@@ -70,7 +70,12 @@ public class MysqlDB extends HikariDB {
 	 */
 	@Override
 	public void setupDatabase(@NotNull HikariConfig config, @NotNull String address, int port, @NotNull String database, @NotNull String user, @NotNull String password) {
-		config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			config.setDriverClassName("com.mysql.cj.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			config.setDriverClassName("com.mysql.jdbc.Driver");
+		}
 		config.setJdbcUrl("jdbc:mysql://" + address + ":" + port + "/" + database);
 		config.setUsername(user);
 		config.setPassword(password);

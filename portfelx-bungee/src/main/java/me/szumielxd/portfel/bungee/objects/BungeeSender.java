@@ -76,7 +76,8 @@ public class BungeeSender implements CommonSender {
 	 * @param message message to translate and send
 	 */
 	public void sendTranslated(@NotNull Component message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(message));
+		Component comp = Lang.get(this).translateComponent(message);
+		this.plugin.adventure().sender(this.sender).sendMessage(comp);
 	}
 	
 	/**

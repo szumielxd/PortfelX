@@ -111,7 +111,7 @@ public abstract class HikariDB implements AbstractDB {
 	/**
 	 * Setup database connection properties.
 	 */
-	public void setup(@NotNull PortfelBungee plugin) {
+	public void setup() {
 		HikariConfig config = new HikariConfig();
 		config.setPoolName("portfel-hikari");
 		final String[] host = DB_HOST.split(":");
@@ -514,7 +514,7 @@ public abstract class HikariDB implements AbstractDB {
 	 * Check if connection can be obtained, otherwise creates new one.
 	 */
 	public void checkConnection() {
-		if (this.isConnected()) this.setup(this.plugin);
+		if (!this.isConnected()) this.setup();
 	}
 	
 	/**
@@ -525,17 +525,17 @@ public abstract class HikariDB implements AbstractDB {
 	private void setupTables() throws SQLException {
 		this.checkConnection();
 		String usersTable = String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(16) NOT NULL,"
-				+ "`%s` UNSIGNED INT NOT NULL DEFAULT '0' , `%s` BOOLEAN NOT NULL DEFAULT FALSE,"
-				+ "PRIMARY KEY (`%s`)) ENGINE = InnoDB;",
+				+ "`%s` INT UNSIGNED NOT NULL DEFAULT '0', `%s` BOOLEAN NOT NULL DEFAULT FALSE,"
+				+ "PRIMARY KEY (`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
 				TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_INTOP, USERS_UUID);
-		String logsTable = String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT, `%s` VARCHAR(36) NOT NULL,"
+		String logsTable = String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT, `%s` VARCHAR(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,"
 				+ "`%s` VARCHAR(16) NOT NULL, `%s` VARCHAR(24) NOT NULL, `%s` VARCHAR(32) NOT NULL, `%s` VARCHAR(36) NOT NULL,"
 				+ "`%s` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(8) NOT NULL,"
-				+ "`%s` INT UNSIGNED NOT NULL, `%s` INT UNSIGNED NOT NULL, PRIMARY KEY (`%s`)),"
-				+ "FOREIGN KEY (`%s`) REFERENCES `%s`(`%s`) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
+				+ "`%s` INT UNSIGNED NOT NULL, `%s` INT UNSIGNED NOT NULL, PRIMARY KEY (`%s`),"
+				+ "FOREIGN KEY (`%s`) REFERENCES `%s`(`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
 				TABLE_LOGS, LOGS_ID, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER, LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_TIME, LOGS_ORDERNAME,
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE, LOGS_ID, LOGS_UUID, TABLE_USERS, USERS_UUID);
-		
+		this.plugin.getLogger().info(logsTable);
 		try (Connection conn = this.hikari.getConnection()) {
 			try (Statement stm = conn.createStatement()) {
 				stm.addBatch(logsTable);

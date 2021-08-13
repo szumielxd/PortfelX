@@ -1,5 +1,8 @@
 package me.szumielxd.portfel.common.commands;
 
+import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.TextDecoration.*;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -15,8 +18,6 @@ import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-import net.kyori.adventure.text.format.TextDecoration;
 
 public abstract class ParentCommand extends SimpleCommand {
 
@@ -44,14 +45,16 @@ public abstract class ParentCommand extends SimpleCommand {
 		final List<CmdArg> cmdArgs = this.getArgs();
 		int offset = 0;
 		Object[] newParsedArgs = new Object[0];
-		for (CmdArg arg : cmdArgs) {
-			Object obj = arg.parseArg(args[offset]);
-			if (obj == null && !arg.isOptional()) {
-				Component comp = Portfel.PREFIX.append(arg.getArgError(Component.text(args[offset], DARK_RED)));
-				sender.sendTranslated(comp);
-				return;
+		if (args.length > offset) {
+			for (CmdArg arg : cmdArgs) {
+				Object obj = arg.parseArg(args[offset]);
+				if (obj == null && !arg.isOptional()) {
+					Component comp = Portfel.PREFIX.append(arg.getArgError(Component.text(args[offset], DARK_RED)));
+					sender.sendTranslated(comp);
+					return;
+				}
+				newParsedArgs = MiscUtils.mergeArrays(newParsedArgs, obj);
 			}
-			newParsedArgs = MiscUtils.mergeArrays(newParsedArgs, obj);
 		}
 		if (args.length > offset) {
 			SimpleCommand cmd = this.childrens.get(args[offset].toLowerCase());
@@ -89,13 +92,13 @@ public abstract class ParentCommand extends SimpleCommand {
 		}
 		Lang lang = Lang.get(sender);
 		Component comp = Portfel.PREFIX.append(LangKey.COMMAND_SUBCOMMANDS_TITLE
-				.component(LIGHT_PURPLE,Component.text(args[offset], LIGHT_PURPLE)))
+				.component(LIGHT_PURPLE,Component.text(label[label.length-1], LIGHT_PURPLE)))
 				.append(Component.text(" (/", GRAY).children(MiscUtils.join(" ", fullLabel).children()).append(Component.text("...)")));
 		sender.sendTranslated(comp);
-		Component linePrefix = Component.text("> ", LIGHT_PURPLE, TextDecoration.BOLD);
+		Component linePrefix = Component.empty().append(Component.text("> ", LIGHT_PURPLE, BOLD));
 		this.getChildrens().stream().sorted((a,b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName())).forEachOrdered(cmd -> {
 			if (!cmd.hasPermission(sender) || !cmd.getAccess().canAccess(sender)) return;
-			Component line = linePrefix.append(Component.text(cmd.getName(), AQUA)).append(Component.text(" - ", DARK_PURPLE))
+			Component line = linePrefix.append(Component.text(cmd.getName(), AQUA)).append(Component.text(cmd.getArgs().isEmpty()? "" : " - ", DARK_PURPLE))
 					.append(MiscUtils.join(" ", cmd.getArgs().stream().map(MiscUtils::argToComponent).toArray(Component[]::new)));
 			String cmdUsage = "/" + String.join(" ", suggestCmd) + " " + cmd.getName() + String.join(" ", cmd.getArgs().stream()
 					.map(arg -> MiscUtils.argToCleanText(lang, arg)).toArray(String[]::new));

@@ -7,7 +7,6 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
 import me.szumielxd.portfel.common.objects.User;
 
@@ -24,7 +23,7 @@ public interface AbstractDB {
 	/**
 	 * Setup database connection properties.
 	 */
-	public void setup(@NotNull PortfelBungee plugin);
+	public void setup();
 	
 	/**
 	 * Get database connection.

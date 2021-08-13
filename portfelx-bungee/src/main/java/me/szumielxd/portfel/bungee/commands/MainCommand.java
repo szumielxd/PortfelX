@@ -52,7 +52,7 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 
 	@Override
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		if (args.length == 0) args = new String[] { this.help };
+		if (args.length == 0) args = new String[] { "" };
 		SimpleCommand cmd = this.childrens.get(args[0].toLowerCase());
 		if (cmd == null) cmd = this.childrens.get(this.help);
 		if (!cmd.hasPermission(sender)) {

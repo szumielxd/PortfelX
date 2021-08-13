@@ -7,6 +7,7 @@ import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
 import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 
+import java.util.Arrays;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +31,8 @@ public class HelpCommand extends SimpleCommand {
 	@Override
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		
-		String helpCmd = "/" + String.join(" ", label) + " help";
+		String[] shortLabel = Arrays.copyOf(label, label.length-1);
+		String helpCmd = "/" + String.join(" ", shortLabel) + " help";
 		PortfelBungee pl = (PortfelBungee) this.getPlugin();
 		String pluginVersion = pl.getDescription().getName() + " " + pl.getDescription().getVersion();
 		Component running = Portfel.PREFIX.append(LangKey.COMMAND_MAIN_RUNNING.component(DARK_PURPLE, Component.text(pluginVersion, LIGHT_PURPLE)));
@@ -48,19 +50,18 @@ public class HelpCommand extends SimpleCommand {
 				.append(Component.space())
 				.append(Component.text(pl.getDescription().getAuthor(), GRAY));
 		sender.sendTranslated(running.hoverEvent(runningHover));
-		
-		if (args.length == 0) {
-			Component use = Portfel.PREFIX.append(LangKey.COMMAND_MAIN_USE.component(DARK_AQUA, MiscUtils.buildCommandUsage(Component.text(helpCmd, AQUA), helpCmd, this)));
-			sender.sendTranslated(use);
-		} else {
+		if (!label[shortLabel.length].equals("")) {
 			MainCommand parent = (MainCommand) this.getParent();
 			parent.getChildrens().stream().sorted((a,b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName())).forEachOrdered(cmd -> {
 				Lang lang = Lang.get(sender);
-				String strCmd = "/" + String.join(" ", label) + cmd.getName();
+				String strCmd = "/" + String.join(" ", shortLabel) + " " + cmd.getName();
 				if (!cmd.getArgs().isEmpty()) strCmd += " " + String.join(" ", cmd.getArgs().stream().map(arg -> MiscUtils.argToCleanText(lang, arg)).toArray(String[]::new));
 				Component line = Component.text("> ", LIGHT_PURPLE).append(Component.text(strCmd, AQUA));
 				sender.sendTranslated(MiscUtils.buildCommandUsage(line, strCmd, cmd));
 			});
+		} else {
+			Component use = Portfel.PREFIX.append(LangKey.COMMAND_MAIN_USE.component(DARK_AQUA, MiscUtils.buildCommandUsage(Component.text(helpCmd, AQUA), helpCmd, this)));
+			sender.sendTranslated(use);
 		}
 	}
 

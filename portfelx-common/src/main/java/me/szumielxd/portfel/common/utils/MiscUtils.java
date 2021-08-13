@@ -67,7 +67,7 @@ public class MiscUtils {
 	 * @return copy of array containing all merged elements
 	 */
 	public static <T> @NotNull T[] mergeArrays(@NotNull T[] array, @Nullable T toAppend) {
-		return mergeArrays(array, Arrays.asList(toAppend).toArray(array));
+		return mergeArrays(array, Arrays.asList(toAppend).toArray(array.clone()));
 	}
 	
 	/**
@@ -152,7 +152,7 @@ public class MiscUtils {
 		List<Component> childs = new ArrayList<>();
 		if (!elements.isEmpty()) {
 			elements.forEach(e -> childs.addAll(Arrays.asList(delimer, e)));
-			elements.remove(0);
+			childs.remove(0);
 		}
 		return comp.children(childs);
 	}

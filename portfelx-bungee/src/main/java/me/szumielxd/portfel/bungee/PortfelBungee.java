@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.PortfelProvider;
+import me.szumielxd.portfel.bungee.commands.CommonArgs;
 import me.szumielxd.portfel.bungee.commands.MainCommand;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger;
@@ -53,6 +54,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 	@Override
 	public void onEnable() {
 		PortfelProvider.register(this);
+		CommonArgs.init(this);
 		this.setupProxyId();
 		this.adventure = BungeeAudiences.create(this);
 		this.taskManager = new BungeeTaskManager(this);
@@ -63,6 +65,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 		String dbType = this.getConfiguration().getString(BungeeConfigKey.DATABASE_TYPE).toLowerCase();
 		if ("mariadb".equals(dbType)) this.database = new MariaDB(this);
 		else this.database = new MysqlDB(this);
+		this.database.setup();
 		
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new BungeeUserManager(this).init();

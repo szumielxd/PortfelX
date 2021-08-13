@@ -55,42 +55,47 @@ public class OrdersManager {
 		defaultVip.set("broadcast", Arrays.asList("&5Surprise! %player% bought VIP for $1 days!", "&bYou can do so by checking out shop: www.example.com!"));
 		defaultVip.set("command", Arrays.asList("lpb user %player% parent addtemp vip $1d!"));
 		yaml.addDefaults(defaults);
-		yaml.setComment(defaultNothing.getCurrentPath(), 
-				  "This is the simplest example of creating new global order.\n"
-				+ "This global order will be excuted if pending order's name\n"
-				+ "will match given pattern and orign server will have\n"
-				+ "access to this global order. To give access to this global order\n"
-				+ "just execute command `/dpb system server <serverName> grant <orderName>`.\n"
-				+ "Name of order is name of section, so in this case it will be `nothingOrder`");
-		yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-				"This is the only required value. Remember that this is REGEX pattern,\n"
-				+ "so some characters are reserved for other purpose.");
-		yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-				"This is list of messages to broadcast when order will be executed.\n"
-				+ "You can use (also in message and command) two placeholders: %player% for player's name\n"
-				+ "and %playerId% for player's unique ID.");
-		yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-				"This is list of messages to send to player when order will be executed.\n"
-				+ "You can use (also in broadcast) two different formats of mesages: plain with `&` character,\n"
-				+ "or modern json format with support of hover and click events.");
-		yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-				"This is list of commands to execute by console when order will be executed.\n"
-				+ "Text formatting is not supported");
-		yaml.setComment(defaultVip.getCurrentPath(), 
-				"This is extended example of global order.\n"
-				+ "This global order does not have constant text as pattern,\n"
-				+ "so it will match more than one diffrent pending order names.");
-		yaml.setComment(defaultVip.getCurrentPath() + ".pattern", 
-				"This pattern is more advanced than above, it contains special elements.\n"
-				+ "For example pattern below will match string `vip-10d`,\n"
-				+ "but ignore `vip-0d`, `vip`, `kebab` and lots of others.");
-		yaml.setComment(defaultVip.getCurrentPath() + ".command", 
-				"Another benefit of using advanced patterns is\n"
-				+ "ability to use specified matched sections\n"
-				+ "(between parentheses, ex: '(a*)') as replacements.\n"
-				+ "For instance `$1` will be replaced with matcher section with number 1");
 		try {
-			yaml.createOrLoadWithComments();
+			if (yaml.exists()) {
+				yaml.load();
+			} else {
+				yaml.createNewFile(false);
+				yaml.setComment(defaultNothing.getCurrentPath(), 
+						  "This is the simplest example of creating new global order.\n"
+						+ "This global order will be excuted if pending order's name\n"
+						+ "will match given pattern and orign server will have\n"
+						+ "access to this global order. To give access to this global order\n"
+						+ "just execute command `/dpb system server <serverName> grant <orderName>`.\n"
+						+ "Name of order is name of section, so in this case it will be `nothingOrder`");
+				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
+						"This is the only required value. Remember that this is REGEX pattern,\n"
+						+ "so some characters are reserved for other purpose.");
+				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
+						"This is list of messages to broadcast when order will be executed.\n"
+						+ "You can use (also in message and command) two placeholders: %player% for player's name\n"
+						+ "and %playerId% for player's unique ID.");
+				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
+						"This is list of messages to send to player when order will be executed.\n"
+						+ "You can use (also in broadcast) two different formats of mesages: plain with `&` character,\n"
+						+ "or modern json format with support of hover and click events.");
+				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
+						"This is list of commands to execute by console when order will be executed.\n"
+						+ "Text formatting is not supported");
+				yaml.setComment(defaultVip.getCurrentPath(), 
+						"This is extended example of global order.\n"
+						+ "This global order does not have constant text as pattern,\n"
+						+ "so it will match more than one diffrent pending order names.");
+				yaml.setComment(defaultVip.getCurrentPath() + ".pattern", 
+						"This pattern is more advanced than above, it contains special elements.\n"
+						+ "For example pattern below will match string `vip-10d`,\n"
+						+ "but ignore `vip-0d`, `vip`, `kebab` and lots of others.");
+				yaml.setComment(defaultVip.getCurrentPath() + ".command", 
+						"Another benefit of using advanced patterns is\n"
+						+ "ability to use specified matched sections\n"
+						+ "(between parentheses, ex: '(a*)') as replacements.\n"
+						+ "For instance `$1` will be replaced with matcher section with number 1");
+				yaml.save();
+			}
 		} catch (IOException | InvalidConfigurationException e) {
 			e.printStackTrace();
 		}

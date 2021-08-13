@@ -31,7 +31,7 @@ public class UserParentCommand extends ParentCommand {
 
 	@Override
 	public @NotNull List<CmdArg> getArgs() {
-		return this.getArgs();
+		return this.args;
 	}
 
 	@Override
