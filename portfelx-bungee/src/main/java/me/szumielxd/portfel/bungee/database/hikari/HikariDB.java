@@ -362,19 +362,24 @@ public abstract class HikariDB implements AbstractDB {
 		UUID[] uuids = Stream.of(users).map(User::getUniqueId).toArray(UUID[]::new);
 		this.checkConnection();
 		final String uuidMarks = String.join(", ", Stream.of(uuids).map(s -> "?").toArray(String[]::new));
-		final String sql = String.format("SELECT `pos`, `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `Nick` IN (%s)", USERS_UUID, USERS_UUID, TABLE_USERS, USERS_INTOP, USERS_BALANCE, uuidMarks);
+		final String sql = String.format("SELECT CAST(`pos` as INT), `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `%s` IN (%s)", USERS_UUID, USERS_UUID, TABLE_USERS, USERS_INTOP, USERS_BALANCE, USERS_UUID, uuidMarks);
 		try (Connection conn = this.connect(); PreparedStatement stm = conn.prepareStatement(sql)) {
 			int index = 0;
 			// fill query with UUIDs
 			for (; index < uuids.length; index++) {
-				stm.setString(index, uuids[index].toString());
+				stm.setString(index+1, uuids[index].toString());
 			}
+			this.plugin.getLogger().info(sql.replace("?", uuids[0].toString()));
 			try (ResultSet rs = stm.executeQuery()) {
 				while (rs.next()) {
 					int pos = rs.getInt(1);
 					UUID uuid = UUID.fromString(rs.getString(2));
+					this.plugin.getLogger().warning(String.format("UUID: %s, POS: %s", uuid, pos));
 					for (int i = 0; i < uuids.length; i++) {
-						if (uuids[i] == uuid) arr[i] = pos;
+						this.plugin.getLogger().warning(String.format("Loop #%s: %s == %s %s", i, uuids[i], uuid, (uuids[i].equals(uuid))));
+						if (uuids[i].equals(uuid)) {
+							arr[i] = pos;
+						}
 					}
 				}
 			}
@@ -535,7 +540,6 @@ public abstract class HikariDB implements AbstractDB {
 				+ "FOREIGN KEY (`%s`) REFERENCES `%s`(`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
 				TABLE_LOGS, LOGS_ID, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER, LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_TIME, LOGS_ORDERNAME,
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE, LOGS_ID, LOGS_UUID, TABLE_USERS, USERS_UUID);
-		this.plugin.getLogger().info(logsTable);
 		try (Connection conn = this.hikari.getConnection()) {
 			try (Statement stm = conn.createStatement()) {
 				stm.addBatch(logsTable);

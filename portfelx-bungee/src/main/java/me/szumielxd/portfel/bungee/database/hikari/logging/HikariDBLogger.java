@@ -18,7 +18,7 @@ import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger;
 import me.szumielxd.portfel.bungee.database.hikari.HikariDB;
-import me.szumielxd.portfel.bungee.objects.BungeePlayer;
+import me.szumielxd.portfel.bungee.objects.BungeeSender;
 import me.szumielxd.portfel.common.Config;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.Lang.LangKey;
@@ -276,7 +276,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 				.append(LangKey.LOG_VALUE_DATE.component(GRAY, Component.text(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(time.getTime())), AQUA))))).append(Component.space()).append(valComp);
 		this.plugin.getProxy().getPlayers().forEach(p -> {
 			if (p.isConnected() && p.hasPermission("portfel.verbose")) {
-				BungeePlayer player = new BungeePlayer(this.plugin, p);
+				BungeeSender player = BungeeSender.get(this.plugin, p);
 				player.sendTranslated(line1);
 				player.sendTranslated(line2);
 			}

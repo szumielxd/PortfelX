@@ -165,7 +165,7 @@ public class OrdersManager {
 			if (!match.matches()) return false;
 			Audience all = plugin.adventure().all();
 			Audience player = plugin.adventure().player(user.getUniqueId());
-			CommonSender console = new BungeeSender(plugin, plugin.getProxy().getConsole());
+			CommonSender console = BungeeSender.get(plugin, plugin.getProxy().getConsole());
 			
 			// Broadcast
 			this.broadcast.stream().map(s -> {

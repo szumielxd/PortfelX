@@ -29,7 +29,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	private final ProxiedPlayer player;
 	
 	
-	public BungeePlayer(@NotNull PortfelBungee plugin, @NotNull ProxiedPlayer player) {
+	BungeePlayer(@NotNull PortfelBungee plugin, @NotNull ProxiedPlayer player) {
 		super(plugin, player);
 		this.player = player;
 	}

@@ -77,7 +77,7 @@ public abstract class SimpleCommand implements AbstractCommand {
 		int index = 0;
 		for (int i = 0; i < argList.size(); i++) {
 			CmdArg arg = argList.get(i);
-			if (args.length <= index) return null;
+			if (args.length <= index) break;
 			Object obj = arg.parseArg(args[index]);
 			if (obj != null) {
 				list.add(obj);

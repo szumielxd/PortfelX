@@ -27,7 +27,7 @@ public class UnregisterServerCommand extends SimpleCommand {
 	public final List<CmdArg> args;
 
 	public UnregisterServerCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
-		super(plugin, parent, "registerserver", "createserver");
+		super(plugin, parent, "unregisterserver", "deleteserver");
 		this.args = Arrays.asList(CommonArgs.SERVER);
 	}
 

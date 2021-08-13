@@ -378,7 +378,7 @@ public class AccessManager implements Listener {
 			this.sender = sender;
 			this.task = plugin.getTaskManager().runTaskLater(() -> {
 				this.done();
-				this.sender.sendMessage(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT.component(RED)));
+				this.sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT.component(RED)));
 			}, 1, TimeUnit.SECONDS);
 		}
 		

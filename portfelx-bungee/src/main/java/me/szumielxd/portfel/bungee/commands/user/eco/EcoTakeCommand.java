@@ -19,7 +19,6 @@ import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.objects.User;
-import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
 public class EcoTakeCommand extends SimpleCommand {
@@ -54,8 +53,6 @@ public class EcoTakeCommand extends SimpleCommand {
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_EXECUTION.component(DARK_RED)));
 				e.printStackTrace();
 			}
-		} else {
-			sender.sendTranslated(MiscUtils.extendedCommandUsage(this));
 		}
 	}
 

@@ -11,6 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class BungeeSender implements CommonSender {
 	
@@ -19,7 +20,7 @@ public class BungeeSender implements CommonSender {
 	private final CommandSender sender;
 	
 	
-	public BungeeSender(@NotNull PortfelBungee plugin, @NotNull CommandSender sender) {
+	protected BungeeSender(@NotNull PortfelBungee plugin, @NotNull CommandSender sender) {
 		this.plugin = plugin;
 		this.sender = sender;
 	}
@@ -115,6 +116,17 @@ public class BungeeSender implements CommonSender {
 	 */
 	public void executeProxyCommand(@NotNull String command) {
 		this.plugin.getProxy().getPluginManager().dispatchCommand(this.sender, command);
+	}
+	
+	
+	/**
+	 * Creates CommonSender or CommonPlayer depending on given CommandSender
+	 * 
+	 * @param sender sender to wrap
+	 * @return CommonSender or its subclass
+	 */
+	public static BungeeSender get(PortfelBungee plugin, CommandSender sender) {
+		return sender instanceof ProxiedPlayer ? new BungeePlayer(plugin, (ProxiedPlayer)sender) : new BungeeSender(plugin, sender);
 	}
 	
 
