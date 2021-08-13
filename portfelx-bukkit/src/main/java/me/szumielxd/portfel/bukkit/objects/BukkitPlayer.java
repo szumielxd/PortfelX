@@ -33,7 +33,7 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	private final Player player;
 	
 	
-	public BukkitPlayer(@NotNull PortfelBukkit plugin, @NotNull Player player) {
+	BukkitPlayer(@NotNull PortfelBukkit plugin, @NotNull Player player) {
 		super(plugin, player);
 		this.player = player;
 	}
