@@ -369,14 +369,11 @@ public abstract class HikariDB implements AbstractDB {
 			for (; index < uuids.length; index++) {
 				stm.setString(index+1, uuids[index].toString());
 			}
-			this.plugin.getLogger().info(sql.replace("?", uuids[0].toString()));
 			try (ResultSet rs = stm.executeQuery()) {
 				while (rs.next()) {
 					int pos = rs.getInt(1);
 					UUID uuid = UUID.fromString(rs.getString(2));
-					this.plugin.getLogger().warning(String.format("UUID: %s, POS: %s", uuid, pos));
 					for (int i = 0; i < uuids.length; i++) {
-						this.plugin.getLogger().warning(String.format("Loop #%s: %s == %s %s", i, uuids[i], uuid, (uuids[i].equals(uuid))));
 						if (uuids[i].equals(uuid)) {
 							arr[i] = pos;
 						}
