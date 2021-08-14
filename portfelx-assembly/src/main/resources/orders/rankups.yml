@@ -50,7 +50,7 @@ orders:
         # Normally displayed icon
         icon: IRON_ORE
         # Icon displayed when player has permission given in `done-permission` field.
-        icon-bought: *IRON_BLOCK
+        icon-bought: '*IRON_BLOCK'
         # Price of this order.
         # When categor type is UPGRADE final price if built by iterating all orders
         # with lower level and adding theirs price to this basic-price if user 
@@ -76,7 +76,7 @@ orders:
         name: '&eGold'
         description: 'To check priviliges try /gold'
         icon: GOLD_ORE
-        icon-bought: *GOLD_BLOCK
+        icon-bought: '*GOLD_BLOCK'
         price: 20
         done-permission: 'group.gold'
         broadcast: '&5Surprise! %player% bought Gold Rank!'
@@ -88,7 +88,7 @@ orders:
         name: '&bDiament'
         description: 'To check priviliges try /diament'
         icon: DIAMOND_ORE
-        icon-bought: *DIAMOND_BLOCK
+        icon-bought: '*DIAMOND_BLOCK'
         price: 40
         done-permission: 'group.diamond'
         broadcast: '&5Surprise! %player% bought Diamond Rank!'
@@ -100,7 +100,7 @@ orders:
         name: '&aEmerald'
         description: 'To check priviliges try /emerald'
         icon: EMERALD_ORE
-        icon-bought: *EMERALD_BLOCK
+        icon-bought: '*EMERALD_BLOCK'
         price: 70
         done-permission: 'group.emerald'
         broadcast: '&5Surprise! %player% bought Emerald Rank!'
