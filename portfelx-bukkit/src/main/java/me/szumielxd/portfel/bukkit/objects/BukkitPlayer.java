@@ -1,5 +1,6 @@
 package me.szumielxd.portfel.bukkit.objects;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.util.Arrays;
@@ -15,7 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import me.clip.placeholderapi.libs.kyori.adventure.translation.Translator;
 import me.szumielxd.portfel.bukkit.PortfelBukkit;
 import me.szumielxd.portfel.common.objects.CommonPlayer;
 import net.kyori.adventure.audience.Audience;
@@ -26,6 +26,7 @@ import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
+import net.kyori.adventure.translation.Translator;
 
 public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	
@@ -110,7 +111,14 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 			try {
 				locale = (String) this.player.spigot().getClass().getMethod("getLocale").invoke(this.player.spigot());
 			} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | SecurityException ex) {
-				throw new RuntimeException("Unsupported minecraft version. Missing method: getLocale", ex);
+				try {
+					Object handle = this.player.getClass().getMethod("getHandle").invoke(this.player);
+					Field f = handle.getClass().getField("locale");
+					f.setAccessible(true);
+					locale = (String) f.get(handle);
+				} catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | SecurityException | NoSuchFieldException exc) {
+					throw new RuntimeException("Unsupported minecraft version. Missing method: getLocale", exc);
+				}
 			}
 		}
 		return Translator.parseLocale(locale);

@@ -47,6 +47,7 @@ public class ChannelManager {
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_SETUP);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_USERS);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "bungeecord:main");
 		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, "bungeecord:main", this::onSetupValidator);
 		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_SETUP, this::onSetupChannel);
 		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
@@ -111,7 +112,7 @@ public class ChannelManager {
 					e.printStackTrace();
 				}
 				this.waitingForValidation.remove(operationId);
-				if (res == true) this.sendSetupChannel(channel, player, operationId, proxyId, serverId);
+				if (Boolean.TRUE == res) this.sendSetupChannel(channel, player, operationId, proxyId, serverId);
 			});
 			
 		}

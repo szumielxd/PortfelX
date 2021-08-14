@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.event.HandlerList;
@@ -16,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.bukkit.commands.WalletCommand;
+import me.szumielxd.portfel.bukkit.hooks.PAPIHandler;
 import me.szumielxd.portfel.bukkit.managers.BukkitTaskManager;
 import me.szumielxd.portfel.bukkit.managers.BukkitUserManager;
 import me.szumielxd.portfel.bukkit.managers.ChannelManager;
@@ -42,6 +44,8 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 	private OrdersManager ordersManager;
 	private UserManager userManager;
 	
+	private PAPIHandler papiHandler;
+	
 	
 	@Override
 	public void onEnable() {
@@ -62,7 +66,11 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 			walletCmd.setExecutor(new WalletCommand(this));
 			walletCmd.setPermission("portfel.gui");
 			walletCmd.setUsage("/<command>");
-			walletCmd.register(commands);
+			commands.register(this.getName(), walletCmd);
+			
+			if(Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+				this.papiHandler = new PAPIHandler(this);
+			}
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
@@ -88,6 +96,8 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 			e.printStackTrace();
 		}
 		HandlerList.unregisterAll(this);
+		
+		if(this.papiHandler != null) this.papiHandler.oldUnregister();
 	}
 
 	@Override

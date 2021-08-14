@@ -74,6 +74,9 @@ public class PortfelBungee extends Plugin implements Portfel {
 		this.getProxy().getPluginManager().registerCommand(this, this.command);
 		this.getProxy().getPluginManager().registerListener(this, new UserListener(this));
 		this.getProxy().getPluginManager().registerListener(this, new ChannelListener(this));
+		this.getProxy().registerChannel(CHANNEL_SETUP);
+		this.getProxy().registerChannel(CHANNEL_USERS);
+		this.getProxy().registerChannel(CHANNEL_TRANSACTIONS);
 	}
 	
 	
@@ -93,6 +96,9 @@ public class PortfelBungee extends Plugin implements Portfel {
 		}
 		this.getProxy().getPluginManager().unregisterCommands(this);
 		this.getProxy().getPluginManager().unregisterListeners(this);
+		this.getProxy().unregisterChannel(CHANNEL_SETUP);
+		this.getProxy().unregisterChannel(CHANNEL_USERS);
+		this.getProxy().unregisterChannel(CHANNEL_TRANSACTIONS);
 	}
 	
 	
