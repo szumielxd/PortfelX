@@ -21,7 +21,7 @@ public class BukkitSender implements CommonSender {
 	private final CommandSender sender;
 	
 	
-	public BukkitSender(@NotNull PortfelBukkit plugin, @NotNull CommandSender sender) {
+	BukkitSender(@NotNull PortfelBukkit plugin, @NotNull CommandSender sender) {
 		this.plugin = plugin;
 		this.sender = sender;
 	}
@@ -118,6 +118,17 @@ public class BukkitSender implements CommonSender {
 	 */
 	public void executeProxyCommand(@NotNull String command) {
 		this.plugin.getServer().dispatchCommand(this.sender, command);
+	}
+	
+	
+	/**
+	 * Creates CommonSender or CommonPlayer depending on given CommandSender
+	 * 
+	 * @param sender sender to wrap
+	 * @return CommonSender or its subclass
+	 */
+	public static BukkitSender get(PortfelBukkit plugin, CommandSender sender) {
+		return sender instanceof Player ? new BukkitPlayer(plugin, (Player)sender) : new BukkitSender(plugin, sender);
 	}
 	
 

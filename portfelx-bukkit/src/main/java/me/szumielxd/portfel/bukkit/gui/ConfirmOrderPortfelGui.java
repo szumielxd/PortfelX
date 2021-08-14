@@ -46,7 +46,7 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 	@Override
 	public @NotNull Component getTitle(User user) {
 		Player player = this.plugin.getServer().getPlayer(user.getUniqueId());
-		return (player != null ? Lang.get(new BukkitPlayer(this.plugin, player)) : Lang.def()).translateComponent(LangKey.SHOP_CONFIRM_TITLE.component(AQUA));
+		return (player != null ? Lang.get(BukkitPlayer.get(this.plugin, player)) : Lang.def()).translateComponent(LangKey.SHOP_CONFIRM_TITLE.component(AQUA));
 	}
 
 
@@ -66,7 +66,7 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 	@Override
 	public void setup(@NotNull Player player, @NotNull Inventory inventory) {
 		inventory.clear();
-		Lang lang = player != null ? Lang.get(new BukkitPlayer(this.plugin, player)) : Lang.def();
+		Lang lang = player != null ? Lang.get(BukkitPlayer.get(this.plugin, player)) : Lang.def();
 		
 		ItemStack reject = REJECT.clone(); {
 			ItemMeta meta = reject.getItemMeta();

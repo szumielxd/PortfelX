@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bukkit.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.PortfelBukkit;
-import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
+import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.objects.OrderData;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.bukkit.utils.PlaceholderUtils;
@@ -127,7 +127,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	public void setup(@NotNull Player player, @NotNull Inventory inventory) {
 		inventory.clear();
 		List<OrderData> orderList = orders.entrySet().stream().map(Entry::getValue).sorted((a,b) -> Integer.compare(a.getLevel(), b.getLevel())).collect(Collectors.toList());
-		Lang lang = Lang.get(new BukkitPlayer(this.plugin, player));
+		Lang lang = Lang.get(BukkitSender.get(this.plugin, player));
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user == null) return;
 		if (this.type.equals(ShopType.NORMAL)) {

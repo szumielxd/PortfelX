@@ -45,7 +45,7 @@ public class WalletCommand implements TabExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (!(sender instanceof Player)) {
-			new BukkitSender(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_PLAYERS_ONLY.component(RED)));
+			BukkitSender.get(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_PLAYERS_ONLY.component(RED)));
 			return true;
 		}
 		AbstractPortfelGui gui = null;
@@ -56,7 +56,7 @@ public class WalletCommand implements TabExecutor {
 		Player player = (Player) sender;
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user == null) {
-			new BukkitSender(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(RED)));
+			BukkitSender.get(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(RED)));
 			return true;
 		}
 		PortfelGuiHolder holder = new PortfelGuiHolder(this.plugin, gui, user);

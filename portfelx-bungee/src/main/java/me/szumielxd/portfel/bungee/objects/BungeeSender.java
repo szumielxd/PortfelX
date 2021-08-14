@@ -20,7 +20,7 @@ public class BungeeSender implements CommonSender {
 	private final CommandSender sender;
 	
 	
-	protected BungeeSender(@NotNull PortfelBungee plugin, @NotNull CommandSender sender) {
+	BungeeSender(@NotNull PortfelBungee plugin, @NotNull CommandSender sender) {
 		this.plugin = plugin;
 		this.sender = sender;
 	}
