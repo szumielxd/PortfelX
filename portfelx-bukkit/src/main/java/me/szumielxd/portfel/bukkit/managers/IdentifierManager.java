@@ -38,7 +38,7 @@ public class IdentifierManager {
 	
 	public IdentifierManager init() {
 		if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-		if (!file.exists()) {
+		if (file.exists()) {
 			try {
 				this.accessMap = GSON.fromJson(new FileReader(file), JsonObject.class);
 				return this;

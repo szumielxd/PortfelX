@@ -119,6 +119,14 @@
 							<pattern>org.slf4j</pattern>
 							<shadedPattern>me.szumielxd.portfel.lib.org.slf4j</shadedPattern>
 						</relocation>
+						<relocation>
+							<pattern>org.simpleyaml</pattern>
+							<shadedPattern>me.szumielxd.portfel.lib.org.simpleyaml</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>org.yaml.snakeyaml</pattern>
+							<shadedPattern>me.szumielxd.portfel.lib.org.yaml.snakeyaml</shadedPattern>
+						</relocation>
 					</relocations>
 				</configuration>
 			</plugin>
