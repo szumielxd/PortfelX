@@ -181,7 +181,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 			Component prefix = Component.text(" ┗╸ ");
 			for (int i = orderIndex-1; i >= 0; i--) {
 				OrderData o = orders.get(i);
-				if (o.isAvailable(player)) done = true;
+				if (!o.isAvailable(player)) done = true;
 				if (!done) {
 					price += o.getPrice();
 					discounts.add(prefix.color(GRAY).append(Component.text(MiscUtils.firstToUpper(o.getName()), DARK_GRAY)).append(Component.text(" -" + o.getPrice(), DARK_AQUA)));
