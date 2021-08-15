@@ -18,6 +18,7 @@ public interface Portfel {
 	public static String CHANNEL_USERS = "portfel:userdata";
 	public static String CHANNEL_SETUP = "portfel:setup";
 	public static String CHANNEL_TRANSACTIONS = "portfel:transactions";
+	public static String CHANNEL_BUNGEE = "bungeecord:main";
 	
 	public @NotNull UserManager getUserManager();
 	

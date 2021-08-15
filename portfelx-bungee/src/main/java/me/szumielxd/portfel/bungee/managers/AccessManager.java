@@ -242,6 +242,7 @@ public class AccessManager implements Listener {
 				out.writeUTF(this.plugin.getProxyId().toString()); // proxy ID
 				out.writeUTF(serverId.toString()); // server ID
 				srv.sendData(Portfel.CHANNEL_SETUP, out.toByteArray());
+				this.plugin.getLogger().info("Sent Setup...");
 				this.registerRequests.put(operationId, new RegistrationHolder(operationId, serverId, serverName, player));
 			}
 		}
@@ -253,12 +254,15 @@ public class AccessManager implements Listener {
 	
 	@EventHandler
 	public void onRegistrationValidCheck(PluginMessageEvent event) {
-		if ("bungeecord:main".equals(event.getTag())) {
+		this.plugin.getLogger().info(String.format("Received sth... (%s)", event.getTag()));
+		if (Portfel.CHANNEL_BUNGEE.equals(event.getTag())) {
 			if (event.getSender() instanceof Server) {
 				Server srv = (Server) event.getSender();
 				ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
 				String subchannel = in.readUTF(); // subchannel
+				this.plugin.getLogger().info(String.format("Received sth#2... (%s)", subchannel));
 				if ("ForwardToPlayer".equals(subchannel)) {
+					this.plugin.getLogger().info("Received Bungee...");
 					in.readUTF(); // username
 					String channel = in.readUTF(); // custom channel
 					if (Portfel.CHANNEL_SETUP.equals(channel)) {
@@ -280,7 +284,8 @@ public class AccessManager implements Listener {
 								os.writeBoolean(this.registerRequests.containsKey(uuid)); // validity result
 								out.writeShort(baos.toByteArray().length);
 								out.write(baos.toByteArray());
-								srv.sendData(channel, out.toByteArray());
+								srv.sendData(event.getTag(), out.toByteArray());
+								this.plugin.getLogger().info("Sent Bungee...");
 							}
 						} catch (IOException e) {
 							e.printStackTrace();
@@ -301,6 +306,7 @@ public class AccessManager implements Listener {
 				ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
 				String subchannel = in.readUTF();
 				if ("Register".equals(subchannel)) {
+					this.plugin.getLogger().info("Received Setup...");
 					UUID operationId = null;
 					try {
 						operationId = UUID.fromString(in.readUTF());

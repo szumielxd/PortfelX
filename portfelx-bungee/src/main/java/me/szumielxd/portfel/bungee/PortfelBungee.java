@@ -77,6 +77,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 		this.getProxy().registerChannel(CHANNEL_SETUP);
 		this.getProxy().registerChannel(CHANNEL_USERS);
 		this.getProxy().registerChannel(CHANNEL_TRANSACTIONS);
+		this.getProxy().registerChannel(CHANNEL_BUNGEE);
 	}
 	
 	

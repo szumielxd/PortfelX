@@ -23,7 +23,7 @@ import net.kyori.adventure.text.Component;
 
 public class GrantOrderCommand extends SimpleCommand {
 	
-	private final List<CmdArg> args = Arrays.asList(CommonArgs.SERVER);
+	private final List<CmdArg> args = Arrays.asList(CommonArgs.ORDER);
 
 	public GrantOrderCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "grant");

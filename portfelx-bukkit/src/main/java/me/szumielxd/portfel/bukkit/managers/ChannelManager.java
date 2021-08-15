@@ -47,8 +47,8 @@ public class ChannelManager {
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_SETUP);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_USERS);
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, "bungeecord:main");
-		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, "bungeecord:main", this::onSetupValidator);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_BUNGEE);
+		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_BUNGEE, this::onSetupValidator);
 		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_SETUP, this::onSetupChannel);
 		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
 		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_USERS, this::onUsersChannel);
@@ -70,6 +70,7 @@ public class ChannelManager {
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF(); // subchannel
 		if ("ForwardToPlayer".equals(subchannel)) {
+			this.plugin.getLogger().info("Received Bungee...");
 			byte[] bytes = new byte[in.readShort()];
 			in.readFully(bytes);
 			DataInputStream is = new DataInputStream(new ByteArrayInputStream(bytes));
@@ -92,6 +93,7 @@ public class ChannelManager {
 	
 	private void onSetupChannel(@NotNull String channel, @NotNull Player player, byte[] message) {
 		if (!Portfel.CHANNEL_SETUP.equals(channel)) return;
+		this.plugin.getLogger().info("Received Setup...");
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF();
 		if ("Register".equals(subchannel)) {
@@ -134,7 +136,8 @@ public class ChannelManager {
 		}
 		out.writeShort(baos.toByteArray().length);
 		out.write(baos.toByteArray());
-		player.sendPluginMessage(plugin, "bungeecord:main", out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_BUNGEE, out.toByteArray());
+		this.plugin.getLogger().info("Sent Bungee...");
 	}
 	
 	private void sendSetupChannel(@NotNull String channel, @NotNull Player player, @NotNull UUID operationId, @NotNull UUID proxyId, @NotNull UUID serverId) {
@@ -152,6 +155,7 @@ public class ChannelManager {
 		out.writeUTF(proxyId.toString()); // proxyId
 		out.writeUTF(srvId.toString()); // serverId
 		player.sendPluginMessage(this.plugin, channel, out.toByteArray());
+		this.plugin.getLogger().info("Sent Setup...");
 	}
 	
 	
