@@ -177,7 +177,7 @@ public class MiscUtils {
 	public static @Nullable String firstToUpper(@Nullable String text, boolean strict) {
 		if (text == null) return null;
 		if (text.length() == 0) return text;
-		return text.substring(0, 1).toUpperCase() + (strict? text.toLowerCase().substring(1, text.length()) : text);
+		return text.substring(0, 1).toUpperCase() + (strict? text.toLowerCase() : text).substring(1, text.length());
 	}
 	
 	/**
