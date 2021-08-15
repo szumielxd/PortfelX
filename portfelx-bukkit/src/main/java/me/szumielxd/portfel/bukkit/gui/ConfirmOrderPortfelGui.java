@@ -84,6 +84,7 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 		
 		inventory.setItem(2, reject);
 		inventory.setItem(6, accept);
+		player.openInventory(inventory);
 	}
 	
 

@@ -179,7 +179,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		List<Component> discounts = new ArrayList<>();{
 			boolean done = false;
 			Component prefix = Component.text(" ┗╸ ");
-			for (int i = orderIndex-1; i >= 0; i++) {
+			for (int i = orderIndex-1; i >= 0; i--) {
 				OrderData o = orders.get(i);
 				if (o.isAvailable(player)) done = true;
 				if (!done) {

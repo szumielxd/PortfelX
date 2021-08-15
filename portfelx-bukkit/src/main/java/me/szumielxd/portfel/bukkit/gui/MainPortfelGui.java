@@ -40,7 +40,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	static {
 		try { BACKGROUND = new ItemStack(Material.getMaterial("STAINED_GLASS_PANE"), 1, (byte)15); } catch (NullPointerException e) { BACKGROUND = new ItemStack(Material.getMaterial("BLACK_STAINED_GLASS_PANE")); }; {
 			ItemMeta meta = BACKGROUND.getItemMeta();
-			meta.setDisplayName("");
+			meta.setDisplayName("§0");
 			BACKGROUND.setItemMeta(meta);
 		}
 	}
