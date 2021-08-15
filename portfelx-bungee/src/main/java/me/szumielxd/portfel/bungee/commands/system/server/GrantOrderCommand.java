@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.commands.CommonArgs;
 import me.szumielxd.portfel.bungee.managers.AccessManager;
+import me.szumielxd.portfel.bungee.managers.OrdersManager.GlobalOrder;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
@@ -33,17 +34,17 @@ public class GrantOrderCommand extends SimpleCommand {
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed != null) {
-			String order = (String) parsed[0];
+			GlobalOrder order = (GlobalOrder) parsed[0];
 			UUID server = (UUID) parsedArgs[0];
 			AccessManager access = ((PortfelBungee)this.getPlugin()).getAccessManager();
-			if (access.canAccess(server, order)) {
+			if (access.canAccess(server, order.getName())) {
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_SERVER_GRANT_ALREADY.component(RED)));
 				return;
 			}
-			access.giveAccess(server, order);
+			access.giveAccess(server, order.getName());
 			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_SERVER_GRANT_SUCCESS.component(LIGHT_PURPLE,
 					Component.text(access.getServerNames().get(server), AQUA),
-					Component.text(order, AQUA))));
+					Component.text(order.getName(), AQUA))));
 			return;
 		}
 		sender.sendTranslated(MiscUtils.extendedCommandUsage(this));

@@ -38,7 +38,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	
 	
 	static {
-		try { BACKGROUND = new ItemStack(Material.getMaterial("WOOL"), 1, (byte)5); } catch (NullPointerException e) { BACKGROUND = new ItemStack(Material.getMaterial("BLACK_WOOL")); }; {
+		try { BACKGROUND = new ItemStack(Material.getMaterial("STAINED_GLASS_PANE"), 1, (byte)15); } catch (NullPointerException e) { BACKGROUND = new ItemStack(Material.getMaterial("BLACK_STAINED_GLASS_PANE")); }; {
 			ItemMeta meta = BACKGROUND.getItemMeta();
 			meta.setDisplayName("");
 			BACKGROUND.setItemMeta(meta);
@@ -99,6 +99,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 			background[i] = item;
 		});
 		inventory.setContents(background);
+		player.openInventory(inventory);
 	}
 
 }

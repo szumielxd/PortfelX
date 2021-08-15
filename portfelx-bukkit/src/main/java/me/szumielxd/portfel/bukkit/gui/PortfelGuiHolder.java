@@ -1,6 +1,5 @@
 package me.szumielxd.portfel.bukkit.gui;
 
-import java.awt.Component;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -11,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bukkit.PortfelBukkit;
 import me.szumielxd.portfel.common.objects.User;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 public class PortfelGuiHolder implements InventoryHolder {
@@ -27,9 +27,7 @@ public class PortfelGuiHolder implements InventoryHolder {
 	static {
 		try {
 			Server_createInventory = Server.class.getMethod("createInventory", InventoryHolder.class, Integer.TYPE, Component.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			e.printStackTrace();
-		}
+		} catch (NoSuchMethodException | SecurityException e) {}
 	}
 	
 	

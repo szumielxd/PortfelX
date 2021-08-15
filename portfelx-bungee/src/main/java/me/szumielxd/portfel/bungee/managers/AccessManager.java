@@ -78,7 +78,7 @@ public class AccessManager implements Listener {
 		if (!file.exists()) {
 			try {
 				file.createNewFile();
-				this.accessMap = GSON.fromJson(new FileReader(file), JsonObject.class);
+				Files.write(file.toPath(), GSON.toJson(this.accessMap = new JsonObject()).getBytes(StandardCharsets.UTF_8));
 				return this;
 			} catch (JsonSyntaxException | JsonIOException | IOException e) {
 				File to = new File(this.plugin.getDataFolder(), file.getName() + ".broken");
@@ -87,7 +87,7 @@ public class AccessManager implements Listener {
 			}
 		}
 		try {
-			Files.write(file.toPath(), GSON.toJson(this.accessMap = new JsonObject()).getBytes(StandardCharsets.UTF_8));
+			this.accessMap = GSON.fromJson(new FileReader(file), JsonObject.class);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
