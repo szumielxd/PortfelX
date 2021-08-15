@@ -46,7 +46,7 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 	@Override
 	public @NotNull Component getTitle(User user) {
 		Player player = this.plugin.getServer().getPlayer(user.getUniqueId());
-		return (player != null ? Lang.get(BukkitPlayer.get(this.plugin, player)) : Lang.def()).translateComponent(LangKey.SHOP_CONFIRM_TITLE.component(AQUA));
+		return (player != null ? Lang.get(BukkitPlayer.get(this.plugin, player)) : Lang.def()).translateComponent(LangKey.SHOP_CONFIRM_TITLE.component(AQUA, LangKey.MAIN_CURRENCY_FORMAT.component(Component.text(this.order.getPrice()))));
 	}
 
 
@@ -59,7 +59,7 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 	@Override
 	public void onClick(@NotNull Player player, int slot) {
 		if (slot == 2) player.closeInventory(); // reject
-		else if (slot == 6) this.plugin.getTaskManager().runTaskAsynchronously(() -> this.plugin.getChannelManager().requestTransaction(player, this.order)); // accept
+		else if (slot == 6) { this.plugin.getTaskManager().runTaskAsynchronously(() -> this.plugin.getChannelManager().requestTransaction(player, this.order)); player.closeInventory(); } // accept
 	}
 
 
@@ -77,8 +77,8 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 		
 		ItemStack accept = ACCEPT.clone(); {
 			ItemMeta meta = accept.getItemMeta();
-			BukkitUtils.setDisplayName(meta, lang.translateComponent(LangKey.SHOP_CONFIRM_NO_TITLE.component(DARK_RED)));
-			BukkitUtils.setLore(meta, Arrays.asList(lang.translateComponent(LangKey.SHOP_CONFIRM_NO_DESCRIPTION.component(GRAY, Component.text(this.order.getPrice(), AQUA), this.order.getDisplay()))));
+			BukkitUtils.setDisplayName(meta, lang.translateComponent(LangKey.SHOP_CONFIRM_YES_TITLE.component(GREEN)));
+			BukkitUtils.setLore(meta, Arrays.asList(lang.translateComponent(LangKey.SHOP_CONFIRM_YES_DESCRIPTION.component(GRAY, LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Component.text(this.order.getPrice())), this.order.getDisplay()))));
 			accept.setItemMeta(meta);
 		}
 		

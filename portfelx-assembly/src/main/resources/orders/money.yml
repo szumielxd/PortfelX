@@ -46,7 +46,8 @@ orders:
         name: '&6$3000'
         # Colored description of order.
         # Can parse internal placeholders and placeholders from PlaceholderAPI.
-        description: 'Top up your account'
+        description:
+        - 'Top up your account'
         # Normally displayed icon
         icon: GOLD_INGOT
         # Icon displayed when player has permission given in `done-permission` field.
@@ -74,59 +75,79 @@ orders:
         slot: 11
         level: 2 # used in upgrades
         name: '&6$15000'
-        description: 'Top up your account'
+        description:
+        - 'Top up your account'
         icon: GOLD_INGOT
         icon-bought: GOLD_INGOT
         price: 12
         done-permission: ''
-        broadcast: '&5Surprise! %player% has bought $15000!'
-        message: '{"text":"Congratultions %player%! You have bought $15000!","color":"light_purple"}'
-        command: '/eco give %playerId% 15000'
+        broadcast:
+        - '&5Surprise! %player% has bought $15000!'
+        message:
+        - '{"text":"Congratultions %player%! You have bought $15000!","color":"light_purple"}'
+        command:
+        - '/eco give %playerId% 15000'
     'Money x35000':
         slot: 12
         level: 3 # used in upgrades
         name: '&6$35000'
-        description: 'Top up your account'
+        description:
+        - 'Top up your account'
         icon: GOLD_INGOT
         icon-bought: GOLD_INGOT
         price: 24
         done-permission: ''
-        broadcast: '&5Surprise! %player% has bought $35000!'
-        message: '{"text":"Congratultions %player%! You have bought $35000!","color":"light_purple"}'
-        command: '/eco give %playerId% 35000'
+        broadcast:
+        - '&5Surprise! %player% has bought $35000!'
+        message:
+        - '{"text":"Congratultions %player%! You have bought $35000!","color":"light_purple"}'
+        command:
+        - '/eco give %playerId% 35000'
     'Money x67000':
         slot: 14
         level: 4 # used in upgrades
         name: '&6$67000'
-        description: 'Top up your account'
+        description:
+        - 'Top up your account'
         icon: GOLD_INGOT
         icon-bought: GOLD_INGOT
         price: 48
         done-permission: ''
-        broadcast: '&5Surprise! %player% has bought $67000!'
-        message: '{"text":"Congratultions %player%! You have bought $67000!","color":"light_purple"}'
-        command: '/eco give %playerId% 67000'
+        broadcast:
+        - '&5Surprise! %player% has bought $67000!'
+        message:
+        - '{"text":"Congratultions %player%! You have bought $67000!","color":"light_purple"}'
+        command:
+        - '/eco give %playerId% 67000'
     'Money x100000':
         slot: 15
         level: 5 # used in upgrades
         name: '&6$100000'
-        description: 'Top up your account'
+        description:
+        - 'Top up your account'
         icon: GOLD_INGOT
         icon-bought: GOLD_INGOT
         price: 65
         done-permission: ''
-        broadcast: '&5Surprise! %player% has bought $100000!'
-        message: '{"text":"Congratultions %player%! You have bought $100000!","color":"light_purple"}'
-        command: '/eco give %playerId% 100000'
+        broadcast:
+        - '&5Surprise! %player% has bought $100000!'
+        message:
+        - '{"text":"Congratultions %player%! You have bought $100000!","color":"light_purple"}'
+        command:
+        - '/eco give %playerId% 100000'
     'Money x170000':
         slot: 16
         level: 6 # used in upgrades
         name: '&6$170000'
-        description: 'Top up your account'
+        description:
+        - 'Top up your account'
         icon: GOLD_INGOT
         icon-bought: GOLD_INGOT
         price: 100
         done-permission: ''
-        broadcast: '&5Surprise! %player% has bought $170000!'
-        message: '{"text":"Congratultions %player%! You have bought $170000!","color":"light_purple"}'
-        command: '/eco give %playerId% 170000'
+        broadcast:
+        - '&5Surprise! %player% has bought $170000!'
+        message:
+        - '{"text":"Congratultions %player%! You have bought $170000!","color":"light_purple"}'
+        command:
+        - '/eco give %playerId% 170000'

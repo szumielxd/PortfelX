@@ -164,8 +164,8 @@ public class ChannelManager {
 			UUID transactionId = UUID.fromString(in.readUTF()); // transaction id
 			TransactionResult result = null;
 			if (this.plugin.getIdentifierManager().isValid(proxyId)) {
-				long newBalance = in.readLong();
-				Optional<TransactionStatus> status = TransactionStatus.parse(in.readUTF());
+				long newBalance = in.readLong(); // newBalance
+				Optional<TransactionStatus> status = TransactionStatus.parse(in.readUTF()); // status
 				if (status.isPresent()) {
 					int globalOrders = 0;
 					Throwable throwable = null;

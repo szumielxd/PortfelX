@@ -50,13 +50,17 @@ public class Transaction {
 	
 	
 	public boolean finish(@NotNull TransactionResult result) {
+		this.plugin.getLogger().info("Transaction#finish 1");
 		if (this.result != null) return false;
-		if (this.transactionId.equals(result.getTransactionId()))
+		this.plugin.getLogger().info("Transaction#finish 2");
+		if (!this.transactionId.equals(result.getTransactionId())) return false;
+		this.plugin.getLogger().info("Transaction#finish 3");
 		this.result = result;
 		
 		((BukkitOperableUser)this.user).setPlainBalance(this.result.newBalance);
 		
 		if (!this.result.getStatus().equals(TransactionStatus.OK)) return true;
+		this.plugin.getLogger().info("Transaction#finish 4");
 		
 		// replacements: %player% %playerId%
 		Pattern pattern = Pattern.compile("%player(Ip)?%");
@@ -78,10 +82,10 @@ public class Transaction {
 		});
 		
 		// command
-		this.getOrder().getCommand().forEach(cmd -> {
+		this.plugin.getTaskManager().runTask(() -> this.getOrder().getCommand().forEach(cmd -> {
 			this.plugin.getServer().dispatchCommand(this.plugin.getServer().getConsoleSender(), MiscUtils.replaceAll(pattern.matcher(cmd), replacer));
-		});
-		
+		}));
+		this.plugin.getLogger().info(String.format("Transaction#finish 5 %s %s %s", this.getOrder().getBroadcast().size(), this.getOrder().getMessage().size(), this.getOrder().getCommand().size()));
 		return true; 
 	}
 	

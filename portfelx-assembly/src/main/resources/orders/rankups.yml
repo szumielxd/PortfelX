@@ -46,7 +46,8 @@ orders:
         name: '&7Iron'
         # Colored description of order.
         # Can parse internal placeholders and placeholders from PlaceholderAPI.
-        description: 'To check priviliges try /iron'
+        description:
+        - 'To check priviliges try /iron'
         # Normally displayed icon
         icon: IRON_ORE
         # Icon displayed when player has permission given in `done-permission` field.
@@ -74,35 +75,47 @@ orders:
         slot: 12
         level: 2 # used in upgrades
         name: '&eGold'
-        description: 'To check priviliges try /gold'
+        description:
+        - 'To check priviliges try /gold'
         icon: GOLD_ORE
         icon-bought: '*GOLD_BLOCK'
         price: 20
         done-permission: 'group.gold'
-        broadcast: '&5Surprise! %player% bought Gold Rank!'
-        message: '{"text":"Congratultions %player%! You have bought Gold Rank!","color":"light_purple"}'
-        command: '/lp user %playerId% parent add gold'
+        broadcast:
+        - '&5Surprise! %player% bought Gold Rank!'
+        message:
+        - '{"text":"Congratultions %player%! You have bought Gold Rank!","color":"light_purple"}'
+        command:
+        - '/lp user %playerId% parent add gold'
     diamond:
         slot: 14
         level: 3 # used in upgrades
         name: '&bDiament'
-        description: 'To check priviliges try /diament'
+        description:
+        - 'To check priviliges try /diament'
         icon: DIAMOND_ORE
         icon-bought: '*DIAMOND_BLOCK'
         price: 40
         done-permission: 'group.diamond'
-        broadcast: '&5Surprise! %player% bought Diamond Rank!'
-        message: '{"text":"Congratultions %player%! You have bought Diamond Rank!","color":"light_purple"}'
-        command: '/lp user %playerId% parent add diamond'
+        broadcast:
+        - '&5Surprise! %player% bought Diamond Rank!'
+        message:
+        - '{"text":"Congratultions %player%! You have bought Diamond Rank!","color":"light_purple"}'
+        command:
+        - '/lp user %playerId% parent add diamond'
     emerald:
         slot: 16
         level: 4 # used in upgrades
         name: '&aEmerald'
-        description: 'To check priviliges try /emerald'
+        description:
+        - 'To check priviliges try /emerald'
         icon: EMERALD_ORE
         icon-bought: '*EMERALD_BLOCK'
         price: 70
         done-permission: 'group.emerald'
-        broadcast: '&5Surprise! %player% bought Emerald Rank!'
-        message: '{"text":"Congratultions %player%! You have bought Emerald Rank!","color":"light_purple"}'
-        command: '/lp user %playerId% parent add emerald'
+        broadcast:
+        - '&5Surprise! %player% bought Emerald Rank!'
+        message:
+        - '{"text":"Congratultions %player%! You have bought Emerald Rank!","color":"light_purple"}'
+        command:
+        - '/lp user %playerId% parent add emerald'

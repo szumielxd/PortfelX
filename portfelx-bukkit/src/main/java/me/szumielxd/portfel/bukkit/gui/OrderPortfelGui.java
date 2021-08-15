@@ -106,7 +106,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 						int index = orderList.indexOf(order);
 						if (index < 0) return;
 						for (int i = index-1; i >= 0; i--) {
-							OrderData o = orders.get(i);
+							OrderData o = orderList.get(i);
 							if (!o.isAvailable(player)) break;
 							price += o.getPrice();
 						}
