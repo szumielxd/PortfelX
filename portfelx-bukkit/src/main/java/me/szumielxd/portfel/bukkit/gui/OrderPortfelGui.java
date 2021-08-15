@@ -105,9 +105,9 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 						List<OrderData> orderList = orders.entrySet().stream().map(Entry::getValue).sorted((a,b) -> Integer.compare(a.getLevel(), b.getLevel())).collect(Collectors.toList());
 						int index = orderList.indexOf(order);
 						if (index < 0) return;
-						for (int i = index-1; i >= 0; i++) {
+						for (int i = index-1; i >= 0; i--) {
 							OrderData o = orders.get(i);
-							if (o.isAvailable(player)) break;
+							if (!o.isAvailable(player)) break;
 							price += o.getPrice();
 						}
 					}
