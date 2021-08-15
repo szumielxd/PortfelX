@@ -20,6 +20,7 @@ import me.szumielxd.portfel.bukkit.commands.WalletCommand;
 import me.szumielxd.portfel.bukkit.hooks.PAPIHandler;
 import me.szumielxd.portfel.bukkit.listeners.GuiListener;
 import me.szumielxd.portfel.bukkit.managers.BukkitTaskManager;
+import me.szumielxd.portfel.bukkit.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.managers.BukkitUserManager;
 import me.szumielxd.portfel.bukkit.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.managers.IdentifierManager;
@@ -30,6 +31,7 @@ import me.szumielxd.portfel.common.Config.AbstractKey;
 import me.szumielxd.portfel.common.Config.ConfigKey;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.managers.TaskManager;
+import me.szumielxd.portfel.common.managers.TopManager;
 import me.szumielxd.portfel.common.managers.UserManager;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -44,6 +46,7 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 	private ChannelManager channelManager;
 	private OrdersManager ordersManager;
 	private UserManager userManager;
+	private TopManager topManager;
 	
 	private PAPIHandler papiHandler;
 	
@@ -59,6 +62,7 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 		this.channelManager = new ChannelManager(this);
 		this.ordersManager = new OrdersManager(this).init();
 		this.userManager = new BukkitUserManager(this).init();
+		this.topManager = new BukkitTopManager(this).init();
 		this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
@@ -81,7 +85,9 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 	@Override
 	public void onDisable() {
 		this.userManager.killManager();
+		this.topManager.killManager();
 		this.taskManager.cancelAll();
+		this.channelManager.killManager();
 		try {
 			Field f = Class.forName("net.kyori.adventure.platform.bukkit.BukkitAudiencesImpl").getDeclaredField("INSTANCES");
 			f.setAccessible(true);
@@ -105,6 +111,11 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 	@Override
 	public @NotNull UserManager getUserManager() {
 		return this.userManager;
+	}
+	
+	@Override
+	public @NotNull TopManager getTopManager() {
+		return this.topManager;
 	}
 
 	@Override

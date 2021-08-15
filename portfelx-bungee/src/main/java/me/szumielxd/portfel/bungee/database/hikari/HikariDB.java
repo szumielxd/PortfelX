@@ -24,6 +24,7 @@ import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
 import me.szumielxd.portfel.common.Config;
+import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -43,7 +44,7 @@ public abstract class HikariDB implements AbstractDB {
 	private final String USERS_NAME;
 	private final String USERS_UUID;
 	private final String USERS_BALANCE;
-	private final String USERS_INTOP;
+	private final String USERS_IGNORETOP;
 	
 	private final String LOGS_ID;
 	private final String LOGS_UUID;
@@ -83,7 +84,7 @@ public abstract class HikariDB implements AbstractDB {
 		USERS_NAME = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_USERNAME));
 		USERS_UUID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_UUID));
 		USERS_BALANCE = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_BALANCE));
-		USERS_INTOP = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_IGNORETOP));
+		USERS_IGNORETOP = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_USERS_COLLUMN_IGNORETOP));
 		
 		LOGS_ID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_ID));
 		LOGS_UUID = escapeSql(cfg.getString(BungeeConfigKey.DATABASE_TABLE_LOGS_COLLUMN_UUID));
@@ -220,7 +221,7 @@ public abstract class HikariDB implements AbstractDB {
 	@Override
 	public @Nullable User loadUserByName(@NotNull String name, boolean strict) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` =%s ?", USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_INTOP, TABLE_USERS, USERS_NAME, (strict ? " BINARY" : ""));
+		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` =%s ?", USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_NAME, (strict ? " BINARY" : ""));
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, name);
@@ -247,7 +248,7 @@ public abstract class HikariDB implements AbstractDB {
 	@Override
 	public @Nullable User loadUser(@NotNull UUID uuid) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?", USERS_NAME, USERS_BALANCE, USERS_INTOP, TABLE_USERS, USERS_UUID);
+		String sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?", USERS_NAME, USERS_BALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID);
 		ProxiedPlayer player = this.plugin.getProxy().getPlayer(uuid);
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
@@ -261,7 +262,7 @@ public abstract class HikariDB implements AbstractDB {
 			
 			// fallback to old username offline-mode system
 			if (!MiscUtils.isOnlineModeUUID(uuid) && player != null) {
-				sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = BINARY ? AND `%s` IS NULL", USERS_UUID, USERS_BALANCE, USERS_INTOP, TABLE_USERS, USERS_NAME, USERS_UUID);
+				sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = BINARY ? AND `%s` IS NULL", USERS_UUID, USERS_BALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_NAME, USERS_UUID);
 				try (PreparedStatement stm = conn.prepareStatement(sql)) {
 					stm.setString(1, player.getName());
 					try (ResultSet rs = stm.executeQuery()) {
@@ -286,7 +287,7 @@ public abstract class HikariDB implements AbstractDB {
 	@Override
 	public @NotNull User loadOrCreateUser(@NotNull UUID uuid) throws SQLException, IllegalStateException {
 		this.checkConnection();
-		String sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?", USERS_NAME, USERS_BALANCE, USERS_INTOP, TABLE_USERS, USERS_UUID);
+		String sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?", USERS_NAME, USERS_BALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID);
 		ProxiedPlayer player = this.plugin.getProxy().getPlayer(uuid);
 		BungeeOperableUser user = null;
 		try (Connection conn = this.connect()) {
@@ -315,7 +316,7 @@ public abstract class HikariDB implements AbstractDB {
 			
 			// fallback to old username offline-mode system
 			if (!MiscUtils.isOnlineModeUUID(uuid)) {
-				sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = BINARY ? AND `%s` IS NULL", USERS_UUID, USERS_BALANCE, USERS_INTOP, TABLE_USERS, USERS_NAME, USERS_UUID);
+				sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = BINARY ? AND `%s` IS NULL", USERS_UUID, USERS_BALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_NAME, USERS_UUID);
 				try (PreparedStatement stm = conn.prepareStatement(sql)) {
 					stm.setString(1, player.getName());
 					try (ResultSet rs = stm.executeQuery()) {
@@ -335,7 +336,7 @@ public abstract class HikariDB implements AbstractDB {
 			}
 			
 			// create new user
-			sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?)", TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_INTOP);
+			sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?)", TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_IGNORETOP);
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				if (user == null) user = new BungeeOperableUser(this.plugin, uuid, player.getName(), player.isConnected(), false, 0);
 				stm.setString(1, user.getUniqueId().toString());
@@ -362,7 +363,7 @@ public abstract class HikariDB implements AbstractDB {
 		UUID[] uuids = Stream.of(users).map(User::getUniqueId).toArray(UUID[]::new);
 		this.checkConnection();
 		final String uuidMarks = String.join(", ", Stream.of(uuids).map(s -> "?").toArray(String[]::new));
-		final String sql = String.format("SELECT CAST(`pos` as INT), `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `%s` IN (%s)", USERS_UUID, USERS_UUID, TABLE_USERS, USERS_INTOP, USERS_BALANCE, USERS_UUID, uuidMarks);
+		final String sql = String.format("SELECT CAST(`pos` as INT), `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `%s` IN (%s)", USERS_UUID, USERS_UUID, TABLE_USERS, USERS_IGNORETOP, USERS_BALANCE, USERS_UUID, uuidMarks);
 		try (Connection conn = this.connect(); PreparedStatement stm = conn.prepareStatement(sql)) {
 			int index = 0;
 			// fill query with UUIDs
@@ -407,7 +408,7 @@ public abstract class HikariDB implements AbstractDB {
 		final Map<UUID, BungeeOperableUser> map = Stream.of(users).collect(Collectors.toMap(User::getUniqueId, Function.identity(), (a, b) -> a));
 		// generate right amount of `?` characters to insert into query
 		final String uuidMarks = String.join(", ", map.keySet().stream().map(s -> "?").toArray(String[]::new));
-		final String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` IN (%s)", USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_INTOP, TABLE_USERS, USERS_UUID, uuidMarks);
+		final String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` IN (%s)", USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID, uuidMarks);
 		try (Connection conn = this.connect(); PreparedStatement stm = conn.prepareStatement(sql)) {
 			int index = 0;
 			// fill query with UUIDs
@@ -502,7 +503,7 @@ public abstract class HikariDB implements AbstractDB {
 	@Override
 	public void setDeniedInTop(@NotNull BungeeOperableUser user, boolean deniedInTop) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?", TABLE_USERS, USERS_INTOP, USERS_UUID);
+		String sql = String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?", TABLE_USERS, USERS_IGNORETOP, USERS_UUID);
 		try (Connection conn = this.hikari.getConnection()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setBoolean(1, deniedInTop);
@@ -510,6 +511,33 @@ public abstract class HikariDB implements AbstractDB {
 				if (stm.executeUpdate() == 0) throw new SQLException("Unable to update a user's deniedInTop state. (inexistent uuid)");
 			}
 		}
+	}
+	
+	/**
+	 * Set whether user should be visible in balance top.
+	 * 
+	 * @implNote Internal use only, try {@link TopManager} instead. Thread unsafe.
+	 * @param limit max size of top
+	 * @return list of top entries sorted from first to last
+	 * @throws Exception when something went wrong
+	 */
+	public @NotNull List<TopEntry> getTop(int limit) throws SQLException {
+		this.checkConnection();
+		List<TopEntry> list = new ArrayList<>();
+		String sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? ORDER BY `%s` DESC LIMIT ?", USERS_UUID, USERS_NAME, USERS_BALANCE, TABLE_USERS, USERS_IGNORETOP, USERS_BALANCE);
+		try (Connection conn = this.hikari.getConnection()) {
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				stm.setBoolean(1, true);
+				stm.setInt(2, limit);
+				try (ResultSet rs = stm.executeQuery()) {
+					while (rs.next()) {
+						UUID uuid = UUID.fromString(rs.getString(1));
+						list.add(new TopEntry(uuid, rs.getString(2), rs.getLong(3)));
+					}
+				}
+			}
+		}
+		return list;
 	}
 	
 	/**
@@ -529,7 +557,7 @@ public abstract class HikariDB implements AbstractDB {
 		String usersTable = String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(16) NOT NULL,"
 				+ "`%s` INT UNSIGNED NOT NULL DEFAULT '0', `%s` BOOLEAN NOT NULL DEFAULT FALSE,"
 				+ "PRIMARY KEY (`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
-				TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_INTOP, USERS_UUID);
+				TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_IGNORETOP, USERS_UUID);
 		String logsTable = String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT, `%s` VARCHAR(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,"
 				+ "`%s` VARCHAR(16) NOT NULL, `%s` VARCHAR(24) NOT NULL, `%s` VARCHAR(32) NOT NULL, `%s` VARCHAR(36) NOT NULL,"
 				+ "`%s` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(8) NOT NULL,"

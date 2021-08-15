@@ -1,5 +1,6 @@
 package me.szumielxd.portfel.bungee.listeners;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -14,6 +15,7 @@ import me.szumielxd.portfel.bungee.PortfelBungee;
 import me.szumielxd.portfel.bungee.objects.BungeeActionExecutor;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.enums.TransactionStatus;
+import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.common.objects.ActionExecutor;
 import me.szumielxd.portfel.common.objects.User;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -54,6 +56,38 @@ public class ChannelListener implements Listener {
 						out.writeUTF(player.getName());
 						out.writeLong(user.getBalance());
 						out.writeBoolean(user.isDeniedInTop());
+						srv.sendData(event.getTag(), out.toByteArray());
+					} catch (Exception e) {	
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+	
+	
+	@EventHandler
+	public void onTopData(PluginMessageEvent event) {
+		if (Portfel.CHANNEL_USERS.equals(event.getTag())) {
+			event.setCancelled(true);
+			if (event.getSender() instanceof Server) {
+				ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
+				String subchannel = in.readUTF();
+				if ("Top".equals(subchannel)) {
+					try {
+						Server srv = (Server) event.getSender();
+						ByteArrayDataOutput out = ByteStreams.newDataOutput();
+						out.writeUTF(subchannel);
+						out.writeUTF(this.plugin.getProxyId().toString());
+						
+						List<TopEntry> list = this.plugin.getTopManager().getFullTopCopy();
+						out.writeInt(list.size());
+						list.forEach(top -> {
+							out.writeUTF(top.getUniqueId().toString());
+							out.writeUTF(top.getName());
+							out.writeLong(top.getBalance());
+						});
+						
 						srv.sendData(event.getTag(), out.toByteArray());
 					} catch (Exception e) {	
 						e.printStackTrace();

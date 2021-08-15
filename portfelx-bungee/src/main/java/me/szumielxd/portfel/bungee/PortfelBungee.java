@@ -23,6 +23,7 @@ import me.szumielxd.portfel.bungee.listeners.ChannelListener;
 import me.szumielxd.portfel.bungee.listeners.UserListener;
 import me.szumielxd.portfel.bungee.managers.AccessManager;
 import me.szumielxd.portfel.bungee.managers.BungeeTaskManager;
+import me.szumielxd.portfel.bungee.managers.BungeeTopManager;
 import me.szumielxd.portfel.bungee.managers.BungeeUserManager;
 import me.szumielxd.portfel.bungee.managers.OrdersManager;
 import me.szumielxd.portfel.common.Config;
@@ -31,6 +32,7 @@ import me.szumielxd.portfel.common.Config.ConfigKey;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.managers.TaskManager;
+import me.szumielxd.portfel.common.managers.TopManager;
 import me.szumielxd.portfel.common.managers.UserManager;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
@@ -44,6 +46,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 	private TaskManager taskManager;
 	private Config config;
 	private UserManager userManager;
+	private TopManager topManager;
 	private OrdersManager ordersManager;
 	private AbstractDB database;
 	private AbstractDBLogger transactionLogger;
@@ -69,6 +72,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 		
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new BungeeUserManager(this).init();
+		this.topManager = new BungeeTopManager(this).init();
 		this.ordersManager = new OrdersManager(this).init();
 		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
 		this.getProxy().getPluginManager().registerCommand(this, this.command);
@@ -84,6 +88,7 @@ public class PortfelBungee extends Plugin implements Portfel {
 	@Override
 	public void onDisable() {
 		this.userManager.killManager();
+		this.topManager.killManager();
 		this.transactionLogger.killLogger();
 		this.database.shutdown();
 		this.taskManager.cancelAll();
@@ -121,6 +126,12 @@ public class PortfelBungee extends Plugin implements Portfel {
 	@Override
 	public @NotNull UserManager getUserManager() {
 		return this.userManager;
+	}
+	
+	
+	@Override
+	public @NotNull TopManager getTopManager() {
+		return this.topManager;
 	}
 	
 	

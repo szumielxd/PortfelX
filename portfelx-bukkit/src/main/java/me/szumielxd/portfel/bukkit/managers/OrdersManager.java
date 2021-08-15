@@ -110,7 +110,7 @@ public class OrdersManager {
 			List<String> broadcast = yml.getStringList("broadcast");
 			List<String> message = yml.getStringList("message");
 			List<String> command = yml.getStringList("command");
-			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, icon, iconBought, price, donePermission, broadcast, message, command);
+			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, icon, iconBought, price, donePermission.isEmpty()? null : donePermission, broadcast, message, command);
 		} catch (NullPointerException e) {
 			this.plugin.getLogger().log(Level.WARNING, String.format("Cannot load order `%s` from category `%s`", yml.getName(), yml.getRoot().getName()), e);
 		}

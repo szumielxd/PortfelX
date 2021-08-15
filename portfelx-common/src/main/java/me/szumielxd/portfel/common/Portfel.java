@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.common.managers.TaskManager;
+import me.szumielxd.portfel.common.managers.TopManager;
 import me.szumielxd.portfel.common.managers.UserManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -21,6 +22,8 @@ public interface Portfel {
 	public static String CHANNEL_BUNGEE = "bungeecord:main";
 	
 	public @NotNull UserManager getUserManager();
+	
+	public @NotNull TopManager getTopManager();
 	
 	public @NotNull TaskManager getTaskManager();
 	

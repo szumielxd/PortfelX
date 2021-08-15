@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
+import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.common.objects.User;
 
 public interface AbstractDB {
@@ -141,6 +142,16 @@ public interface AbstractDB {
 	 * @throws Exception when something went wrong
 	 */
 	public void setDeniedInTop(@NotNull BungeeOperableUser user, boolean deniedInTop) throws Exception;
+	
+	/**
+	 * Set whether user should be visible in balance top.
+	 * 
+	 * @implNote Internal use only, try {@link TopManager} instead. Thread unsafe.
+	 * @param limit max size of top
+	 * @return list of top entries sorted from first to last
+	 * @throws Exception when something went wrong
+	 */
+	public @NotNull List<TopEntry> getTop(int limit) throws Exception;
 	
 	/**
 	 * Check if connection can be obtained, otherwise creates new one.

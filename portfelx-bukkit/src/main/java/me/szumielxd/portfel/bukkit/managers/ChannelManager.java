@@ -6,17 +6,20 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.io.ByteArrayDataInput;
@@ -32,6 +35,7 @@ import me.szumielxd.portfel.bukkit.objects.Transaction;
 import me.szumielxd.portfel.bukkit.objects.Transaction.TransactionResult;
 import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.enums.TransactionStatus;
+import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.common.objects.User;
 
 public class ChannelManager {
@@ -40,6 +44,10 @@ public class ChannelManager {
 	private final PortfelBukkit plugin;
 	
 	private Consumer<BukkitOperableUser> registerer = null;
+	private final PluginMessageListenerRegistration bungee;
+	private final PluginMessageListenerRegistration setup;
+	private final PluginMessageListenerRegistration transactions;
+	private final PluginMessageListenerRegistration users;
 	
 	
 	public ChannelManager(@NotNull PortfelBukkit plugin) {
@@ -48,10 +56,18 @@ public class ChannelManager {
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_USERS);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_BUNGEE);
-		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_BUNGEE, this::onSetupValidator);
-		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_SETUP, this::onSetupChannel);
-		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
-		this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_USERS, this::onUsersChannel);
+		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_BUNGEE, this::onSetupValidator);
+		this.setup = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_SETUP, this::onSetupChannel);
+		this.transactions = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
+		this.users = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_USERS, this::onUsersChannel);
+	}
+	
+	
+	public void killManager() {
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_BUNGEE, this.bungee.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_SETUP, this.setup.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_TRANSACTIONS, this.transactions.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_USERS, this.users.getListener());
 	}
 	
 	
@@ -62,6 +78,7 @@ public class ChannelManager {
 	
 	
 	private final Map<UUID, CompletableFuture<Boolean>> waitingForValidation = new HashMap<>();
+	private final Map<UUID, CompletableFuture<List<TopEntry>>> waitingTopUpdates = new HashMap<>();
 	private final Map<UUID, CompletableFuture<BukkitOperableUser>> waitingUserUpdates = new HashMap<>();
 	private final Map<UUID, Entry<Transaction, CompletableFuture<TransactionResult>>> waitingTransactions = new HashMap<>();
 	
@@ -193,6 +210,8 @@ public class ChannelManager {
 		if (!Portfel.CHANNEL_USERS.equals(channel)) return;
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF(); // subchannel
+		
+		/* User Profile */
 		if ("User".equals(subchannel)) {
 			BukkitOperableUser user = null;
 			UUID proxyId = UUID.fromString(in.readUTF()); // proxyId
@@ -220,6 +239,26 @@ public class ChannelManager {
 			}
 			this.registerer.accept(user);
 		}
+		
+		/* Top Update */
+		if ("Top".equals(subchannel)) {
+			UUID proxyId = UUID.fromString(in.readUTF()); // proxyId
+			if (this.plugin.getIdentifierManager().isValid(proxyId)) {
+				int size = in.readInt(); // top size
+				List<TopEntry> list = new ArrayList<>();
+				for (int i = 0; i < size; i++) {
+					UUID uuid = UUID.fromString(in.readUTF()); // UUID
+					String name = in.readUTF(); // Name
+					long balance = in.readLong();
+					list.add(new TopEntry(uuid, name, balance));
+				}
+				
+				CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.get(proxyId);
+				if (future != null) {
+					future.complete(list);
+				}
+			}
+		}
 	}
 	
 	
@@ -243,6 +282,33 @@ public class ChannelManager {
 			return user;
 		} catch (ExecutionException | InterruptedException | TimeoutException e) {
 			this.waitingUserUpdates.remove(uuid);
+			throw e;
+		}
+	}
+	
+	
+	private void sendTopRequest(Player player) {
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("Top");
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
+	}
+	
+	
+	public List<TopEntry> requestTop(@NotNull Player player) throws Exception {
+		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+		if (user == null) return new ArrayList<>();
+		UUID proxyId = ((BukkitOperableUser)user).getProxyId();
+		CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.get(proxyId);
+		if (future == null) {
+			this.waitingTopUpdates.put(proxyId, future = new CompletableFuture<>());
+			this.sendTopRequest(player);
+		}
+		try {
+			List<TopEntry> top = future.get(5, TimeUnit.SECONDS);
+			this.waitingUserUpdates.remove(proxyId);
+			return top;
+		} catch (ExecutionException | InterruptedException | TimeoutException e) {
+			this.waitingUserUpdates.remove(proxyId);
 			throw e;
 		}
 	}
