@@ -3,6 +3,7 @@ package me.szumielxd.portfel.bukkit.hooks;
 import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -11,9 +12,12 @@ import org.bukkit.OfflinePlayer;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.bukkit.managers.BukkitTopManager;
+import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.common.objects.CommonPlayer;
 import me.szumielxd.portfel.common.objects.User;
 import net.kyori.adventure.translation.Translator;
@@ -95,27 +99,44 @@ public class PAPIHandler extends PlaceholderExpansion {
 				return this.formatCurrency(player, val);
 			}
 		}
-		/*if(identifier.startsWith("top_balance_")) {
-			String[] arr = identifier.substring(12).split("_", 2);
-			String type = null;
-			if(arr.length == 1) type = "";
-			else type = arr[0];
-			try {
-				Integer pos = Integer.parseInt(arr[arr.length-1]);
-				Integer value = this.plugin.getDB().getTopHandler().getBalanceByPos(pos);
-				if(value == null) return "0";
-				return MiscUtils.formatNumber(value, type);
-			} catch (NumberFormatException e) {}
+		if(identifier.startsWith("top_balance_")) {
+			String[] arr = identifier.substring(12).split("_");
+			if(arr.length > 1) {
+				try {
+					int pos = Integer.parseInt(arr[arr.length-1]);
+					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+					TopEntry entry = ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos);
+					Optional<Locale> locale = Optional.ofNullable(Translator.parseLocale(String.join("_", Arrays.copyOf(arr, arr.length-1))));
+					return entry!=null? this.formatCurrency(locale.orElse(Locale.getDefault()), entry.getBalance()) : "";
+				} catch (NumberFormatException e) {}
+			} else {
+				try {
+					int pos = Integer.parseInt(identifier.substring(11));
+					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+					TopEntry entry = ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos);
+					return entry!=null? this.formatCurrency(player, entry.getBalance()) : "";
+				} catch (NumberFormatException e) {}
+			}
 			return null;
 		}
 		if(identifier.startsWith("top_player_")) {
 			try {
 				int pos = Integer.parseInt(identifier.substring(11));
-				String nick = this.plugin.getDB().getTopHandler().getPlayerByPos(pos);
-				return nick!=null? nick : "";
+				BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+				TopEntry entry = ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos);
+				return entry!=null? entry.getName() : "";
 			} catch (NumberFormatException e) {}
 			return null;
-		}*/
+		}
+		if(identifier.startsWith("top_uuid_")) {
+			try {
+				int pos = Integer.parseInt(identifier.substring(11));
+				BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+				TopEntry entry = ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos);
+				return entry!=null? entry.getUniqueId().toString() : "";
+			} catch (NumberFormatException e) {}
+			return null;
+		}
 		return null;
 	}
 	
@@ -126,9 +147,9 @@ public class PAPIHandler extends PlaceholderExpansion {
 		list.add(this.getIdentifier()+"_balance_other_<player>");
 		list.add(this.getIdentifier()+"_balance_<locale>");
 		list.add(this.getIdentifier()+"_balance_locale");
-		//list.add(this.getIdentifier()+"_top_balance_#");
-		//list.add(this.getIdentifier()+"_top_balance_locale_#");
-		//list.add(this.getIdentifier()+"_top_player_#");
+		list.add(this.getIdentifier()+"_top_balance_#");
+		list.add(this.getIdentifier()+"_top_balance_<locale>_#");
+		list.add(this.getIdentifier()+"_top_player_#");
 		return list;
 	}
 	
