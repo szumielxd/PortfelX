@@ -278,11 +278,11 @@ public class ChannelManager {
 		}
 		try {
 			BukkitOperableUser user = future.get(5, TimeUnit.SECONDS);
-			this.waitingUserUpdates.remove(uuid);
 			return user;
 		} catch (ExecutionException | InterruptedException | TimeoutException e) {
-			this.waitingUserUpdates.remove(uuid);
 			throw e;
+		} finally {
+			this.waitingUserUpdates.remove(uuid);
 		}
 	}
 	
@@ -305,11 +305,11 @@ public class ChannelManager {
 		}
 		try {
 			List<TopEntry> top = future.get(5, TimeUnit.SECONDS);
-			this.waitingUserUpdates.remove(proxyId);
 			return top;
 		} catch (ExecutionException | InterruptedException | TimeoutException e) {
-			this.waitingUserUpdates.remove(proxyId);
 			throw e;
+		} finally {
+			this.waitingTopUpdates.remove(proxyId);
 		}
 	}
 	

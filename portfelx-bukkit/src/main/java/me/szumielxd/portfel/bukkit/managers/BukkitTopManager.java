@@ -35,9 +35,10 @@ public class BukkitTopManager extends TopManager {
 	@Override
 	protected void update() {
 		try {
+			this.plugin.getLogger().info("Updating Top...");
 			final ChannelManager channel = this.plugin.getChannelManager();
 			this.cachedTop = this.plugin.getUserManager().getLoadedUsers().stream().map(BukkitOperableUser.class::cast).filter(User::isOnline)
-					.collect(Collectors.toMap(u -> u.getProxyId(), Function.identity(), (p, q) -> p)).values().stream()
+					.collect(Collectors.toMap(u -> u.getProxyId(), Function.identity(), (p, q) -> p)).values().parallelStream()
 					.collect(Collectors.toMap(u -> u.getProxyId(), u -> {
 						try{
 							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());

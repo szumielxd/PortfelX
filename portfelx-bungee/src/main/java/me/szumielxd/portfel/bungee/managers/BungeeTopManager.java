@@ -24,6 +24,7 @@ public class BungeeTopManager extends TopManager {
 	@Override
 	protected void update() {
 		try {
+			this.plugin.getLogger().info("Updating Top...");
 			this.cachedTop = this.plugin.getDB().getTop(100);
 		} catch (Exception e) {
 			e.printStackTrace();

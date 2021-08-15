@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 	
 	private final PortfelBukkit plugin;
 	private final String identifier;
+	private final List<String> placeholders;
 	
 	
 	
@@ -39,6 +41,16 @@ public class PAPIHandler extends PlaceholderExpansion {
 		} catch (Exception e) {
 			this.plugin.getLogger().warning("Cannot hook placeholders into PlaceholderAPI");
 		}
+		ArrayList<String> list = new ArrayList<>();
+		list.add(this.getIdentifier()+"_balance");
+		list.add(this.getIdentifier()+"_balance_other_<player>");
+		list.add(this.getIdentifier()+"_balance_<locale>");
+		list.add(this.getIdentifier()+"_top_balance_#");
+		list.add(this.getIdentifier()+"_top_balance_<locale>_#");
+		list.add(this.getIdentifier()+"_top_player_#");
+		list.add(this.getIdentifier()+"_top_uuid_#");
+		list.replaceAll(str -> "%"+str+"%");
+		this.placeholders = Collections.unmodifiableList(list);
 	}
 	
 	
@@ -111,7 +123,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 				} catch (NumberFormatException e) {}
 			} else {
 				try {
-					int pos = Integer.parseInt(identifier.substring(11));
+					int pos = Integer.parseInt(identifier.substring(12));
 					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
 					TopEntry entry = ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos);
 					return entry!=null? this.formatCurrency(player, entry.getBalance()) : "";
@@ -130,7 +142,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 		}
 		if(identifier.startsWith("top_uuid_")) {
 			try {
-				int pos = Integer.parseInt(identifier.substring(11));
+				int pos = Integer.parseInt(identifier.substring(9));
 				BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
 				TopEntry entry = ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos);
 				return entry!=null? entry.getUniqueId().toString() : "";
@@ -142,15 +154,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 	
 	@Override
 	public List<String> getPlaceholders() {
-		ArrayList<String> list = new ArrayList<>();
-		list.add(this.getIdentifier()+"_balance");
-		list.add(this.getIdentifier()+"_balance_other_<player>");
-		list.add(this.getIdentifier()+"_balance_<locale>");
-		list.add(this.getIdentifier()+"_balance_locale");
-		list.add(this.getIdentifier()+"_top_balance_#");
-		list.add(this.getIdentifier()+"_top_balance_<locale>_#");
-		list.add(this.getIdentifier()+"_top_player_#");
-		return list;
+		return this.placeholders;
 	}
 	
 	

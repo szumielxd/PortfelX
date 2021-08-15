@@ -19,6 +19,7 @@ import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.bukkit.commands.WalletCommand;
 import me.szumielxd.portfel.bukkit.hooks.PAPIHandler;
 import me.szumielxd.portfel.bukkit.listeners.GuiListener;
+import me.szumielxd.portfel.bukkit.listeners.UserListener;
 import me.szumielxd.portfel.bukkit.managers.BukkitTaskManager;
 import me.szumielxd.portfel.bukkit.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.managers.BukkitUserManager;
@@ -64,6 +65,7 @@ public class PortfelBukkit extends JavaPlugin implements Portfel {
 		this.userManager = new BukkitUserManager(this).init();
 		this.topManager = new BukkitTopManager(this).init();
 		this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
+		this.getServer().getPluginManager().registerEvents(new UserListener(this), this);
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
 			PluginCommand walletCmd = this.getPluginCommand(this.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME));

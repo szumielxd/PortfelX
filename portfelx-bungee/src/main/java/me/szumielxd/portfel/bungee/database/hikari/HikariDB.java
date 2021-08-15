@@ -527,7 +527,7 @@ public abstract class HikariDB implements AbstractDB {
 		String sql = String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? ORDER BY `%s` DESC LIMIT ?", USERS_UUID, USERS_NAME, USERS_BALANCE, TABLE_USERS, USERS_IGNORETOP, USERS_BALANCE);
 		try (Connection conn = this.hikari.getConnection()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
-				stm.setBoolean(1, true);
+				stm.setBoolean(1, false);
 				stm.setInt(2, limit);
 				try (ResultSet rs = stm.executeQuery()) {
 					while (rs.next()) {
