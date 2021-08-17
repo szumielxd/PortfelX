@@ -3,8 +3,11 @@ package me.szumielxd.portfel.common.commands;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
@@ -38,11 +41,27 @@ public abstract class SimpleCommand implements AbstractCommand {
 	
 	@Override
 	public @NotNull Iterable<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
-		List<CmdArg> argList = this.getArgs();
-		if (args.length > 0 && args.length <= argList.size()) {
+		List<CmdArg> origin = this.getArgs();
+		List<CmdArg> flyingArgs = new ArrayList<>();
+		List<CmdArg> argList = new ArrayList<>();
+		for (int i = 0; i < origin.size(); i++) {
+			CmdArg arg = origin.get(i);
+			if (arg.isFlying()) flyingArgs.add(arg);
+			else argList.add(arg);
+		}
+		List<String> completions = new ArrayList<>();
+		if (args.length > 0 && args.length <= origin.size()) {
 			final int index = args.length-1;
 			String arg = args[index].toLowerCase();
-			return this.getArgs().get(index).getTabCompletions(sender, label).stream().filter(s -> s.toLowerCase().startsWith(arg)).sorted().collect(Collectors.toList());
+			if (args.length <= argList.size()) {
+				completions.addAll(argList.get(index).getTabCompletions(sender, label));
+			}
+			flyingArgs.stream().map(a -> {
+				List<String> res = a.getTabCompletions(sender, label);
+				if (res.isEmpty()) return Arrays.asList(a.getPrefix());
+				return res;
+			}).forEach(completions::addAll);
+			return completions.stream().filter(s -> s.toLowerCase().startsWith(arg)).sorted().collect(Collectors.toList());
 		}
 		return this.emptyList;
 	}
@@ -72,28 +91,50 @@ public abstract class SimpleCommand implements AbstractCommand {
 	}
 	
 	protected @Nullable Object[] validateArgs(CommonSender sender, String... args) {
-		List<Object> list = new ArrayList<>();
-		List<CmdArg> argList = this.getArgs();
+		Map<CmdArg, Integer> flyingArgs = new HashMap<>();
+		List<CmdArg> origin = this.getArgs();
+		for (int i = 0; i < origin.size(); i++) {
+			CmdArg arg = origin.get(i);
+			if (arg.isFlying()) flyingArgs.put(arg, i);
+		}
 		int index = 0;
-		for (int i = 0; i < argList.size(); i++) {
-			CmdArg arg = argList.get(i);
-			if (args.length <= index) break;
-			Object obj = arg.parseArg(args[index]);
-			if (obj != null) {
-				list.add(obj);
-				index++;
-			} else {
+		Object[] arr = new Object[origin.size()];
+		
+		// loop through all command arguments
+		for (int i = 0; i < origin.size(); i++) {
+			CmdArg arg = origin.get(i);
+			if (args.length > index && flyingArgs.size() > 0) {
+				/* checking for flying arguments */
+				flyCheck:
+				for (CmdArg fly : flyingArgs.keySet()) {
+					if (args[index].toLowerCase().startsWith(fly.getPrefix().toLowerCase())) {
+						Object obj = fly.parseArg(args[index++]);
+						arr[flyingArgs.get(fly)] = obj;
+						break flyCheck;
+					}
+				}
+				/* end checking */
+			}
+			if (arg.isFlying()) continue; // ignore flying arguments
+			Object obj = args.length > index ? arg.parseArg(args[index]) : null; // return null when array out of bound or when parse result is null
+			arr[i] = obj;
+			if (obj == null) {
 				if (!arg.isOptional()) {
-					sender.sendTranslated(Portfel.PREFIX.append(arg.getArgError(Component.text(args[index], DARK_RED))));
+					if (args.length > index) sender.sendTranslated(Portfel.PREFIX.append(arg.getArgError(Component.text(args[index], DARK_RED))));
+					else sender.sendTranslated(MiscUtils.extendedCommandUsage(this));
+					this.plugin.getLogger().warning("Exit 1");
 					return null;
 				}
+			} else {
+				index++;
 			}
 		}
-		if (list.size() < argList.size()) {
+		if (index < args.length) { // check for bigger amount of given arguments
 			sender.sendTranslated(MiscUtils.extendedCommandUsage(this));
+			this.plugin.getLogger().warning("Exit 2");
 			return null;
 		}
-		return list.toArray();
+		return arr;
 	}
 
 }

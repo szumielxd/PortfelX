@@ -8,10 +8,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.bungee.BungeeConfigKey;
 import me.szumielxd.portfel.bungee.PortfelBungee;
@@ -118,8 +122,8 @@ public class HikariDBLogger implements AbstractDBLogger {
 							if (id >= 0) {
 								ActionExecutor executor = new ActionExecutor(rs.getString(5), UUID.fromString(rs.getString(6))) {};
 								ActionType type = ActionType.parse(rs.getString(9));
-								this.handleIncomingLog(UUID.fromString(rs.getString(2)), rs.getString(3), executor,
-										rs.getString(4), rs.getDate(7), rs.getString(8), type, rs.getLong(10), rs.getLong(11));
+								this.handleIncomingLog(new LogEntry(rs.getInt(1), UUID.fromString(rs.getString(2)), rs.getString(3), executor,
+										rs.getString(4), rs.getDate(7), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
 							}
 						}
 						if (this.lastID < 0) this.lastID = 0;
@@ -155,7 +159,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 		this.validate();
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
-		String sql = String.format("INSERT INTO `%s` (%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
 				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
@@ -172,8 +176,6 @@ public class HikariDBLogger implements AbstractDBLogger {
 				stm.setLong(9, target.getBalance());
 				stm.executeUpdate();
 			}
-		} catch (SQLException e) {
-			throw e;
 		}
 	}
 	
@@ -192,7 +194,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 		this.validate();
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
-		String sql = String.format("INSERT INTO `%s` (%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
 				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
@@ -209,8 +211,6 @@ public class HikariDBLogger implements AbstractDBLogger {
 				stm.setLong(9, target.getBalance());
 				stm.executeUpdate();
 			}
-		} catch (SQLException e) {
-			throw e;
 		}
 	}
 	
@@ -229,7 +229,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 		this.validate();
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
-		String sql = String.format("INSERT INTO `%s` (%s,%s,%s,%s,%s,%s,%s,%s,%s) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
 				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
@@ -246,8 +246,6 @@ public class HikariDBLogger implements AbstractDBLogger {
 				stm.setLong(9, target.getBalance());
 				stm.executeUpdate();
 			}
-		} catch (SQLException e) {
-			throw e;
 		}
 	}
 	
@@ -263,17 +261,17 @@ public class HikariDBLogger implements AbstractDBLogger {
 	 * @param balance target's balance before logged action
 	 */
 	@Override
-	public void handleIncomingLog(@NotNull UUID targetId, @NotNull String targetName, @NotNull ActionExecutor executor, @NotNull String server, @NotNull Date time, @NotNull String orderName, @NotNull ActionType type, long value, long balance) {
+	public void handleIncomingLog(@NotNull LogEntry log) {
 		this.validate();
 		Component prefix = Portfel.PREFIX.append(LangKey.LOG_PREFIX.component(DARK_AQUA)).append(Component.text(" > ", GRAY));
-		Component exec = this.prepareInteractive(Component.text(executor.getDisplayName() + "@" + server, GREEN), executor.getDisplayName(), executor.getUniqueId());
-		Component target = this.prepareInteractive(Component.text(targetName, AQUA), targetName, targetId);
-		Component valComp = Component.text(type.getFormattedPrefix()+value, type.getColor()).hoverEvent(Component.text(type.getFormattedPrefix()+value, type.getColor())
-				.append(Component.newline()).append(LangKey.LOG_VALUE_ACTION.component(GRAY, Component.text(type.name(), AQUA))).append(Component.newline())
-				.append(LangKey.LOG_VALUE_OLD_BALANCE.component(GRAY, Component.text(balance, AQUA))));
+		Component exec = this.prepareInteractive(Component.text(log.getExecutor().getDisplayName() + "@" + log.getServer(), GREEN), log.getExecutor().getDisplayName(), log.getExecutor().getUniqueId());
+		Component target = this.prepareInteractive(Component.text(log.getTargetName(), AQUA), log.getTargetName(), log.getTargetUniqueId());
+		Component valComp = Component.text(log.getType().getFormattedPrefix()+log.getValue(), log.getType().getColor()).hoverEvent(Component.text(log.getType().getFormattedPrefix()+log.getValue(), log.getType().getColor())
+				.append(Component.newline()).append(LangKey.LOG_VALUE_ACTION.component(GRAY, Component.text(log.getType().name(), AQUA))).append(Component.newline())
+				.append(LangKey.LOG_VALUE_OLD_BALANCE.component(GRAY, Component.text(log.getBalance(), AQUA))));
 		Component line1 = prefix.append(Component.text("(", DARK_GRAY)).append(exec).append(Component.text(") [", DARK_GRAY)).append(target).append(Component.text("]", DARK_GRAY));
-		Component line2 = prefix.append(Component.text(orderName, WHITE).hoverEvent(Component.text(orderName, WHITE).append(Component.newline())
-				.append(LangKey.LOG_VALUE_DATE.component(GRAY, Component.text(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(time.getTime())), AQUA))))).append(Component.space()).append(valComp);
+		Component line2 = prefix.append(Component.text(log.getOrderName(), WHITE).hoverEvent(Component.text(log.getOrderName(), WHITE).append(Component.newline())
+				.append(LangKey.LOG_VALUE_DATE.component(GRAY, Component.text(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(log.getTime().getTime())), AQUA))))).append(Component.space()).append(valComp);
 		this.plugin.getProxy().getPlayers().forEach(p -> {
 			if (p.isConnected() && p.hasPermission("portfel.verbose")) {
 				BungeeSender player = BungeeSender.get(this.plugin, p);
@@ -283,11 +281,109 @@ public class HikariDBLogger implements AbstractDBLogger {
 		});
 	}
 	
+	/**
+	 * Get recent logs.
+	 * 
+	 * @return list of recent logs
+	 * @throws SQLException when something went wrong
+	 */
+	@Override
+	public @NotNull List<LogEntry> getLogs(@Nullable String[] targets, @Nullable String[] executors, @Nullable String[] servers, @Nullable String[] orders, @Nullable ActionType[] actions, @Nullable NumericCondition[] valueConditions, @Nullable NumericCondition[] balanceConditions) throws SQLException {
+		this.validate();
+		
+		// parse target and executor
+		List<String> targetNames = new ArrayList<>();
+		List<UUID> targetIds = new ArrayList<>();
+		List<String> executorNames = new ArrayList<>();
+		List<UUID> executorIds = new ArrayList<>();
+		if (targets != null) Stream.of(targets).forEach(str -> {
+			try {targetIds.add(UUID.fromString(str));} catch (IllegalArgumentException e) {targetNames.add(str);}
+		});
+		if (executors != null) Stream.of(executors).forEach(str -> {
+			try {executorIds.add(UUID.fromString(str));} catch (IllegalArgumentException e) {executorNames.add(str);}
+		});
+		
+		// create builder
+		StringBuilder whereClause = new StringBuilder();
+		
+		// targets
+		if (!targetNames.isEmpty()) whereClause.append(whereClause.length()>0? " AND `" : " `").append(LOGS_USERNAME).append('`').append(" IN (").append(String.join(", ", targetNames.stream().map(s -> "?").toArray(String[]::new))).append(')');
+		if (!targetIds.isEmpty()) whereClause.append(whereClause.length()>0? " AND `" : " `").append(LOGS_UUID).append('`').append(" IN (").append(String.join(", ", targetNames.stream().map(s -> "?").toArray(String[]::new))).append(')');
+		// executors
+		if (!executorNames.isEmpty()) whereClause.append(whereClause.length()>0? " AND `" : " `").append(LOGS_EXECUTOR).append('`').append(" IN (").append(String.join(", ", targetNames.stream().map(s -> "?").toArray(String[]::new))).append(')');
+		if (!executorIds.isEmpty()) whereClause.append(whereClause.length()>0? " AND `" : " `").append(LOGS_EXECUTORUUID).append('`').append(" IN (").append(String.join(", ", targetNames.stream().map(s -> "?").toArray(String[]::new))).append(')');
+		// servers
+		if (servers != null && servers.length > 0) whereClause.append(whereClause.length()>0? " AND (" : " (").append(String.join(" OR ", Stream.of(servers).map(s -> String.format("`%s` LIKE ?", LOGS_SERVER)).toArray(String[]::new))).append(')');
+		// orders
+		if (orders != null && orders.length > 0) whereClause.append(whereClause.length()>0? " AND (" : " (").append(String.join(" OR ", Stream.of(orders).map(s -> String.format("`%s` LIKE ?", LOGS_ORDERNAME)).toArray(String[]::new))).append(')');
+		// actions
+		if (actions != null && actions.length > 0) whereClause.append(whereClause.length()>0? " AND (" : " (").append(String.join(" OR ", Stream.of(actions).map(s -> String.format("`%s` LIKE ?", LOGS_ACTION)).toArray(String[]::new))).append(')');
+		// value
+		if (valueConditions != null && valueConditions.length > 0) {
+			whereClause.append(whereClause.length()>0? " AND (" : " (").append(String.join(" AND ", Stream.of(valueConditions).map(c -> String.format("`%s` %s", LOGS_VALUE, c.getFormat())).toArray(String[]::new))).append(')');
+		}
+		// balance
+		if (balanceConditions != null && balanceConditions.length > 0) {
+			whereClause.append(whereClause.length()>0? " AND (" : " (").append(String.join(" AND ", Stream.of(balanceConditions).map(c -> String.format("`%s` %s", LOGS_BALANCE, c.getFormat())).toArray(String[]::new))).append(')');
+		}
+		
+		AbstractDB db = this.plugin.getDB();
+		db.checkConnection();
+		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s`",
+				LOGS_ID, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
+				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_TIME, LOGS_ORDERNAME,
+				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE, TABLE_LOGS);
+		if (whereClause.length() > 0) sql = whereClause.insert(0, " WHERE ").insert(0, sql).toString();
+		
+		try (Connection conn = ((HikariDB)db).connect()) {
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				int i = 0;
+				// targets
+				if (!targetNames.isEmpty()) for (String s : targetNames) stm.setString(++i, s);
+				if (!targetIds.isEmpty()) for (UUID s : targetIds) stm.setString(++i, s.toString());
+				// executors
+				if (!executorNames.isEmpty()) for (String s : executorNames) stm.setString(++i, s);
+				if (!executorIds.isEmpty()) for (UUID s : executorIds) stm.setString(++i, s.toString());
+				// servers
+				if (servers != null && servers.length > 0) for (String s : servers) stm.setString(++i, this.likeContains(s));
+				// orders
+				if (orders != null && orders.length > 0) for (String s : orders) stm.setString(++i, this.likeContains(s));
+				// actions
+				if (actions != null && actions.length > 0) for (ActionType s : actions) stm.setString(++i, this.likeContains(s.name()));
+				// value
+				if (valueConditions != null && valueConditions.length > 0) for (NumericCondition c : valueConditions) for (long val : c.getValues()) stm.setLong(++i, val);
+				// balance
+				if (balanceConditions != null && balanceConditions.length > 0) for (NumericCondition c : balanceConditions) for (long val : c.getValues()) stm.setLong(++i, val);
+				
+				try (ResultSet rs = stm.executeQuery()) {
+					List<LogEntry> list = new ArrayList<>(rs.getFetchSize());
+					while (rs.next()) {
+						ActionExecutor executor = new ActionExecutor(rs.getString(5), UUID.fromString(rs.getString(6))) {};
+						ActionType type = ActionType.parse(rs.getString(9));
+						list.add(new LogEntry(rs.getInt(1), UUID.fromString(rs.getString(2)), rs.getString(3), executor,
+								rs.getString(4), rs.getDate(7), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
+					}
+					return list;
+				}
+			}
+		}
+	}
+	
+	
+	
 	private @NotNull Component prepareInteractive(@NotNull Component comp, @NotNull String name, @NotNull UUID uuid) {
 		return comp.hoverEvent(Component.text(uuid.toString(), AQUA)
 				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.LOG_SUGGEST.component(GRAY))
 				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.LOG_INSERT.component(GRAY)))
 				.clickEvent(ClickEvent.suggestCommand(name)).insertion(uuid.toString());
+	}
+	
+	private @NotNull String escapeLikeWildcards(@NotNull String text) {
+		return text.replace("%", "\\%").replace("_", "\\_");
+	}
+	
+	private @NotNull String likeContains(@NotNull String text) {
+		return "%" + this.escapeLikeWildcards(text) + "%";
 	}
 	
 

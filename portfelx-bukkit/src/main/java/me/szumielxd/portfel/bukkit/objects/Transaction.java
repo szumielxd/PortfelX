@@ -1,9 +1,18 @@
 package me.szumielxd.portfel.bukkit.objects;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
+
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,6 +63,8 @@ public class Transaction {
 		if (!this.transactionId.equals(result.getTransactionId())) return false;
 		this.result = result;
 		
+		long oldBalance = this.user.getBalance();
+		
 		((BukkitOperableUser)this.user).setPlainBalance(this.result.newBalance);
 		
 		if (!this.result.getStatus().equals(TransactionStatus.OK)) return true;
@@ -82,7 +93,24 @@ public class Transaction {
 			if (cmd.startsWith("/")) cmd = cmd.substring(1, cmd.length());
 			this.plugin.getServer().dispatchCommand(this.plugin.getServer().getConsoleSender(), MiscUtils.replaceAll(pattern.matcher(cmd), replacer));
 		}));
+		
+		OfflinePlayer target = Bukkit.getOfflinePlayer(user.getUniqueId());
+		String ip = target.isOnline()? target.getPlayer().getAddress().getAddress().getHostAddress() : "offline";
+		this.log(String.format("%s(%s) successfully bought `%s` for %s$. Old balance: %s$, new balance: %s$", user.getName(), ip, order.getName(), order.getPrice(), oldBalance, user.getBalance()));
+		
 		return true; 
+	}
+	
+	
+	private void log(@NotNull String text) {
+		File f = new File(this.plugin.getDataFolder(), "transactions.log");
+		if (!f.getParentFile().exists()) f.getParentFile().mkdirs();
+		text = String.format("[%s] %s", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
+		try {
+			Files.write(f.toPath(), Collections.singletonList(text));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	

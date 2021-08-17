@@ -72,10 +72,38 @@ public class Lang {
 		COMMAND_ARGTYPES_INTOP_DISPLAY("command.arg-types.in-top.display", "reason"),
 		COMMAND_ARGTYPES_INTOP_DESCRIPTION("command.arg-types.in-top.description", "reason of this action"),
 		COMMAND_ARGTYPES_INTOP_ERROR("command.arg-types.in-top.error", "Did you know {0} is not true nor false?"),
+		//
+		COMMAND_ARGTYPES_LOGPAGE_DISPLAY("command.arg-types.log-page.display", "page"),
+		COMMAND_ARGTYPES_LOGPAGE_DESCRIPTION("command.arg-types.log-page.description", "current page of logs"),
+		//
+		COMMAND_ARGTYPES_LOGSIZE_DISPLAY("command.arg-types.log-size.display", "size"),
+		COMMAND_ARGTYPES_LOGSIZE_DESCRIPTION("command.arg-types.log-size.description", "size of one page"),
+		COMMAND_ARGTYPES_LOGSIZE_ERROR("command.arg-types.log-size.error", "Are you stupid or stupid? Page size of {0} is definitly unsafe. Max allowed is {1}."),
+		//
+		COMMAND_ARGTYPES_LOGTARGET_DISPLAY("command.arg-types.log-target.display", "target"),
+		COMMAND_ARGTYPES_LOGTARGET_DESCRIPTION("command.arg-types.log-target.description", "string representation of action's target"),
+		//
+		COMMAND_ARGTYPES_LOGEXECUTOR_DISPLAY("command.arg-types.log-executor.display", "executor"),
+		COMMAND_ARGTYPES_LOGEXECUTOR_DESCRIPTION("command.arg-types.log-executor.description", "string representation of action's executor"),
+		//
+		COMMAND_ARGTYPES_LOGSERVER_DISPLAY("command.arg-types.log-executor.display", "server"),
+		COMMAND_ARGTYPES_LOGSERVER_DESCRIPTION("command.arg-types.log-executor.description", "string representation of server where action has place"),
+		//
+		COMMAND_ARGTYPES_LOGORDER_DISPLAY("command.arg-types.log-executor.display", "order"),
+		COMMAND_ARGTYPES_LOGORDER_DESCRIPTION("command.arg-types.log-executor.description", "string representation of order's name"),
+		//
+		COMMAND_ARGTYPES_LOGACTION_DISPLAY("command.arg-types.log-executor.display", "action"),
+		COMMAND_ARGTYPES_LOGACTION_DESCRIPTION("command.arg-types.log-executor.description", "string representation of action's type"),
+		//
+		COMMAND_ARGTYPES_LOGVALCOND_DISPLAY("command.arg-types.log-value-condition.display", "condition"),
+		COMMAND_ARGTYPES_LOGVALCOND_DESCRIPTION("command.arg-types.log-value-condition.description", "conditions describing range of values"),
+		//
+		COMMAND_ARGTYPES_LOGBALCOND_DISPLAY("command.arg-types.log-balance-condition.display", "condition"),
+		COMMAND_ARGTYPES_LOGBALCOND_DESCRIPTION("command.arg-types.log-balance-condition.description", "conditions describing range of balances"),
 		
 		
 		COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
-		
+		//
 		COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
 		//
 		COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
@@ -131,6 +159,13 @@ public class Lang {
 		COMMAND_USER_TOP_SET_DESCRIPTION("command.user.top.set.description", "Set wheter this user should by available in top."),
 		COMMAND_USER_TOP_SET_SUCCESS("command.user.top.set.success", "Set {0}'s in top visibility to {1}."),
 		COMMAND_USER_TOP_SET_ALREADY("command.user.top.set.already", "{0}'s in top visibility is already set to {1}."),
+		//
+		COMMAND_LOG_DESCRIPTION("command.log.description", "Log management main command."),
+		//
+		COMMAND_LOG_READ_DESCRIPTION("command.log.read.description", "Read logs."),
+		COMMAND_LOG_READ_HEADER("command.log.read.header", "Showing last activities"),
+		COMMAND_LOG_READ_PAGE("command.log.read.page", "page {0} of {1}"),
+		COMMAND_LOG_READ_TIME_AGO("command.log.read.time-ago", "{0} ago"),
 		
 		
 		COMMAND_USAGE_TITLE("command.usage.title", "Command Usage - {0}"),
@@ -176,6 +211,10 @@ public class Lang {
 		MAIN_VALUE_NO("main.value.no", "no"),
 		MAIN_VALUE_ONLINE("main.value.online", "Online"),
 		MAIN_VALUE_OFFLINE("main.value.offline", "Offline"),
+		MAIN_VALUE_TIME_MINUTES("main.value.time.minutes", "{0}m"),
+		MAIN_VALUE_TIME_HOURS("main.value.time.hours", "{0}h"),
+		MAIN_VALUE_TIME_DAYS("main.value.time.days", "{0}d"),
+		MAIN_VALUE_TIME_YEARS("main.value.time.years", "{0}y"),
 		
 		MAIN_MESSAGE_INSERTION("main.message.insertion", "Click to insert the {0}."),
 		

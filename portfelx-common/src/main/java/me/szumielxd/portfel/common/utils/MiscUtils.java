@@ -201,7 +201,7 @@ public class MiscUtils {
 	 * @return component representation of argument
 	 */
 	public static @NotNull Component argToComponent(@NotNull CmdArg arg, @Nullable TextColor argColor, @Nullable TextColor bracketsColor) {
-		String prefix = arg.isOptional() ? "[<" : "<";
+		String prefix = (arg.isOptional() ? "[" : "") + (arg.hasPrefix()? arg.getPrefix() : "") + "<";
 		String suffix = arg.isOptional() ? ">]" : ">";
 		return Component.empty().children(Arrays.asList(Component.text(prefix, bracketsColor),
 				arg.getDisplay().component(argColor), Component.text(suffix, bracketsColor)));
@@ -239,8 +239,8 @@ public class MiscUtils {
 	 * @return string visual representation of argument
 	 */
 	public static @NotNull String argToPlainText(@NotNull Lang lang, @NotNull CmdArg arg, @Nullable ChatColor argColor, @Nullable ChatColor bracketsColor) {
-		String prefix = (argColor!=null ? argColor.toString() : "") + (arg.isOptional() ? "[<" : "<") + (bracketsColor!=null ? bracketsColor.toString() : "");
-		String suffix = (argColor!=null ? argColor.toString() : "") + (arg.isOptional() ? ">]" : ">");
+		String prefix = (bracketsColor!=null ? bracketsColor.toString() : "") + (arg.isOptional() ? "[" : "") + (arg.hasPrefix()? arg.getPrefix() : "") + "<" + (argColor!=null ? argColor.toString() : "");
+		String suffix = (bracketsColor!=null ? bracketsColor.toString() : "") + (arg.isOptional() ? ">]" : ">");
 		return prefix + lang.text(arg.getDisplay()) + suffix;
 	}
 	
@@ -383,6 +383,38 @@ public class MiscUtils {
 		} 
 		matcher.appendTail(sb); 
 		return sb.toString();
+	}
+	
+	/**
+	 * Format duration given in milliseconds as localized text. 
+	 * 
+	 * @param lang language used to localize
+	 * @param duration duration to format
+	 * @param removeZero if true values equal to zero will be ignored (except minutes)
+	 * @return formatted text
+	 */
+	public static String formatDuration(Lang lang, long duration, boolean removeZero) {
+		duration /= 60000;
+		long min = duration%60;
+		duration /= 60;
+		long hr = duration%24;
+		duration /= 24;
+		long day = duration%365;
+		duration /= 365;
+		StringBuilder time = new StringBuilder();
+		if (duration > 0 || !removeZero) {
+			time.append(lang.text(LangKey.MAIN_VALUE_TIME_YEARS, duration)).append(" "); // years (1+)
+			removeZero = false;
+		}
+		if (day > 0 || !removeZero) {
+			time.append(lang.text(LangKey.MAIN_VALUE_TIME_DAYS, day)).append(" "); // days (1-364)
+			removeZero = false;
+		}
+		if (hr > 0 || !removeZero) {
+			time.append(lang.text(LangKey.MAIN_VALUE_TIME_HOURS, hr)).append(" "); // hours (1-23)
+		}
+		time.append(lang.text(LangKey.MAIN_VALUE_TIME_MINUTES, min)); // minutes (0-59)
+		return time.toString();
 	}
 	
 
