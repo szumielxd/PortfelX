@@ -19,7 +19,7 @@
 		<author>szumielxd</author>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<bukkitMainClass>me.szumielxd.portfel.bukkit.PortfelBukkitImpl</bukkitMainClass>
-		<bungeeMainClass>me.szumielxd.portfel.bungee.PortfelBungee</bungeeMainClass>
+		<bungeeMainClass>me.szumielxd.portfel.bungee.PortfelBungeeImpl</bungeeMainClass>
 		<revision>3.0.0-SNAPSHOT</revision>
 	</properties>
 
