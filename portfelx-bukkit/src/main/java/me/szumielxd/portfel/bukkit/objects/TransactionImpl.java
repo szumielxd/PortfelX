@@ -92,7 +92,7 @@ public class TransactionImpl implements Transaction {
 	 */
 	@Override
 	public boolean finish(@NotNull TransactionResult result) throws RuntimeException {
-		if (!this.plugin.getServer().isPrimaryThread()) throw new RuntimeException("Transaction cannot be finished in main thread.");
+		if (this.plugin.getServer().isPrimaryThread()) throw new RuntimeException("Transaction cannot be finished in main thread.");
 		if (this.result != null) return false;
 		if (!this.transactionId.equals(result.getTransactionId())) return false;
 		this.result = result;
