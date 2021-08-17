@@ -8,8 +8,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
-import me.szumielxd.portfel.common.objects.User;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -19,7 +19,7 @@ public class PortfelGuiHolder implements InventoryHolder {
 	private static Method Server_createInventory;
 	private static final LegacyComponentSerializer legacy = LegacyComponentSerializer.builder().hexColors().useUnusualXRepeatedCharacterHexFormat().character('§').build();
 	
-	private final PortfelBukkit plugin;
+	private final PortfelBukkitImpl plugin;
 	private final Inventory inventory;
 	private final AbstractPortfelGui gui;
 	
@@ -31,7 +31,7 @@ public class PortfelGuiHolder implements InventoryHolder {
 	}
 	
 	
-	public PortfelGuiHolder(@NotNull PortfelBukkit plugin, @NotNull AbstractPortfelGui gui, User user) {
+	public PortfelGuiHolder(@NotNull PortfelBukkitImpl plugin, @NotNull AbstractPortfelGui gui, User user) {
 		this.plugin = plugin;
 		this.gui = gui;
 		Inventory inv;

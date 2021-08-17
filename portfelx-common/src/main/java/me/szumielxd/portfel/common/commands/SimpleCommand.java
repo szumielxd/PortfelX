@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.common.Portfel;
-import me.szumielxd.portfel.common.objects.CommonSender;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 

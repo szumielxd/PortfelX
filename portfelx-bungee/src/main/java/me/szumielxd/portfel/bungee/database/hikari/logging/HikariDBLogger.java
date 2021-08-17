@@ -17,18 +17,18 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.bungee.BungeeConfigKey;
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.api.Config;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.ActionExecutor;
+import me.szumielxd.portfel.api.objects.ExecutedTask;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import me.szumielxd.portfel.bungee.api.configuration.BungeeConfigKey;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger;
 import me.szumielxd.portfel.bungee.database.hikari.HikariDB;
 import me.szumielxd.portfel.bungee.objects.BungeeSender;
-import me.szumielxd.portfel.common.Config;
-import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.objects.ActionExecutor;
-import me.szumielxd.portfel.common.objects.ExecutedTask;
-import me.szumielxd.portfel.common.objects.User;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
@@ -50,7 +50,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 	private final String LOGS_BALANCE;
 	
 	
-	private final PortfelBungee plugin;
+	private final PortfelBungeeImpl plugin;
 	private long lastID = -1;
 	private ExecutedTask logListener;
 	private Boolean initialized;
@@ -60,7 +60,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 		return text.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
 	}
 	
-	public HikariDBLogger(PortfelBungee plugin) {
+	public HikariDBLogger(PortfelBungeeImpl plugin) {
 		this.plugin = plugin;
 		Config cfg = this.plugin.getConfiguration();
 		

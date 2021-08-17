@@ -6,10 +6,4 @@
 		<artifactId>portfelx-parent</artifactId>
 		<version>${revision}</version>
 	</parent>
-	<dependencies>
-		<dependency>
-			<groupId>me.szumielxd</groupId>
-			<artifactId>portfelx-common</artifactId>
-		</dependency>
-	</dependencies>
 </project>

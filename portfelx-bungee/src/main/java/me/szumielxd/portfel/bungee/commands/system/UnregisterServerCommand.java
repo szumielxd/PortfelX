@@ -10,15 +10,15 @@ import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import me.szumielxd.portfel.bungee.api.managers.AccessManager;
 import me.szumielxd.portfel.bungee.commands.CommonArgs;
-import me.szumielxd.portfel.bungee.managers.AccessManager;
-import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
-import me.szumielxd.portfel.common.objects.CommonSender;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
@@ -26,7 +26,7 @@ public class UnregisterServerCommand extends SimpleCommand {
 	
 	public final List<CmdArg> args;
 
-	public UnregisterServerCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
+	public UnregisterServerCommand(@NotNull PortfelBungeeImpl plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "unregisterserver", "deleteserver");
 		this.args = Arrays.asList(CommonArgs.SERVER);
 	}
@@ -35,7 +35,7 @@ public class UnregisterServerCommand extends SimpleCommand {
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed == null) return;
-		PortfelBungee pl = (PortfelBungee)this.getPlugin();
+		PortfelBungeeImpl pl = (PortfelBungeeImpl)this.getPlugin();
 		AccessManager access = pl.getAccessManager();
 		UUID serverId = (UUID) parsed[0];
 		access.unregister(serverId);

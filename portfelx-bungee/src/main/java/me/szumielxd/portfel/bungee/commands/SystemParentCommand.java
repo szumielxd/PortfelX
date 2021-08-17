@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.commands.system.RegisterServerCommand;
 import me.szumielxd.portfel.bungee.commands.system.ServerParentCommand;
 import me.szumielxd.portfel.bungee.commands.system.UnregisterServerCommand;
@@ -16,7 +16,7 @@ import me.szumielxd.portfel.common.commands.ParentCommand;
 
 public class SystemParentCommand extends ParentCommand {
 
-	public SystemParentCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
+	public SystemParentCommand(@NotNull PortfelBungeeImpl plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "system", "sys");
 		this.register(
 				new RegisterServerCommand(plugin, this),

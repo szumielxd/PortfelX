@@ -21,13 +21,13 @@ import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.Sets;
 
-import me.szumielxd.portfel.bukkit.BukkitConfigKey;
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
@@ -46,11 +46,11 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	}
 	
 	
-	private final PortfelBukkit plugin;
+	private final PortfelBukkitImpl plugin;
 	private final Map<Integer, OrderPortfelGui> guis;
 	
 	
-	public MainPortfelGui(PortfelBukkit plugin, OrderPortfelGui... shops) {
+	public MainPortfelGui(PortfelBukkitImpl plugin, OrderPortfelGui... shops) {
 		this.plugin = plugin;
 		Range<Integer> range = Range.between(0, this.getSize()-1);
 		this.guis = Stream.of(shops).filter(s -> range.contains(s.getSlot())).collect(Collectors.toMap(s -> s.getSlot(), Function.identity(), (a,b) -> b));

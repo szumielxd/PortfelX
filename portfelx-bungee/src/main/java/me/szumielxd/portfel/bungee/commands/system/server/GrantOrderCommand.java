@@ -9,16 +9,16 @@ import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import me.szumielxd.portfel.bungee.api.managers.AccessManager;
 import me.szumielxd.portfel.bungee.commands.CommonArgs;
-import me.szumielxd.portfel.bungee.managers.AccessManager;
 import me.szumielxd.portfel.bungee.managers.OrdersManager.GlobalOrder;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
-import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
@@ -36,7 +36,7 @@ public class GrantOrderCommand extends SimpleCommand {
 		if (parsed != null) {
 			GlobalOrder order = (GlobalOrder) parsed[0];
 			UUID server = (UUID) parsedArgs[0];
-			AccessManager access = ((PortfelBungee)this.getPlugin()).getAccessManager();
+			AccessManager access = ((PortfelBungeeImpl)this.getPlugin()).getAccessManager();
 			if (access.canAccess(server, order.getName())) {
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_SERVER_GRANT_ALREADY.component(RED)));
 				return;

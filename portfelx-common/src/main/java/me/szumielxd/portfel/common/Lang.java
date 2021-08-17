@@ -21,9 +21,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 
-import me.szumielxd.portfel.common.Config.ConfigKey;
-import me.szumielxd.portfel.common.objects.CommonPlayer;
-import me.szumielxd.portfel.common.objects.CommonSender;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.configuration.ConfigKey;
+import me.szumielxd.portfel.api.objects.CommonPlayer;
+import me.szumielxd.portfel.api.objects.CommonSender;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextReplacementConfig;

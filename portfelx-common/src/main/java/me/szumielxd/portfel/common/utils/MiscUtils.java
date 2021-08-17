@@ -20,9 +20,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import net.kyori.adventure.text.Component;

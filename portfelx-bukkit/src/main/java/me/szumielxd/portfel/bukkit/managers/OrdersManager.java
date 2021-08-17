@@ -23,22 +23,22 @@ import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
 import org.simpleyaml.exceptions.InvalidConfigurationException;
 
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.api.objects.OrderData;
 import me.szumielxd.portfel.bukkit.gui.OrderPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.ShopType;
-import me.szumielxd.portfel.bukkit.objects.OrderData;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 
 public class OrdersManager {
 	
 	
-	private final PortfelBukkit plugin;
+	private final PortfelBukkitImpl plugin;
 	private final File ordersFolder;
 	private final Map<String, OrderPortfelGui> categories = new HashMap<>();
 	
 	
-	public OrdersManager(@NotNull PortfelBukkit plugin) {
+	public OrdersManager(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
 		this.ordersFolder = new File(this.plugin.getDataFolder(), "orders");
 	}

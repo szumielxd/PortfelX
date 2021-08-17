@@ -2,7 +2,7 @@ package me.szumielxd.portfel.bukkit.objects;
 
 import org.bukkit.scheduler.BukkitTask;
 
-import me.szumielxd.portfel.common.objects.ExecutedTask;
+import me.szumielxd.portfel.api.objects.ExecutedTask;
 
 public class BukkitTaskWrapper implements ExecutedTask {
 	

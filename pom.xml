@@ -18,7 +18,7 @@
 		<pluginName>Portfel</pluginName>
 		<author>szumielxd</author>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<bukkitMainClass>me.szumielxd.portfel.bukkit.PortfelBukkit</bukkitMainClass>
+		<bukkitMainClass>me.szumielxd.portfel.bukkit.PortfelBukkitImpl</bukkitMainClass>
 		<bungeeMainClass>me.szumielxd.portfel.bungee.PortfelBungee</bungeeMainClass>
 		<revision>3.0.0-SNAPSHOT</revision>
 	</properties>
@@ -64,7 +64,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>portfelx-logging</artifactId>
+				<artifactId>portfelx-assembly</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>

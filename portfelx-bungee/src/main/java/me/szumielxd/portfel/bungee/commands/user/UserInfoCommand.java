@@ -16,12 +16,12 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
-import me.szumielxd.portfel.common.objects.CommonSender;
-import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;

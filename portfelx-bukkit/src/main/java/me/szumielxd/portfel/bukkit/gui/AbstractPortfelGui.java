@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.common.objects.User;
+import me.szumielxd.portfel.api.objects.User;
 import net.kyori.adventure.text.Component;
 
 public interface AbstractPortfelGui {

@@ -7,9 +7,9 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
+import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
-import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
-import me.szumielxd.portfel.common.objects.User;
 
 public interface AbstractDB {
 	

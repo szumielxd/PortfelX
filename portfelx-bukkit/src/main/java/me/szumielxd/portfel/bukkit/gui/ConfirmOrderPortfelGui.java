@@ -11,13 +11,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
-import me.szumielxd.portfel.bukkit.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.objects.User;
 import net.kyori.adventure.text.Component;
 
 public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
@@ -33,11 +33,11 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 	}
 	
 	
-	private final PortfelBukkit plugin;
+	private final PortfelBukkitImpl plugin;
 	private final OrderDataOnAir order;
 	
 	
-	public ConfirmOrderPortfelGui(@NotNull PortfelBukkit plugin, OrderDataOnAir order) {
+	public ConfirmOrderPortfelGui(@NotNull PortfelBukkitImpl plugin, OrderDataOnAir order) {
 		this.plugin = plugin;
 		this.order = order;
 	}

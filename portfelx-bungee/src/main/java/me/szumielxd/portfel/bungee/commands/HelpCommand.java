@@ -11,20 +11,20 @@ import java.util.Arrays;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
-import me.szumielxd.portfel.common.Portfel;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
-import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
 public class HelpCommand extends SimpleCommand {
 	
 
-	public HelpCommand(@NotNull PortfelBungee plugin, @NotNull MainCommand parent, @NotNull String name, @NotNull String... aliases) {
+	public HelpCommand(@NotNull PortfelBungeeImpl plugin, @NotNull MainCommand parent, @NotNull String name, @NotNull String... aliases) {
 		super(plugin, parent, name, aliases);
 	}
 
@@ -33,7 +33,7 @@ public class HelpCommand extends SimpleCommand {
 		
 		String[] shortLabel = Arrays.copyOf(label, label.length-1);
 		String helpCmd = "/" + String.join(" ", shortLabel) + " help";
-		PortfelBungee pl = (PortfelBungee) this.getPlugin();
+		PortfelBungeeImpl pl = (PortfelBungeeImpl) this.getPlugin();
 		String pluginVersion = pl.getDescription().getName() + " " + pl.getDescription().getVersion();
 		Component running = Portfel.PREFIX.append(LangKey.COMMAND_MAIN_RUNNING.component(DARK_PURPLE, Component.text(pluginVersion, LIGHT_PURPLE)));
 		Component runningHover = Component.text(pluginVersion, LIGHT_PURPLE);

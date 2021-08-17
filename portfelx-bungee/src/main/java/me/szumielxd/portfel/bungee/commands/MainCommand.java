@@ -12,14 +12,14 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.objects.BungeeSender;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
-import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
@@ -28,12 +28,12 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 public class MainCommand extends Command implements TabExecutor, AbstractCommand {
 
 	
-	private final PortfelBungee plugin;
+	private final PortfelBungeeImpl plugin;
 	private Map<String, SimpleCommand> childrens = new HashMap<>();
 	private final String help = "help";
 	
 	
-	public MainCommand(@NotNull PortfelBungee plugin, @NotNull String name, @NotNull String permission, @NotNull String... aliases) {
+	public MainCommand(@NotNull PortfelBungeeImpl plugin, @NotNull String name, @NotNull String permission, @NotNull String... aliases) {
 		super(name, permission, aliases);
 		this.plugin = plugin;
 		this.register(

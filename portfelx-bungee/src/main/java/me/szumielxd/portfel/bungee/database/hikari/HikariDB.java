@@ -19,20 +19,20 @@ import org.jetbrains.annotations.Nullable;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.szumielxd.portfel.bungee.BungeeConfigKey;
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.api.Config;
+import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import me.szumielxd.portfel.bungee.api.configuration.BungeeConfigKey;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
-import me.szumielxd.portfel.common.Config;
-import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
-import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public abstract class HikariDB implements AbstractDB {
 	
 	
-	protected final PortfelBungee plugin;
+	protected final PortfelBungeeImpl plugin;
 	protected HikariDataSource hikari;
 	
 	private boolean tablesChecked = false;
@@ -69,7 +69,7 @@ public abstract class HikariDB implements AbstractDB {
 	}
 	
 	
-	public HikariDB(PortfelBungee plugin) {
+	public HikariDB(PortfelBungeeImpl plugin) {
 		this.plugin = plugin;
 		Config cfg = this.plugin.getConfiguration();
 		

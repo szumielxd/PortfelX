@@ -18,7 +18,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
 import me.clip.placeholderapi.PlaceholderAPI;
-import me.szumielxd.portfel.common.objects.User;
+import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;

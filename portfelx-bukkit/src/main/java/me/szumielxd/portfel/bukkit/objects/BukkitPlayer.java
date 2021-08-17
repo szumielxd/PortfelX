@@ -16,8 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
-import me.szumielxd.portfel.common.objects.CommonPlayer;
+import me.szumielxd.portfel.api.objects.CommonPlayer;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
@@ -34,7 +34,7 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	private final Player player;
 	
 	
-	BukkitPlayer(@NotNull PortfelBukkit plugin, @NotNull Player player) {
+	BukkitPlayer(@NotNull PortfelBukkitImpl plugin, @NotNull Player player) {
 		super(plugin, player);
 		this.player = player;
 	}

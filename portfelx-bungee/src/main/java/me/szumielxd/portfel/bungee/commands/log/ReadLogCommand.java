@@ -17,18 +17,18 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger.ActionType;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger.LogEntry;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger.NumericCondition;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
-import me.szumielxd.portfel.common.objects.CommonSender;
-import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -132,7 +132,7 @@ public class ReadLogCommand extends SimpleCommand {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed != null) {
 			try {
-				List<LogEntry> logs = ((PortfelBungee)this.getPlugin()).getDBLogger().getLogs((String[])parsed[2], (String[])parsed[3], (String[])parsed[4], (String[])parsed[5], (ActionType[])parsed[6], (NumericCondition[])parsed[7], (NumericCondition[])parsed[8]);
+				List<LogEntry> logs = ((PortfelBungeeImpl)this.getPlugin()).getDBLogger().getLogs((String[])parsed[2], (String[])parsed[3], (String[])parsed[4], (String[])parsed[5], (ActionType[])parsed[6], (NumericCondition[])parsed[7], (NumericCondition[])parsed[8]);
 				
 				int size = parsed[1] != null ? (int)parsed[1] : 5;
 				int maxPage = (int) Math.ceil(logs.size()/(double)size);

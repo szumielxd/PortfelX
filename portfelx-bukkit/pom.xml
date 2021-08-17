@@ -11,10 +11,6 @@
 			<groupId>${parent.groupId}</groupId>
 			<artifactId>portfelx-common</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>${parent.groupId}</groupId>
-			<artifactId>portfelx-api</artifactId>
-		</dependency>
 		<!--dependency>
 			<groupId>io.papermc.paper</groupId>
 			<artifactId>paper-api</artifactId>

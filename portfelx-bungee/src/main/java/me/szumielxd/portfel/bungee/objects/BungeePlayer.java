@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
-import me.szumielxd.portfel.common.objects.CommonPlayer;
+import me.szumielxd.portfel.api.objects.CommonPlayer;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
@@ -29,7 +29,7 @@ public class BungeePlayer extends BungeeSender implements CommonPlayer {
 	private final ProxiedPlayer player;
 	
 	
-	BungeePlayer(@NotNull PortfelBungee plugin, @NotNull ProxiedPlayer player) {
+	BungeePlayer(@NotNull PortfelBungeeImpl plugin, @NotNull ProxiedPlayer player) {
 		super(plugin, player);
 		this.player = player;
 	}

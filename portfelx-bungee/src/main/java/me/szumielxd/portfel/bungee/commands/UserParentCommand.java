@@ -5,11 +5,11 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.bungee.commands.user.EcoParentCommand;
 import me.szumielxd.portfel.bungee.commands.user.TopParentCommand;
 import me.szumielxd.portfel.bungee.commands.user.UserInfoCommand;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;

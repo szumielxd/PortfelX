@@ -5,14 +5,14 @@ import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
-import me.szumielxd.portfel.common.objects.ActionExecutor;
-import me.szumielxd.portfel.common.objects.User;
+import me.szumielxd.portfel.api.objects.ActionExecutor;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 
 public class BungeeOperableUser extends User {
 	
 	
-	private final PortfelBungee plugin;
+	private final PortfelBungeeImpl plugin;
 	
 
 	/**
@@ -25,7 +25,7 @@ public class BungeeOperableUser extends User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public BungeeOperableUser(@NotNull PortfelBungee plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance) {
+	public BungeeOperableUser(@NotNull PortfelBungeeImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance) {
 		super(uuid, name, online, deniedInTop, balance);
 		this.plugin = plugin;
 	}

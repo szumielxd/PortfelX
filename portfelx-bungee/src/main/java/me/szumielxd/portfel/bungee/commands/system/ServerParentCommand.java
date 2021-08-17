@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.commands.CommonArgs;
 import me.szumielxd.portfel.bungee.commands.system.server.GrantOrderCommand;
 import me.szumielxd.portfel.bungee.commands.system.server.RevokeOrderCommand;
@@ -17,7 +17,7 @@ public class ServerParentCommand extends ParentCommand {
 	
 	public final List<CmdArg> args;
 
-	public ServerParentCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
+	public ServerParentCommand(@NotNull PortfelBungeeImpl plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "server", "srv");
 		this.register(
 				new GrantOrderCommand(plugin, this),

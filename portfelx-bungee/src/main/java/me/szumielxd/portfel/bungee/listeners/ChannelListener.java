@@ -11,13 +11,14 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import me.szumielxd.portfel.bungee.PortfelBungee;
-import me.szumielxd.portfel.bungee.objects.BungeeActionExecutor;
-import me.szumielxd.portfel.common.Portfel;
-import me.szumielxd.portfel.common.enums.TransactionStatus;
-import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
-import me.szumielxd.portfel.common.objects.ActionExecutor;
-import me.szumielxd.portfel.common.objects.User;
+
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.enums.TransactionStatus;
+import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
+import me.szumielxd.portfel.api.objects.ActionExecutor;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import me.szumielxd.portfel.bungee.api.objects.BungeeActionExecutor;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PluginMessageEvent;
@@ -27,11 +28,11 @@ import net.md_5.bungee.event.EventHandler;
 public class ChannelListener implements Listener {
 	
 	
-	private final PortfelBungee plugin;
+	private final PortfelBungeeImpl plugin;
 	private final Gson gson;
 	
 	
-	public ChannelListener(@NotNull PortfelBungee plugin) {
+	public ChannelListener(@NotNull PortfelBungeeImpl plugin) {
 		this.plugin = plugin;
 		this.gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	}

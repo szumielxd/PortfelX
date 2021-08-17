@@ -6,11 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 
 public class MysqlDB extends HikariDB {
 
-	public MysqlDB(PortfelBungee plugin) {
+	public MysqlDB(PortfelBungeeImpl plugin) {
 		super(plugin);
 	}
 	

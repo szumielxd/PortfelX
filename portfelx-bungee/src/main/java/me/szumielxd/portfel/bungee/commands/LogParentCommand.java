@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.commands.log.ReadLogCommand;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
@@ -14,7 +14,7 @@ import me.szumielxd.portfel.common.commands.ParentCommand;
 
 public class LogParentCommand extends ParentCommand {
 
-	public LogParentCommand(@NotNull PortfelBungee plugin, @NotNull AbstractCommand parent) {
+	public LogParentCommand(@NotNull PortfelBungeeImpl plugin, @NotNull AbstractCommand parent) {
 		super(plugin, parent, "log", "logs");
 		this.register(
 				new ReadLogCommand(plugin, this)

@@ -18,10 +18,11 @@ import org.simpleyaml.configuration.file.YamlFile;
 import org.simpleyaml.exceptions.InvalidConfigurationException;
 
 import com.google.gson.Gson;
-import me.szumielxd.portfel.bungee.PortfelBungee;
+
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.objects.BungeeSender;
-import me.szumielxd.portfel.common.objects.CommonSender;
-import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -30,12 +31,12 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 public class OrdersManager {
 	
 	
-	private final PortfelBungee plugin;
+	private final PortfelBungeeImpl plugin;
 	private final File file;
 	private Map<String, GlobalOrder> orders = new HashMap<>();
 	
 	
-	public OrdersManager(PortfelBungee plugin) {
+	public OrdersManager(PortfelBungeeImpl plugin) {
 		this.plugin = plugin;
 		this.file = new File(this.plugin.getDataFolder(), "orders.yml");
 	}

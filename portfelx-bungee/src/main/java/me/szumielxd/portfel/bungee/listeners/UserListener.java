@@ -5,10 +5,10 @@ import org.jetbrains.annotations.NotNull;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
-import me.szumielxd.portfel.common.Portfel;
-import me.szumielxd.portfel.common.objects.User;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
@@ -20,10 +20,10 @@ import net.md_5.bungee.event.EventPriority;
 public class UserListener implements Listener {
 	
 	
-	private final PortfelBungee plugin;
+	private final PortfelBungeeImpl plugin;
 	
 	
-	public UserListener(@NotNull PortfelBungee plugin) {
+	public UserListener(@NotNull PortfelBungeeImpl plugin) {
 		this.plugin = plugin;
 	}
 	

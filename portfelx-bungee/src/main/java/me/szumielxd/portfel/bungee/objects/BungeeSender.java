@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.objects.CommonSender;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -16,11 +16,11 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 public class BungeeSender implements CommonSender {
 	
 	
-	protected final PortfelBungee plugin;
+	protected final PortfelBungeeImpl plugin;
 	private final CommandSender sender;
 	
 	
-	BungeeSender(@NotNull PortfelBungee plugin, @NotNull CommandSender sender) {
+	BungeeSender(@NotNull PortfelBungeeImpl plugin, @NotNull CommandSender sender) {
 		this.plugin = plugin;
 		this.sender = sender;
 	}
@@ -125,7 +125,7 @@ public class BungeeSender implements CommonSender {
 	 * @param sender sender to wrap
 	 * @return CommonSender or its subclass
 	 */
-	public static BungeeSender get(PortfelBungee plugin, CommandSender sender) {
+	public static BungeeSender get(PortfelBungeeImpl plugin, CommandSender sender) {
 		return sender instanceof ProxiedPlayer ? new BungeePlayer(plugin, (ProxiedPlayer)sender) : new BungeeSender(plugin, sender);
 	}
 	

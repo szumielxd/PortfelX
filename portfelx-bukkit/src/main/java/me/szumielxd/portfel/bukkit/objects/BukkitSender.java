@@ -6,9 +6,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.objects.CommonSender;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -17,11 +17,11 @@ import net.md_5.bungee.api.chat.TextComponent;
 public class BukkitSender implements CommonSender {
 	
 	
-	protected final PortfelBukkit plugin;
+	protected final PortfelBukkitImpl plugin;
 	private final CommandSender sender;
 	
 	
-	BukkitSender(@NotNull PortfelBukkit plugin, @NotNull CommandSender sender) {
+	BukkitSender(@NotNull PortfelBukkitImpl plugin, @NotNull CommandSender sender) {
 		this.plugin = plugin;
 		this.sender = sender;
 	}
@@ -127,7 +127,7 @@ public class BukkitSender implements CommonSender {
 	 * @param sender sender to wrap
 	 * @return CommonSender or its subclass
 	 */
-	public static BukkitSender get(PortfelBukkit plugin, CommandSender sender) {
+	public static BukkitSender get(PortfelBukkitImpl plugin, CommandSender sender) {
 		return sender instanceof Player ? new BukkitPlayer(plugin, (Player)sender) : new BukkitSender(plugin, sender);
 	}
 	

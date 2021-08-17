@@ -1,6 +1,6 @@
 package me.szumielxd.portfel.bungee.objects;
 
-import me.szumielxd.portfel.common.objects.ExecutedTask;
+import me.szumielxd.portfel.api.objects.ExecutedTask;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 public class BungeeTaskWrapper implements ExecutedTask {

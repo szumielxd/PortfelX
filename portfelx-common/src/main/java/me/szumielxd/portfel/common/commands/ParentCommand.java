@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
-import me.szumielxd.portfel.common.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 

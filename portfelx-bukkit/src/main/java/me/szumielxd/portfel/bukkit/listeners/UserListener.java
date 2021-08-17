@@ -4,16 +4,16 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 
 public class UserListener implements Listener {
 	
 	
-	private final PortfelBukkit plugin;
+	private final PortfelBukkitImpl plugin;
 	
 	
-	public UserListener(PortfelBukkit plugin) {
+	public UserListener(PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
 	}
 	

@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.api.objects.BungeeActionExecutor;
 import me.szumielxd.portfel.bungee.commands.CommonArgs;
-import me.szumielxd.portfel.bungee.objects.BungeeActionExecutor;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
-import me.szumielxd.portfel.common.objects.CommonSender;
-import me.szumielxd.portfel.common.objects.User;
 import net.kyori.adventure.text.Component;
 
 public class EcoSetCommand extends SimpleCommand {

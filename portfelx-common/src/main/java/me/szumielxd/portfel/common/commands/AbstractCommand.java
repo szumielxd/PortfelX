@@ -5,9 +5,9 @@ import java.util.function.Predicate;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.api.objects.CommonPlayer;
+import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.objects.CommonPlayer;
-import me.szumielxd.portfel.common.objects.CommonSender;
 
 public interface AbstractCommand {
 	

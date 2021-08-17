@@ -21,22 +21,22 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bukkit.BukkitConfigKey;
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
+import me.szumielxd.portfel.bukkit.api.objects.OrderData;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
-import me.szumielxd.portfel.bukkit.objects.OrderData;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.bukkit.utils.PlaceholderUtils;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
 public class OrderPortfelGui implements AbstractPortfelGui {
 	
 	
-	private final PortfelBukkit plugin;
+	private final PortfelBukkitImpl plugin;
 	private final String name;
 	private final String title;
 	private final int slot;
@@ -48,7 +48,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	private final Map<Integer, OrderData> orders;
 	
 	
-	public OrderPortfelGui(@NotNull PortfelBukkit plugin, @NotNull String name, @NotNull String title, int slot, int rows, @NotNull String displayName, @NotNull List<String> description, ItemStack icon, @NotNull ShopType type, @NotNull List<OrderData> orders) {
+	public OrderPortfelGui(@NotNull PortfelBukkitImpl plugin, @NotNull String name, @NotNull String title, int slot, int rows, @NotNull String displayName, @NotNull List<String> description, ItemStack icon, @NotNull ShopType type, @NotNull List<OrderData> orders) {
 		this.plugin = plugin;
 		this.name = name;
 		this.title = title;

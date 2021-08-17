@@ -5,8 +5,8 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
-import me.szumielxd.portfel.bungee.managers.AccessManager;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import me.szumielxd.portfel.bungee.api.managers.AccessManager;
 import me.szumielxd.portfel.bungee.managers.OrdersManager.GlobalOrder;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.CmdArg;
@@ -15,10 +15,10 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 public class CommonArgs {
 	
 	
-	private static PortfelBungee plugin;
+	private static PortfelBungeeImpl plugin;
 	
 	
-	public static void init(PortfelBungee plugin) {
+	public static void init(PortfelBungeeImpl plugin) {
 		CommonArgs.plugin = plugin;
 	}
 	

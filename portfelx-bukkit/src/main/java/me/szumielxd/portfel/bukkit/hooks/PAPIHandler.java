@@ -12,28 +12,28 @@ import java.util.Optional;
 import org.bukkit.OfflinePlayer;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
-import me.szumielxd.portfel.bukkit.managers.BukkitTopManager;
+import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
+import me.szumielxd.portfel.api.objects.CommonPlayer;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.managers.TopManager.TopEntry;
-import me.szumielxd.portfel.common.objects.CommonPlayer;
-import me.szumielxd.portfel.common.objects.User;
 import net.kyori.adventure.translation.Translator;
 
 public class PAPIHandler extends PlaceholderExpansion {
 	
 	
 	
-	private final PortfelBukkit plugin;
+	private final PortfelBukkitImpl plugin;
 	private final String identifier;
 	private final List<String> placeholders;
 	
 	
 	
-	public PAPIHandler(PortfelBukkit plugin) {
+	public PAPIHandler(PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
 		this.identifier = plugin.getName().toLowerCase();
 		try {

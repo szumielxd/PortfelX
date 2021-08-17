@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.common.objects.ActionExecutor;
-import me.szumielxd.portfel.common.objects.User;
+import me.szumielxd.portfel.api.objects.ActionExecutor;
+import me.szumielxd.portfel.api.objects.User;
 import net.kyori.adventure.text.format.TextColor;
 
 public interface AbstractDBLogger {

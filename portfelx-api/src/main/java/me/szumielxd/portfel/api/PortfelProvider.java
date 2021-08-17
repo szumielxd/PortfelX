@@ -2,8 +2,6 @@ package me.szumielxd.portfel.api;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.common.Portfel;
-
 public class PortfelProvider {
 	
 	

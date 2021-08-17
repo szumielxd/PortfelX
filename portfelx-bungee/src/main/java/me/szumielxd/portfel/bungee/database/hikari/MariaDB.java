@@ -6,11 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.szumielxd.portfel.bungee.PortfelBungee;
+import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 
 public class MariaDB extends HikariDB {
 
-	public MariaDB(PortfelBungee plugin) {
+	public MariaDB(PortfelBungeeImpl plugin) {
 		super(plugin);
 	}
 	

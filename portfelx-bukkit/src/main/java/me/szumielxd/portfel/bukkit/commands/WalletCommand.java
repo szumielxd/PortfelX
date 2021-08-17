@@ -12,23 +12,23 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.bukkit.PortfelBukkit;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.gui.AbstractPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.MainPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.OrderPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.PortfelGuiHolder;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.Portfel;
-import me.szumielxd.portfel.common.objects.User;
 
 public class WalletCommand implements TabExecutor {
 
 	
-	private final PortfelBukkit plugin;
+	private final PortfelBukkitImpl plugin;
 	
 	
-	public WalletCommand(@NotNull PortfelBukkit plugin) {
+	public WalletCommand(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
 	}
 	
