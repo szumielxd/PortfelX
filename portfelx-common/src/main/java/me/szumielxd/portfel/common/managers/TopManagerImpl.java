@@ -23,7 +23,7 @@ public abstract class TopManagerImpl implements TopManager {
 	 * @implNote Internal use only
 	 */
 	@Override
-	public @NotNull TopManagerImpl init() {
+	public @NotNull TopManager init() {
 		this.topUpdater = this.getPlugin().getTaskManager().runTaskTimerAsynchronously(this::update, 10, 10, TimeUnit.SECONDS);
 		this.initialized = true;
 		return this;

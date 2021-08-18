@@ -19,8 +19,9 @@ import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
+import me.szumielxd.portfel.common.managers.TopManagerImpl;
 
-public class BukkitTopManagerImpl extends BukkitTopManager {
+public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopManager {
 	
 	
 	private final PortfelBukkitImpl plugin;
@@ -30,6 +31,11 @@ public class BukkitTopManagerImpl extends BukkitTopManager {
 	public BukkitTopManagerImpl(PortfelBukkitImpl plugin) {
 		this.cachedTop = new HashMap<>();
 		this.plugin = plugin;
+	}
+	
+	@Override
+	public @NotNull BukkitTopManagerImpl init() {
+		return (BukkitTopManagerImpl) super.init();
 	}
 	
 	/**

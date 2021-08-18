@@ -3,20 +3,29 @@ package me.szumielxd.portfel.bungee.managers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.api.managers.BungeeTopManager;
+import me.szumielxd.portfel.common.managers.TopManagerImpl;
 
-public class BungeeTopManagerImpl extends BungeeTopManager {
+public class BungeeTopManagerImpl extends TopManagerImpl implements BungeeTopManager {
 	
 	
 	private final PortfelBungeeImpl plugin;
 	private List<TopEntry> cachedTop;
 	
 	
-	public BungeeTopManagerImpl(PortfelBungeeImpl plugin) {
+	public BungeeTopManagerImpl(@NotNull PortfelBungeeImpl plugin) {
 		this.cachedTop = new ArrayList<>();
 		this.plugin = plugin;
+	}
+	
+	@Override
+	public @NotNull BungeeTopManagerImpl init() {
+		return (BungeeTopManagerImpl) super.init();
 	}
 	
 	/**
@@ -62,7 +71,7 @@ public class BungeeTopManagerImpl extends BungeeTopManager {
 	 * @return copy of actually cached top
 	 */
 	@Override
-	public List<TopEntry> getFullTopCopy() {
+	public @Nullable List<TopEntry> getFullTopCopy() {
 		return new ArrayList<>(this.cachedTop);
 	}
 	
