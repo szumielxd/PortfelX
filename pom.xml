@@ -18,8 +18,9 @@
 		<pluginName>Portfel</pluginName>
 		<author>szumielxd</author>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<bukkitMainClass>me.szumielxd.portfel.bukkit.PortfelBukkitImpl</bukkitMainClass>
-		<bungeeMainClass>me.szumielxd.portfel.bungee.PortfelBungeeImpl</bungeeMainClass>
+		<package>me.szumielxd.portfel</package>
+		<bukkitMainClass>${package}.bukkit.PortfelBukkitImpl</bukkitMainClass>
+		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
 		<revision>3.0.0-SNAPSHOT</revision>
 	</properties>
 
@@ -64,12 +65,7 @@
 		<dependencies>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>portfelx-api</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>${project.groupId}</groupId>
-				<artifactId>portfelx-bungee-api</artifactId>
+				<artifactId>portfelx-common-api</artifactId>
 				<version>3.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
@@ -79,7 +75,7 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>portfelx-api-assembly</artifactId>
+				<artifactId>portfelx-bungee-api</artifactId>
 				<version>3.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
@@ -89,18 +85,179 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>portfelx-bungee</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-bukkit</artifactId>
 				<version>3.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>portfelx-assembly</artifactId>
+				<artifactId>portfelx-bungee</artifactId>
 				<version>3.0.0-SNAPSHOT</version>
+			</dependency>
+			
+			<!-- Adventure platform -->
+			<dependency>
+				<groupId>net.kyori</groupId>
+				<artifactId>adventure-platform-bungeecord</artifactId>
+				<version>4.0.0-SNAPSHOT</version>
+				<type>jar</type>
+				<scope>compile</scope>
+				<optional>true</optional>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jetbrains</groupId>
+						<artifactId>annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.checkerframework</groupId>
+						<artifactId>checker-qual</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>examination-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-nbt</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-platform-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-text-serializer-bungeecord</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-text-serializer-gson</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-text-serializer-legacy</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>net.kyori</groupId>
+				<artifactId>adventure-platform-bukkit</artifactId>
+				<version>4.0.0-SNAPSHOT</version>
+				<type>jar</type>
+				<scope>compile</scope>
+				<optional>true</optional>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jetbrains</groupId>
+						<artifactId>annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.checkerframework</groupId>
+						<artifactId>checker-qual</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>examination-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-nbt</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-platform-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-text-serializer-bungeecord</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-text-serializer-gson</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>net.kyori</groupId>
+						<artifactId>adventure-text-serializer-legacy</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>net.kyori</groupId>
+				<artifactId>adventure-platform-api</artifactId>
+				<version>4.0.0-SNAPSHOT</version>
+				<scope>compile</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jetbrains</groupId>
+						<artifactId>annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.checkerframework</groupId>
+						<artifactId>checker-qual</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>net.kyori</groupId>
+				<artifactId>adventure-text-serializer-bungeecord</artifactId>
+				<version>4.0.0-SNAPSHOT</version>
+				<scope>compile</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.jetbrains</groupId>
+						<artifactId>annotations</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.checkerframework</groupId>
+						<artifactId>checker-qual</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>net.kyori</groupId>
+				<artifactId>adventure-text-serializer-legacy</artifactId>
+				<version>4.8.1</version>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>net.kyori</groupId>
+				<artifactId>adventure-text-serializer-gson</artifactId>
+				<version>4.8.1</version>
+				<scope>compile</scope>
+			</dependency>
+			
+			<!-- BungeeCord -->
+			<dependency>
+				<groupId>net.md-5</groupId>
+				<artifactId>bungeecord-api</artifactId>
+				<version>1.17-R0.1-SNAPSHOT</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.gson</groupId>
+						<artifactId>gson</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			
+			<!-- Spigot -->
+			<dependency>
+				<groupId>org.spigotmc</groupId>
+				<artifactId>spigot-api</artifactId>
+				<version>1.8.8-R0.1-SNAPSHOT</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.gson</groupId>
+						<artifactId>gson</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -112,46 +269,22 @@
 			<artifactId>bungeecord-chat</artifactId>
 			<version>1.17-R0.1-SNAPSHOT</version>
 			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.code.gson</groupId>
+					<artifactId>gson</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
 			<version>21.0.1</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-bungeecord</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jetbrains</groupId>
-					<artifactId>annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.checkerframework</groupId>
-					<artifactId>checker-qual</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-bukkit</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jetbrains</groupId>
-					<artifactId>annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.checkerframework</groupId>
-					<artifactId>checker-qual</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 
@@ -171,6 +304,110 @@
 						<source>1.8</source>
 						<target>1.8</target>
 						<showDeprecation>true</showDeprecation>
+					</configuration>
+				</plugin>
+				<!-- Git Commit plugin -->
+				<plugin>
+					<groupId>io.github.git-commit-id</groupId>
+					<artifactId>git-commit-id-maven-plugin</artifactId>
+					<version>5.0.0</version>
+					<executions>
+						<execution>
+							<id>get-the-git-infos</id>
+							<goals>
+								<goal>revision</goal>
+							</goals>
+							<phase>initialize</phase>
+						</execution>
+					</executions>
+					<configuration>
+						<dotGitDirectory>${project.parent.basedir}/.git</dotGitDirectory>
+					</configuration>
+				</plugin>
+				
+				<!-- Assembly plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.3.0</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>single</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
+						<appendAssemblyId>false</appendAssemblyId>
+						<descriptorRefs>
+							<descriptorRef>jar-with-dependencies</descriptorRef>
+						</descriptorRefs>
+						<archive>
+							<index>false</index>
+							<addMavenDescriptor>false</addMavenDescriptor>
+							<manifest>
+								<packageName>${package}</packageName>
+							</manifest>
+							<manifestEntries>
+								<Created-By>${author}</Created-By>
+							</manifestEntries>
+						</archive>
+					</configuration>
+				</plugin>
+				
+				<!-- Jar plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				
+				<!-- Shade plugin -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-shade-plugin</artifactId>
+					<version>3.2.4</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>shade</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<filters>
+							<filter>
+								<artifact>*:*</artifact>
+								<excludes>
+									<exclude>META-INF/maven/**</exclude>
+								</excludes>
+							</filter>
+						</filters>
+						<relocations>
+							<relocation>
+								<pattern>com.zaxxer</pattern>
+								<shadedPattern>${package}.lib.com.zaxxer</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>com.google.gson</pattern>
+								<shadedPattern>${package}.lib.com.google.gson</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>net.kyori.platform</pattern>
+								<shadedPattern>${package}.lib.net.kyori.adventure.platform</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>org.simpleyaml</pattern>
+								<shadedPattern>${package}.lib.org.simpleyaml</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>org.yaml.snakeyaml</pattern>
+								<shadedPattern>${package}.lib.org.yaml.snakeyaml</shadedPattern>
+							</relocation>
+						</relocations>
 					</configuration>
 				</plugin>
 			</plugins>
@@ -195,13 +432,12 @@
 	</build>
 
 	<modules>
-		<module>portfelx-api</module>
+		<module>portfelx-common-api</module>
 		<module>portfelx-bukkit-api</module>
 		<module>portfelx-bungee-api</module>
+		<module>portfelx-common</module>
 		<module>portfelx-bukkit</module>
 		<module>portfelx-bungee</module>
-		<module>portfelx-common</module>
-		<module>portfelx-assembly</module>
-		<module>portfelx-api-assembly</module>
+		<module>portfelx-api</module>
 	</modules>
 </project>

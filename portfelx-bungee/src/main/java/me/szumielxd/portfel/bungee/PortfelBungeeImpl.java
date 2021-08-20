@@ -36,6 +36,7 @@ import me.szumielxd.portfel.bungee.managers.BungeeUserManagerImpl;
 import me.szumielxd.portfel.bungee.managers.OrdersManager;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
+import me.szumielxd.portfel.common.ValidateAccess;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -58,32 +59,43 @@ public class PortfelBungeeImpl extends Plugin implements PortfelBungee {
 	
 	@Override
 	public void onEnable() {
+		if (ValidateAccess.checkAccess() == false) {
+			this.getLogger().warning("You have no power here. Die potato!");
+			return;
+		}
 		PortfelProvider.register(this);
 		CommonArgs.init(this);
 		this.setupProxyId();
 		this.adventure = BungeeAudiences.create(this);
 		this.taskManager = new BungeeTaskManagerImpl(this);
 		this.accessManager = new AccessManagerImpl(this).init();
+		this.getLogger().info("Loading configuration...");
 		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(BungeeConfigKey.values()).toArray(AbstractKey[]::new)));
+		this.getLogger().info("Setup locales...");
 		Lang.load(new File(this.getDataFolder(), "languages"), this);
-		
 		String dbType = this.getConfiguration().getString(BungeeConfigKey.DATABASE_TYPE).toLowerCase();
 		if ("mariadb".equals(dbType)) this.database = new MariaDB(this);
 		else this.database = new MysqlDB(this);
+		this.getLogger().info("Establishing connection with database...");
 		this.database.setup();
 		
+		this.getLogger().info("Setup managers...");
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new BungeeUserManagerImpl(this).init();
 		this.topManager = (BungeeTopManagerImpl) new BungeeTopManagerImpl(this).init();
 		this.ordersManager = new OrdersManager(this).init();
-		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
-		this.getProxy().getPluginManager().registerCommand(this, this.command);
+		this.getLogger().info("Registering listeners...");
 		this.getProxy().getPluginManager().registerListener(this, new UserListener(this));
 		this.getProxy().getPluginManager().registerListener(this, new ChannelListener(this));
+		this.getLogger().info("Registering commands...");
+		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
+		this.getProxy().getPluginManager().registerCommand(this, this.command);
 		this.getProxy().registerChannel(CHANNEL_SETUP);
 		this.getProxy().registerChannel(CHANNEL_USERS);
 		this.getProxy().registerChannel(CHANNEL_TRANSACTIONS);
 		this.getProxy().registerChannel(CHANNEL_BUNGEE);
+		this.sendMotd();
+		
 	}
 	
 	
@@ -187,6 +199,15 @@ public class PortfelBungeeImpl extends Plugin implements PortfelBungee {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	private void sendMotd() {
+		this.getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐");
+		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv3.0.0");
+		this.getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on BungeeCord - " + this.getProxy().getName());
+		this.getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘");
+		this.getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘");
 	}
 
 

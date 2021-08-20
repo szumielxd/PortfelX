@@ -38,6 +38,7 @@ import me.szumielxd.portfel.bukkit.managers.IdentifierManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.OrdersManager;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
+import me.szumielxd.portfel.common.ValidateAccess;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 
@@ -58,18 +59,28 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 	
 	@Override
 	public void onEnable() {
+		if (ValidateAccess.checkAccess() == false) {
+			this.getLogger().warning("You have no power here. Die potato!");
+			this.getServer().getPluginManager().disablePlugin(this);
+			return;
+		}
 		PortfelProvider.register(this);
 		this.adventure = BukkitAudiences.create(this);
 		this.taskManager = new BukkitTaskManagerImpl(this);
 		this.identifierManager = new IdentifierManagerImpl(this).init();
+		this.getLogger().info("Loading configuration...");
 		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(BukkitConfigKey.values()).toArray(AbstractKey[]::new)));
+		this.getLogger().info("Setup locales...");
 		Lang.load(new File(this.getDataFolder(), "languages"), this);
+		this.getLogger().info("Setup managers...");
 		this.channelManager = new ChannelManagerImpl(this);
 		this.ordersManager = new OrdersManager(this).init();
 		this.userManager = new BukkitUserManagerImpl(this).init();
 		this.topManager = new BukkitTopManagerImpl(this).init();
+		this.getLogger().info("Registering listeners...");
 		this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
 		this.getServer().getPluginManager().registerEvents(new UserListener(this), this);
+		this.getLogger().info("Registering commands...");
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
 			PluginCommand walletCmd = this.getPluginCommand(this.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME));
@@ -86,14 +97,15 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		this.sendMotd();
 	}
 	
 	@Override
 	public void onDisable() {
-		this.userManager.killManager();
-		this.topManager.killManager();
-		this.taskManager.cancelAll();
-		this.channelManager.killManager();
+		if (this.userManager != null) this.userManager.killManager();
+		if (this.userManager != null) this.topManager.killManager();
+		if (this.userManager != null) this.taskManager.cancelAll();
+		if (this.userManager != null) this.channelManager.killManager();
 		try {
 			Field f = Class.forName("net.kyori.adventure.platform.bukkit.BukkitAudiencesImpl").getDeclaredField("INSTANCES");
 			f.setAccessible(true);
@@ -204,6 +216,14 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	private void sendMotd() {
+		this.getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐");
+		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv3.0.0");
+		this.getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on Bukkit - " + this.getServer().getName());
+		this.getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘");
+		this.getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘");
 	}
 	
 

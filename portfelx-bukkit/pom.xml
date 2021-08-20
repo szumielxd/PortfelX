@@ -8,24 +8,20 @@
 	</parent>
 	<dependencies>
 		<dependency>
-			<groupId>${parent.groupId}</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-common</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>${parent.groupId}</groupId>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-bukkit-api</artifactId>
 		</dependency>
-		<!--dependency>
-			<groupId>io.papermc.paper</groupId>
-			<artifactId>paper-api</artifactId>
-			<version>1.17.1-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency-->
+		<dependency>
+			<groupId>net.kyori</groupId>
+			<artifactId>adventure-platform-bukkit</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
-			<version>1.8.8-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>me.clip</groupId>
@@ -45,42 +41,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		<!--dependency>
-			<groupId>com.github.SkriptLang</groupId>
-			<artifactId>Skript</artifactId>
-			<version>2.5.3</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.bukkit</groupId>
-					<artifactId>bukkit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sk89q.worldedit</groupId>
-					<artifactId>worldedit-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sk89q.worldguard</groupId>
-					<artifactId>worldguard-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.sk89q</groupId>
-					<artifactId>commandbook</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>net.milkbowl.vault</groupId>
-					<artifactId>Vault</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.bstats</groupId>
-					<artifactId>bstats-bukkit</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.ow2.asm</groupId>
-					<artifactId>asm</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency-->
 		<dependency>
 			<groupId>com.mojang</groupId>
 			<artifactId>authlib</artifactId>
@@ -88,4 +48,58 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+	
+	<!-- Build -->
+	<build>
+		<defaultGoal>clean package</defaultGoal>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>plugin.yml</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>false</filtering>
+				<excludes>
+					<exclude>**/*.java</exclude>
+					<exclude>plugin.yml</exclude>
+				</excludes>
+			</resource>
+		</resources>
+	
+		<plugins>
+			<!-- Compiler plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+			</plugin>
+			
+			<!-- Git Commit plugin -->
+			<plugin>
+				<groupId>io.github.git-commit-id</groupId>
+				<artifactId>git-commit-id-maven-plugin</artifactId>
+			</plugin>
+			
+			<!-- Assembly plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+			</plugin>
+			
+			<!-- Jar plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+			</plugin>
+			
+			<!-- Shade plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 </project>

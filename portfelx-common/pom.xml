@@ -8,8 +8,8 @@
 	</parent>
 	<dependencies>
 		<dependency>
-			<groupId>${parent.groupId}</groupId>
-			<artifactId>portfelx-api</artifactId>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>portfelx-common-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>me.carleslc.Simple-YAML</groupId>
@@ -26,37 +26,19 @@
 		</dependency>
 		<dependency>
 			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-bungeecord</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jetbrains</groupId>
-					<artifactId>annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.checkerframework</groupId>
-					<artifactId>checker-qual</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>adventure-platform-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-bukkit</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
-			<type>jar</type>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.jetbrains</groupId>
-					<artifactId>annotations</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.checkerframework</groupId>
-					<artifactId>checker-qual</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>adventure-text-serializer-bungeecord</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.kyori</groupId>
+			<artifactId>adventure-text-serializer-legacy</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.kyori</groupId>
+			<artifactId>adventure-text-serializer-gson</artifactId>
 		</dependency>
 	</dependencies>
 </project>
