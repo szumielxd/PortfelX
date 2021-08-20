@@ -5,6 +5,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
@@ -219,11 +220,11 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 	}
 	
 	private void sendMotd() {
-		this.getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐");
-		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv3.0.0");
-		this.getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on Bukkit - " + this.getServer().getName());
-		this.getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘");
-		this.getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘");
+		Logger.getGlobal().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
+		Logger.getGlobal().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv3.0.0\u001b[0m");
+		Logger.getGlobal().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on Bukkit - " + this.getServer().getName() + "\u001b[0m");
+		Logger.getGlobal().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
+		Logger.getGlobal().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
 	}
 	
 

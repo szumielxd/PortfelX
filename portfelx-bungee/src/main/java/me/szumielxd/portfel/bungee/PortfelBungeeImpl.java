@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -203,11 +204,11 @@ public class PortfelBungeeImpl extends Plugin implements PortfelBungee {
 	
 	
 	private void sendMotd() {
-		this.getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐");
-		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv3.0.0");
-		this.getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on BungeeCord - " + this.getProxy().getName());
-		this.getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘");
-		this.getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘");
+		Logger.getGlobal().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
+		Logger.getGlobal().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv3.0.0\u001b[0m");
+		Logger.getGlobal().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on BungeeCord - " + this.getProxy().getName() + "\u001b[0m");
+		Logger.getGlobal().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
+		Logger.getGlobal().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
 	}
 
 
