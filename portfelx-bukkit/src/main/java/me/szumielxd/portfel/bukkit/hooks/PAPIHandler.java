@@ -16,7 +16,6 @@ import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
-import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.common.Lang;
@@ -117,7 +116,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 				try {
 					int pos = Integer.parseInt(arr[arr.length-1]);
 					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
-					TopEntry entry = user!=null ? ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos) : this.plugin.getTopManager().getByPos(pos);
+					TopEntry entry = user!=null ? this.plugin.getTopManager().getByPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByPos(pos);
 					Optional<Locale> locale = Optional.ofNullable(Translator.parseLocale(String.join("_", Arrays.copyOf(arr, arr.length-1))));
 					return entry!=null? this.formatCurrency(locale.orElse(Locale.getDefault()), entry.getBalance()) : "";
 				} catch (NumberFormatException e) {}
@@ -125,7 +124,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 				try {
 					int pos = Integer.parseInt(identifier.substring(12));
 					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
-					TopEntry entry = user!=null ? ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos) : this.plugin.getTopManager().getByPos(pos);
+					TopEntry entry = user!=null ? this.plugin.getTopManager().getByPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByPos(pos);
 					return entry!=null? this.formatCurrency(player, entry.getBalance()) : "";
 				} catch (NumberFormatException e) {}
 			}
@@ -135,7 +134,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 			try {
 				int pos = Integer.parseInt(identifier.substring(11));
 				BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
-				TopEntry entry = user!=null ? ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos) : this.plugin.getTopManager().getByPos(pos);
+				TopEntry entry = user!=null ? this.plugin.getTopManager().getByPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByPos(pos);
 				return entry!=null? entry.getName() : "";
 			} catch (NumberFormatException e) {}
 			return null;
@@ -144,7 +143,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 			try {
 				int pos = Integer.parseInt(identifier.substring(9));
 				BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
-				TopEntry entry = user!=null ? ((BukkitTopManager)this.plugin.getTopManager()).getByPos(user.getProxyId(), pos) : this.plugin.getTopManager().getByPos(pos);
+				TopEntry entry = user!=null ? this.plugin.getTopManager().getByPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByPos(pos);
 				return entry!=null? entry.getUniqueId().toString() : "";
 			} catch (NumberFormatException e) {}
 			return null;

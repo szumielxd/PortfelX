@@ -46,6 +46,7 @@ import me.szumielxd.portfel.api.objects.ExecutedTask;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.api.managers.AccessManager;
 import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.utils.CryptoUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -140,19 +141,34 @@ public class AccessManagerImpl implements Listener, AccessManager {
 	}
 	
 	/**
+	 * Get hash key for given server
+	 * 
+	 * @param serverId server's identifier
+	 * @return hash key string
+	 */
+	@Override
+	public @Nullable String getHashKey(@NotNull UUID serverId) {
+		if (!this.canAccess(serverId)) return null;
+		JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
+		return obj.get("hashKey").getAsString();
+	}
+	
+	/**
 	 * Register new server.
 	 * 
 	 * @param serverId identifier of server
 	 * @param serverName user-friendly text representation (case-insensitive)
+	 * @param hashKey key used to hash plugin messages
 	 * @return false if server is already registered, otherwise true
 	 */
 	@Override
-	public boolean register(@NotNull UUID serverId, @NotNull String serverName) {
+	public boolean register(@NotNull UUID serverId, @NotNull String serverName, @NotNull String hashKey) {
 		if (this.accessMap == null) throw new IllegalStateException("AccessManager is not initialized");
 		if (this.accessMap.has(serverId.toString())) return false;
 		JsonObject server = new JsonObject();
 		server.addProperty("display", serverName.toLowerCase());
 		server.add("orders", new JsonArray());
+		server.addProperty("hashKey", hashKey);
 		this.accessMap.add(serverId.toString(), server);
 		this.save();
 		return true;
@@ -251,7 +267,7 @@ public class AccessManagerImpl implements Listener, AccessManager {
 	}
 	
 	
-	public void pendingRegistration(CommonPlayer player, String serverName) {
+	public void pendingRegistration(CommonPlayer player, String serverName, String hashKey) {
 		ProxiedPlayer pp = this.plugin.getProxy().getPlayer(player.getUniqueId());
 		if (pp != null) {
 			Server srv = pp.getServer();
@@ -260,11 +276,17 @@ public class AccessManagerImpl implements Listener, AccessManager {
 				UUID operationId = UUID.randomUUID();
 				ByteArrayDataOutput out = ByteStreams.newDataOutput();
 				out.writeUTF("Register"); // subchannel
-				out.writeUTF(operationId.toString()); // operation ID
-				out.writeUTF(this.plugin.getProxyId().toString()); // proxy ID
-				out.writeUTF(serverId.toString()); // server ID
+				try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
+						DataOutputStream dout = new DataOutputStream(bout);) {
+					dout.writeUTF(operationId.toString()); // operation ID
+					dout.writeUTF(this.plugin.getProxyId().toString()); // proxy ID
+					dout.writeUTF(serverId.toString()); // server ID
+					CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), hashKey);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 				srv.sendData(Portfel.CHANNEL_SETUP, out.toByteArray());
-				this.registerRequests.put(operationId, new RegistrationHolder(operationId, serverId, serverName, player));
+				this.registerRequests.put(operationId, new RegistrationHolder(operationId, serverId, serverName, player, hashKey));
 			}
 		}
 	}
@@ -275,7 +297,7 @@ public class AccessManagerImpl implements Listener, AccessManager {
 	
 	@EventHandler
 	public void onRegistrationValidCheck(PluginMessageEvent event) {
-		if (Portfel.CHANNEL_BUNGEE.equals(event.getTag())) {
+		if (Portfel.CHANNEL_BUNGEE.equals(event.getTag()) || Portfel.CHANNEL_LEGACY_BUNGEE.equals(event.getTag())) {
 			if (event.getSender() instanceof Server) {
 				Server srv = (Server) event.getSender();
 				ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
@@ -331,52 +353,63 @@ public class AccessManagerImpl implements Listener, AccessManager {
 						RegistrationHolder holder = this.registerRequests.get(operationId);
 						if (holder != null) {
 							holder.done();
-							String status = in.readUTF();
-							if ("Ok".equals(status)) {
-								UUID proxyId = UUID.fromString(in.readUTF());
-								UUID serverId = UUID.fromString(in.readUTF());
-								if (this.plugin.getProxyId().equals(proxyId)) {
-									if (holder.getServerId().equals(serverId)) {
-										if (this.register(holder.getServerId(), holder.getServerFriendyName())) {
-											String srvId = holder.getServerId().toString();
-											String srvName = holder.getServerFriendyName();
+							byte[] data;
+							try {
+								data = CryptoUtils.decodeBytesFromInput(in, holder.getHashKey());
+							} catch (IllegalArgumentException e) {
+								// ignore malformed messages
+								return;
+							}
+							try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+								String status = din.readUTF();
+								if ("Ok".equals(status)) {
+									UUID proxyId = UUID.fromString(din.readUTF());
+									UUID serverId = UUID.fromString(din.readUTF());
+									if (this.plugin.getProxyId().equals(proxyId)) {
+										if (holder.getServerId().equals(serverId)) {
+											if (this.register(holder.getServerId(), holder.getServerFriendyName(), holder.getHashKey())) {
+												String srvId = holder.getServerId().toString();
+												String srvName = holder.getServerFriendyName();
+												Component srvIdComp = Component.text(srvId, AQUA, UNDERLINED)
+														.clickEvent(ClickEvent.suggestCommand(srvId)).insertion(srvId)
+														.hoverEvent(Component.text("» ", DARK_AQUA).append(LangKey.MAIN_MESSAGE_INSERTION
+																.component(AQUA, Component.text("server ID"))
+														));
+												Component srvNameComp = Component.text(srvName, AQUA, UNDERLINED)
+														.clickEvent(ClickEvent.suggestCommand(srvName)).insertion(srvName)
+														.hoverEvent(Component.text("» ", DARK_AQUA).append(LangKey.MAIN_MESSAGE_INSERTION
+																.component(AQUA, Component.text("server friendly name"))
+														));
+												
+												holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SUCCESS
+														.component(LIGHT_PURPLE, srvIdComp, srvNameComp)));
+												return;
+											}
+										}
+									}
+								} else if ("Set".equals(status)) {
+									UUID proxyId = UUID.fromString(din.readUTF());
+									UUID serverId = UUID.fromString(din.readUTF());
+									if (this.plugin.getProxyId().equals(proxyId)) {
+										if (this.canAccess(serverId)) {
+											String srvId = serverId.toString();
 											Component srvIdComp = Component.text(srvId, AQUA, UNDERLINED)
 													.clickEvent(ClickEvent.suggestCommand(srvId)).insertion(srvId)
 													.hoverEvent(Component.text("» ", DARK_AQUA).append(LangKey.MAIN_MESSAGE_INSERTION
 															.component(AQUA, Component.text("server ID"))
 													));
-											Component srvNameComp = Component.text(srvName, AQUA, UNDERLINED)
-													.clickEvent(ClickEvent.suggestCommand(srvName)).insertion(srvName)
-													.hoverEvent(Component.text("» ", DARK_AQUA).append(LangKey.MAIN_MESSAGE_INSERTION
-															.component(AQUA, Component.text("server friendly name"))
-													));
 											
-											holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SUCCESS
-													.component(LIGHT_PURPLE, srvIdComp, srvNameComp)));
+											holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ALREADY
+													.component(RED, srvIdComp)));
 											return;
 										}
 									}
 								}
-							} else if ("Set".equals(status)) {
-								UUID proxyId = UUID.fromString(in.readUTF());
-								UUID serverId = UUID.fromString(in.readUTF());
-								if (this.plugin.getProxyId().equals(proxyId)) {
-									if (this.canAccess(serverId)) {
-										String srvId = serverId.toString();
-										Component srvIdComp = Component.text(srvId, AQUA, UNDERLINED)
-												.clickEvent(ClickEvent.suggestCommand(srvId)).insertion(srvId)
-												.hoverEvent(Component.text("» ", DARK_AQUA).append(LangKey.MAIN_MESSAGE_INSERTION
-														.component(AQUA, Component.text("server ID"))
-												));
-										
-										holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ALREADY
-												.component(RED, srvIdComp)));
-										return;
-									}
-								}
+								holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ERROR.component(DARK_RED)));
+								return;
+							} catch (IOException e) {
+								e.printStackTrace();
 							}
-							holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ERROR.component(DARK_RED)));
-							return;
 						}
 					}
 				}
@@ -391,13 +424,15 @@ public class AccessManagerImpl implements Listener, AccessManager {
 		private final UUID serverId;
 		private final String serverName;
 		private final CommonPlayer sender;
+		private final String hashKey;
 		private final ExecutedTask task;
 		
-		public RegistrationHolder(@NotNull UUID operationId, @NotNull UUID serverId, @NotNull String serverName, @NotNull CommonPlayer sender) {
+		public RegistrationHolder(@NotNull UUID operationId, @NotNull UUID serverId, @NotNull String serverName, @NotNull CommonPlayer sender, @NotNull String hashKey) {
 			this.operationId = operationId;
 			this.serverId = serverId;
 			this.serverName = serverName;
 			this.sender = sender;
+			this.hashKey = hashKey;
 			this.task = plugin.getTaskManager().runTaskLater(() -> {
 				this.done();
 				this.sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT.component(RED)));
@@ -414,6 +449,10 @@ public class AccessManagerImpl implements Listener, AccessManager {
 		
 		public @NotNull CommonPlayer getSender() {
 			return this.sender;
+		}
+		
+		public @NotNull String getHashKey() {
+			return this.hashKey;
 		}
 		
 		public void done() {

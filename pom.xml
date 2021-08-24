@@ -22,6 +22,10 @@
 		<bukkitMainClass>${package}.bukkit.PortfelBukkitImpl</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
 		<revision>3.0.0-SNAPSHOT</revision>
+		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
+		<finalNameObf>/../../target/${project.artifactId}-obf-${git.commit.id.abbrev}-${project.version}</finalNameObf>
+		<renamelog>${project.artifactId}_renamelog.xml</renamelog>
+		<shrinklog>${project.artifactId}_shrinklog.xml</shrinklog>
 	</properties>
 
 	<!-- Repositories -->
@@ -38,11 +42,11 @@
 			<id>sonatype-oss-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</repository>
-		<repository>
+		<!--repository>
 			<id>mvdw-software</id>
 			<name>MVdW Public Repositories</name>
 			<url>http://repo.mvdw-software.be/content/groups/public/</url>
-		</repository>
+		</repository-->
 		<repository>
 			<id>placeholderapi</id>
 			<url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
@@ -286,6 +290,14 @@
 			<version>21.0.1</version>
 			<scope>provided</scope>
 		</dependency>
+		
+		<!-- yGuard -->
+		<!--dependency>
+			<groupId>com.yworks</groupId>
+			<artifactId>yguard</artifactId>
+			<version>3.0.0</version>
+			<scope>compile</scope>
+		</dependency-->
 	</dependencies>
 
 	<!-- Build -->
@@ -339,7 +351,7 @@
 						</execution>
 					</executions>
 					<configuration>
-						<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
+						<finalName>${finalName}</finalName>
 						<appendAssemblyId>false</appendAssemblyId>
 						<descriptorRefs>
 							<descriptorRef>jar-with-dependencies</descriptorRef>
@@ -410,6 +422,44 @@
 						</relocations>
 					</configuration>
 				</plugin>
+				
+				<!-- AntRun plugin for yGuard -->
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId> 
+					<artifactId>maven-antrun-plugin</artifactId>
+					<version>1.8</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>run</goal>
+							</goals>
+							<id>obfuscate</id>
+							<configuration>
+								<tasks>
+									<property name="runtime_classpath" refid="maven.runtime.classpath"/>
+									<taskdef name="yguard" classname="com.yworks.yguard.YGuardTask" classpath="${runtime_classpath}"/>
+									<yguard>
+										<inoutpair in="${project.basedir}/target/${finalName}.jar" out="${project.basedir}/target/${finalNameObf}.jar"/>
+										<shrink logfile="${shrinklog}">
+										 	<keep>
+												<!-- main method -->
+												<method name="void onEnable()" class="${bukkitMainclass}" />
+											</keep>
+										</shrink>
+										<rename mainclass="me.szumielxd.portfel.bukkit.PortfelBukkitImpl" logfile="${renamelog}">
+											<keep>
+												<class classes="protected" methods="protected" fields="protected" />
+											</keep>
+										</rename>
+									<!-- see the yGuard task documentation for information about the <yguard> element-->
+									</yguard>
+								</tasks>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -436,8 +486,8 @@
 		<module>portfelx-bukkit-api</module>
 		<module>portfelx-bungee-api</module>
 		<module>portfelx-common</module>
-		<module>portfelx-bukkit</module>
 		<module>portfelx-bungee</module>
+		<module>portfelx-bukkit</module>
 		<module>portfelx-api</module>
 	</modules>
 </project>

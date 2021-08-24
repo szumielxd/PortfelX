@@ -4,6 +4,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class User {
 	
@@ -14,6 +15,8 @@ public abstract class User {
 	protected long lastUpdated;
 	protected boolean deniedInTop;
 	protected long balance;
+	protected String serverName;
+	protected UUID remoteId;
 	
 	
 	/**
@@ -121,6 +124,24 @@ public abstract class User {
 	 */
 	public @NotNull String getName() {
 		return this.name;
+	}
+	
+	/**
+	 * Get name of user's current server
+	 * 
+	 * @return server name
+	 */
+	public @Nullable String getServerName() {
+		return this.serverName;
+	}
+	
+	/**
+	 * Get identifier of user's remote server.
+	 * 
+	 * @return UUID of remote
+	 */
+	public @Nullable UUID getRemoteId() {
+		return this.remoteId;
 	}
 	
 	/**

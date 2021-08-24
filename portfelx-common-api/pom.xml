@@ -9,6 +9,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>net.kyori</groupId>
+			<artifactId>adventure-platform-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.kyori</groupId>
 			<artifactId>adventure-text-serializer-bungeecord</artifactId>
 			<scope>provided</scope>
 		</dependency>

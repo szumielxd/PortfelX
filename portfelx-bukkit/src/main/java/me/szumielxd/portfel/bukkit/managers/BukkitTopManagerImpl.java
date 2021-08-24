@@ -18,7 +18,6 @@ import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
-import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.common.managers.TopManagerImpl;
 
 public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopManager {
@@ -45,9 +44,9 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	protected void update() {
 		try {
 			final ChannelManager channel = this.plugin.getChannelManager();
-			this.cachedTop = this.plugin.getUserManager().getLoadedUsers().stream().map(BukkitOperableUser.class::cast).filter(User::isOnline)
-					.collect(Collectors.toMap(u -> u.getProxyId(), Function.identity(), (p, q) -> p)).values().parallelStream()
-					.collect(Collectors.toMap(u -> u.getProxyId(), u -> {
+			this.cachedTop = this.plugin.getUserManager().getLoadedUsers().stream().filter(User::isOnline)
+					.collect(Collectors.toMap(u -> u.getRemoteId(), Function.identity(), (p, q) -> p)).values().parallelStream()
+					.collect(Collectors.toMap(u -> u.getRemoteId(), u -> {
 						try{
 							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());
 							return channel.requestTop(player);

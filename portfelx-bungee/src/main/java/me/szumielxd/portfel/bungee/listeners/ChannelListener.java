@@ -1,5 +1,10 @@
 package me.szumielxd.portfel.bungee.listeners;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -19,6 +24,8 @@ import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.api.objects.BungeeActionExecutor;
+import me.szumielxd.portfel.bungee.objects.BungeeOperableUser;
+import me.szumielxd.portfel.common.utils.CryptoUtils;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.connection.Server;
 import net.md_5.bungee.api.event.PluginMessageEvent;
@@ -46,18 +53,46 @@ public class ChannelListener implements Listener {
 				ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
 				String subchannel = in.readUTF();
 				if ("User".equals(subchannel)) {
+					this.plugin.getTaskManager().runTaskAsynchronously(() -> {
+						try {
+							Server srv = (Server) event.getSender();
+							ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
+							User user = this.plugin.getUserManager().getOrCreateUser(player.getUniqueId());
+							ByteArrayDataOutput out = ByteStreams.newDataOutput();
+							out.writeUTF(subchannel);
+							out.writeUTF(this.plugin.getProxyId().toString());
+							out.writeUTF(player.getUniqueId().toString());
+							out.writeUTF(player.getName());
+							out.writeLong(user.getBalance());
+							out.writeBoolean(user.isDeniedInTop());
+							srv.sendData(event.getTag(), out.toByteArray());
+						} catch (Exception e) {	
+							e.printStackTrace();
+						}
+					});
+				}
+			}
+		}
+	}
+	
+	
+	@EventHandler
+	public void onServerData(PluginMessageEvent event) {
+		if (Portfel.CHANNEL_USERS.equals(event.getTag())) {
+			event.setCancelled(true);
+			if (event.getSender() instanceof Server) {
+				ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
+				String subchannel = in.readUTF();
+				if ("ServerId".equals(subchannel)) {
 					try {
-						Server srv = (Server) event.getSender();
 						ProxiedPlayer player = (ProxiedPlayer) event.getReceiver();
-						User user = this.plugin.getUserManager().getOrCreateUser(player.getUniqueId());
-						ByteArrayDataOutput out = ByteStreams.newDataOutput();
-						out.writeUTF(subchannel);
-						out.writeUTF(this.plugin.getProxyId().toString());
-						out.writeUTF(player.getUniqueId().toString());
-						out.writeUTF(player.getName());
-						out.writeLong(user.getBalance());
-						out.writeBoolean(user.isDeniedInTop());
-						srv.sendData(event.getTag(), out.toByteArray());
+						BungeeOperableUser user = (BungeeOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+						if (user != null) {
+							UUID uuid = UUID.fromString(in.readUTF());
+							if (this.plugin.getAccessManager().canAccess(uuid)) {
+								user.setRemoteIdAndName(uuid, in.readUTF());
+							}
+						}
 					} catch (Exception e) {	
 						e.printStackTrace();
 					}
@@ -111,38 +146,60 @@ public class ChannelListener implements Listener {
 				if ("Buy".equals(subchannel)) {
 					UUID serverKey = UUID.fromString(in.readUTF()); // serverKey
 					if (!this.plugin.getAccessManager().canAccess(serverKey)) return;
-					final String transactionId = in.readUTF(); // transaction id
-					String server = in.readUTF(); // server
-					long value = in.readLong(); // value
-					ActionExecutor plugin = BungeeActionExecutor.plugin(in.readUTF()); // plugin
-					String order = in.readUTF(); // order
-					User user = this.plugin.getUserManager().getUser(player.getUniqueId());
-					CompletableFuture<Exception> future = user.takeBalance(value, plugin, server, order);
-					this.plugin.getTaskManager().runTask(() -> {
-						try {
-							Exception ex = future.get();
-							ByteArrayDataOutput out = ByteStreams.newDataOutput();
-							out.writeUTF(subchannel); // subchannel
-							out.writeUTF(this.plugin.getProxyId().toString()); // proxy id
-							out.writeUTF(transactionId); // transaction id
-							out.writeLong(user.getBalance()); // new balance
-							int found = (int) this.plugin.getOrdersManager().getOrders().values().stream()
-									.filter(o -> o.examine(user, order)).count();
-							if (ex == null) {
-								out.writeUTF(TransactionStatus.OK.getText()); // status
-								out.writeInt(found);
-							} else {
-								out.writeUTF(TransactionStatus.ERROR.getText());
-								out.writeUTF(this.gson.toJson(this.gson.toJsonTree(srv))); // status
-							}
-							srv.sendData(event.getTag(), out.toByteArray());
-						} catch (InterruptedException | ExecutionException e) {
-							e.printStackTrace();
-						}
-					});
+					byte[] data;
+					try {
+						data = CryptoUtils.decodeBytesFromInput(in, this.plugin.getAccessManager().getHashKey(serverKey));
+					} catch (IllegalArgumentException e) {
+						// ignore malformed messages
+						return;
+					}
+					try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+						final String transactionId = din.readUTF(); // transaction id
+						String server = din.readUTF(); // server
+						long value = din.readLong(); // value
+						ActionExecutor pluginExecutor = BungeeActionExecutor.plugin(din.readUTF()); // plugin
+						String order = din.readUTF(); // order
+						this.runTransaction(transactionId, serverKey, srv, player, pluginExecutor, order, server, value);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
+	}
+	
+	
+	private void runTransaction(@NotNull String transactionId, @NotNull UUID serverId, @NotNull Server srv, @NotNull ProxiedPlayer target, @NotNull ActionExecutor pluginExecutor, @NotNull String order, @NotNull String server, long value) {
+		User user = this.plugin.getUserManager().getUser(target.getUniqueId());
+		CompletableFuture<Exception> future = user.takeBalance(value, pluginExecutor, server, order);
+		this.plugin.getTaskManager().runTask(() -> {
+			try {
+				Exception ex = future.get();
+				ByteArrayDataOutput out = ByteStreams.newDataOutput();
+				out.writeUTF("Buy"); // subchannel
+				try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
+						DataOutputStream dout = new DataOutputStream(bout);) {
+					dout.writeUTF(this.plugin.getProxyId().toString()); // proxy id
+					dout.writeUTF(transactionId); // transaction id
+					dout.writeLong(user.getBalance()); // new balance
+					int found = (int) this.plugin.getOrdersManager().getOrders().values().stream()
+							.filter(o -> o.examine(user, order)).count();
+					if (ex == null) {
+						dout.writeUTF(TransactionStatus.OK.getText()); // status
+						dout.writeInt(found);
+					} else {
+						dout.writeUTF(TransactionStatus.ERROR.getText());
+						dout.writeUTF(this.gson.toJson(this.gson.toJsonTree(ex))); // status
+					}
+					CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getAccessManager().getHashKey(serverId));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				srv.sendData(Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 	
 

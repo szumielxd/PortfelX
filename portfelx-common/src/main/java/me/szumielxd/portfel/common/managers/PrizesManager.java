@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.bungee.managers;
+package me.szumielxd.portfel.common.managers;
 
 import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 
@@ -20,56 +20,52 @@ import org.simpleyaml.exceptions.InvalidConfigurationException;
 
 import com.google.gson.Gson;
 
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
-import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
-import me.szumielxd.portfel.bungee.objects.BungeeSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
-public class OrdersManager {
+public class PrizesManager {
 	
 	
-	private final PortfelBungeeImpl plugin;
+	private final Portfel plugin;
 	private final File file;
-	private Map<String, GlobalOrder> orders = new HashMap<>();
+	private Map<String, PrizeOrder> orders = new HashMap<>();
 	
 	
-	public OrdersManager(PortfelBungeeImpl plugin) {
+	public PrizesManager(Portfel plugin) {
 		this.plugin = plugin;
-		this.file = new File(this.plugin.getDataFolder(), "orders.yml");
+		this.file = new File(this.plugin.getDataFolder(), "token-prizes.yml");
 	}
 	
 	
-	public OrdersManager init() {
+	public PrizesManager init() {
 		YamlFile yaml = new YamlFile(this.file);
 		// defaults
 		MemoryConfiguration defaults = new MemoryConfiguration();
 		ConfigurationSection defaultNothing = defaults.createSection("nothingOrder");
 		defaultNothing.set("pattern", "nothing");
-		defaultNothing.set("broadcast", Arrays.asList("&5Surprise! %player% bought nothing!", "&bNow thanks God it's not about You!"));
-		defaultNothing.set("message", Arrays.asList(GsonComponentSerializer.gson().serialize(Component.text("Congratultions %player%! You have bought absolutly nothing!", LIGHT_PURPLE))));
+		defaultNothing.set("broadcast", Arrays.asList("&5Surprise! %player% won nothing!", "&bNow thanks God it's not about You!"));
+		defaultNothing.set("message", Arrays.asList(GsonComponentSerializer.gson().serialize(Component.text("Congratultions %player%! You have won absolutly nothing!", LIGHT_PURPLE))));
 		defaultNothing.set("command", Arrays.asList("kick %playerId% free kick!"));
 		ConfigurationSection defaultVip = defaults.createSection("vip");
 		defaultVip.set("pattern", "vip-([1-9]\\d*)d");
-		defaultVip.set("broadcast", Arrays.asList("&5Surprise! %player% bought VIP for $1 days!", "&bYou can do so by checking out shop: www.example.com!"));
+		defaultVip.set("broadcast", Arrays.asList("&5Surprise! %player% won VIP for $1 days!", "&bYou can do so by observing our fanpage: ig.example.com!"));
 		defaultVip.set("command", Arrays.asList("lpb user %player% parent addtemp vip $1d"));
 		yaml.addDefaults(defaults);
 		try {
 			if (yaml.exists()) {
-				this.plugin.getLogger().info(String.format("Loading orders from file `%s`", this.file.getName()));
+				this.plugin.getLogger().info(String.format("Loading prizes from file `%s`", this.file.getName()));
 				yaml.load();
 			} else {
-				this.plugin.getLogger().info(String.format("Creating new orders container as file `%s`", this.file.getName()));
+				this.plugin.getLogger().info(String.format("Creating new prizes container as file `%s`", this.file.getName()));
 				yaml.setComment(defaultNothing.getCurrentPath(), 
-						  "This is the simplest example of creating new global order.\n"
-						+ "This global order will be excuted if pending order's name\n"
-						+ "will match given pattern and orign server will have\n"
-						+ "access to this global order. To give access to this global order\n"
-						+ "just execute command `/dpb system server <serverName> grant <orderName>`.\n"
-						+ "Name of order is name of section, so in this case it will be `nothingOrder`");
+						  "This is the simplest example of creating new token-prize order.\n"
+						+ "This prize order will be excuted if pending order's name\n"
+						+ "will match given pattern.");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
 						"This is the only required value. Remember that this is REGEX pattern,\n"
 						+ "so some characters are reserved for other purpose.");
@@ -85,8 +81,8 @@ public class OrdersManager {
 						"This is list of commands to execute by console when order will be executed.\n"
 						+ "Text formatting is not supported");
 				yaml.setComment(defaultVip.getCurrentPath(), 
-						"This is extended example of global order.\n"
-						+ "This global order does not have constant text as pattern,\n"
+						"This is extended example of prize order.\n"
+						+ "This prize order does not have constant text as pattern,\n"
 						+ "so it will match more than one diffrent pending order names.");
 				yaml.setComment(defaultVip.getCurrentPath() + ".pattern", 
 						"This pattern is more advanced than above, it contains special elements.\n"
@@ -103,7 +99,7 @@ public class OrdersManager {
 			e.printStackTrace();
 		}
 		
-		final Map<String, GlobalOrder> ordersMap = new HashMap<>();
+		final Map<String, PrizeOrder> ordersMap = new HashMap<>();
 		
 		yaml.getKeys(false).forEach(key -> {
 			if (yaml.isConfigurationSection(key)) {
@@ -113,7 +109,7 @@ public class OrdersManager {
 					List<String> message = cfg.getStringList("message");
 					List<String> broadcast = cfg.getStringList("broadcast");
 					List<String> command = cfg.getStringList("command");
-					ordersMap.put(key.toLowerCase(), new GlobalOrder(key, pattern, message, broadcast, command));
+					ordersMap.put(key.toLowerCase(), new PrizeOrder(key, pattern, message, broadcast, command));
 				}
 			}
 		});
@@ -122,12 +118,12 @@ public class OrdersManager {
 		return this;
 	}
 	
-	public Map<String, GlobalOrder> getOrders() {
+	public Map<String, PrizeOrder> getOrders() {
 		return this.orders;
 	}
 	
 	
-	public class GlobalOrder {
+	public class PrizeOrder {
 		
 		private final String name;
 		private final Pattern pattern;
@@ -135,7 +131,7 @@ public class OrdersManager {
 		private final List<String> message;
 		private final List<String> command;
 		
-		private GlobalOrder(@NotNull String name, @NotNull Pattern pattern, @NotNull List<String> broadcast, @NotNull List<String> message, @NotNull List<String> command) {
+		private PrizeOrder(@NotNull String name, @NotNull Pattern pattern, @NotNull List<String> broadcast, @NotNull List<String> message, @NotNull List<String> command) {
 			this.name = name;
 			this.pattern = pattern;
 			this.broadcast = Collections.unmodifiableList(broadcast);
@@ -163,15 +159,16 @@ public class OrdersManager {
 			return this.command;
 		}
 		
-		public boolean examine(User user, String orderName) {
+		public boolean examine(User user, String orderName, String token) {
 			final Matcher match = this.pattern.matcher(orderName);
 			if (!match.matches()) return false;
 			Audience all = plugin.adventure().all();
 			Audience player = plugin.adventure().player(user.getUniqueId());
-			CommonSender console = BungeeSender.get(plugin, plugin.getProxy().getConsole());
+			CommonSender console = plugin.getConsole();
 			Function<String, String> replacer = s -> {
 				s = s.replace("%player%", user.getName())
-						.replace("%playerId%", user.getUniqueId().toString());
+						.replace("%playerId%", user.getUniqueId().toString())
+						.replace("%token%", token);
 				for (int i = 0; i <= match.groupCount(); i++) s = s.replace("$"+i, escapeJson(match.group(i)));
 				return s;
 			};

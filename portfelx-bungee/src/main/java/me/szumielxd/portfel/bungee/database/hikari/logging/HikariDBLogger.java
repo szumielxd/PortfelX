@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import com.google.common.base.Objects;
+
 import me.szumielxd.portfel.api.Config;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
@@ -27,7 +29,9 @@ import me.szumielxd.portfel.bungee.api.configuration.BungeeConfigKey;
 import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger;
 import me.szumielxd.portfel.bungee.database.hikari.HikariDB;
+import me.szumielxd.portfel.bungee.objects.BungeePlayer;
 import me.szumielxd.portfel.bungee.objects.BungeeSender;
+import me.szumielxd.portfel.bungee.objects.PrizeToken;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -250,6 +254,39 @@ public class HikariDBLogger implements AbstractDBLogger {
 	}
 	
 	/**
+	 * Log use of existent token.
+	 * 
+	 * @param target target of action
+	 * @param server server where token was used
+	 * @param prize executed prize
+	 * @throws SQLException when cannot establish connection to database
+	 */
+	@Override
+	public void logTokenUse(@NotNull User target, @NotNull String server, @NotNull PrizeToken prize) throws SQLException {
+		this.validate();
+		AbstractDB db = this.plugin.getDB();
+		db.checkConnection();
+		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
+				LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_ORDERNAME,
+				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE);
+		try (Connection conn = ((HikariDB)db).connect()) {
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				stm.setString(1, target.getUniqueId().toString());
+				stm.setString(2, target.getName());
+				stm.setString(3, server);
+				stm.setString(4, prize.getCreator().getDisplayName());
+				stm.setString(5, prize.getCreator().getUniqueId().toString());
+				stm.setString(6, String.format("%s (%s)", prize.getToken(), prize.getOrder()));
+				stm.setString(7, ActionType.TOKEN.name());
+				stm.setLong(8, 0);
+				stm.setLong(9, target.getBalance());
+				stm.executeUpdate();
+			}
+		}
+	}
+	
+	/**
 	 * Handle incoming log.
 	 * 
 	 * @param targetId unique identifier of logged action target
@@ -263,20 +300,24 @@ public class HikariDBLogger implements AbstractDBLogger {
 	@Override
 	public void handleIncomingLog(@NotNull LogEntry log) {
 		this.validate();
-		Component prefix = Portfel.PREFIX.append(LangKey.LOG_PREFIX.component(DARK_AQUA)).append(Component.text(" > ", GRAY));
-		Component exec = this.prepareInteractive(Component.text(log.getExecutor().getDisplayName() + "@" + log.getServer(), GREEN), log.getExecutor().getDisplayName(), log.getExecutor().getUniqueId());
-		Component target = this.prepareInteractive(Component.text(log.getTargetName(), AQUA), log.getTargetName(), log.getTargetUniqueId());
-		Component valComp = Component.text(log.getType().getFormattedPrefix()+log.getValue(), log.getType().getColor()).hoverEvent(Component.text(log.getType().getFormattedPrefix()+log.getValue(), log.getType().getColor())
-				.append(Component.newline()).append(LangKey.LOG_VALUE_ACTION.component(GRAY, Component.text(log.getType().name(), AQUA))).append(Component.newline())
-				.append(LangKey.LOG_VALUE_OLD_BALANCE.component(GRAY, Component.text(log.getBalance(), AQUA))));
-		Component line1 = prefix.append(Component.text("(", DARK_GRAY)).append(exec).append(Component.text(") [", DARK_GRAY)).append(target).append(Component.text("]", DARK_GRAY));
-		Component line2 = prefix.append(Component.text(log.getOrderName(), WHITE).hoverEvent(Component.text(log.getOrderName(), WHITE).append(Component.newline())
-				.append(LangKey.LOG_VALUE_DATE.component(GRAY, Component.text(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(log.getTime().getTime())), AQUA))))).append(Component.space()).append(valComp);
 		this.plugin.getProxy().getPlayers().forEach(p -> {
 			if (p.isConnected() && p.hasPermission("portfel.verbose")) {
-				BungeeSender player = BungeeSender.get(this.plugin, p);
-				player.sendTranslated(line1);
-				player.sendTranslated(line2);
+				BungeePlayer player = (BungeePlayer) BungeeSender.get(this.plugin, p);
+				User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+				if (user != null) {
+					Component prefix = Portfel.PREFIX.append(LangKey.LOG_PREFIX.component(DARK_AQUA)).append(Component.text(" > ", GRAY));
+					Component exec = this.prepareInteractive(Component.text(log.getExecutor().getDisplayName() + (Objects.equal(user.getServerName(), log.getServer()) ? "" : ("@" + log.getServer())), GREEN), log.getExecutor().getDisplayName(), log.getExecutor().getUniqueId());
+					Component target = this.prepareInteractive(Component.text(log.getTargetName(), AQUA), log.getTargetName(), log.getTargetUniqueId());
+					Component valComp = Component.text(log.getType().format(String.valueOf(log.getValue())), log.getType().getColor()).hoverEvent(Component.text(log.getType().format(String.valueOf(log.getValue())), log.getType().getColor())
+							.append(Component.newline()).append(LangKey.LOG_VALUE_ACTION.component(GRAY, Component.text(log.getType().name(), AQUA))).append(Component.newline())
+							.append(LangKey.LOG_VALUE_OLD_BALANCE.component(GRAY, Component.text(log.getBalance(), AQUA))));
+					Component line1 = prefix.append(Component.text("(", DARK_GRAY)).append(exec).append(Component.text(") [", DARK_GRAY)).append(target).append(Component.text("]", DARK_GRAY));
+					Component line2 = prefix.append(Component.text(log.getOrderName(), WHITE).hoverEvent(Component.text(log.getOrderName(), WHITE).append(Component.newline())
+							.append(LangKey.LOG_VALUE_DATE.component(GRAY, Component.text(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(log.getTime().getTime())), AQUA))))).append(Component.space()).append(valComp);
+					
+					player.sendTranslated(line1);
+					player.sendTranslated(line2);
+				}
 			}
 		});
 	}

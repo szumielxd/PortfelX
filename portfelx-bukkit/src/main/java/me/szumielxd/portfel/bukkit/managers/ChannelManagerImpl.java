@@ -4,7 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +16,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +44,7 @@ import me.szumielxd.portfel.bukkit.api.objects.Transaction;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction.TransactionResult;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.TransactionImpl;
+import me.szumielxd.portfel.common.utils.CryptoUtils;
 
 public class ChannelManagerImpl implements ChannelManager {
 	
@@ -50,6 +56,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	private final PluginMessageListenerRegistration setup;
 	private final PluginMessageListenerRegistration transactions;
 	private final PluginMessageListenerRegistration users;
+	private String BUNGEE_CHANNEL;
 	
 	
 	public ChannelManagerImpl(@NotNull PortfelBukkitImpl plugin) {
@@ -57,8 +64,12 @@ public class ChannelManagerImpl implements ChannelManager {
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_SETUP);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_USERS);
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_BUNGEE);
-		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_BUNGEE, this::onSetupValidator);
+		try {
+			this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, BUNGEE_CHANNEL = Portfel.CHANNEL_LEGACY_BUNGEE);
+		} catch (IllegalArgumentException e) { // fallback to new BungeeCord channel
+			this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, BUNGEE_CHANNEL = Portfel.CHANNEL_BUNGEE);
+		}
+		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, BUNGEE_CHANNEL, this::onSetupValidator);
 		this.setup = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_SETUP, this::onSetupChannel);
 		this.transactions = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
 		this.users = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_USERS, this::onUsersChannel);
@@ -66,7 +77,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	
 	public void killManager() {
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_BUNGEE, this.bungee.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, BUNGEE_CHANNEL, this.bungee.getListener());
 		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_SETUP, this.setup.getListener());
 		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_TRANSACTIONS, this.transactions.getListener());
 		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_USERS, this.users.getListener());
@@ -114,25 +125,37 @@ public class ChannelManagerImpl implements ChannelManager {
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF();
 		if ("Register".equals(subchannel)) {
-			final UUID operationId = UUID.fromString(in.readUTF());
-			final UUID proxyId = UUID.fromString(in.readUTF());
-			final UUID serverId = UUID.fromString(in.readUTF());
+			byte[] data;
+			try {
+				data = CryptoUtils.decodeBytesFromInput(in, this.plugin.getServerHashKey());
+			} catch (IllegalArgumentException e) {
+				// ignore malformed message
+				return;
+			}
 			
-			this.plugin.getTaskManager().runTaskAsynchronously(() -> {
-				CompletableFuture<Boolean> future = this.waitingForValidation.get(operationId);
-				if (future == null) {
-					this.waitingForValidation.put(operationId, future = new CompletableFuture<>());
-					this.validateSetup(player, operationId);
-				}
-				Boolean res = null;
-				try {
-					res = future.get(3, TimeUnit.SECONDS);
-				} catch (InterruptedException | ExecutionException | TimeoutException e) {
-					e.printStackTrace();
-				}
-				this.waitingForValidation.remove(operationId);
-				if (Boolean.TRUE == res) this.sendSetupChannel(channel, player, operationId, proxyId, serverId);
-			});
+			try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+				final UUID operationId = UUID.fromString(din.readUTF());
+				final UUID proxyId = UUID.fromString(din.readUTF());
+				final UUID serverId = UUID.fromString(din.readUTF());
+				
+				this.plugin.getTaskManager().runTaskAsynchronously(() -> {
+					CompletableFuture<Boolean> future = this.waitingForValidation.get(operationId);
+					if (future == null) {
+						this.waitingForValidation.put(operationId, future = new CompletableFuture<>());
+						this.validateSetup(player, operationId);
+					}
+					Boolean res = null;
+					try {
+						res = future.get(3, TimeUnit.SECONDS);
+					} catch (InterruptedException | ExecutionException | TimeoutException e) {
+						e.printStackTrace();
+					}
+					this.waitingForValidation.remove(operationId);
+					if (Boolean.TRUE == res) this.sendSetupChannel(channel, player, operationId, proxyId, serverId);
+				});
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			
 		}
 		
@@ -153,23 +176,31 @@ public class ChannelManagerImpl implements ChannelManager {
 		}
 		out.writeShort(baos.toByteArray().length);
 		out.write(baos.toByteArray());
-		player.sendPluginMessage(plugin, Portfel.CHANNEL_BUNGEE, out.toByteArray());
+		player.sendPluginMessage(plugin, BUNGEE_CHANNEL, out.toByteArray());
 	}
 	
 	private void sendSetupChannel(@NotNull String channel, @NotNull Player player, @NotNull UUID operationId, @NotNull UUID proxyId, @NotNull UUID serverId) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("Register"); // subchannel
 		out.writeUTF(operationId.toString()); // operationId
-		UUID srvId = this.plugin.getIdentifierManager().getComplementary(proxyId);
-		if (srvId != null) {
-			out.writeUTF("Set"); // status
-		} else {
-			out.writeUTF("Ok"); // status
-			srvId = serverId;
-			this.plugin.getIdentifierManager().register(proxyId, serverId);
+		try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
+				DataOutputStream dout = new DataOutputStream(bout);) {
+			
+			UUID srvId = this.plugin.getIdentifierManager().getComplementary(proxyId);
+			if (srvId != null) {
+				dout.writeUTF("Set"); // status
+			} else {
+				dout.writeUTF("Ok"); // status
+				srvId = serverId;
+				this.plugin.getIdentifierManager().register(proxyId, serverId);
+			}
+			dout.writeUTF(proxyId.toString()); // proxyId
+			dout.writeUTF(srvId.toString()); // serverId
+			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getServerHashKey());
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		out.writeUTF(proxyId.toString()); // proxyId
-		out.writeUTF(srvId.toString()); // serverId
+		
 		player.sendPluginMessage(this.plugin, channel, out.toByteArray());
 	}
 	
@@ -178,32 +209,72 @@ public class ChannelManagerImpl implements ChannelManager {
 		if (!Portfel.CHANNEL_TRANSACTIONS.equals(channel)) return;
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF(); // subchannel
+		
+		/* Handle shipping */
 		if ("Buy".equals(subchannel)) {
-			UUID proxyId = UUID.fromString(in.readUTF()); // proxy id
-			UUID transactionId = UUID.fromString(in.readUTF()); // transaction id
-			TransactionResult result = null;
-			if (this.plugin.getIdentifierManager().isValid(proxyId)) {
-				long newBalance = in.readLong(); // newBalance
-				Optional<TransactionStatus> status = TransactionStatus.parse(in.readUTF()); // status
-				if (status.isPresent()) {
-					int globalOrders = 0;
-					Throwable throwable = null;
-					if (status.get().equals(TransactionStatus.OK)) {
-						globalOrders = in.readInt();
-					} else if (status.get().equals(TransactionStatus.OK)) {
-						try {
-							throwable = new Gson().fromJson(in.readUTF(), Throwable.class);
-						} catch (Exception e) {
-							throwable = e;
-						}
-					}
-					result = new TransactionResult(transactionId, status.get(), newBalance, globalOrders, throwable);
-				}
+			byte[] data;
+			try {
+				data = CryptoUtils.decodeBytesFromInput(in, this.plugin.getServerHashKey());
+			} catch (IllegalArgumentException e) {
+				// ignore malformed messages
+				return;
 			}
-			Entry<Transaction, CompletableFuture<TransactionResult>> entry = this.waitingTransactions.get(transactionId);
-			if (entry == null) return;
-			if (!proxyId.equals(((BukkitOperableUser)entry.getKey().getUser()).getProxyId())) result = null;
-			entry.getValue().complete(result);
+			try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+				UUID proxyId = UUID.fromString(din.readUTF()); // proxy id
+				UUID transactionId = UUID.fromString(din.readUTF()); // transaction id
+				TransactionResult result = null;
+				if (this.plugin.getIdentifierManager().isValid(proxyId)) {
+					long newBalance = din.readLong(); // newBalance
+					Optional<TransactionStatus> status = TransactionStatus.parse(din.readUTF()); // status
+					if (status.isPresent()) {
+						int globalOrders = 0;
+						Throwable throwable = null;
+						if (status.get().equals(TransactionStatus.OK)) {
+							globalOrders = din.readInt();
+						} else if (status.get().equals(TransactionStatus.OK)) {
+							try {
+								throwable = new Gson().fromJson(din.readUTF(), Throwable.class);
+							} catch (Exception e) {
+								throwable = e;
+							}
+						}
+						result = new TransactionResult(transactionId, status.get(), newBalance, globalOrders, throwable);
+					}
+				}
+				Entry<Transaction, CompletableFuture<TransactionResult>> entry = this.waitingTransactions.get(transactionId);
+				if (entry == null) return;
+				if (!proxyId.equals(entry.getKey().getUser().getRemoteId())) result = null;
+				entry.getValue().complete(result);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} 
+		
+		/* Handle TokenPrizes */
+		if ("Token".equals(subchannel)) {
+			byte[] data;
+			try {
+				data = CryptoUtils.decodeBytesFromInput(in, this.plugin.getServerHashKey());
+			} catch (IllegalArgumentException e) {
+				// ignore malformed messages
+				return;
+			}
+			try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+				UUID proxyId = UUID.fromString(din.readUTF()); // proxyId
+				UUID serverId = UUID.fromString(din.readUTF()); // serverId
+				String token = din.readUTF(); // token
+				String order = din.readUTF(); // orderName
+				long globalOrders = din.readLong(); // globalOrdersCount
+				if (serverId.equals(this.plugin.getIdentifierManager().getComplementary(proxyId))) {
+					User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+					if (user != null && user.getRemoteId().equals(proxyId)) {
+						long executed = this.plugin.getPrizesManager().getOrders().values().stream().filter(o -> o.examine(user, order, token)).count();
+						this.plugin.getTaskManager().runTaskAsynchronously(() -> this.logTokenPrize(String.format("Handled token %s (%s) for %s(%s). Result: %d global, %d locale orders", token, order, user.getName(), String.valueOf(user.getUniqueId()), globalOrders, executed)));
+					}
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -225,7 +296,7 @@ public class ChannelManagerImpl implements ChannelManager {
 					String username = in.readUTF(); // username
 					long balance = in.readLong(); // balance
 					boolean deniedInTop = in.readBoolean(); // deniedInTop
-					user = new BukkitOperableUser(this.plugin, uuid, username, online, deniedInTop, balance, proxyId);
+					user = new BukkitOperableUser(this.plugin, uuid, username, online, deniedInTop, balance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
 				} else {
 					user.setName(in.readUTF()); // username
 					user.setPlainBalance(in.readLong()); // balance
@@ -240,6 +311,7 @@ public class ChannelManagerImpl implements ChannelManager {
 				future.complete(user);
 			}
 			this.registerer.accept(user);
+			this.sendServerId(player);
 		}
 		
 		/* Top Update */
@@ -260,6 +332,19 @@ public class ChannelManagerImpl implements ChannelManager {
 					future.complete(list);
 				}
 			}
+		}
+	}
+	
+	
+	private void sendServerId(Player player) {
+		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+		if (user != null) {
+			UUID serverId = this.plugin.getIdentifierManager().getComplementary(user.getRemoteId());
+			ByteArrayDataOutput out = ByteStreams.newDataOutput();
+			out.writeUTF("ServerId");
+			out.writeUTF(serverId.toString());
+			out.writeUTF(this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
+			player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
 		}
 	}
 	
@@ -315,7 +400,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	public @NotNull List<TopEntry> requestTop(@NotNull Player player) throws Exception {
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user == null) return new ArrayList<>();
-		UUID proxyId = ((BukkitOperableUser)user).getProxyId();
+		UUID proxyId = user.getRemoteId();
 		CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.get(proxyId);
 		if (future == null) {
 			this.waitingTopUpdates.put(proxyId, future = new CompletableFuture<>());
@@ -335,12 +420,19 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void sendTransaction(Player player, Transaction transaction) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("Buy"); // subchannel
-		out.writeUTF(this.plugin.getIdentifierManager().getComplementary(((BukkitOperableUser)transaction.getUser()).getProxyId()).toString()); // serverId
-		out.writeUTF(transaction.getTransactionId().toString()); // transactionId
-		out.writeUTF(this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME)); // server
-		out.writeLong(transaction.getOrder().getPrice()); // value
-		out.writeUTF(this.plugin.getName()); // plugin
-		out.writeUTF(transaction.getOrder().getName()); // order
+		out.writeUTF(this.plugin.getIdentifierManager().getComplementary(transaction.getUser().getRemoteId()).toString()); // serverId
+		try {
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			DataOutputStream dout = new DataOutputStream(bout);
+			dout.writeUTF(transaction.getTransactionId().toString()); // transactionId
+			dout.writeUTF(this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME)); // server
+			dout.writeLong(transaction.getOrder().getPrice()); // value
+			dout.writeUTF(this.plugin.getName()); // plugin
+			dout.writeUTF(transaction.getOrder().getName()); // order
+			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getServerHashKey());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		player.sendPluginMessage(plugin, Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 	}
 	
@@ -380,7 +472,16 @@ public class ChannelManagerImpl implements ChannelManager {
 	}
 	
 	
-	
+	private void logTokenPrize(@NotNull String text) {
+		File f = new File(this.plugin.getDataFolder(), "token-prize.log");
+		if (!f.getParentFile().exists()) f.getParentFile().mkdirs();
+		text = String.format("[%s] %s", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
+		try {
+			Files.write(f.toPath(), Collections.singletonList(text));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 
 }

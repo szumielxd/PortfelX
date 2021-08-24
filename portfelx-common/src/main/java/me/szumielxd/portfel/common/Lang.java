@@ -54,6 +54,9 @@ public class Lang {
 		COMMAND_ARGTYPES_SERVERNAME_DISPLAY("command.arg-types.servername.display", "serverName"),
 		COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION("command.arg-types.servername.description", "user-friendly text representation of server instance (not the same as bungee serverName)"),
 		//
+		COMMAND_ARGTYPES_HASHKEY_DISPLAY("command.arg-types.hashkey.display", "hashKey"),
+		COMMAND_ARGTYPES_HASHKEY_DESCRIPTION("command.arg-types.hashkey.description", "hash provided by subject server used to encode messages (see `server-key.dat` file in client-server's walet directory)"),
+		//
 		COMMAND_ARGTYPES_SERVER_DISPLAY("command.arg-types.server.display", "server"),
 		COMMAND_ARGTYPES_SERVER_DESCRIPTION("command.arg-types.server.description", "server representated by friendly-name or unique id"),
 		COMMAND_ARGTYPES_SERVER_ERROR("command.arg-types.server.error", "A server for {0} could not be found."),
@@ -108,7 +111,7 @@ public class Lang {
 		COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
 		//
 		COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
-		COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT("command.system.registerserver.timeout", "Are you sure, server you want to register has actual version of Portfel? He's not responding..."),
+		COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT("command.system.registerserver.timeout", "Are you sure, you provided valid hashKey and server you want to register has up to date version of Portfel? He's not responding..."),
 		COMMAND_SYSTEM_REGISTERSERVER_ALREADY("command.system.registerserver.already", "Is there any intelligent reason to register already registered server? Pro Tip: Check ID {0}."),
 		COMMAND_SYSTEM_REGISTERSERVER_SUCCESS("command.system.registerserver.success", "You did it! You registered new portfel server with friendly name {0} and ID {1}!"),
 		COMMAND_SYSTEM_REGISTERSERVER_ERROR("command.system.registerserver.error", "This... This was very interesting. Server returned an unknown response."),
@@ -179,6 +182,13 @@ public class Lang {
 		
 		COMMAND_MAIN_RUNNING("command.main.running", "Running {0}."),
 		COMMAND_MAIN_USE("command.main.use", "Use {0} to view available commands."),
+		
+		TOKEN_CHECK_USAGE("token.check.usage", "Correct usage: /{0} <token>"),
+		TOKEN_CHECK_ALREADY("token.check.already", "Why are you spamming me? Wait for the result of previus check."),
+		TOKEN_CHECK_FULLPOOL("token.check.full-pool", "So many players to check, so few resources to do this. Please wait, the pool is full."),
+		TOKEN_CHECK_INVALID("token.check.invalid", "Probably you provided an inexistient token. Prove? It doesn't exist!"),
+		TOKEN_CHECK_SERVER_INVALID_REGISTERED("token.check.server.invalid.registered", "This game mode doesn't support tokens. Please try another game mode, or just throw it away..."),
+		TOKEN_CHECK_SERVER_INVALID_WHITELIST("token.check.server.invalid.whitelist", "This token doesn't like this game mode. But it should like: {0}"),
 		
 		SHOP_TITLE("shop.title", "Wallet ({0})"),
 		SHOP_ORDER_PRICE("shop.order.price", "Price: {0}"),

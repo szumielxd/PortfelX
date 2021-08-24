@@ -125,7 +125,7 @@ public class BungeeSender implements CommonSender {
 	 * @param sender sender to wrap
 	 * @return CommonSender or its subclass
 	 */
-	public static BungeeSender get(PortfelBungeeImpl plugin, CommandSender sender) {
+	public static BungeeSender get(@NotNull PortfelBungeeImpl plugin, @NotNull CommandSender sender) {
 		return sender instanceof ProxiedPlayer ? new BungeePlayer(plugin, (ProxiedPlayer)sender) : new BungeeSender(plugin, sender);
 	}
 	

@@ -34,7 +34,8 @@ public class UserListener implements Listener {
 		ProxiedPlayer player = event.getPlayer();
 		this.plugin.getTaskManager().runTaskAsynchronously(() -> {
 			try {
-				User user = this.plugin.getUserManager().getOrCreateUser(player.getUniqueId());
+				BungeeOperableUser user = (BungeeOperableUser) this.plugin.getUserManager().getOrCreateUser(player.getUniqueId());
+				user.setRemoteIdAndName(null, null);
 				if (srv != player.getServer()) return;
 				ByteArrayDataOutput out = ByteStreams.newDataOutput();
 				out.writeUTF("User");

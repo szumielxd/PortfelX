@@ -4,6 +4,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
@@ -143,6 +144,17 @@ public class BungeeOperableUser extends User {
 	 */
 	public void setOnline(boolean online) {
 		this.online = online;
+	}
+	
+	/**
+	 * Set user's remote server's identifier
+	 * 
+	 * @param serverId UUID of server
+	 * @param serverName name of server
+	 */
+	public void setRemoteIdAndName(@Nullable UUID serverId, @Nullable String serverName) {
+		this.remoteId = serverId;
+		this.serverName = serverName;
 	}
 	
 	/**

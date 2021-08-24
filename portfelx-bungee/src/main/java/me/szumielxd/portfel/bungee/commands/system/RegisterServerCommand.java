@@ -25,7 +25,9 @@ public class RegisterServerCommand extends SimpleCommand {
 		super(plugin, parent, "registerserver", "createserver");
 		this.args = Arrays.asList(
 				// serverName
-				new CmdArg(LangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY, LangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>())
+				new CmdArg(LangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY, LangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>()),
+				// hashKey
+				new CmdArg(LangKey.COMMAND_ARGTYPES_HASHKEY_DISPLAY, LangKey.COMMAND_ARGTYPES_HASHKEY_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>())
 		);
 	}
 
@@ -39,7 +41,7 @@ public class RegisterServerCommand extends SimpleCommand {
 			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY.component(RED)));
 			return;
 		}
-		pl.getAccessManager().pendingRegistration((CommonPlayer) sender, args[0]);
+		pl.getAccessManager().pendingRegistration((CommonPlayer) sender, args[0], args[1]);
 	}
 
 	@Override

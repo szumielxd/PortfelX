@@ -29,7 +29,7 @@
 			<version>2.10.10</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<!--dependency>
 			<groupId>be.maximvdw</groupId>
 			<artifactId>MVdWPlaceholderAPI</artifactId>
 			<version>3.1.1-SNAPSHOT</version>
@@ -40,7 +40,7 @@
 					<artifactId>spigot</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency-->
 		<dependency>
 			<groupId>com.mojang</groupId>
 			<artifactId>authlib</artifactId>
@@ -100,6 +100,12 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 			</plugin>
+			
+			<!-- AntRun plugin for yGuard -->
+			<!--plugin>
+				<groupId>org.apache.maven.plugins</groupId> 
+				<artifactId>maven-antrun-plugin</artifactId>
+			</plugin-->
 		</plugins>
 	</build>
 </project>

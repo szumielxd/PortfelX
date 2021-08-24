@@ -8,6 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.TopManager;
 import me.szumielxd.portfel.api.managers.UserManager;
+import me.szumielxd.portfel.api.objects.CommonSender;
+import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -40,6 +42,11 @@ public interface Portfel {
 	public static String CHANNEL_BUNGEE = "bungeecord:main";
 	
 	/**
+	 * Official legacy BungeeCord plugin channel. Returns <i>BungeeCord</i>.
+	 */
+	public static String CHANNEL_LEGACY_BUNGEE = "BungeeCord";
+	
+	/**
 	 * Get user manager.
 	 * 
 	 * @return user manager
@@ -59,6 +66,20 @@ public interface Portfel {
 	 * @return task manager
 	 */
 	public @NotNull TaskManager getTaskManager();
+	
+	/**
+	 * Get audience implementation.
+	 * 
+	 * @return audiences
+	 */
+	public @NotNull AudienceProvider adventure();
+	
+	/**
+	 * Get Console Sender.
+	 * 
+	 * @return current console sender
+	 */
+	public @NotNull CommonSender getConsole();
 	
 	/**
 	 * Get plugin's data folder.

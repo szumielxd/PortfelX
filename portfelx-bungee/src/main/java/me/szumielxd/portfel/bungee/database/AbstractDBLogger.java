@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.bungee.objects.PrizeToken;
 import net.kyori.adventure.text.format.TextColor;
 
 public interface AbstractDBLogger {
@@ -67,6 +68,16 @@ public interface AbstractDBLogger {
 	public void logBalanceSet(@NotNull User target, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName, long value) throws Exception;
 	
 	/**
+	 * Log use of existent token.
+	 * 
+	 * @param target target of action
+	 * @param server server where token was used
+	 * @param prize executed prize
+	 * @throws Exception when something went wrong
+	 */
+	public void logTokenUse(@NotNull User target, @NotNull String server, @NotNull PrizeToken prize) throws Exception;
+	
+	/**
 	 * Handle incoming log.
 	 * 
 	 * @param logEntry logged entry
@@ -83,9 +94,10 @@ public interface AbstractDBLogger {
 	
 	
 	public static enum ActionType {
-		ADD("+", GREEN),
-		SET("", GOLD),
-		REMOVE("-", RED);
+		ADD("+%s", GREEN),
+		SET("%s", GOLD),
+		REMOVE("-%s", RED),
+		TOKEN("", WHITE);
 		
 		private final TextColor color;
 		private final String formattedPrefix;
@@ -99,8 +111,12 @@ public interface AbstractDBLogger {
 			return this.color;
 		}
 		
-		public String getFormattedPrefix() {
+		public String getFormat() {
 			return this.formattedPrefix;
+		}
+		
+		public String format(String val) {
+			return String.format(this.formattedPrefix, val);
 		}
 		
 		public static @Nullable ActionType parse(@NotNull String text) {

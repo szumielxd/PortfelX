@@ -153,7 +153,7 @@ public class ReadLogCommand extends SimpleCommand {
 						LogEntry log = logs.get(i + offset);
 						Component exec = this.prepareInteractive(Component.text(log.getExecutor().getDisplayName() + "@" + log.getServer(), GREEN), log.getExecutor().getDisplayName(), log.getExecutor().getUniqueId());
 						Component target = this.prepareInteractive(Component.text(log.getTargetName(), AQUA), log.getTargetName(), log.getTargetUniqueId());
-						Component valComp = Component.text(log.getType().getFormattedPrefix()+log.getValue(), log.getType().getColor()).hoverEvent(Component.text(log.getType().getFormattedPrefix()+log.getValue(), log.getType().getColor())
+						Component valComp = Component.text(log.getType().format(String.valueOf(log.getValue())), log.getType().getColor()).hoverEvent(Component.text(log.getType().format(String.valueOf(log.getValue())), log.getType().getColor())
 								.append(Component.newline()).append(LangKey.LOG_VALUE_ACTION.component(GRAY, Component.text(log.getType().name(), AQUA))).append(Component.newline())
 								.append(LangKey.LOG_VALUE_OLD_BALANCE.component(GRAY, Component.text(log.getBalance(), AQUA))));
 						Component logLine = Portfel.PREFIX.append(Component.text("#"+log.getLogId(), LIGHT_PURPLE)).append(Component.text(" (", DARK_GRAY))

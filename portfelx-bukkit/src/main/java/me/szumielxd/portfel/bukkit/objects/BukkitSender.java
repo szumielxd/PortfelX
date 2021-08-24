@@ -122,12 +122,13 @@ public class BukkitSender implements CommonSender {
 	
 	
 	/**
-	 * Creates CommonSender or CommonPlayer depending on given CommandSender
+	 * Creates CommonSender or CommonPlayer depending on given CommandSender.
 	 * 
+	 * @param plugin Portfel instance
 	 * @param sender sender to wrap
 	 * @return CommonSender or its subclass
 	 */
-	public static BukkitSender get(PortfelBukkitImpl plugin, CommandSender sender) {
+	public static @NotNull BukkitSender get(@NotNull PortfelBukkitImpl plugin, @NotNull CommandSender sender) {
 		return sender instanceof Player ? new BukkitPlayer(plugin, (Player)sender) : new BukkitSender(plugin, sender);
 	}
 	

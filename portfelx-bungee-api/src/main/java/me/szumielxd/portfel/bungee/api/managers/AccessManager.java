@@ -35,13 +35,22 @@ public interface AccessManager {
 	public @Nullable UUID getServerByName(@NotNull String serverName);
 	
 	/**
+	 * Get hash key for given server
+	 * 
+	 * @param serverId server's identifier
+	 * @return hash key string
+	 */
+	public @Nullable String getHashKey(@NotNull UUID serverId);
+	
+	/**
 	 * Register new server.
 	 * 
 	 * @param serverId identifier of server
 	 * @param serverName user-friendly text representation (case-insensitive)
+	 * @param hashKey key used to hash plugin messages
 	 * @return false if server is already registered, otherwise true
 	 */
-	public boolean register(@NotNull UUID serverId, @NotNull String serverName);
+	public boolean register(@NotNull UUID serverId, @NotNull String serverName, @NotNull String hashKey);
 	
 	/**
 	 * Unregister server.
