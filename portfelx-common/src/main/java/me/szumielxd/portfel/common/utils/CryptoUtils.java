@@ -93,13 +93,11 @@ public class CryptoUtils {
 	 * @return ready to send encoded array
 	 */
 	public static byte[] fullEncode(byte[] bytes, String key, int passes) {
-		logBytes("\u001b[35m[E] BEFORE BYTES(%s): %s\u001b[0m", bytes);
 		byte[] arr = Arrays.copyOf(CONTROL_BYTES, bytes.length+CONTROL_BYTES.length);
 		for (int i = 0; i < bytes.length; i++) {
 			arr[i+CONTROL_BYTES.length] = bytes[i];
 		}
 		bytes = encode(arr, key, passes);
-		logBytes("\u001b[35m[E] AFTER BYTES(%s): %s\u001b[0m", bytes);
 		return bytes;
 	}
 	
@@ -125,9 +123,7 @@ public class CryptoUtils {
 	 * @throws IllegalArgumentException when the array cannot be properly decoded using given key
 	 */
 	public static byte[] fullDecode(byte[] bytes, String key, int passes) throws IllegalArgumentException {
-		logBytes("\u001b[32m[D] BEFORE BYTES(%s): %s\u001b[0m", bytes);
 		bytes = decode(bytes, key, passes);
-		logBytes("\u001b[32m[D] AFTER BYTES(%s): %s\u001b[0m", bytes);
 		if (bytes.length < 4 || bytes[0] != 0x00 || bytes[1] != 0x00 || bytes[2] != 0x00 || bytes[3] != 0x00) throw new IllegalArgumentException("This isn't valid byte array or key");
 		return Arrays.copyOfRange(bytes, 4, bytes.length);
 	}
@@ -196,15 +192,6 @@ public class CryptoUtils {
 	 */
 	public static byte[] decodeBytesFromInput(ByteArrayDataInput in, String key) throws IllegalArgumentException {
 		return decodeBytesFromInput(in, key, PASSES_COUNT);
-	}
-	
-	
-	private static void logBytes(String format, byte[] bytes) {
-		List<String> list = new ArrayList<>();
-		for (int i = 0; i < bytes.length; i++) {
-			list.add(Integer.toString(Byte.toUnsignedInt(bytes[i]), 16));
-		}
-		PortfelProvider.get().getLogger().warning(String.format(format, list.size(), String.join(" ", list)));
 	}
 	
 
