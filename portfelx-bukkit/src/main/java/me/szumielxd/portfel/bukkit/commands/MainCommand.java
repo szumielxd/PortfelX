@@ -1,6 +1,6 @@
-package me.szumielxd.portfel.bungee.commands;
+package me.szumielxd.portfel.bukkit.commands;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,37 +10,36 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabExecutor;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
-import me.szumielxd.portfel.bungee.objects.BungeeSender;
+import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.utils.MiscUtils;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.plugin.Command;
-import net.md_5.bungee.api.plugin.TabExecutor;
 
-public class MainCommand extends Command implements TabExecutor, AbstractCommand {
+public class MainCommand implements AbstractCommand, TabExecutor {
 
-	
-	private final PortfelBungeeImpl plugin;
+	private final PortfelBukkitImpl plugin;
+	private final PluginCommand command;
 	private Map<String, SimpleCommand> childrens = new HashMap<>();
 	private final String help = "help";
 	
 	
-	public MainCommand(@NotNull PortfelBungeeImpl plugin, @NotNull String name, @NotNull String permission, @NotNull String... aliases) {
-		super(name, permission, aliases);
+	public MainCommand(@NotNull PortfelBukkitImpl plugin, @NotNull PluginCommand command) {
 		this.plugin = plugin;
+		this.command = command;
 		this.register(
 				new HelpCommand(plugin, this, help),
-				new SystemParentCommand(plugin, this),
-				new UserParentCommand(plugin, this),
-				new LogParentCommand(plugin, this)
+				new SystemParentCommand(plugin, this)
 		);
 	}
 	
@@ -81,11 +80,6 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 	}
 
 	@Override
-	public @NotNull String[] getAliases() {
-		return super.getAliases();
-	}
-
-	@Override
 	public @NotNull List<CmdArg> getArgs() {
 		return new ArrayList<>();
 	}
@@ -94,12 +88,6 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 	public @NotNull LangKey getDescription() {
 		return LangKey.EMPTY;
 	}
-
-	@Override
-	public void execute(CommandSender sender, String[] args) {
-		this.onCommand(BungeeSender.get(this.plugin, sender), new Object[0], new String[] {this.getName()}, args);
-		
-	}
 	
 	public @NotNull List<SimpleCommand> getChildrens() {
 		return this.childrens.values().stream().distinct().collect(Collectors.toList());
@@ -107,8 +95,29 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 
 
 	@Override
-	public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
-		return this.onTabComplete(BungeeSender.get(this.plugin, sender), new String[] {this.getName()}, args);
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+		return this.onTabComplete(BukkitSender.get(this.plugin, sender), new String[] {alias}, args);
+	}
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		this.onCommand(BukkitSender.get(this.plugin, sender), new Object[0], new String[] {label}, args);
+		return true;
+	}
+
+	@Override
+	public @NotNull String getName() {
+		return this.command.getName();
+	}
+
+	@Override
+	public @NotNull String[] getAliases() {
+		return this.command.getAliases().toArray(new String[0]);
+	}
+
+	@Override
+	public @NotNull String getPermission() {
+		return this.command.getPermission();
 	}
 
 }

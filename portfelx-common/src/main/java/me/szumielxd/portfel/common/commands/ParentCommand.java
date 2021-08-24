@@ -110,7 +110,7 @@ public abstract class ParentCommand extends SimpleCommand {
 	}
 
 	@Override
-	public @NotNull Iterable<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
+	public @NotNull List<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
 		List<CmdArg> subCmds = this.getArgs();
 		String lastArg = args[args.length-1].toLowerCase();
 		if (subCmds.size() >= args.length) {

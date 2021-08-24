@@ -40,7 +40,7 @@ public abstract class SimpleCommand implements AbstractCommand {
 	
 	
 	@Override
-	public @NotNull Iterable<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
+	public @NotNull List<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
 		List<CmdArg> origin = this.getArgs();
 		List<CmdArg> flyingArgs = new ArrayList<>();
 		List<CmdArg> argList = new ArrayList<>();

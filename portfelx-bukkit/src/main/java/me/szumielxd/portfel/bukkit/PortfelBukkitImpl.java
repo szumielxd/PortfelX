@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -31,6 +32,7 @@ import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.managers.IdentifierManager;
+import me.szumielxd.portfel.bukkit.commands.MainCommand;
 import me.szumielxd.portfel.bukkit.commands.WalletCommand;
 import me.szumielxd.portfel.bukkit.hooks.PAPIHandler;
 import me.szumielxd.portfel.bukkit.listeners.GuiListener;
@@ -92,6 +94,15 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 		this.getLogger().info("Registering commands...");
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
+			// main
+			PluginCommand mainCmd = this.getPluginCommand("devportfel");
+			mainCmd.setAliases(Arrays.asList("dp"));
+			mainCmd.setDescription("Portfel main command");
+			mainCmd.setExecutor(new MainCommand(this, mainCmd));
+			mainCmd.setPermission("portfel.command");
+			mainCmd.setUsage("/<command>");
+			commands.register(this.getName(), mainCmd);
+			// wallet
 			PluginCommand walletCmd = this.getPluginCommand(this.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME));
 			walletCmd.setAliases(this.getConfiguration().getStringList(BukkitConfigKey.SHOP_COMMAND_ALIASES));
 			walletCmd.setDescription("Command to open wallet shop gui");

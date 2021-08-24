@@ -110,6 +110,11 @@ public class Lang {
 		//
 		COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
 		//
+		COMMAND_SYSTEM_RELOAD_DESCRIPTION("command.system.reload.description", "Reload partially plugin's configuration."),
+		COMMAND_SYSTEM_RELOAD_EXECUTE("command.system.reload.execute", "Reloading plugin..."),
+		COMMAND_SYSTEM_RELOAD_SUCCESS("command.system.reload.success", "Successfully reloaded {0}."),
+		COMMAND_SYSTEM_RELOAD_ERROR("command.system.reload.success", "An error occured while attempting to reload this plugin. Hover this text or see console for more informations."),
+		//
 		COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
 		COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT("command.system.registerserver.timeout", "Are you sure, you provided valid hashKey and server you want to register has up to date version of Portfel? He's not responding..."),
 		COMMAND_SYSTEM_REGISTERSERVER_ALREADY("command.system.registerserver.already", "Is there any intelligent reason to register already registered server? Pro Tip: Check ID {0}."),
