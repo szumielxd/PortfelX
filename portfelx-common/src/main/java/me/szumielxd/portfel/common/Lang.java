@@ -51,6 +51,10 @@ public class Lang {
 		COMMAND_ARGTYPES_USER_DESCRIPTION("command.arg-types.user.description", "user representated by name or unique id"),
 		COMMAND_ARGTYPES_USER_ERROR("command.arg-types.user.error", "A user for {0} could not be found."),
 		//
+		COMMAND_ARGTYPES_TOKEN_DISPLAY("command.arg-types.token.display", "giftcode"),
+		COMMAND_ARGTYPES_TOKEN_DESCRIPTION("command.arg-types.token.description", "giftcode representated by token"),
+		COMMAND_ARGTYPES_TOKEN_ERROR("command.arg-types.token.error", "A giftcode for {0} could not be found."),
+		//
 		COMMAND_ARGTYPES_SERVERNAME_DISPLAY("command.arg-types.servername.display", "serverName"),
 		COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION("command.arg-types.servername.description", "user-friendly text representation of server instance (not the same as bungee serverName)"),
 		//
@@ -77,33 +81,61 @@ public class Lang {
 		COMMAND_ARGTYPES_INTOP_DESCRIPTION("command.arg-types.in-top.description", "reason of this action"),
 		COMMAND_ARGTYPES_INTOP_ERROR("command.arg-types.in-top.error", "Did you know {0} is not true nor false?"),
 		//
-		COMMAND_ARGTYPES_LOGPAGE_DISPLAY("command.arg-types.log-page.display", "page"),
-		COMMAND_ARGTYPES_LOGPAGE_DESCRIPTION("command.arg-types.log-page.description", "current page of logs"),
+		COMMAND_ARGTYPES_PAGENUMBER_DISPLAY("command.arg-types.page-number.display", "page"),
+		COMMAND_ARGTYPES_PAGENUMBER_DESCRIPTION("command.arg-types.page-number.description", "current page of logs"),
 		//
-		COMMAND_ARGTYPES_LOGSIZE_DISPLAY("command.arg-types.log-size.display", "size"),
-		COMMAND_ARGTYPES_LOGSIZE_DESCRIPTION("command.arg-types.log-size.description", "size of one page"),
-		COMMAND_ARGTYPES_LOGSIZE_ERROR("command.arg-types.log-size.error", "Are you stupid or stupid? Page size of {0} is definitly unsafe. Max allowed is {1}."),
+		COMMAND_ARGTYPES_PAGESIZE_DISPLAY("command.arg-types.page-size.display", "size"),
+		COMMAND_ARGTYPES_PAGESIZE_DESCRIPTION("command.arg-types.page-size.description", "size of one page"),
+		COMMAND_ARGTYPES_PAGESIZE_ERROR("command.arg-types.page-size.error", "Are you stupid or stupid? Page size of {0} is definitly unsafe. Max allowed is {1}."),
 		//
-		COMMAND_ARGTYPES_LOGTARGET_DISPLAY("command.arg-types.log-target.display", "target"),
+		COMMAND_ARGTYPES_LOGTARGET_DISPLAY("command.arg-types.log-target.display", "targets"),
 		COMMAND_ARGTYPES_LOGTARGET_DESCRIPTION("command.arg-types.log-target.description", "string representation of action's target"),
 		//
-		COMMAND_ARGTYPES_LOGEXECUTOR_DISPLAY("command.arg-types.log-executor.display", "executor"),
+		COMMAND_ARGTYPES_LOGEXECUTOR_DISPLAY("command.arg-types.log-executor.display", "executors"),
 		COMMAND_ARGTYPES_LOGEXECUTOR_DESCRIPTION("command.arg-types.log-executor.description", "string representation of action's executor"),
 		//
-		COMMAND_ARGTYPES_LOGSERVER_DISPLAY("command.arg-types.log-executor.display", "server"),
+		COMMAND_ARGTYPES_LOGSERVER_DISPLAY("command.arg-types.log-executor.display", "servers"),
 		COMMAND_ARGTYPES_LOGSERVER_DESCRIPTION("command.arg-types.log-executor.description", "string representation of server where action has place"),
 		//
-		COMMAND_ARGTYPES_LOGORDER_DISPLAY("command.arg-types.log-executor.display", "order"),
+		COMMAND_ARGTYPES_LOGORDER_DISPLAY("command.arg-types.log-executor.display", "orders"),
 		COMMAND_ARGTYPES_LOGORDER_DESCRIPTION("command.arg-types.log-executor.description", "string representation of order's name"),
 		//
-		COMMAND_ARGTYPES_LOGACTION_DISPLAY("command.arg-types.log-executor.display", "action"),
+		COMMAND_ARGTYPES_LOGACTION_DISPLAY("command.arg-types.log-executor.display", "actions"),
 		COMMAND_ARGTYPES_LOGACTION_DESCRIPTION("command.arg-types.log-executor.description", "string representation of action's type"),
 		//
-		COMMAND_ARGTYPES_LOGVALCOND_DISPLAY("command.arg-types.log-value-condition.display", "condition"),
+		COMMAND_ARGTYPES_LOGVALCOND_DISPLAY("command.arg-types.log-value-condition.display", "values"),
 		COMMAND_ARGTYPES_LOGVALCOND_DESCRIPTION("command.arg-types.log-value-condition.description", "conditions describing range of values"),
 		//
-		COMMAND_ARGTYPES_LOGBALCOND_DISPLAY("command.arg-types.log-balance-condition.display", "condition"),
+		COMMAND_ARGTYPES_LOGBALCOND_DISPLAY("command.arg-types.log-balance-condition.display", "balances"),
 		COMMAND_ARGTYPES_LOGBALCOND_DESCRIPTION("command.arg-types.log-balance-condition.description", "conditions describing range of balances"),
+		//
+		COMMAND_ARGTYPES_TOKENCREATOR_DISPLAY("command.arg-types.token-creator.display", "creators"),
+		COMMAND_ARGTYPES_TOKENCREATOR_DESCRIPTION("command.arg-types.token-creator.description", "string representation of order's creator"),
+		//
+		COMMAND_ARGTYPES_TOKENSERVER_DISPLAY("command.arg-types.token-server.display", "servers"),
+		COMMAND_ARGTYPES_TOKENSERVER_DESCRIPTION("command.arg-types.token-server.description", "string representation of order's server"),
+		//
+		COMMAND_ARGTYPES_TOKENORDER_DISPLAY("command.arg-types.token-order.display", "orders"),
+		COMMAND_ARGTYPES_TOKENORDER_DESCRIPTION("command.arg-types.token-order.description", "string representation of order's name"),
+		//
+		COMMAND_ARGTYPES_TOKENCREATECOND_DISPLAY("command.arg-types.token-createdate-condition.display", "creationDates"),
+		COMMAND_ARGTYPES_TOKENCREATECOND_DESCRIPTION("command.arg-types.token-createdate-condition.description", "conditions describing range of creation dates"),
+		//
+		COMMAND_ARGTYPES_TOKENEXPIRATIONCOND_DISPLAY("command.arg-types.token-expirationdate-condition.display", "creationDates"),
+		COMMAND_ARGTYPES_TOKENEXPIRATIONCOND_DESCRIPTION("command.arg-types.token-expirationdate-condition.description", "conditions describing range of expiration dates"),
+		//
+		COMMAND_ARGTYPES_GIFTORDER_DISPLAY("command.arg-types.gift-order.display", "giftOrder"),
+		COMMAND_ARGTYPES_GIFTORDER_DESCRIPTION("command.arg-types.gift-order.description", "order called on gift-code execution"),
+		//
+		COMMAND_ARGTYPES_GIFTEXPIRATION_DISPLAY("command.arg-types.gift-expiration.display", "expiration"),
+		COMMAND_ARGTYPES_GIFTEXPIRATION_DESCRIPTION("command.arg-types.gift-expiration.description", "expiration time of this gift, use -1 for lifetime token"),
+		COMMAND_ARGTYPES_GIFTEXPIRATION_ERROR("command.arg-types.gift-expiration.error", "That's pretty sure '{0}' isn't valid date format. Working examples: `1629864019000`, 10d"),
+		//
+		COMMAND_ARGTYPES_GIFTSERVERS_DISPLAY("command.arg-types.gift-servers.display", "servers"),
+		COMMAND_ARGTYPES_GIFTSERVERS_DESCRIPTION("command.arg-types.gift-servers.description", "comma separated servers where gift can be used, use `*` for any server on proxy, of `+` for any server with registered portfel"),
+		//
+		COMMAND_ARGTYPES_GIFTTOKEN_DISPLAY("command.arg-types.gift-servers.display", "token"),
+		COMMAND_ARGTYPES_GIFTTOKEN_DESCRIPTION("command.arg-types.gift-servers.description", "token used to obtain this gift, if not given, defaults to random string of 12 alphanumeric characters"),
 		
 		
 		COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
@@ -175,6 +207,41 @@ public class Lang {
 		COMMAND_LOG_READ_HEADER("command.log.read.header", "Showing last activities"),
 		COMMAND_LOG_READ_PAGE("command.log.read.page", "page {0} of {1}"),
 		COMMAND_LOG_READ_TIME_AGO("command.log.read.time-ago", "{0} ago"),
+		//
+		COMMAND_GIFTCODE_DESCRIPTION("command.giftcode.description", "Giftcode management main command."),
+		//
+		COMMAND_GIFTCODE_INFO_DESCRIPTION("command.giftcode.info.description", "Get extended info about giftcode."),
+		COMMAND_GIFTCODE_INFO_HEADER("command.giftcode.info.header", "Giftcode Info: {0}"),
+		COMMAND_GIFTCODE_INFO_CREATOR("command.giftcode.info.creator", "Creator: {0}"),
+		COMMAND_GIFTCODE_INFO_UUID("command.giftcode.info.uuid", "UUID: {0}"),
+		COMMAND_GIFTCODE_INFO_ORDER("command.giftcode.info.order", "Order: {0}"),
+		COMMAND_GIFTCODE_INFO_ACCESSIBILITY("command.giftcode.info.accessibility", "Accessibility:"),
+		COMMAND_GIFTCODE_INFO_ACCESSTYPE("command.giftcode.info.access-type", "Type: {0}"),
+		COMMAND_GIFTCODE_INFO_ACCESSLIST("command.giftcode.info.access-list", "Allowed: {0}"),
+		COMMAND_GIFTCODE_INFO_DATES("command.giftcode.info.dates", "Dates:"),
+		COMMAND_GIFTCODE_INFO_CREATION("command.giftcode.info.creation", "Created: {0}"),
+		COMMAND_GIFTCODE_INFO_EXPIRATION("command.giftcode.info.expiration", "Expires: {0}"),
+		COMMAND_GIFTCODE_INFO_SUGGEST("command.giftcode.info.suggest", "Click to suggest command on chat"),
+		COMMAND_GIFTCODE_INFO_INSERT("command.giftcode.info.intop", "Click+Shift to insert above text on chat"),
+		//
+		COMMAND_DELETEGIFTCODE_DESCRIPTION("command.deletegiftcode.description", "Delete giftcode."),
+		COMMAND_DELETEGIFTCODE_SUCCESS("command.deletegiftcode.success", "Removed giftcode for {0}."),
+		COMMAND_DELETEGIFTCODE_FAIL("command.deletegiftcode.fail", "Cannot delete giftcode for {0}."),
+		//
+		COMMAND_CREATEGIFTCODE_DESCRIPTION("command.creategiftcode.description", "Create giftcode."),
+		COMMAND_CREATEGIFTCODE_SUCCESS("command.creategiftcode.success", "Created giftcode {0} for order {1} on {2} with expiration {3}."),
+		COMMAND_CREATEGIFTCODE_FAIL("command.creategiftcode.fail", "Cannot create giftcode for {0}."),
+		COMMAND_CREATEGIFTCODE_ALREADY("command.creategiftcode.already", "Gift code for {0} token already exists in database."),
+		COMMAND_CREATEGIFTCODE_PAST("command.creategiftcode.past", "You're time traveller? The expiration date cannot be earlier than now."),
+		//
+		COMMAND_LISTGIFTCODES_DESCRIPTION("command.listgiftcodes.description", "List giftcodes."),
+		COMMAND_LISTGIFTCODES_HEADER("command.listgiftcodes.header", "Showing last activities"),
+		COMMAND_LISTGIFTCODES_PAGE("command.listgiftcodes.page", "page {0} of {1}"),
+		COMMAND_LISTGIFTCODES_LIFETIME("command.listgiftcodes.lifetime", "lifetime"),
+		COMMAND_LISTGIFTCODES_TIME_AGO("command.listgiftcodes.time-ago", "{0} ago"),
+		COMMAND_LISTGIFTCODES_SUGGEST("command.listgiftcodes.suggest", "Click to insert displayname on chat"),
+		COMMAND_LISTGIFTCODES_INSERT("command.listgiftcodes.insert", "Click+Shift to insert unique ID on chat"),
+		COMMAND_LISTGIFTCODES_EXPIRATION("command.listgiftcodes.expiration", "Expiration: {0}"),
 		
 		
 		COMMAND_USAGE_TITLE("command.usage.title", "Command Usage - {0}"),
@@ -383,6 +450,7 @@ public class Lang {
 	 * @param locales directory
 	 */
 	public static void load(@NotNull File dir, @NotNull Portfel plugin) {
+		LANG_BY_LOCALE.clear();
 		if (dir.isFile() && dir.exists()) dir.delete();
 		if (!dir.exists()) dir.mkdirs();
 		File[] files = dir.listFiles((d, name) -> FILE_PATTERN.matcher(name).matches());

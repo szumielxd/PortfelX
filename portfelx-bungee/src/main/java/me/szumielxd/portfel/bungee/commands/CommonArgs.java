@@ -2,12 +2,16 @@ package me.szumielxd.portfel.bungee.commands;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.api.managers.AccessManager;
 import me.szumielxd.portfel.bungee.managers.OrdersManager.GlobalOrder;
+import me.szumielxd.portfel.bungee.objects.PrizeToken;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -16,6 +20,7 @@ public class CommonArgs {
 	
 	
 	private static PortfelBungeeImpl plugin;
+	public static List<String> NUMBERS_LIST = Arrays.asList("1", "2", "5", "10", "20", "50", "100");
 	
 	
 	public static void init(PortfelBungeeImpl plugin) {
@@ -57,6 +62,18 @@ public class CommonArgs {
 	
 	//
 	
+	public static final CmdArg TOKEN = new CmdArg(LangKey.COMMAND_ARGTYPES_TOKEN_DISPLAY, LangKey.COMMAND_ARGTYPES_TOKEN_DESCRIPTION, LangKey.COMMAND_ARGTYPES_TOKEN_ERROR, s -> {
+		try {
+			return plugin.getTokenDB().getToken(s);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	},
+	s -> plugin.getTokenManager().getCachedTokens().stream().map(PrizeToken::getToken).collect(Collectors.toList()));
+	
+	//
+	
 	public static final CmdArg ORDER = new CmdArg(LangKey.COMMAND_ARGTYPES_ORDER_DISPLAY, LangKey.COMMAND_ARGTYPES_ORDER_DESCRIPTION, LangKey.COMMAND_ARGTYPES_ORDER_ERROR, s -> {
 			return plugin.getOrdersManager().getOrders().get(s.toLowerCase());
 	},
@@ -87,5 +104,30 @@ public class CommonArgs {
 		return null;
 	},
 	s -> Arrays.asList("true", "false"));
+	
+	//
+	
+	public static final CmdArg PAGENUMBER = new CmdArg(LangKey.COMMAND_ARGTYPES_PAGENUMBER_DISPLAY, LangKey.COMMAND_ARGTYPES_PAGENUMBER_DESCRIPTION, null, CommonArgs::tryParseUnsignedNotZeroInt, (s, arr) -> {
+		return NUMBERS_LIST;
+	});
+	
+	//
+	
+	public static final CmdArg PAGESIZE = new CmdArg(true, "size=", LangKey.COMMAND_ARGTYPES_PAGESIZE_DISPLAY, LangKey.COMMAND_ARGTYPES_PAGESIZE_DESCRIPTION, null, CommonArgs::tryParseUnsignedNotZeroInt, (s, arr) -> {
+		return NUMBERS_LIST.stream().map(n -> "size="+n).collect(Collectors.toList());
+	});
+	
+	
+	
+	
+	
+	private static @Nullable Integer tryParseUnsignedNotZeroInt(String text) {
+		try {
+			int i = Integer.parseInt(text);
+			return i > 0 ? i : null;
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 	
 }

@@ -102,7 +102,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelBungee {
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new BungeeUserManagerImpl(this).init();
 		this.topManager = (BungeeTopManagerImpl) new BungeeTopManagerImpl(this).init();
-		this.tokenManager = new TokenManager(this);
+		this.tokenManager = new TokenManager(this).init();
 		this.getLogger().info("Registering listeners...");
 		this.getProxy().getPluginManager().registerListener(this, new UserListener(this));
 		this.getProxy().getPluginManager().registerListener(this, new ChannelListener(this));
@@ -114,8 +114,6 @@ public class PortfelBungeeImpl extends Plugin implements PortfelBungee {
 		this.getProxy().registerChannel(CHANNEL_SETUP);
 		this.getProxy().registerChannel(CHANNEL_USERS);
 		this.getProxy().registerChannel(CHANNEL_TRANSACTIONS);
-		//this.getProxy().registerChannel(CHANNEL_BUNGEE);
-		//this.getProxy().registerChannel(CHANNEL_LEGACY_BUNGEE);
 		
 		this.sendMotd();
 		
@@ -146,6 +144,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelBungee {
 		this.getLogger().info("Unloading managers");
 		this.userManager.killManager();
 		this.topManager.killManager();
+		this.tokenManager.killManager();
 		this.transactionLogger.killLogger();
 		this.database.shutdown();
 		this.tokenDatabase.shutdown();

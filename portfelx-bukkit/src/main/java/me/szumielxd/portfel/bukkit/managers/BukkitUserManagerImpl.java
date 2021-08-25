@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import org.bukkit.Server;
@@ -157,6 +159,8 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 		Stream.of(users).map(User::getUniqueId).map(srv::getPlayer).filter(Objects::nonNull).forEach(t -> {
 			try {
 				mgr.requestPlayer(t);
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				// silence
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

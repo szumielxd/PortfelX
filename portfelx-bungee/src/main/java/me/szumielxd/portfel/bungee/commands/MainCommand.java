@@ -38,6 +38,10 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 		this.plugin = plugin;
 		this.register(
 				new HelpCommand(plugin, this, help),
+				new ListgiftcodesCommand(plugin, this),
+				new CreategiftcodeCommand(plugin, this),
+				new DeletegiftcodeCommand(plugin, this),
+				new GiftcodeParentCommand(plugin, this),
 				new SystemParentCommand(plugin, this),
 				new UserParentCommand(plugin, this),
 				new LogParentCommand(plugin, this)
@@ -97,8 +101,7 @@ public class MainCommand extends Command implements TabExecutor, AbstractCommand
 
 	@Override
 	public void execute(CommandSender sender, String[] args) {
-		this.onCommand(BungeeSender.get(this.plugin, sender), new Object[0], new String[] {this.getName()}, args);
-		
+		this.plugin.getTaskManager().runTaskAsynchronously(() -> this.onCommand(BungeeSender.get(this.plugin, sender), new Object[0], new String[] {this.getName()}, args));
 	}
 	
 	public @NotNull List<SimpleCommand> getChildrens() {

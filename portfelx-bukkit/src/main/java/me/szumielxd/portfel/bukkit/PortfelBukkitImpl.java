@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.event.HandlerList;
@@ -34,6 +35,7 @@ import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.managers.IdentifierManager;
 import me.szumielxd.portfel.bukkit.commands.MainCommand;
 import me.szumielxd.portfel.bukkit.commands.WalletCommand;
+import me.szumielxd.portfel.bukkit.hooks.MVdWHandler;
 import me.szumielxd.portfel.bukkit.hooks.PAPIHandler;
 import me.szumielxd.portfel.bukkit.listeners.GuiListener;
 import me.szumielxd.portfel.bukkit.listeners.UserListener;
@@ -66,6 +68,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 	private BukkitTopManager topManager;
 	
 	private PAPIHandler papiHandler;
+	private MVdWHandler mvdwHandler;
 	private ContextProvider luckpermsContextProvider;
 	
 	private String serverHashKey;
@@ -83,6 +86,10 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 		this.taskManager = new BukkitTaskManagerImpl(this);
 		
 		this.load();
+		
+		if(Bukkit.getPluginManager().isPluginEnabled("MVdWPlaceholderAPI")) {
+			this.mvdwHandler = new MVdWHandler(this);
+		}
 		
 		this.getLogger().info("Setup managers...");
 		this.channelManager = new ChannelManagerImpl(this);
@@ -172,6 +179,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 		HandlerList.unregisterAll(this);
 		
 		this.unload();
+		this.mvdwHandler.unregister();
 		this.getLogger().info("Everything OK, miss you");
 		this.getLogger().info("Goodbye my friend...");
 	}

@@ -54,7 +54,7 @@ public abstract class SimpleCommand implements AbstractCommand {
 			final int index = args.length-1;
 			String arg = args[index].toLowerCase();
 			if (args.length <= argList.size()) {
-				completions.addAll(argList.get(index).getTabCompletions(sender, label));
+				completions.addAll(argList.get(index).getTabCompletions(sender, MiscUtils.mergeArrays(label, Arrays.copyOf(args, index+1))));
 			}
 			flyingArgs.stream().map(a -> {
 				List<String> res = a.getTabCompletions(sender, label);
@@ -122,7 +122,6 @@ public abstract class SimpleCommand implements AbstractCommand {
 				if (!arg.isOptional()) {
 					if (args.length > index) sender.sendTranslated(Portfel.PREFIX.append(arg.getArgError(Component.text(args[index], DARK_RED))));
 					else sender.sendTranslated(MiscUtils.extendedCommandUsage(this));
-					this.plugin.getLogger().warning("Exit 1");
 					return null;
 				}
 			} else {
@@ -131,7 +130,6 @@ public abstract class SimpleCommand implements AbstractCommand {
 		}
 		if (index < args.length) { // check for bigger amount of given arguments
 			sender.sendTranslated(MiscUtils.extendedCommandUsage(this));
-			this.plugin.getLogger().warning("Exit 2");
 			return null;
 		}
 		return arr;

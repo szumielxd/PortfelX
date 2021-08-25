@@ -48,6 +48,11 @@
 			<url>http://repo.mvdw-software.be/content/groups/public/</url>
 		</repository-->
 		<repository>
+			<id>minefox</id>
+			<name>MineFox Public Repository</name>
+			<url>http://repo.minefox.pl/repository/maven-public/</url>
+		</repository>
+		<repository>
 			<id>placeholderapi</id>
 			<url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
 		</repository>

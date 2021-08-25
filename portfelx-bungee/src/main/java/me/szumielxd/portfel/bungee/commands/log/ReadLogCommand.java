@@ -21,6 +21,7 @@ import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import me.szumielxd.portfel.bungee.commands.CommonArgs;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger.ActionType;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger.LogEntry;
 import me.szumielxd.portfel.bungee.database.AbstractDBLogger.NumericCondition;
@@ -35,18 +36,13 @@ import net.kyori.adventure.text.event.ClickEvent;
 
 public class ReadLogCommand extends SimpleCommand {
 	
-	private List<String> numbers = Arrays.asList("1", "2", "5", "10", "20", "50", "100");
 	private List<String> signs = Arrays.asList("!", "<", ">");
 	private Pattern numCond = Pattern.compile("\\d+");
 	private Pattern extNumCond = Pattern.compile("[<>!]?\\d+(-\\d+)?");
 	
 	private List<CmdArg> args = Arrays.asList(
-			new CmdArg(LangKey.COMMAND_ARGTYPES_LOGPAGE_DISPLAY, LangKey.COMMAND_ARGTYPES_LOGPAGE_DESCRIPTION, null, this::tryParseUnsignedNotZeroInt, (s, arr) -> {
-				return this.numbers;
-			}),
-			new CmdArg(true, "size=", LangKey.COMMAND_ARGTYPES_LOGSIZE_DISPLAY, LangKey.COMMAND_ARGTYPES_LOGSIZE_DESCRIPTION, null, this::tryParseUnsignedNotZeroInt, (s, arr) -> {
-				return this.numbers.stream().map(n -> "size="+n).collect(Collectors.toList());
-			}),
+			CommonArgs.PAGENUMBER,
+			CommonArgs.PAGESIZE,
 			new CmdArg(true, "targets=", LangKey.COMMAND_ARGTYPES_LOGTARGET_DISPLAY, LangKey.COMMAND_ARGTYPES_LOGTARGET_DESCRIPTION, null, str -> str.split(","), (s, arr) -> {
 				String arg = arr[arr.length-1];
 				String prefix = "targets=";
@@ -98,7 +94,7 @@ public class ReadLogCommand extends SimpleCommand {
 				if (!prefix.isEmpty()) prefix += ",";
 				List<String> list = new ArrayList<>();
 				if (arg.isEmpty()) list.addAll(this.signs);
-				list.addAll(this.numbers);
+				list.addAll(CommonArgs.NUMBERS_LIST);
 				if (this.numCond.matcher(arg).matches()) list.add("-");
 				if (this.extNumCond.matcher(arg).matches()) list.add(",");
 				list.replaceAll(prefix::concat);
@@ -114,7 +110,7 @@ public class ReadLogCommand extends SimpleCommand {
 				if (!prefix.isEmpty()) prefix += ",";
 				List<String> list = new ArrayList<>();
 				if (arg.isEmpty()) list.addAll(this.signs);
-				list.addAll(this.numbers);
+				list.addAll(CommonArgs.NUMBERS_LIST);
 				if (this.numCond.matcher(arg).matches()) list.add("-");
 				if (this.extNumCond.matcher(arg).matches()) list.add(",");
 				list.replaceAll(prefix::concat);

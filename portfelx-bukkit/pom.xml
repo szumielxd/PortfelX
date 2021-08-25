@@ -29,18 +29,12 @@
 			<version>2.10.10</version>
 			<scope>provided</scope>
 		</dependency>
-		<!--dependency>
+		<dependency>
 			<groupId>be.maximvdw</groupId>
 			<artifactId>MVdWPlaceholderAPI</artifactId>
-			<version>3.1.1-SNAPSHOT</version>
+			<version>3.1.1</version>
 			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.spigotmc</groupId>
-					<artifactId>spigot</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency-->
+		</dependency>
 		<dependency>
 			<groupId>com.mojang</groupId>
 			<artifactId>authlib</artifactId>

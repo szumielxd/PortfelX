@@ -6,11 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,6 +26,7 @@ import me.szumielxd.portfel.api.Config;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.api.configuration.BungeeConfigKey;
+import me.szumielxd.portfel.bungee.database.AbstractDB;
 import me.szumielxd.portfel.bungee.database.token.AbstractTokenDB;
 import me.szumielxd.portfel.bungee.objects.PrizeToken;
 import me.szumielxd.portfel.bungee.objects.PrizeToken.ServerSelectorType;
@@ -198,7 +203,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	@Override
 	public @Nullable PrizeToken getToken(@NotNull String token) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? AND (`%s` = -1 OR `%s` >= CURRENT_TIMESTAMP)",
+		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? AND (`%s` = -1 OR `%s` >= UNIX_TIMESTAMP())",
 				TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID, TOKENS_CREATIONDATE, TOKENS_EXPIRATIONDATE,
 				TABLE_TOKENS, TOKENS_TOKEN, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE);
 		try (Connection conn = this.connect()) {
@@ -260,6 +265,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	 * @param expiration date timestamp when token will expire, set to -1 for non-expiring token
 	 * @throws SQLException when cannot establish the connection to the database or token already exists
 	 */
+	@Override
 	public void registerToken(@NotNull String token, @NotNull String servers, @NotNull String order, @NotNull ActionExecutor creator, long expiration) throws SQLException {
 		this.checkConnection();
 		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?)",
@@ -278,6 +284,94 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	}
 	
 	/**
+	 * Get all active gift-codes.
+	 * 
+	 * @param servers servers where token can be used
+	 * @param orders list of filtered orders
+	 * @param creators list of creators to filter
+	 * @param creationDateConditions creation date filter
+	 * @param expirationDateConditions expiration date filter. Type -1 for non-expiring
+	 * @return list of valid prize tokens
+	 * @throws when cannot establish the connection to the database or token already exists
+	 */
+	@Override
+	public @NotNull List<PrizeToken> getTokens(@Nullable String[] servers, @Nullable String[] orders, @Nullable String[] creators, @Nullable DateCondition[] creationDateConditions, @Nullable DateCondition[] expirationDateConditions) throws SQLException {
+		this.checkConnection();
+		
+		// parse target and executor
+		List<String> creatorNames = new ArrayList<>();
+		List<UUID> creatorIds = new ArrayList<>();
+		if (creators != null) Stream.of(creators).forEach(str -> {
+			try {creatorIds.add(UUID.fromString(str));} catch (IllegalArgumentException e) {creatorNames.add(str);}
+		});
+		
+		// create builder
+		StringBuilder whereClause = new StringBuilder();
+		
+		// creators
+		if (!creatorNames.isEmpty()) whereClause.append(" AND `").append(TOKENS_CREATORNAME).append('`').append(" IN (").append(String.join(", ", creatorNames.stream().map(s -> "?").toArray(String[]::new))).append(')');
+		if (!creatorIds.isEmpty()) whereClause.append(" AND `").append(TOKENS_CREATORUUID).append('`').append(" IN (").append(String.join(", ", creatorNames.stream().map(s -> "?").toArray(String[]::new))).append(')');
+		// servers
+		if (servers != null && servers.length > 0) whereClause.append(" AND (").append(String.join(" OR ", Stream.of(servers).map(s -> String.format("`%s` LIKE ?", TOKENS_SERVERS)).toArray(String[]::new))).append(')');
+		// orders
+		if (orders != null && orders.length > 0) whereClause.append(" AND (").append(String.join(" OR ", Stream.of(orders).map(s -> String.format("`%s` LIKE ?", TOKENS_ORDERNAME)).toArray(String[]::new))).append(')');
+		// creation date
+		if (creationDateConditions != null && creationDateConditions.length > 0) {
+			whereClause.append(" AND (").append(String.join(" AND ", Stream.of(creationDateConditions).map(c -> String.format("`%s` %s", TOKENS_CREATIONDATE, c.getFormat())).toArray(String[]::new))).append(')');
+		}
+		// expiration date
+		if (expirationDateConditions != null && expirationDateConditions.length > 0) {
+			whereClause.append(" AND (").append(String.join(" AND ", Stream.of(expirationDateConditions).map(c -> String.format("`%s` %s", TOKENS_EXPIRATIONDATE, c.getFormat())).toArray(String[]::new))).append(')');
+		}
+		
+		AbstractDB db = this.plugin.getDB();
+		db.checkConnection();
+		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE (`%s` = -1 OR `%s` >= UNIX_TIMESTAMP()) ",
+				TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID,
+				TOKENS_CREATIONDATE, TOKENS_EXPIRATIONDATE, TABLE_TOKENS, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE);
+		if (whereClause.length() > 0) sql = whereClause.insert(0, sql).append(String.format(" ORDER BY `%s` ASC", TOKENS_CREATIONDATE)).toString();
+		
+		try (Connection conn = this.connect()) {
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				int i = 0;
+				// creators
+				if (!creatorNames.isEmpty()) for (String s : creatorNames) stm.setString(++i, s);
+				if (!creatorIds.isEmpty()) for (UUID s : creatorIds) stm.setString(++i, s.toString());
+				// servers
+				if (servers != null && servers.length > 0) for (String s : servers) stm.setString(++i, this.likeContains(s));
+				// orders
+				if (orders != null && orders.length > 0) for (String s : orders) stm.setString(++i, this.likeContains(s));
+				// value
+				if (creationDateConditions != null && creationDateConditions.length > 0) for (DateCondition c : creationDateConditions) for (long val : c.getValues()) stm.setLong(++i, val);
+				// balance
+				if (expirationDateConditions != null && expirationDateConditions.length > 0) for (DateCondition c : expirationDateConditions) for (long val : c.getValues()) stm.setLong(++i, val);
+				
+				try (ResultSet rs = stm.executeQuery()) {
+					List<PrizeToken> list = new ArrayList<>(rs.getFetchSize());
+					while (rs.next()) {
+						ActionExecutor creator = new ActionExecutor(rs.getString(4), UUID.fromString(rs.getString(5))) {};
+						Date creationDate = rs.getDate(6);
+						long expiration = rs.getLong(7);
+						String selector = rs.getString(2);
+						Set<String> serversSet = new HashSet<>();
+						ServerSelectorType type;
+						if ("*".equals(selector)) {
+							type = ServerSelectorType.ANY;
+						} else if ("+".equals(selector)) {
+							type = ServerSelectorType.REGISTERED;
+						} else {
+							type = ServerSelectorType.WHITELIST;
+							serversSet = new HashSet<>(Arrays.asList(selector.split(",")));
+						}
+						list.add(new PrizeToken(rs.getString(1), serversSet, type, rs.getString(3), creator, creationDate, expiration));
+					}
+					return list;
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Remove expired tokens from database.
 	 * 
 	 * @implNote Thread unsafe.
@@ -286,7 +380,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	@Override
 	public void cleanupExpired() throws SQLException {
 		this.checkConnection();
-		String sql = String.format("DELETE FROM `%s` WHERE `%s` <> -1 AND `%s` < CURRENT_TIMESTAMP", TABLE_TOKENS, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE);
+		String sql = String.format("DELETE FROM `%s` WHERE `%s` <> -1 AND `%s` < UNIX_TIMESTAMP()", TABLE_TOKENS, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE);
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.executeUpdate();
@@ -318,6 +412,14 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 				stm.execute(tokensTable);
 			}
 		}
+	}
+
+	private @NotNull String escapeLikeWildcards(@NotNull String text) {
+		return text.replace("%", "\\%").replace("_", "\\_");
+	}
+	
+	private @NotNull String likeContains(@NotNull String text) {
+		return "%" + this.escapeLikeWildcards(text) + "%";
 	}
 
 }

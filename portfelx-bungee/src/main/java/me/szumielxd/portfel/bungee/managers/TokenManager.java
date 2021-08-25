@@ -5,18 +5,25 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
-
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
+import me.szumielxd.portfel.api.objects.ExecutedTask;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.api.configuration.BungeeConfigKey;
@@ -34,11 +41,19 @@ public class TokenManager {
 	
 	private final PortfelBungeeImpl plugin;
 	private final Set<UUID> pendingTokenRequests;
+	private List<PrizeToken> cachedTokens = new ArrayList<>();
+	private ExecutedTask tokenCacheUpdater;
 	
 	
 	public TokenManager(PortfelBungeeImpl plugin) {
 		this.plugin = plugin;
 		this.pendingTokenRequests = new HashSet<>(this.plugin.getConfiguration().getInt(BungeeConfigKey.TOKEN_MANAGER_POOLSIZE));
+	}
+	
+	
+	public TokenManager init() {
+		this.tokenCacheUpdater = this.plugin.getTaskManager().runTaskTimerAsynchronously(this::updateTokens, 0L, 1L, TimeUnit.MINUTES);
+		return this;
 	}
 	
 	
@@ -66,6 +81,43 @@ public class TokenManager {
 	}
 	
 	
+	public List<PrizeToken> getCachedTokens() {
+		return Collections.unmodifiableList(this.cachedTokens);
+	}
+	
+	
+	public CompletableFuture<Boolean> deleteToken(@NotNull String token) {
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				if (this.plugin.getTokenDB().destroyToken(token)) {
+					this.cachedTokens.removeIf(t -> token.equals(t.getToken()));
+					return true;
+				}
+			} catch (InterruptedException | ExecutionException | TimeoutException e) {
+				// silence
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return false;
+		});
+	}
+	
+	
+	public void killManager() {
+		if (this.tokenCacheUpdater != null) this.tokenCacheUpdater.cancel();
+		this.tokenCacheUpdater = null;
+	}
+	
+	
+	private void updateTokens() {
+		try {
+			this.cachedTokens = new ArrayList<>(this.plugin.getTokenDB().getTokens(null, null, null, null, null));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	private void executeValidation(@NotNull ProxiedPlayer target, @NotNull User user, @NotNull CommonPlayer sender, @NotNull String token) throws Exception {
 		PrizeToken prize = this.plugin.getTokenDB().getToken(token);
 		if (prize != null) {
@@ -83,6 +135,7 @@ public class TokenManager {
 			}
 			if (valid) {
 				if (this.plugin.getTokenDB().destroyToken(token)) {
+					this.cachedTokens.removeIf(t -> token.equals(t.getToken()));
 					this.plugin.getDBLogger().logTokenUse(user, user.getServerName(), prize);
 					long executed = this.plugin.getPrizesManager().getOrders().values().stream().filter(o -> o.examine(user, prize.getOrder(), token)).count();
 					if (user.getRemoteId() != null) this.sendTokenPrizeExecution(target, user.getRemoteId(), token, prize.getOrder(), executed);
