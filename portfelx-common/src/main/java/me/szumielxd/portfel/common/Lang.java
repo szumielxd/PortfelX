@@ -235,7 +235,7 @@ public class Lang {
 		COMMAND_CREATEGIFTCODE_PAST("command.creategiftcode.past", "You're time traveller? The expiration date cannot be earlier than now."),
 		//
 		COMMAND_LISTGIFTCODES_DESCRIPTION("command.listgiftcodes.description", "List giftcodes."),
-		COMMAND_LISTGIFTCODES_HEADER("command.listgiftcodes.header", "Showing last activities"),
+		COMMAND_LISTGIFTCODES_HEADER("command.listgiftcodes.header", "Showing giftcodes"),
 		COMMAND_LISTGIFTCODES_PAGE("command.listgiftcodes.page", "page {0} of {1}"),
 		COMMAND_LISTGIFTCODES_LIFETIME("command.listgiftcodes.lifetime", "lifetime"),
 		COMMAND_LISTGIFTCODES_TIME_AGO("command.listgiftcodes.time-ago", "{0} ago"),

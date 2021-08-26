@@ -21,7 +21,7 @@
 		<package>me.szumielxd.portfel</package>
 		<bukkitMainClass>${package}.bukkit.PortfelBukkitImpl</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
-		<revision>3.0.0-SNAPSHOT</revision>
+		<revision>3.0.0</revision>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
 		<finalNameObf>/../../target/${project.artifactId}-obf-${git.commit.id.abbrev}-${project.version}</finalNameObf>
 		<renamelog>${project.artifactId}_renamelog.xml</renamelog>
@@ -75,32 +75,32 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-common-api</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-bukkit-api</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-bungee-api</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-common</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-bukkit</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
+				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-bungee</artifactId>
-				<version>3.0.0-SNAPSHOT</version>
+				<version>${revision}</version>
 			</dependency>
 			
 			<!-- Adventure platform -->

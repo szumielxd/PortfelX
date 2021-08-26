@@ -3,12 +3,12 @@ package me.szumielxd.portfel.bungee.database.hikari.logging;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -127,7 +127,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 								ActionExecutor executor = new ActionExecutor(rs.getString(5), UUID.fromString(rs.getString(6))) {};
 								ActionType type = ActionType.parse(rs.getString(9));
 								this.handleIncomingLog(new LogEntry(rs.getInt(1), UUID.fromString(rs.getString(2)), rs.getString(3), executor,
-										rs.getString(4), rs.getDate(7), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
+										rs.getString(4), new Date(rs.getTimestamp(7).getTime()), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
 							}
 						}
 						if (this.lastID < 0) this.lastID = 0;
@@ -402,7 +402,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 						ActionExecutor executor = new ActionExecutor(rs.getString(5), UUID.fromString(rs.getString(6))) {};
 						ActionType type = ActionType.parse(rs.getString(9));
 						list.add(new LogEntry(rs.getInt(1), UUID.fromString(rs.getString(2)), rs.getString(3), executor,
-								rs.getString(4), rs.getDate(7), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
+								rs.getString(4), new Date(rs.getTimestamp(7).getTime()), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
 					}
 					return list;
 				}

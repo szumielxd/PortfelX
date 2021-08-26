@@ -2,7 +2,7 @@ package me.szumielxd.portfel.bungee.database;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

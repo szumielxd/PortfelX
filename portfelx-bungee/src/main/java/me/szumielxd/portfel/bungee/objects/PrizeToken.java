@@ -1,6 +1,6 @@
 package me.szumielxd.portfel.bungee.objects;
 
-import java.sql.Date;
+import java.util.Date;
 import java.util.Collections;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;

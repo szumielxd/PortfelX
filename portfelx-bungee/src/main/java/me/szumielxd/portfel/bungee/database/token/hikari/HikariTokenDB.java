@@ -1,13 +1,13 @@
 package me.szumielxd.portfel.bungee.database.token.hikari;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -214,7 +214,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 						if (!Objects.equal(token, rs.getString(1))) return null;
 						String order = rs.getString(3);
 						ActionExecutor creator = new ActionExecutor(rs.getString(4), UUID.fromString(rs.getString(5))) {};
-						Date creationDate = rs.getDate(6);
+						Date creationDate = new Date(rs.getTimestamp(6).getTime());
 						long expiration = rs.getLong(7);
 						String selector = rs.getString(2);
 						Set<String> servers = new HashSet<>();
@@ -323,14 +323,13 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 		if (expirationDateConditions != null && expirationDateConditions.length > 0) {
 			whereClause.append(" AND (").append(String.join(" AND ", Stream.of(expirationDateConditions).map(c -> String.format("`%s` %s", TOKENS_EXPIRATIONDATE, c.getFormat())).toArray(String[]::new))).append(')');
 		}
-		
+		whereClause.append(String.format(" ORDER BY `%s` ASC", TOKENS_CREATIONDATE));
 		AbstractDB db = this.plugin.getDB();
 		db.checkConnection();
 		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE (`%s` = -1 OR `%s` >= UNIX_TIMESTAMP()) ",
 				TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID,
 				TOKENS_CREATIONDATE, TOKENS_EXPIRATIONDATE, TABLE_TOKENS, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE);
-		if (whereClause.length() > 0) sql = whereClause.insert(0, sql).append(String.format(" ORDER BY `%s` ASC", TOKENS_CREATIONDATE)).toString();
-		
+		if (whereClause.length() > 0) sql = whereClause.insert(0, sql).toString();
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				int i = 0;
@@ -350,7 +349,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 					List<PrizeToken> list = new ArrayList<>(rs.getFetchSize());
 					while (rs.next()) {
 						ActionExecutor creator = new ActionExecutor(rs.getString(4), UUID.fromString(rs.getString(5))) {};
-						Date creationDate = rs.getDate(6);
+						Date creationDate = new Date(rs.getTimestamp(6).getTime());
 						long expiration = rs.getLong(7);
 						String selector = rs.getString(2);
 						Set<String> serversSet = new HashSet<>();

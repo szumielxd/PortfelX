@@ -179,7 +179,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 		HandlerList.unregisterAll(this);
 		
 		this.unload();
-		this.mvdwHandler.unregister();
+		if (this.mvdwHandler != null) this.mvdwHandler.unregister();
 		this.getLogger().info("Everything OK, miss you");
 		this.getLogger().info("Goodbye my friend...");
 	}
