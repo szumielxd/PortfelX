@@ -1,5 +1,6 @@
 package me.szumielxd.portfel.bukkit.managers;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -142,7 +143,7 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 	@Override
 	public @NotNull Collection<User> getLoadedUsers() {
 		this.validate();
-		return Collections.unmodifiableCollection(this.users.values());
+		return Collections.unmodifiableCollection(new ArrayList<>(this.users.values()));
 	}
 	
 	/**
