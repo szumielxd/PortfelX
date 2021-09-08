@@ -164,7 +164,10 @@ public class PAPIHandler extends PlaceholderExpansion {
 	
 	
 	private String formatCurrency(Locale locale, long value) {
-		return Lang.get(locale).text(LangKey.MAIN_CURRENCY_FORMAT, NumberFormat.getInstance(locale).format(value).replace(' ', ' '));
+		NumberFormat format = NumberFormat.getInstance(locale);
+		format.setMinimumFractionDigits(2);
+		format.setMaximumFractionDigits(2);
+		return Lang.get(locale).text(LangKey.MAIN_CURRENCY_FORMAT, format.format(value).replace(' ', ' '));
 	}
 	
 
