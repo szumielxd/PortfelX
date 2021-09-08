@@ -3,6 +3,7 @@ package me.szumielxd.portfel.api;
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
+
 import me.szumielxd.portfel.api.configuration.AbstractKey;
 
 public interface Config {

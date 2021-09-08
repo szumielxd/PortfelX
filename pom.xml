@@ -60,6 +60,10 @@
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
 		</repository>
+		<repository>
+			<id>viaversion-repo</id>
+			<url>https://repo.viaversion.com</url>
+		</repository>
 	</repositories>
 
 	<!-- License -->
@@ -174,10 +178,10 @@
 						<groupId>net.kyori</groupId>
 						<artifactId>adventure-api</artifactId>
 					</exclusion>
-					<exclusion>
+					<!--exclusion>
 						<groupId>net.kyori</groupId>
 						<artifactId>adventure-nbt</artifactId>
-					</exclusion>
+					</exclusion-->
 					<exclusion>
 						<groupId>net.kyori</groupId>
 						<artifactId>adventure-platform-api</artifactId>
@@ -295,14 +299,18 @@
 			<version>21.0.1</version>
 			<scope>provided</scope>
 		</dependency>
-		
-		<!-- yGuard -->
-		<!--dependency>
-			<groupId>com.yworks</groupId>
-			<artifactId>yguard</artifactId>
-			<version>3.0.0</version>
-			<scope>compile</scope>
-		</dependency-->
+		<dependency>
+			<groupId>com.viaversion</groupId>
+			<artifactId>viaversion-api</artifactId>
+			<version>4.0.1</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>net.luckperms</groupId>
+			<artifactId>api</artifactId>
+			<version>5.3</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<!-- Build -->
@@ -339,6 +347,66 @@
 					</executions>
 					<configuration>
 						<dotGitDirectory>${project.parent.basedir}/.git</dotGitDirectory>
+					</configuration>
+				</plugin>
+				
+				<plugin>
+					<groupId>com.github.wvengen</groupId>
+					<artifactId>proguard-maven-plugin</artifactId>
+					<version>2.4.0</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals><goal>proguard</goal></goals>
+						</execution>
+					</executions>
+					<configuration>
+						<obfuscate>true</obfuscate>
+						<injar>${finalName}.jar</injar>
+						<options>
+							<option>-allowaccessmodification</option>
+							<option>-dontshrink</option>
+							<option>-keep public class me.szumielxd.portfel.bukkit.PortfelBukkitImpl { *; }</option>
+							<option>-keep public class net.kyori.** { *; }</option>
+							<option>-keep public class net.** { *; }</option>
+							<option>-dontnote me.clip.**</option>
+							<option>-dontnote be.maximvdw.**</option>
+							<option>-dontnote me.szumielxd.portfel.lib.**</option>
+							<option>-dontnote java.**</option>
+							<option>-dontnote sun.**</option>
+							<option>-dontnote com.sun.**</option>
+							<option>-dontnote org.**</option>
+							<option>-dontnote javax.**</option>
+							<option>-dontnote com.github.**</option>
+							<option>-dontnote com.google.**</option>
+							<option>-dontnote com.**</option>
+							<option>-dontnote net.**</option>
+							<option>-dontwarn com.**</option>
+							<option>-dontwarn org.**</option>
+							<option>-dontwarn net.**</option>
+							<option>-dontwarn net.**</option>
+							<option>-dontwarn me.clip.**</option>
+						</options>
+						<libs>
+							<lib>${java.home}/jmods/java.base.jmod</lib>
+							<lib>${java.home}/jmods/java.logging.jmod</lib>
+							<lib>${java.home}/jmods/java.desktop.jmod</lib>
+							<lib>${java.home}/jmods/java.sql.jmod</lib>
+						</libs>
+						<exclusions>
+							<exclusion>
+								<groupId>${project.groupId}</groupId>
+								<artifactId>portfelx-common</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>${project.groupId}</groupId>
+								<artifactId>portfelx-api</artifactId>
+							</exclusion>
+							<exclusion>
+								<groupId>${project.groupId}</groupId>
+								<artifactId>portfelx-bukkit</artifactId>
+							</exclusion>
+						</exclusions>
 					</configuration>
 				</plugin>
 				
@@ -424,47 +492,13 @@
 								<pattern>org.yaml.snakeyaml</pattern>
 								<shadedPattern>${package}.lib.org.yaml.snakeyaml</shadedPattern>
 							</relocation>
+							<relocation>
+								<pattern>com.github.curiousoddman.rgxgen</pattern>
+								<shadedPattern>${package}.lib.com.github.curiousoddman.rgxgen</shadedPattern>
+							</relocation>
 						</relocations>
 					</configuration>
 				</plugin>
-				
-				<!-- AntRun plugin for yGuard -->
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId> 
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.8</version>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<goals>
-								<goal>run</goal>
-							</goals>
-							<id>obfuscate</id>
-							<configuration>
-								<tasks>
-									<property name="runtime_classpath" refid="maven.runtime.classpath"/>
-									<taskdef name="yguard" classname="com.yworks.yguard.YGuardTask" classpath="${runtime_classpath}"/>
-									<yguard>
-										<inoutpair in="${project.basedir}/target/${finalName}.jar" out="${project.basedir}/target/${finalNameObf}.jar"/>
-										<shrink logfile="${shrinklog}">
-										 	<keep>
-												<!-- main method -->
-												<method name="void onEnable()" class="${bukkitMainclass}" />
-											</keep>
-										</shrink>
-										<rename mainclass="me.szumielxd.portfel.bukkit.PortfelBukkitImpl" logfile="${renamelog}">
-											<keep>
-												<class classes="protected" methods="protected" fields="protected" />
-											</keep>
-										</rename>
-									<!-- see the yGuard task documentation for information about the <yguard> element-->
-									</yguard>
-								</tasks>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -491,8 +525,8 @@
 		<module>portfelx-bukkit-api</module>
 		<module>portfelx-bungee-api</module>
 		<module>portfelx-common</module>
-		<module>portfelx-bungee</module>
 		<module>portfelx-bukkit</module>
+		<module>portfelx-bungee</module>
 		<module>portfelx-api</module>
 	</modules>
 </project>

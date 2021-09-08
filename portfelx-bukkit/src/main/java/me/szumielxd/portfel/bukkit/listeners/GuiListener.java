@@ -23,10 +23,12 @@ public class GuiListener implements Listener {
 			Player player = (Player) event.getWhoClicked();
 			Inventory inv = event.getClickedInventory();
 			if (inv != null) {
-				if (inv.getHolder() != null && inv.getHolder() instanceof PortfelGuiHolder) {
+				if (PortfelGuiHolder.class.isInstance(inv.getHolder())) {
 					event.setResult(Result.DENY);
 					PortfelGuiHolder holder = (PortfelGuiHolder) inv.getHolder();
 					holder.getGui().onClick(player, event.getSlot());
+				} else if (event.isShiftClick() && PortfelGuiHolder.class.isInstance(event.getInventory().getHolder())) {
+					event.setResult(Result.DENY);
 				}
 			}
 		}

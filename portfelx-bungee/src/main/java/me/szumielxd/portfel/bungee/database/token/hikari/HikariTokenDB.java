@@ -404,7 +404,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	private void setupTables() throws SQLException {
 		this.checkConnection();
 		String tokensTable = String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` VARCHAR(32) BINARY NOT NULL, `%s` TEXT NOT NULL, `%s` VARCHAR(32) NOT NULL,"
-				+ "`%s` VARCHAR(16) NOT NULL, `%s` VARCHAR(36) NOT NULL, `%s` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP , `%s` BIGINT NOT NULL DEFAULT '-1' , PRIMARY KEY (`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
+				+ "`%s` VARCHAR(16) NOT NULL, `%s` VARCHAR(36) NOT NULL, `%s` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `%s` BIGINT NOT NULL DEFAULT '-1' , PRIMARY KEY (`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
 				TABLE_TOKENS, TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID, TOKENS_CREATIONDATE, TOKENS_EXPIRATIONDATE, TOKENS_TOKEN);
 		try (Connection conn = this.hikari.getConnection()) {
 			try (Statement stm = conn.createStatement()) {

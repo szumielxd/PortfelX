@@ -89,6 +89,12 @@
 				<artifactId>maven-jar-plugin</artifactId>
 			</plugin>
 			
+			<!-- ProGuard plugin -->
+			<!--plugin>
+				<groupId>com.github.wvengen</groupId>
+				<artifactId>proguard-maven-plugin</artifactId>
+			</plugin-->
+			
 			<!-- Shade plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

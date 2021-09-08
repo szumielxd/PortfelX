@@ -182,7 +182,7 @@ public class ChannelListener implements Listener {
 					dout.writeUTF(this.plugin.getProxyId().toString()); // proxy id
 					dout.writeUTF(transactionId); // transaction id
 					dout.writeLong(user.getBalance()); // new balance
-					int found = (int) this.plugin.getOrdersManager().getOrders().values().stream()
+					int found = (int) this.plugin.getOrdersManager().getOrders().values().stream().filter(o -> this.plugin.getAccessManager().canAccess(serverId, o.getName()))
 							.filter(o -> o.examine(user, order)).count();
 					if (ex == null) {
 						dout.writeUTF(TransactionStatus.OK.getText()); // status

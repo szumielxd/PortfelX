@@ -7,6 +7,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -475,9 +476,9 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void logTokenPrize(@NotNull String text) {
 		File f = new File(this.plugin.getDataFolder(), "token-prize.log");
 		if (!f.getParentFile().exists()) f.getParentFile().mkdirs();
-		text = String.format("[%s] %s", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
+		text = String.format("[%s] %s%n", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
 		try {
-			Files.write(f.toPath(), Collections.singletonList(text));
+			Files.write(f.toPath(), Collections.singletonList(text), StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
