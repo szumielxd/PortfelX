@@ -1,5 +1,6 @@
 package me.szumielxd.portfel.bukkit.utils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
@@ -126,7 +127,14 @@ public class BukkitUtils {
 					meth.setAccessible(true);
 					meth.invoke(meta, profile);
 				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | InvocationTargetException e) {
-					e.printStackTrace();
+					// fallback for older versions
+					try {
+						Field f = meta.getClass().getDeclaredField("profile");
+						f.setAccessible(true);
+						f.set(meta, profile);
+					} catch (SecurityException | IllegalAccessException | NoSuchFieldException ex) {
+						e.printStackTrace();
+					}
 				}
 			}
 			if (damage != null && Damageable.isInstance(damage)) {
