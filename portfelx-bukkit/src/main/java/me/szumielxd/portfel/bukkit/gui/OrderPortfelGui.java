@@ -148,7 +148,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		return this.type;
 	}
 	
-	private @NotNull ItemStack buildNormalIcon(@NotNull OrderData order, @NotNull Lang lang, @NotNull Player player, @NotNull User user, boolean active) {
+	private @NotNull ItemStack buildNormalIcon(final @NotNull OrderData order, final @NotNull Lang lang, final @NotNull Player player, final @NotNull User user, final boolean active) {
 		ItemStack item = (active ? order.getIcon() : order.getIconBought()).clone();
 		ItemMeta meta = item.getItemMeta();
 		BukkitUtils.setDisplayName(meta, order.getDisplay());
@@ -168,7 +168,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	}
 	
 	
-	private @NotNull ItemStack buildUpgradeIcon(@NotNull List<OrderData> orders, int orderIndex, @NotNull Lang lang, @NotNull Player player, @NotNull User user, boolean active) {
+	private @NotNull ItemStack buildUpgradeIcon(final @NotNull List<OrderData> orders, final int orderIndex, final @NotNull Lang lang, final @NotNull Player player, final @NotNull User user, final boolean active) {
 		OrderData order = orders.get(orderIndex);
 		ItemStack item = (active ? order.getIcon() : order.getIconBought()).clone();
 		ItemMeta meta = item.getItemMeta();
