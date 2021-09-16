@@ -105,7 +105,7 @@ public class TransactionImpl implements Transaction {
 		if (!this.result.getStatus().equals(TransactionStatus.OK)) return true;
 		
 		// replacements: %player% %playerId%
-		Pattern pattern = Pattern.compile("%(player(Id)?)|(order)%", Pattern.CASE_INSENSITIVE);
+		Pattern pattern = Pattern.compile("%((player(Id)?)|(order))%", Pattern.CASE_INSENSITIVE);
 		Function<MatchResult, String> replacer = match -> {
 			if (match.group().equalsIgnoreCase("%order%")) return this.order.getName();
 			if (match.group().equalsIgnoreCase("%player%")) return this.user.getName(); // %player%
