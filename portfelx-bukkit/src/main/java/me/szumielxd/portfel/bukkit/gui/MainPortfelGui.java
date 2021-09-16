@@ -90,9 +90,9 @@ public class MainPortfelGui implements AbstractPortfelGui {
 				ItemMeta meta = item.getItemMeta();
 				BukkitUtils.setDisplayName(meta, MiscUtils.parseComponent(s.getDisplayName()));
 				List<Component> lore = new ArrayList<>();
-				lore.addAll(s.getDescription().stream().map(MiscUtils::parseComponent).collect(Collectors.toList()));
+				lore.addAll(s.getDescription().stream().map(MiscUtils::parseComponent).map(l -> l.colorIfAbsent(GRAY)).collect(Collectors.toList()));
 				lore.add(Component.empty());
-				lore.add(Component.text("/" + this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME) + " " + s.getName()));
+				lore.add(Component.text("/" + this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME) + " " + s.getName(), AQUA));
 				BukkitUtils.setLore(meta, lore);
 				item.setItemMeta(meta);
 			}
