@@ -92,7 +92,7 @@ public class OrderData {
 	}
 	
 	public boolean isAvailable(@NotNull Player player) {
-		return this.donePermission == null || !player.hasPermission(orderName);
+		return this.getDonePermission() == null || !player.hasPermission(this.getDonePermission());
 	}
 	
 	public OrderDataOnAir onAirWithPrice(long price) {
