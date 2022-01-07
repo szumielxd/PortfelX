@@ -24,6 +24,8 @@ public class UserListener implements Listener {
 		if (user != null) {
 			user.setOnline(false);
 		}
+		this.plugin.getChannelManager().ensureNotTopRequestSource(event.getPlayer());
+		this.plugin.getChannelManager().ensureNotUserUpdating(event.getPlayer());
 	}
 	
 

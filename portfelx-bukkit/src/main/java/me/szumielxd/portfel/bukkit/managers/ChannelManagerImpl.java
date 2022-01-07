@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.AbstractMap.SimpleEntry;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -92,7 +94,8 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	
 	private final Map<UUID, CompletableFuture<Boolean>> waitingForValidation = new HashMap<>();
-	private final Map<UUID, CompletableFuture<List<TopEntry>>> waitingTopUpdates = new HashMap<>();
+	private final Map<UUID, CompletableFuture<List<TopEntry>>> waitingTopUpdates = new ConcurrentHashMap<>();
+	private final Map<UUID, UUID> topUpdatesByUser = new HashMap<>();
 	private final Map<UUID, CompletableFuture<BukkitOperableUser>> waitingUserUpdates = new HashMap<>();
 	private final Map<UUID, Entry<Transaction, CompletableFuture<TransactionResult>>> waitingTransactions = new HashMap<>();
 	
@@ -383,6 +386,22 @@ public class ChannelManagerImpl implements ChannelManager {
 	}
 	
 	
+	/**
+	 * Cancel user update task if actually pending.
+	 * 
+	 * @param player player to check
+	 */
+	@Override
+	public void ensureNotUserUpdating(@NotNull Player player) {
+		UUID uuid = Objects.requireNonNull(player, "player cannot be null").getUniqueId();
+		CompletableFuture<BukkitOperableUser> future = this.waitingUserUpdates.get(uuid);
+		if (future != null) {
+			future.complete(new BukkitOperableUser(this.plugin, uuid, player.getName(), false, false, 0L, UUID.fromString("00000000-0000-0000-0000-000000000000"), this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME)));
+			this.waitingTopUpdates.remove(uuid);
+		}
+	}
+	
+	
 	private void sendTopRequest(Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("Top");
@@ -401,9 +420,11 @@ public class ChannelManagerImpl implements ChannelManager {
 	public @NotNull List<TopEntry> requestTop(@NotNull Player player) throws Exception {
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user == null) return new ArrayList<>();
+		UUID uuid = user.getUniqueId();
 		UUID proxyId = user.getRemoteId();
 		CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.get(proxyId);
 		if (future == null) {
+			this.topUpdatesByUser.put(uuid, proxyId);
 			this.waitingTopUpdates.put(proxyId, future = new CompletableFuture<>());
 			this.sendTopRequest(player);
 		}
@@ -413,6 +434,23 @@ public class ChannelManagerImpl implements ChannelManager {
 		} catch (ExecutionException | InterruptedException | TimeoutException e) {
 			throw e;
 		} finally {
+			this.waitingTopUpdates.remove(proxyId);
+			this.topUpdatesByUser.remove(uuid, proxyId);
+		}
+	}
+	
+	
+	/**
+	 * Cancel top update task if given player is used as source for this request.
+	 * 
+	 * @param player player to check
+	 */
+	@Override
+	public void ensureNotTopRequestSource(@NotNull Player player) {
+		UUID proxyId = this.topUpdatesByUser.remove(Objects.requireNonNull(player, "player cannot be null").getUniqueId());
+		if (proxyId != null) {
+			CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.get(proxyId);
+			future.complete(new ArrayList<>());
 			this.waitingTopUpdates.remove(proxyId);
 		}
 	}

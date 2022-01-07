@@ -1,7 +1,6 @@
 package me.szumielxd.portfel.bukkit.api.managers;
 
 import java.util.List;
-
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +22,13 @@ public interface ChannelManager {
 	public @NotNull User requestPlayer(@NotNull Player player) throws Exception;
 	
 	/**
+	 * Cancel user update task if actually pending.
+	 * 
+	 * @param player player to check
+	 */
+	public void ensureNotUserUpdating(@NotNull Player player);
+	
+	/**
 	 * Request top update from proxy the player belongs to.
 	 * 
 	 * @param player to determine proxy
@@ -30,6 +36,13 @@ public interface ChannelManager {
 	 * @throws Exception when something went wrong
 	 */
 	public @NotNull List<TopEntry> requestTop(@NotNull Player player) throws Exception;
+	
+	/**
+	 * Cancel top update task if given player is used as source for this request.
+	 * 
+	 * @param player player to check
+	 */
+	public void ensureNotTopRequestSource(@NotNull Player player);
 	
 	/**
 	 * Request transaction for given player with given order.
