@@ -164,7 +164,7 @@ public class BukkitUtils {
 		
 		if (match.group(4) != null) data = Short.parseShort(match.group(4)); // data|damage
 		if (match.group(9) != null) amount = Integer.parseInt(match.group(9)); // amount
-		if (match.group(9) != null) glowing = true; // glowing
+		if (match.group(1) != null) glowing = true; // glowing
 		if (match.group(6) != null) color = Color.fromRGB(Integer.parseInt(match.group(6), 16)); // color
 		if (match.group(8) != null) skin = match.group(8); // skin
 		
