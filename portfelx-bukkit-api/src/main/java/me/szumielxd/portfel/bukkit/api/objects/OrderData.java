@@ -99,7 +99,10 @@ public class OrderData {
 	}
 	
 	public boolean isAvailable(@NotNull Player player) {
-		return this.getDonePermission() == null || !player.hasPermission(this.getDonePermission());
+		if (this.getDonePermission() != null && player.hasPermission(this.getDonePermission())) {
+			if (this.doneConditions.parallelStream().allMatch(c -> c.test(player))) return false;
+		}
+		return true;
 	}
 	
 	public @NotNull OrderDataOnAir onAirWithPrice(long price) {
