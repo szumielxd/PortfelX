@@ -310,8 +310,9 @@ public class MiscUtils {
 	 * @return parsed component
 	 */
 	public static @NotNull Component parseComponent(@NotNull String text) {
+		if (Objects.requireNonNull(text, "text cannot be null").isEmpty()) return Component.empty();
 		try {
-			JsonObject json = new Gson().fromJson(Objects.requireNonNull(text, "text cannot be null"), JsonObject.class);
+			JsonObject json = new Gson().fromJson(text, JsonObject.class);
 			return GsonComponentSerializer.gson().deserializeFromTree(json);
 		} catch (JsonSyntaxException e) {
 			return LegacyComponentSerializer.legacySection().deserialize(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1"));
@@ -328,6 +329,7 @@ public class MiscUtils {
 		Objects.requireNonNull(text, "text cannot be null");
 		Objects.requireNonNull(pattern, "pattern cannot be null");
 		Objects.requireNonNull(replacer, "replacer cannot be null");
+		if (text.isEmpty()) return Component.empty();
 		try {
 			JsonObject json = new Gson().fromJson(text, JsonObject.class);
 			replaceTextInJson(json, pattern, replacer);
