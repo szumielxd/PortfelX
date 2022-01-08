@@ -4,6 +4,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
@@ -310,7 +311,7 @@ public class MiscUtils {
 	 */
 	public static @NotNull Component parseComponent(@NotNull String text) {
 		try {
-			JsonObject json = new Gson().fromJson(text, JsonObject.class);
+			JsonObject json = new Gson().fromJson(Objects.requireNonNull(text, "text cannot be null"), JsonObject.class);
 			return GsonComponentSerializer.gson().deserializeFromTree(json);
 		} catch (JsonSyntaxException e) {
 			return LegacyComponentSerializer.legacySection().deserialize(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1"));
@@ -324,6 +325,9 @@ public class MiscUtils {
 	 * @return parsed component
 	 */
 	public static @NotNull Component parseComponent(@NotNull String text, @NotNull Pattern pattern, @NotNull Function<MatchResult, String> replacer) {
+		Objects.requireNonNull(text, "text cannot be null");
+		Objects.requireNonNull(pattern, "pattern cannot be null");
+		Objects.requireNonNull(replacer, "replacer cannot be null");
 		try {
 			JsonObject json = new Gson().fromJson(text, JsonObject.class);
 			replaceTextInJson(json, pattern, replacer);
@@ -341,6 +345,9 @@ public class MiscUtils {
 	 * @param replacer replacement function
 	 */
 	public static void replaceTextInJson(@NotNull JsonObject json, @NotNull Pattern pattern, @NotNull Function<MatchResult, String> replacer) {
+		Objects.requireNonNull(json, "json cannot be null");
+		Objects.requireNonNull(pattern, "pattern cannot be null");
+		Objects.requireNonNull(replacer, "replacer cannot be null");
 		json.entrySet().stream().forEach(e -> {
 			if (e.getValue().isJsonPrimitive() && e.getValue().getAsJsonPrimitive().isString()) {
 				String val = e.getValue().getAsString();
