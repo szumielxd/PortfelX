@@ -102,7 +102,7 @@ public class OrdersManager {
 	
 	private @Nullable OrderData loadOrder(@NotNull ConfigurationSection yml) {
 		try {
-			final Map<Pattern, String> replacements = yml.getKeys(false).parallelStream().filter(s -> s.startsWith("--")).filter(yml::isString).collect(Collectors.toMap(s -> Pattern.compile(String.format("(?<!(?<!\\\\)\\\\){%s}", Pattern.quote(s.substring(2)))), yml::getString));
+			final Map<Pattern, String> replacements = yml.getKeys(false).parallelStream().filter(s -> s.startsWith("--")).filter(yml::isString).collect(Collectors.toMap(s -> Pattern.compile(String.format("(?<!(?<!\\\\)\\\\)\\{%s\\}", Pattern.quote(s.substring(2)))), yml::getString));
 			Function<String, String> replacer = (str) -> {
 				Iterator<Map.Entry<Pattern, String>> iter = replacements.entrySet().iterator();
 				while (iter.hasNext()) {
