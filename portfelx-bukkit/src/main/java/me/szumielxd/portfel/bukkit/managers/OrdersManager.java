@@ -124,11 +124,12 @@ public class OrdersManager {
 			String donePermission = yml.getString("done-permission", "");
 			
 			// parsing conditions
-			List<DoneCondition> doneConditions = yml.getStringList("done-conditions").parallelStream().map(str -> {
+			List<DoneCondition> doneConditions = yml.getStringList("done-conditions").parallelStream().map(replacer).map(str -> {
 				for (DoneCondition.OperationType type : DoneCondition.OperationType.values()) {
 					final Matcher match = type.getPattern().matcher(str);
 					if (match.matches()) {
-						return new DoneConditionImpl(match.group(1), match.group(3), type);
+						String sign = type.getSign();
+						return new DoneConditionImpl(match.group(1).replace("\\" + sign, sign), match.group(3).replace("\\" + sign, sign), type);
 					}
 				}
 				this.plugin.getLogger().warning(String.format("Cannot parse done-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName()));

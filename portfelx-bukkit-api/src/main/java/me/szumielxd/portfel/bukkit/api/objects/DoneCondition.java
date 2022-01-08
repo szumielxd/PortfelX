@@ -58,11 +58,17 @@ public interface DoneCondition extends Predicate<Player> {
 		
 		
 		private final @NotNull Pattern pattern;
+		private final @NotNull String sign;
 		private final @NotNull BiPredicate<String, String> predicate;
 		
 		private OperationType(@NotNull String sign, @NotNull BiPredicate<String, String> predicate) {
+			this.sign = Objects.requireNonNull(sign, "sign cannot be null");
 			this.predicate = Objects.requireNonNull(predicate, "predicate cannot be null");
-			this.pattern = Pattern.compile(String.format("(.*?) (|\\\\\\\\)%s (.*)", Pattern.quote(Objects.requireNonNull(sign, "sign cannot be null"))));
+			this.pattern = Pattern.compile(String.format("(.*?) (|\\\\\\\\)%s (.*)", Pattern.quote(this.sign)));
+		}
+		
+		public @NotNull String getSign() {
+			return this.sign;
 		}
 		
 		public @NotNull Pattern getPattern() {
