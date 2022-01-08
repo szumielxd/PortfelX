@@ -7,11 +7,14 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,7 +60,7 @@ public class OrdersManager {
 			}
 		}
 		
-		Stream.of(this.ordersFolder.listFiles(f -> f.getName().endsWith(".yml"))).forEach(this::load);
+		Stream.of(this.ordersFolder.listFiles((dir, f) -> f.endsWith(".yml"))).forEach(this::load);
 		
 		return this;
 	}
@@ -99,17 +102,26 @@ public class OrdersManager {
 	
 	private @Nullable OrderData loadOrder(@NotNull ConfigurationSection yml) {
 		try {
+			final Map<Pattern, String> replacements = yml.getKeys(false).parallelStream().filter(s -> s.startsWith("--")).filter(yml::isString).collect(Collectors.toMap(s -> Pattern.compile(String.format("(?<!(?<!\\\\)\\\\){%s}", Pattern.quote(s.substring(2)))), yml::getString));
+			Function<String, String> replacer = (str) -> {
+				Iterator<Map.Entry<Pattern, String>> iter = replacements.entrySet().iterator();
+				while (iter.hasNext()) {
+					Map.Entry<Pattern, String> e = iter.next();
+					str = e.getKey().matcher(str).replaceAll(e.getValue());
+				}
+				return str.replace("\\{", "{");
+			};
 			int slot = Objects.requireNonNull((Integer)yml.get("slot", null), "slot must be set");
 			int level = yml.getInt("level", 0);
-			String name = Objects.requireNonNull(yml.getString("name", null), "name must be set");
-			List<String> description = yml.getStringList("description");
-			ItemStack icon = BukkitUtils.parseItem(yml.getString("icon", "")).orElse(new ItemStack(Material.STONE));
-			ItemStack iconBought = BukkitUtils.parseItem(yml.getString("icon-bought", "")).orElse(new ItemStack(Material.STONE));
+			String name = replacer.apply(Objects.requireNonNull(yml.getString("name", null), "name must be set"));
+			List<String> description = yml.getStringList("description").parallelStream().map(replacer).collect(Collectors.toList());
+			ItemStack icon = BukkitUtils.parseItem(replacer.apply(yml.getString("icon", ""))).orElse(new ItemStack(Material.STONE));
+			ItemStack iconBought = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-bought", ""))).orElse(new ItemStack(Material.STONE));
 			int price = Objects.requireNonNull((Integer)yml.get("price", null), "price must be set");
 			String donePermission = yml.getString("done-permission", "");
-			List<String> broadcast = yml.getStringList("broadcast");
-			List<String> message = yml.getStringList("message");
-			List<String> command = yml.getStringList("command");
+			List<String> broadcast = yml.getStringList("broadcast").parallelStream().map(replacer).collect(Collectors.toList());
+			List<String> message = yml.getStringList("message").parallelStream().map(replacer).collect(Collectors.toList());
+			List<String> command = yml.getStringList("command").parallelStream().map(replacer).collect(Collectors.toList());
 			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, icon, iconBought, price, donePermission.isEmpty()? null : donePermission, broadcast, message, command);
 		} catch (NullPointerException e) {
 			this.plugin.getLogger().log(Level.WARNING, String.format("Cannot load order `%s` from category `%s`", yml.getName(), yml.getRoot().getName()), e);
