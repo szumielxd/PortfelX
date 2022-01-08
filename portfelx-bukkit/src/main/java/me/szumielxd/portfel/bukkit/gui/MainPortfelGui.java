@@ -66,7 +66,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 
 	@Override
 	public int getSize() {
-		return 45;
+		return this.plugin.getConfiguration().getInt(BukkitConfigKey.SHOP_MENU_ROWS)*9;
 	}
 
 	@Override
