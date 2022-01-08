@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,7 @@ public class GuiListener implements Listener {
 	public void onDrag(InventoryDragEvent event) {
 		if (event.getWhoClicked() instanceof Player) {
 			InventoryView view = event.getView();
+			if (event.getView().getTopInventory().getType().equals(InventoryType.CRAFTING)) return;
 			if (event.getRawSlots().stream().map(s -> this.getInventory(view, s)).map(Inventory::getHolder).anyMatch(PortfelGuiHolder.class::isInstance)) event.setResult(Result.DENY);
 		}
 	}
@@ -51,7 +53,7 @@ public class GuiListener implements Listener {
             return null;
         }
         Preconditions.checkArgument(rawSlot >= 0, "Negative, non outside slot %s", rawSlot);
-        Preconditions.checkArgument(rawSlot < view.countSlots(), "Slot %s greater than inventory slot count", rawSlot);
+        Preconditions.checkArgument(rawSlot < view.countSlots(), "Slot %s greater than inventory slot count (%s - %s)", rawSlot, view.countSlots(), view.getTopInventory().getType());
 
         if (rawSlot < view.getTopInventory().getSize()) {
             return view.getTopInventory();
