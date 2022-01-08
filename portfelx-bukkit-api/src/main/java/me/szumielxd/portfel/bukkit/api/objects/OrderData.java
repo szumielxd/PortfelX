@@ -2,6 +2,7 @@ package me.szumielxd.portfel.bukkit.api.objects;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -13,33 +14,35 @@ import net.kyori.adventure.text.Component;
 public class OrderData {
 	
 	
-	protected final String orderName;
+	protected final @NotNull String orderName;
 	protected final int slot;
 	protected final int level;
-	protected final Component display;
-	protected final List<String> description;
-	protected final ItemStack icon;
-	protected final ItemStack iconBought;
+	protected final @NotNull Component display;
+	protected final @NotNull List<String> description;
+	protected final @NotNull ItemStack icon;
+	protected final @NotNull ItemStack iconBought;
 	protected final long price;
-	protected final String donePermission;
-	protected final List<String> broadcast;
-	protected final List<String> message;
-	protected final List<String> command;
+	protected final @Nullable String donePermission;
+	protected final @NotNull List<DoneCondition> doneConditions;
+	protected final @NotNull List<String> broadcast;
+	protected final @NotNull List<String> message;
+	protected final @NotNull List<String> command;
 	
 	
-	public OrderData(@NotNull String orderName, int slot, int level, @NotNull Component display, List<String> description, @NotNull ItemStack icon, @NotNull ItemStack iconBought, long price, @Nullable String donePermission, @NotNull List<String> broadcast, @NotNull List<String> message, @NotNull List<String> command) {
-		this.orderName = orderName;
+	public OrderData(@NotNull String orderName, int slot, int level, @NotNull Component display, @NotNull List<String> description, @NotNull ItemStack icon, @NotNull ItemStack iconBought, long price, @Nullable String donePermission, @NotNull List<DoneCondition> doneConditions, @NotNull List<String> broadcasts, @NotNull List<String> messages, @NotNull List<String> commands) {
+		this.orderName = Objects.requireNonNull(orderName, "orderName cannot be null");
 		this.slot = slot;
 		this.level = level;
-		this.display = display;
-		this.description = Collections.unmodifiableList(description);
-		this.icon = icon;
-		this.iconBought = iconBought;
+		this.display = Objects.requireNonNull(display, "display cannot be null");
+		this.description = Collections.unmodifiableList(Objects.requireNonNull(description, "description cannot be null"));
+		this.icon = Objects.requireNonNull(icon, "icon cannot be null");
+		this.iconBought = Objects.requireNonNull(iconBought, "iconBought cannot be null");
 		this.price = price;
 		this.donePermission = donePermission;
-		this.broadcast = Collections.unmodifiableList(broadcast);
-		this.message = Collections.unmodifiableList(message);
-		this.command = Collections.unmodifiableList(command);
+		this.doneConditions = Collections.unmodifiableList(Objects.requireNonNull(doneConditions, "doneConditions cannot be null"));
+		this.broadcast = Collections.unmodifiableList(Objects.requireNonNull(broadcasts, "broadcasts cannot be null"));
+		this.message = Collections.unmodifiableList(Objects.requireNonNull(messages, "messages cannot be null"));
+		this.command = Collections.unmodifiableList(Objects.requireNonNull(commands, "commands cannot be null"));
 	}
 	
 	
@@ -75,6 +78,10 @@ public class OrderData {
 		return this.donePermission;
 	}
 	
+	public @NotNull List<DoneCondition> getDoneConditions() {
+		return this.doneConditions;
+	}
+	
 	public long getPrice() {
 		return this.price;
 	}
@@ -95,7 +102,7 @@ public class OrderData {
 		return this.getDonePermission() == null || !player.hasPermission(this.getDonePermission());
 	}
 	
-	public OrderDataOnAir onAirWithPrice(long price) {
+	public @NotNull OrderDataOnAir onAirWithPrice(long price) {
 		return new OrderDataOnAir(this.orderName, this.display, price, this.broadcast, this.message, this.command);
 	}
 	

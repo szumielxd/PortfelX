@@ -14,6 +14,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,9 +28,11 @@ import org.simpleyaml.configuration.file.YamlFile;
 import org.simpleyaml.exceptions.InvalidConfigurationException;
 
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.api.objects.DoneCondition;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData;
 import me.szumielxd.portfel.bukkit.gui.OrderPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.ShopType;
+import me.szumielxd.portfel.bukkit.objects.DoneConditionImpl;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 
@@ -119,10 +122,23 @@ public class OrdersManager {
 			ItemStack iconBought = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-bought", ""))).orElse(new ItemStack(Material.STONE));
 			int price = Objects.requireNonNull((Integer)yml.get("price", null), "price must be set");
 			String donePermission = yml.getString("done-permission", "");
+			
+			// parsing conditions
+			List<DoneCondition> doneConditions = yml.getStringList("done-conditions").parallelStream().map(str -> {
+				for (DoneCondition.OperationType type : DoneCondition.OperationType.values()) {
+					final Matcher match = type.getPattern().matcher(str);
+					if (match.matches()) {
+						return new DoneConditionImpl(match.group(1), match.group(3), type);
+					}
+				}
+				this.plugin.getLogger().warning(String.format("Cannot parse done-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName()));
+				return null;
+			}).filter(Objects::nonNull).collect(Collectors.toList());
+			
 			List<String> broadcast = yml.getStringList("broadcast").parallelStream().map(replacer).collect(Collectors.toList());
 			List<String> message = yml.getStringList("message").parallelStream().map(replacer).collect(Collectors.toList());
 			List<String> command = yml.getStringList("command").parallelStream().map(replacer).collect(Collectors.toList());
-			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, icon, iconBought, price, donePermission.isEmpty()? null : donePermission, broadcast, message, command);
+			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, icon, iconBought, price, donePermission.isEmpty()? null : donePermission, doneConditions, broadcast, message, command);
 		} catch (NullPointerException e) {
 			this.plugin.getLogger().log(Level.WARNING, String.format("Cannot load order `%s` from category `%s`", yml.getName(), yml.getRoot().getName()), e);
 		}
