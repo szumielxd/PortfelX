@@ -2,11 +2,13 @@ package me.szumielxd.portfel.bukkit.objects;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
@@ -139,11 +141,13 @@ public class TransactionImpl implements Transaction {
 	
 	
 	private void log(@NotNull String text) {
+		Objects.requireNonNull(text, "text cannot be null");
 		File f = new File(this.plugin.getDataFolder(), "transactions.log");
 		if (!f.getParentFile().exists()) f.getParentFile().mkdirs();
-		text = String.format("[%s] %s%n", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
+		text = String.format("[%s] %s", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
 		try {
-			Files.write(f.toPath(), Collections.singletonList(text), StandardOpenOption.APPEND);
+			if (!f.exists()) f.createNewFile();
+			Files.write(f.toPath(), Collections.singletonList(text), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
