@@ -30,6 +30,12 @@ public interface DoneCondition extends Predicate<Player> {
 			if (s1.equals(s2)) return true;
 			return false;
 		}),
+		NOT_EQUAL("!=", (s1, s2) -> {
+			return !EQUAL.accept(s1, s2);
+		}),
+		NOT_STRICT_EQUAL("!==", (s1, s2) -> {
+			return !STRICT_EQUAL.accept(s1, s2);
+		}),
 		BIGGER(">", (s1, s2) -> {
 			try {
 				if (Double.parseDouble(s1) > Double.parseDouble(s2)) return true;
