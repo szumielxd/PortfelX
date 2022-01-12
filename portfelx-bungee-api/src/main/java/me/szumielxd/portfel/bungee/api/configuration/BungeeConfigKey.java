@@ -10,6 +10,8 @@ import me.szumielxd.portfel.api.configuration.AbstractKey;
 
 public enum BungeeConfigKey implements AbstractKey {
 	
+	MAIN_TOP_SIZE("main.top-size", 20),
+	//
 	DATABASE_TYPE("database.type", "MySQL"),
 	//
 	DATABASE_HOST("database.host", "localhost"),

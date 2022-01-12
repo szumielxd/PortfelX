@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import me.szumielxd.portfel.bungee.api.configuration.BungeeConfigKey;
 import me.szumielxd.portfel.bungee.api.managers.BungeeTopManager;
 import me.szumielxd.portfel.common.managers.TopManagerImpl;
 
@@ -34,7 +35,7 @@ public class BungeeTopManagerImpl extends TopManagerImpl implements BungeeTopMan
 	@Override
 	protected void update() {
 		try {
-			this.cachedTop = this.plugin.getDB().getTop(100);
+			this.cachedTop = this.plugin.getDB().getTop(this.getPlugin().getConfiguration().getInt(BungeeConfigKey.MAIN_TOP_SIZE));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
