@@ -81,6 +81,16 @@ public class ConfigImpl implements Config {
 	}
 	
 	/**
+	 * Get value of given key parsed as boolean
+	 * 
+	 * @param key the key
+	 * @return value of given key
+	 */
+	public boolean getBoolean(@NotNull AbstractKey key) {
+		return this.yaml.isBoolean(key.getPath()) ? this.yaml.getBoolean(key.getPath()) : (boolean) key.getDefault();
+	}
+	
+	/**
 	 * Get value of given key parsed as map of strings
 	 * 
 	 * @param key the key
