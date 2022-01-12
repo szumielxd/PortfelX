@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -19,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
@@ -84,13 +86,14 @@ public class BukkitUtils {
 	}
 	
 	
-	public static Optional<ItemStack> parseItem(String text) throws IllegalArgumentException {
+	public static Optional<ItemStack> parseItem(@NotNull String text) throws IllegalArgumentException {
 		return ITEM_PARSER.apply(text);
 	}
 	
 	
 	
-	private static Optional<ItemStack> parseNewItem(String text) throws IllegalArgumentException {
+	private static Optional<ItemStack> parseNewItem(@NotNull String text) throws IllegalArgumentException {
+		if (Objects.requireNonNull(text, "text cannot be null").isEmpty()) return Optional.empty();
 		Matcher match = ITEM_PATTERN.matcher(text);
 		if (!match.matches()) throw new IllegalArgumentException("Malformed text");
 		Material mat = Material.matchMaterial(match.group(2));
@@ -150,7 +153,8 @@ public class BukkitUtils {
 		return Optional.of(item);
 	}
 	
-	private static Optional<ItemStack> parseLegacyItem(String text) throws IllegalArgumentException {
+	private static Optional<ItemStack> parseLegacyItem(@NotNull String text) throws IllegalArgumentException {
+		if (Objects.requireNonNull(text, "text cannot be null").isEmpty()) return Optional.empty();
 		Matcher match = ITEM_PATTERN.matcher(text);
 		if (!match.matches()) throw new IllegalArgumentException("Malformed text");
 		Material mat = Material.matchMaterial(match.group(2));
