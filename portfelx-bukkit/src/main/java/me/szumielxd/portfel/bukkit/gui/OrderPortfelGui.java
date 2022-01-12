@@ -151,7 +151,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	private @NotNull ItemStack buildNormalIcon(final @NotNull OrderData order, final @NotNull Lang lang, final @NotNull Player player, final @NotNull User user, final boolean active) {
 		ItemStack item = (active ? order.getIcon() : order.getIconBought()).clone();
 		ItemMeta meta = item.getItemMeta();
-		BukkitUtils.setDisplayName(meta, order.getDisplay());
+		BukkitUtils.setDisplayName(meta, PlaceholderUtils.replacePlaceholders(user, player, order.getDisplay()));
 		List<Component> lore = new ArrayList<>();
 		lore.add(LangKey.SHOP_ORDER_PRICE.component(GRAY, LangKey.MAIN_CURRENCY_FORMAT.component((order.getPrice() <= user.getBalance() ? GREEN : RED), Component.text(order.getPrice()))));
 		lore.add(Component.empty());
