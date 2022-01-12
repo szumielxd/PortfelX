@@ -26,6 +26,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
 import org.jetbrains.annotations.NotNull;
@@ -334,6 +337,25 @@ public class ChannelManagerImpl implements ChannelManager {
 				for (int i = 0; i < size; i++) {
 					UUID uuid = UUID.fromString(in.readUTF()); // UUID
 					String name = in.readUTF(); // Name
+					long balance = in.readLong();
+					list.add(new TopEntry(uuid, name, balance));
+				}
+				
+				CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.get(proxyId);
+				if (future != null) {
+					future.complete(list);
+				}
+			}
+		}
+		
+		if ("LightTop".equals(subchannel)) {
+			UUID proxyId = new UUID(in.readLong(), in.readLong()); // proxyId
+			if (this.plugin.getIdentifierManager().isValid(proxyId)) {
+				int size = in.readInt(); // top size
+				List<TopEntry> list = new ArrayList<>();
+				for (int i = 0; i < size; i++) {
+					UUID uuid = new UUID(in.readLong(), in.readLong()); // UUID
+					String name = IntStream.range(0, 16).mapToObj(j -> (char)(((int)in.readByte()) + 128)).filter(ch -> !ch.equals(' ')).map(String::valueOf).collect(Collectors.joining()); // Name
 					long balance = in.readLong();
 					list.add(new TopEntry(uuid, name, balance));
 				}

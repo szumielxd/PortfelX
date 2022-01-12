@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.IntStream;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.io.ByteArrayDataInput;
@@ -121,6 +123,47 @@ public class ChannelListener implements Listener {
 						list.forEach(top -> {
 							out.writeUTF(top.getUniqueId().toString());
 							out.writeUTF(top.getName());
+							out.writeLong(top.getBalance());
+						});
+						
+						srv.sendData(event.getTag(), out.toByteArray());
+					} catch (Exception e) {	
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+	
+	
+	@EventHandler
+	public void onLightTopData(PluginMessageEvent event) {
+		if (Portfel.CHANNEL_USERS.equals(event.getTag())) {
+			event.setCancelled(true);
+			if (event.getSender() instanceof Server) {
+				ByteArrayDataInput in = ByteStreams.newDataInput(event.getData());
+				String subchannel = in.readUTF();
+				if ("LightTop".equals(subchannel)) {
+					try {
+						Server srv = (Server) event.getSender();
+						ByteArrayDataOutput out = ByteStreams.newDataOutput();
+						out.writeUTF(subchannel);
+						
+						// proxyId
+						out.writeLong(this.plugin.getProxyId().getMostSignificantBits());
+						out.writeLong(this.plugin.getProxyId().getLeastSignificantBits());
+						
+						List<TopEntry> list = this.plugin.getTopManager().getFullTopCopy();
+						out.writeInt(list.size());
+						list.forEach(top -> {
+							//uuid
+							out.writeLong(top.getUniqueId().getMostSignificantBits());
+							out.writeLong(top.getUniqueId().getLeastSignificantBits());
+							
+							//username
+							IntStream.range(0, 16).forEach(i -> out.write((byte)((int)(top.getName().length() > i ? top.getName().charAt(i) : ' ') - 128)));
+							
+							//balance
 							out.writeLong(top.getBalance());
 						});
 						
