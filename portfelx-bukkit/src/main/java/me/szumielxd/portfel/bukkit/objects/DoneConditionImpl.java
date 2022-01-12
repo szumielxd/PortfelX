@@ -29,16 +29,12 @@ public class DoneConditionImpl implements DoneCondition {
 			Class.forName("be.maximvdw.placeholderapi.PlaceholderAPI");
 			left = be.maximvdw.placeholderapi.PlaceholderAPI.replacePlaceholders(player, left);
 			right = be.maximvdw.placeholderapi.PlaceholderAPI.replacePlaceholders(player, right);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		} catch (ClassNotFoundException e) {}
 		try {
 			Class.forName("me.clip.placeholderapi.PlaceholderAPI");
 			left = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, left);
 			right = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, right);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		} catch (ClassNotFoundException e) {}
 		return this.operationType.accept(left, right);
 	}
 	

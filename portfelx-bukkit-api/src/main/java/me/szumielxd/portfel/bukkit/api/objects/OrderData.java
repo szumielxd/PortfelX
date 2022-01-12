@@ -41,7 +41,7 @@ public class OrderData {
 		this.denyDescription = Collections.unmodifiableList(Objects.requireNonNull(denyDescription, "denyDescription cannot be null"));
 		this.icon = Objects.requireNonNull(icon, "icon cannot be null");
 		this.iconBought = Objects.requireNonNull(iconBought, "iconBought cannot be null");
-		this.iconDenied = Objects.requireNonNull(iconBought, "iconDenied cannot be null");
+		this.iconDenied = Objects.requireNonNull(iconDenied, "iconDenied cannot be null");
 		this.price = price;
 		this.donePermission = donePermission;
 		this.doneConditions = Collections.unmodifiableList(Objects.requireNonNull(doneConditions, "doneConditions cannot be null"));
@@ -120,7 +120,7 @@ public class OrderData {
 	}
 	
 	public boolean isDenied(@NotNull Player player) {
-		return this.doneConditions.parallelStream().allMatch(c -> c.test(player));
+		return this.denyConditions.parallelStream().allMatch(c -> c.test(player));
 	}
 	
 	public @NotNull OrderDataOnAir onAirWithPrice(long price) {

@@ -149,6 +149,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	}
 	
 	private @NotNull ItemStack buildNormalIcon(final @NotNull OrderData order, final @NotNull Lang lang, final @NotNull Player player, final @NotNull User user, final boolean available, final boolean denied) {
+		this.plugin.debug("normalItem(%s) %s|%s available: %s, denied: %s", player.getName(), this.getName(), order.getName(), available, denied);
 		ItemStack item = (denied ? order.getIconDenied() : available ? order.getIcon() : order.getIconBought()).clone();
 		ItemMeta meta = item.getItemMeta();
 		BukkitUtils.setDisplayName(meta, PlaceholderUtils.replacePlaceholders(user, player, order.getDisplay()));
@@ -175,6 +176,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	
 	
 	private @NotNull ItemStack buildUpgradeIcon(final @NotNull List<OrderData> orders, final int orderIndex, final @NotNull Lang lang, final @NotNull Player player, final @NotNull User user, final boolean available, final boolean denied) {
+		this.plugin.debug("upgradeItem(%s) %s|%s available: %s, denied: %s", player.getName(), this.getName(), orders.get(orderIndex).getName(), available, denied);
 		OrderData order = orders.get(orderIndex);
 		ItemStack item = (denied ? order.getIconDenied() : available ? order.getIcon() : order.getIconBought()).clone();
 		ItemMeta meta = item.getItemMeta();
