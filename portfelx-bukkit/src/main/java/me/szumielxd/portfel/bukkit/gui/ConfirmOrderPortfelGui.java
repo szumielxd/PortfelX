@@ -44,8 +44,7 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 
 
 	@Override
-	public @NotNull Component getTitle(User user) {
-		Player player = this.plugin.getServer().getPlayer(user.getUniqueId());
+	public @NotNull Component getTitle(User user, @NotNull Player player) {
 		return (player != null ? Lang.get(BukkitPlayer.get(this.plugin, player)) : Lang.def()).translateComponent(LangKey.SHOP_CONFIRM_TITLE.component(AQUA, LangKey.MAIN_CURRENCY_FORMAT.component(Component.text(this.order.getPrice()))));
 	}
 

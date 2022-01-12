@@ -10,7 +10,7 @@ import net.kyori.adventure.text.Component;
 public interface AbstractPortfelGui {
 	
 	
-	public @NotNull Component getTitle(User user);
+	public @NotNull Component getTitle(User user, @NotNull Player player);
 	
 	public int getSize();
 	

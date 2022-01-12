@@ -68,8 +68,8 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	}
 	
 	@Override
-	public @NotNull Component getTitle(@NotNull User user) {
-		return PlaceholderUtils.parseComponent(this.title, user);
+	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player) {
+		return PlaceholderUtils.parseComponent(this.title, user, player);
 	}
 	
 	public int getSlot() {
@@ -116,7 +116,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 						if (sound.isPresent()) player.playSound(player.getLocation(), sound.get(), 2, 1);
 						return;
 					}
-					PortfelGuiHolder newHolder = new PortfelGuiHolder(this.plugin, new ConfirmOrderPortfelGui(this.plugin, order.onAirWithPrice(price)), user);
+					PortfelGuiHolder newHolder = new PortfelGuiHolder(this.plugin, new ConfirmOrderPortfelGui(this.plugin, order.onAirWithPrice(price)), user, player);
 					newHolder.getGui().setup(player, newHolder.getInventory());
 				}
 			}
@@ -157,7 +157,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		lore.add(Component.empty());
 		lore.add(LangKey.SHOP_ORDER_DESCRIPTION.component(GRAY));
 		Component indentation = Component.text("  ", AQUA);
-		lore.addAll(order.getDescription().stream().map(s -> PlaceholderUtils.parseComponent(s, user)).map(indentation::append).collect(Collectors.toList()));
+		lore.addAll(order.getDescription().stream().map(s -> PlaceholderUtils.parseComponent(s, user, player)).map(indentation::append).collect(Collectors.toList()));
 		if (!active) lore.addAll(Arrays.asList(Component.empty(), LangKey.SHOP_ORDER_PURCHASED.component(GREEN)));
 		lore.addAll(Arrays.asList(Component.empty(), Component.empty(), LangKey.SHOP_ORDER_TERMS.component(GRAY)));
 		lore.add(indentation.append(Component.text(this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_TERMS_OF_SERVICE))));
@@ -172,7 +172,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		OrderData order = orders.get(orderIndex);
 		ItemStack item = (active ? order.getIcon() : order.getIconBought()).clone();
 		ItemMeta meta = item.getItemMeta();
-		BukkitUtils.setDisplayName(meta, order.getDisplay());
+		BukkitUtils.setDisplayName(meta, PlaceholderUtils.replacePlaceholders(user, player, order.getDisplay()));
 		
 		long fullPrice = order.getPrice();
 		long price = order.getPrice();
@@ -200,7 +200,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		lore.add(Component.empty());
 		lore.add(LangKey.SHOP_ORDER_DESCRIPTION.component(GRAY));
 		Component indentation = Component.text("  ", AQUA);
-		lore.addAll(order.getDescription().stream().map(s -> PlaceholderUtils.parseComponent(s, user)).map(indentation::append).collect(Collectors.toList()));
+		lore.addAll(order.getDescription().stream().map(s -> PlaceholderUtils.parseComponent(s, user, player)).map(indentation::append).collect(Collectors.toList()));
 		if (!active) lore.addAll(Arrays.asList(Component.empty(), LangKey.SHOP_ORDER_PURCHASED.component(GREEN)));
 		lore.addAll(Arrays.asList(Component.empty(), Component.empty(), LangKey.SHOP_ORDER_TERMS.component(GRAY)));
 		lore.add(indentation.append(Component.text(this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_TERMS_OF_SERVICE))));

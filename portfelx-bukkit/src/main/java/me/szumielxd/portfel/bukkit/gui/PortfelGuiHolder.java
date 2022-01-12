@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
@@ -31,14 +32,14 @@ public class PortfelGuiHolder implements InventoryHolder {
 	}
 	
 	
-	public PortfelGuiHolder(@NotNull PortfelBukkitImpl plugin, @NotNull AbstractPortfelGui gui, User user) {
+	public PortfelGuiHolder(@NotNull PortfelBukkitImpl plugin, @NotNull AbstractPortfelGui gui, @NotNull User user, @NotNull Player player) {
 		this.plugin = plugin;
 		this.gui = gui;
 		Inventory inv;
 		try {
-			inv = (Inventory) Server_createInventory.invoke(this.plugin.getServer(), this, this.gui.getSize(), this.gui.getTitle(user));
+			inv = (Inventory) Server_createInventory.invoke(this.plugin.getServer(), this, this.gui.getSize(), this.gui.getTitle(user, player));
 		} catch (NullPointerException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			inv = this.plugin.getServer().createInventory(this, this.gui.getSize(), legacy.serialize(this.gui.getTitle(user)));
+			inv = this.plugin.getServer().createInventory(this, this.gui.getSize(), legacy.serialize(this.gui.getTitle(user, player)));
 		}
 		this.inventory = inv;
 	}

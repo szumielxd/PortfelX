@@ -58,8 +58,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	
 
 	@Override
-	public @NotNull Component getTitle(User user) {
-		Player player = this.plugin.getServer().getPlayer(user.getUniqueId());
+	public @NotNull Component getTitle(User user, @NotNull Player player) {
 		Lang lang = player != null ? Lang.get(BukkitPlayer.get(this.plugin, player)) : Lang.def();
 		return lang.translateComponent(LangKey.SHOP_TITLE.component(DARK_PURPLE, Sets.newHashSet(BOLD), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Sets.newHashSet(BOLD), Component.text(user.getBalance()))));
 	}
@@ -75,7 +74,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 		if (gui != null) {
 			User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 			if (user != null) {
-				PortfelGuiHolder newHolder = new PortfelGuiHolder(this.plugin, gui, user);
+				PortfelGuiHolder newHolder = new PortfelGuiHolder(this.plugin, gui, user, player);
 				newHolder.getGui().setup(player, newHolder.getInventory());
 			}
 		}

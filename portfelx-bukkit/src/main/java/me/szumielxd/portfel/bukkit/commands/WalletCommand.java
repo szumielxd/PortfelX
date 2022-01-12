@@ -59,7 +59,7 @@ public class WalletCommand implements TabExecutor {
 			BukkitSender.get(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(RED)));
 			return true;
 		}
-		PortfelGuiHolder holder = new PortfelGuiHolder(this.plugin, gui, user);
+		PortfelGuiHolder holder = new PortfelGuiHolder(this.plugin, gui, user, player);
 		holder.getGui().setup(player, holder.getInventory());
 		return true;
 	}
