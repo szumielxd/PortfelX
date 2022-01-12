@@ -112,7 +112,7 @@ public class OrdersManager {
 					Map.Entry<Pattern, String> e = iter.next();
 					str = e.getKey().matcher(str).replaceAll(e.getValue());
 				}
-				return str.replace("\\{", "{");
+				return str.replace("\\{", "{").replace("%name%", yml.getName());
 			};
 			int slot = Objects.requireNonNull((Integer)yml.get("slot", null), "slot must be set");
 			int level = yml.getInt("level", 0);
