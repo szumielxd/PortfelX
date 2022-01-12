@@ -433,7 +433,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	private void sendTopRequest(Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF("Top");
+		out.writeUTF("LightTop");
 		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
 	}
 	
