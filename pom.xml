@@ -21,7 +21,7 @@
 		<package>me.szumielxd.portfel</package>
 		<bukkitMainClass>${package}.bukkit.PortfelBukkitImpl</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
-		<revision>3.1.1</revision>
+		<revision>3.1.2</revision>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
 		<finalNameObf>/../../target/${project.artifactId}-obf-${git.commit.id.abbrev}-${project.version}</finalNameObf>
 		<renamelog>${project.artifactId}_renamelog.xml</renamelog>
