@@ -300,7 +300,7 @@ public abstract class HikariDB implements AbstractDB {
 				}
 			}
 			
-			if (user != null) {
+			if (user != null && player != null) {
 				if (user.getName() != player.getName()) {
 					user.setName(player.getName());
 					sql = String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?", TABLE_USERS, USERS_NAME, USERS_UUID);
