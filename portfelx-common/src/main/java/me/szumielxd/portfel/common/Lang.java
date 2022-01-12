@@ -266,6 +266,7 @@ public class Lang {
 		SHOP_ORDER_PRICE("shop.order.price", "Price: {0}"),
 		SHOP_ORDER_DESCRIPTION("shop.order.description", "Description:"),
 		SHOP_ORDER_PURCHASED("shop.order.purchased", "Purchased"),
+		SHOP_ORDER_DENIED("shop.order.denied", "Denied!"),
 		SHOP_ORDER_TERMS("shop.order.terms", "Terms of service:"),
 		//
 		SHOP_CONFIRM_TITLE("shop.confirm.title", "Are you sure? That's {0}!"),

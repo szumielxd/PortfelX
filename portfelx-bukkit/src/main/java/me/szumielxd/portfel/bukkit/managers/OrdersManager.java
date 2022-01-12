@@ -35,6 +35,7 @@ import me.szumielxd.portfel.bukkit.gui.ShopType;
 import me.szumielxd.portfel.bukkit.objects.DoneConditionImpl;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.utils.MiscUtils;
+import net.kyori.adventure.text.Component;
 
 public class OrdersManager {
 	
@@ -117,13 +118,15 @@ public class OrdersManager {
 			int slot = Objects.requireNonNull((Integer)yml.get("slot", null), "slot must be set");
 			int level = yml.getInt("level", 0);
 			String name = replacer.apply(Objects.requireNonNull(yml.getString("name", null), "name must be set"));
-			List<String> description = yml.getStringList("description").parallelStream().map(replacer).collect(Collectors.toList());
+			List<Component> description = yml.getStringList("description").parallelStream().map(replacer).map(MiscUtils::parseComponent).collect(Collectors.toList());
+			List<Component> denyDescription = yml.getStringList("deny-description").parallelStream().map(replacer).map(MiscUtils::parseComponent).collect(Collectors.toList());
 			ItemStack icon = BukkitUtils.parseItem(replacer.apply(yml.getString("icon", ""))).orElse(new ItemStack(Material.STONE));
-			ItemStack iconBought = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-bought", ""))).orElse(new ItemStack(Material.STONE));
+			ItemStack iconBought = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-bought", ""))).orElse(icon);
+			ItemStack iconDenied = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-denied", ""))).orElse(icon);
 			int price = Objects.requireNonNull((Integer)yml.get("price", null), "price must be set");
 			String donePermission = replacer.apply(yml.getString("done-permission", ""));
 			
-			// parsing conditions
+			// parsing done conditions
 			List<DoneCondition> doneConditions = yml.getStringList("done-conditions").parallelStream().map(replacer).map(str -> {
 				for (DoneCondition.OperationType type : DoneCondition.OperationType.values()) {
 					final Matcher match = type.getPattern().matcher(str);
@@ -136,10 +139,23 @@ public class OrdersManager {
 				return null;
 			}).filter(Objects::nonNull).collect(Collectors.toList());
 			
+			// parsing deny conditions
+			List<DoneCondition> denyConditions = yml.getStringList("deny-conditions").parallelStream().map(replacer).map(str -> {
+				for (DoneCondition.OperationType type : DoneCondition.OperationType.values()) {
+					final Matcher match = type.getPattern().matcher(str);
+					if (match.matches()) {
+						String sign = type.getSign();
+						return new DoneConditionImpl(match.group(1).replace("\\" + sign, sign), match.group(3).replace("\\" + sign, sign), type);
+					}
+				}
+				this.plugin.getLogger().warning(String.format("Cannot parse deny-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName()));
+				return null;
+			}).filter(Objects::nonNull).collect(Collectors.toList());
+			
 			List<String> broadcast = yml.getStringList("broadcast").parallelStream().map(replacer).collect(Collectors.toList());
 			List<String> message = yml.getStringList("message").parallelStream().map(replacer).collect(Collectors.toList());
 			List<String> command = yml.getStringList("command").parallelStream().map(replacer).collect(Collectors.toList());
-			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, icon, iconBought, price, donePermission.isEmpty()? null : donePermission, doneConditions, broadcast, message, command);
+			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, denyDescription, icon, iconBought, iconDenied, price, donePermission.isEmpty()? null : donePermission, doneConditions, denyConditions, broadcast, message, command);
 		} catch (NullPointerException e) {
 			this.plugin.getLogger().log(Level.WARNING, String.format("Cannot load order `%s` from category `%s`", yml.getName(), yml.getRoot().getName()), e);
 		}
