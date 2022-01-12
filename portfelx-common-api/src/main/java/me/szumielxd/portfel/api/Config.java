@@ -42,6 +42,14 @@ public interface Config {
 	public int getInt(@NotNull AbstractKey key);
 	
 	/**
+	 * Get value of given key parsed as boolean
+	 * 
+	 * @param key the key
+	 * @return value of given key
+	 */
+	public boolean getBoolean(@NotNull AbstractKey key);
+	
+	/**
 	 * Get value of given key parsed as map of strings
 	 * 
 	 * @param key the key

@@ -1,10 +1,13 @@
 package me.szumielxd.portfel.api;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.TopManager;
 import me.szumielxd.portfel.api.managers.UserManager;
@@ -108,6 +111,17 @@ public interface Portfel {
 	 * @return plugin's logger
 	 */
 	public @NotNull Logger getLogger();
+	
+	/**
+	 * Log debug message in console.
+	 * 
+	 * @param message
+	 * @param args
+	 */
+	default public void debug(@NotNull String message, @Nullable Object... args) {
+		Objects.requireNonNull(message, "message cannot be null");
+		if (this.getConfiguration().getBoolean(ConfigKey.MAIN_DEBUG)) this.getLogger().info("DEBUG: " + String.format(message, args));
+	}
 	
 
 }

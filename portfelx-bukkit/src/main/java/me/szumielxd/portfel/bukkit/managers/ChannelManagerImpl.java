@@ -128,6 +128,9 @@ public class ChannelManagerImpl implements ChannelManager {
 		if (!Portfel.CHANNEL_SETUP.equals(channel)) return;
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF();
+		
+		this.plugin.debug("PluginMessage(setup|%s)\\[%s\\]: %s", player.getName(), message.length, subchannel);
+		
 		if ("Register".equals(subchannel)) {
 			byte[] data;
 			try {
@@ -214,6 +217,8 @@ public class ChannelManagerImpl implements ChannelManager {
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF(); // subchannel
 		
+		this.plugin.debug("PluginMessage(transaction|%s)\\[%s\\]: %s", player.getName(), message.length, subchannel);
+		
 		/* Handle shipping */
 		if ("Buy".equals(subchannel)) {
 			byte[] data;
@@ -287,6 +292,8 @@ public class ChannelManagerImpl implements ChannelManager {
 		if (!Portfel.CHANNEL_USERS.equals(channel)) return;
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF(); // subchannel
+		
+		this.plugin.debug("PluginMessage(user|%s)\\[%s\\]: %s", player.getName(), message.length, subchannel);
 		
 		/* User Profile */
 		if ("User".equals(subchannel)) {

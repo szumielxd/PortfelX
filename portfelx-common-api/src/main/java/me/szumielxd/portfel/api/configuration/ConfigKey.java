@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 public enum ConfigKey implements AbstractKey {
 	
 	LANG_DEFAULT_LOCALE("lang.default-locale", "en_US"),
+	MAIN_DEBUG("main.debug", false),
 	;
 	
 	private final String path;
