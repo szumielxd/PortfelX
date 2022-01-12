@@ -121,7 +121,7 @@ public class OrdersManager {
 			ItemStack icon = BukkitUtils.parseItem(replacer.apply(yml.getString("icon", ""))).orElse(new ItemStack(Material.STONE));
 			ItemStack iconBought = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-bought", ""))).orElse(new ItemStack(Material.STONE));
 			int price = Objects.requireNonNull((Integer)yml.get("price", null), "price must be set");
-			String donePermission = yml.getString("done-permission", "");
+			String donePermission = replacer.apply(yml.getString("done-permission", ""));
 			
 			// parsing conditions
 			List<DoneCondition> doneConditions = yml.getStringList("done-conditions").parallelStream().map(replacer).map(str -> {
