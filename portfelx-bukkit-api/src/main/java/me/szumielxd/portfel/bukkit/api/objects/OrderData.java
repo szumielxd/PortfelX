@@ -120,6 +120,7 @@ public class OrderData {
 	}
 	
 	public boolean isDenied(@NotNull Player player) {
+		if (this.denyConditions.isEmpty()) return false;
 		return this.denyConditions.parallelStream().allMatch(c -> c.test(player));
 	}
 	
