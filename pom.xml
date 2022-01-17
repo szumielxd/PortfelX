@@ -21,7 +21,7 @@
 		<package>me.szumielxd.portfel</package>
 		<bukkitMainClass>${package}.bukkit.PortfelBukkitImpl</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
-		<revision>3.2.4</revision>
+		<revision>3.3.0-SNAPSHOT</revision>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
 		<finalNameObf>/../../target/${project.artifactId}-obf-${git.commit.id.abbrev}-${project.version}</finalNameObf>
 		<renamelog>${project.artifactId}_renamelog.xml</renamelog>
@@ -88,12 +88,17 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
-				<artifactId>portfelx-bungee-api</artifactId>
+				<artifactId>portfelx-proxy-api</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-common</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-proxy</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -104,6 +109,11 @@
 			<dependency>
 				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-bungee</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-velocity</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			
@@ -259,6 +269,20 @@
 				</exclusions>
 			</dependency>
 			
+			<!-- Velocity -->
+			<dependency>
+				<groupId>com.velocitypowered</groupId>
+				<artifactId>velocity-api</artifactId>
+				<version>3.0.1</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>com.google.code.gson</groupId>
+						<artifactId>gson</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			
 			<!-- Spigot -->
 			<dependency>
 				<groupId>org.spigotmc</groupId>
@@ -309,6 +333,13 @@
 			<groupId>net.luckperms</groupId>
 			<artifactId>api</artifactId>
 			<version>5.3</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>31.0.1-jre</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
@@ -496,6 +527,29 @@
 								<pattern>com.github.curiousoddman.rgxgen</pattern>
 								<shadedPattern>${package}.lib.com.github.curiousoddman.rgxgen</shadedPattern>
 							</relocation>
+							
+							<!-- Yes, I'm monster not programmer. I use relocation to replace variables -->
+							<relocation>
+								<!-- Alphanumeric only... -->
+								<pattern>id----</pattern>
+								<shadedPattern>${pluginId}</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>@pluginName@</pattern>
+								<shadedPattern>${pluginName}</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>@version@</pattern>
+								<shadedPattern>${version}</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>@author@</pattern>
+								<shadedPattern>${author}</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>@description@</pattern>
+								<shadedPattern>${description}</shadedPattern>
+							</relocation>
 						</relocations>
 					</configuration>
 				</plugin>
@@ -523,10 +577,12 @@
 	<modules>
 		<module>portfelx-common-api</module>
 		<module>portfelx-bukkit-api</module>
-		<module>portfelx-bungee-api</module>
+		<module>portfelx-proxy-api</module>
 		<module>portfelx-common</module>
 		<module>portfelx-bukkit</module>
+		<module>portfelx-proxy</module>
 		<module>portfelx-bungee</module>
+		<module>portfelx-velocity</module>
 		<module>portfelx-api</module>
 	</modules>
 </project>

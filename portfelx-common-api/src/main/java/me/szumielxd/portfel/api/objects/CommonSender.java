@@ -3,7 +3,6 @@ package me.szumielxd.portfel.api.objects;
 import org.jetbrains.annotations.NotNull;
 
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.chat.BaseComponent;
 
 public interface CommonSender {
 	
@@ -14,20 +13,6 @@ public interface CommonSender {
 	 * @param message message to send
 	 */
 	public void sendMessage(@NotNull String message);
-	
-	/**
-	 * Send message to this sender.
-	 * 
-	 * @param message message to send
-	 */
-	public void sendMessage(@NotNull BaseComponent message);
-	
-	/**
-	 * Send message to this sender.
-	 * 
-	 * @param message message to send
-	 */
-	public void sendMessage(@NotNull BaseComponent... message);
 	
 	/**
 	 * Send message to this sender.

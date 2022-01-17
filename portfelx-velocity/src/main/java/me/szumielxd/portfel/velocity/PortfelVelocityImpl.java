@@ -1,15 +1,26 @@
-package me.szumielxd.portfel.bungee;
+package me.szumielxd.portfel.velocity;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Map;
+import java.nio.file.Path;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
+
 import org.jetbrains.annotations.NotNull;
+
+import com.velocitypowered.api.command.CommandManager;
+import com.velocitypowered.api.command.CommandMeta;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 
 import me.szumielxd.portfel.api.Config;
 import me.szumielxd.portfel.api.PortfelProvider;
@@ -18,11 +29,6 @@ import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.bungee.commands.BungeeCommandWrapper;
-import me.szumielxd.portfel.bungee.listeners.BungeeChannelListener;
-import me.szumielxd.portfel.bungee.listeners.BungeeUserListener;
-import me.szumielxd.portfel.bungee.managers.BungeeAccessManagerImpl;
-import me.szumielxd.portfel.bungee.objects.BungeeProxy;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.ValidateAccess;
@@ -51,16 +57,64 @@ import me.szumielxd.portfel.proxy.managers.ProxyTaskManagerImpl;
 import me.szumielxd.portfel.proxy.managers.ProxyTopManagerImpl;
 import me.szumielxd.portfel.proxy.managers.ProxyUserManagerImpl;
 import me.szumielxd.portfel.proxy.managers.TokenManager;
-import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
-import net.md_5.bungee.api.plugin.Plugin;
+import me.szumielxd.portfel.velocity.commands.VelocityCommandWrapper;
+import me.szumielxd.portfel.velocity.listeners.VelocityChannelListener;
+import me.szumielxd.portfel.velocity.listeners.VelocityUserListener;
+import me.szumielxd.portfel.velocity.managers.VelocityAccessManagerImpl;
+import me.szumielxd.portfel.velocity.objects.VelocityProxy;
+import net.kyori.adventure.platform.AudienceProvider;
 
-public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
+@Plugin(
+		id = "id----",
+		name = "@pluginName@",
+		version = "@version@",
+		authors = { "@author@" },
+		description = "@description@",
+		url = "https://github.com/szumielxd/PortfelX/"
+)
+public class PortfelVelocityImpl implements PortfelProxyImpl {
 	
 	
 	
-	private @NotNull BungeeProxy proxy;
+	private final ProxyServer server;
+	private final Logger logger;
+	private final File dataFolder;
 	
 	
+	private @NotNull VelocityProxy proxy;
+	
+	
+	@Inject
+	public PortfelVelocityImpl(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
+		this.server = server;
+		this.logger = logger;
+		this.dataFolder = dataDirectory.toFile();
+	}
+	
+	
+	@Subscribe
+	public void onProxyInitialization(ProxyInitializeEvent event) {
+	    this.onEnable();
+	}
+	
+	
+	@Override
+	public @NotNull Logger getLogger() {
+		return this.logger;
+	}
+	
+	
+	@Override
+	public @NotNull File getDataFolder() {
+		return this.dataFolder;
+	}
+	
+	
+	public @NotNull ProxyServer getProxy() {
+		return this.server;
+	}
+
+
 	@Override
 	public @NotNull CommonProxy getProxyServer() {
 		return this.proxy;
@@ -68,7 +122,9 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	
 	
 	private void registerCommand(@NotNull CommonCommand command) {
-		this.getProxy().getPluginManager().registerCommand(this, new BungeeCommandWrapper(this, command));
+		CommandManager mgr = this.getProxy().getCommandManager();
+		CommandMeta meta = mgr.metaBuilder(command.getName()).aliases(command.getAliases()).build();
+		mgr.register(meta, new VelocityCommandWrapper(this, command));
 	}
 	
 	
@@ -79,7 +135,6 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	
 	
 	
-	private BungeeAudiences adventure;
 	private AccessManagerImpl accessManager;
 	private TaskManager taskManager;
 	private ConfigImpl config;
@@ -105,12 +160,11 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 			return;
 		}
 		PortfelProvider.register(this);
+		this.proxy = new VelocityProxy(this);
 		CommonArgs.init(this);
 		this.setupProxyId();
-		this.proxy = new BungeeProxy(this);
-		this.adventure = BungeeAudiences.create(this);
 		this.taskManager = new ProxyTaskManagerImpl(this);
-		this.accessManager = new BungeeAccessManagerImpl(this).init();
+		this.accessManager = new VelocityAccessManagerImpl(this).init();
 		this.load();
 		//
 		String dbType = this.getConfiguration().getString(ProxyConfigKey.DATABASE_TYPE).toLowerCase();
@@ -131,16 +185,16 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 		this.topManager = (ProxyTopManagerImpl) new ProxyTopManagerImpl(this).init();
 		this.tokenManager = new TokenManager(this).init();
 		this.getLogger().info("Registering listeners...");
-		this.getProxy().getPluginManager().registerListener(this, new BungeeUserListener(this));
-		this.getProxy().getPluginManager().registerListener(this, new BungeeChannelListener(this));
+		this.getProxy().getEventManager().register(this, new VelocityUserListener(this));
+		this.getProxy().getEventManager().register(this, new VelocityChannelListener(this));
 		this.getLogger().info("Registering commands...");
 		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
 		this.tokenCommand = new MainTokenCommand(this, this.config.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.config.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
-		this.getProxy().registerChannel(CHANNEL_SETUP);
-		this.getProxy().registerChannel(CHANNEL_USERS);
-		this.getProxy().registerChannel(CHANNEL_TRANSACTIONS);
+		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_SETUP));
+		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_USERS));
+		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_TRANSACTIONS));
 		
 		this.sendMotd();
 		
@@ -176,23 +230,12 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 		this.database.shutdown();
 		this.tokenDatabase.shutdown();
 		this.taskManager.cancelAll();
-		this.getLogger().info("Unhooking kyori adventure");
-		try {
-			Field f = Class.forName("net.kyori.adventure.platform.bungeecord.BungeeAudiencesImpl").getDeclaredField("INSTANCES");
-			f.setAccessible(true);
-			Map<?, ?> INSTANCES = (Map<?, ?>) f.get(null);
-			INSTANCES.remove(this.getDescription().getName());
-		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
-		}
-		this.getLogger().info("Unregistering commands");
-		this.getProxy().getPluginManager().unregisterCommands(this);
 		this.getLogger().info("Unregistering listeners");
-		this.getProxy().getPluginManager().unregisterListeners(this);
+		this.getProxy().getEventManager().unregisterListeners(this);
 		this.getLogger().info("Unregistering channels");
-		this.getProxy().unregisterChannel(CHANNEL_SETUP);
-		this.getProxy().unregisterChannel(CHANNEL_USERS);
-		this.getProxy().unregisterChannel(CHANNEL_TRANSACTIONS);
+		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_SETUP));
+		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_USERS));
+		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_TRANSACTIONS));
 		this.unload();
 		this.getLogger().info("Everything OK, miss you");
 		this.getLogger().info("Goodbye my friend...");
@@ -244,25 +287,25 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	
 	@Override
 	public @NotNull String getName() {
-		return this.getDescription().getName();
+		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getName().orElse("");
 	}
 	
 	
 	@Override
 	public @NotNull String getVersion() {
-		return this.getDescription().getVersion();
+		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getVersion().orElse("");
 	}
 	
 	
 	@Override
 	public @NotNull String getAuthor() {
-		return this.getDescription().getAuthor();
+		return String.join(", ", this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getAuthors());
 	}
 	
 	
 	@Override
 	public @NotNull String getDescriptionText() {
-		return this.getDescription().getDescription();
+		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getDescription().orElse("");
 	}
 	
 	
@@ -282,26 +325,6 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	 */
 	public @NotNull AbstractDBLogger getDBLogger() {
 		return this.transactionLogger;
-	}
-	
-	/**
-	 * Get Bungee audience implementation.
-	 * 
-	 * @return audiences
-	 */
-	@Override
-	public @NotNull BungeeAudiences adventure() {
-		if (this.adventure == null) throw new IllegalStateException("Cannot retrieve audience provider while plugin is not enabled");
-		return this.adventure;
-	}
-	
-	/**
-	 * Get Console Sender.
-	 * 
-	 * @return current console sender
-	 */
-	public @NotNull CommonSender getConsole() {
-		return this.getProxyServer().getConsole();
 	}
 	
 	
@@ -329,17 +352,29 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	
 	
 	private void sendMotd() {
-		this.getProxy().getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
-		this.getProxy().getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.getDescription().getVersion()+"\u001b[0m");
-		this.getProxy().getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on BungeeCord - " + this.getProxy().getName() + "\u001b[0m");
-		this.getProxy().getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
-		this.getProxy().getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
+		this.getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
+		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.getVersion()+"\u001b[0m");
+		this.getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on Velocity" + "" + "\u001b[0m");
+		this.getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
+		this.getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
 	}
 
 
 	@Override
 	public @NotNull Config getConfiguration() {
 		return this.config;
+	}
+
+
+	@Override
+	public @NotNull AudienceProvider adventure() {
+		throw new IllegalArgumentException("Velocity has native support for kyori");
+	}
+
+
+	@Override
+	public @NotNull CommonSender getConsole() {
+		return this.getProxyServer().getConsole();
 	}
 	
 

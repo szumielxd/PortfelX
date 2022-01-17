@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.bungee.objects;
+package me.szumielxd.portfel.velocity.objects;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -10,18 +10,25 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
+import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ServerConnection;
+import com.velocitypowered.api.proxy.messages.LegacyChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import com.velocitypowered.api.proxy.server.ServerInfo;
+
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
+import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.bossbar.BossBar.Color;
 import net.kyori.adventure.bossbar.BossBar.Flag;
 import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import net.luckperms.api.LuckPerms;
@@ -32,16 +39,14 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public class BungeePlayer extends BungeeSender implements ProxyPlayer {
+public class VelocityPlayer extends VelocitySender implements ProxyPlayer {
+
+	
+	private final @NotNull Player player;
 	
 	
-private final @NotNull ProxiedPlayer player;
-	
-	
-	public BungeePlayer(@NotNull PortfelBungeeImpl plugin, @NotNull ProxiedPlayer player) {
+	public VelocityPlayer(@NotNull PortfelVelocityImpl plugin, @NotNull Player player) {
 		super(plugin, player);
 		this.player = player;
 	}
@@ -49,13 +54,13 @@ private final @NotNull ProxiedPlayer player;
 	
 	@Override
 	public String getName() {
-		return this.player.getName();
+		return this.player.getUsername();
 	}
 	
 	
 	@Override
 	public Collection<String> getGroups() {
-		final Set<String> groups = new HashSet<>(this.player.getGroups());
+		final Set<String> groups = new HashSet<>();
 		try {
 			Class.forName("net.luckperms.api.LuckPermsProvider");
 			LuckPerms api = LuckPermsProvider.get();
@@ -70,19 +75,19 @@ private final @NotNull ProxiedPlayer player;
 	
 	@Override
 	public int getVersion() {
-		return this.player.getPendingConnection().getVersion();
+		return this.player.getProtocolVersion().getProtocol();
 	}
 	
 	
 	@Override
 	public boolean isModded() {
-		return this.player.isForgeUser();
+		return this.player.getModInfo().isPresent();
 	}
 	
 	
 	@Override
 	public void chat(@NotNull String message) {
-		this.player.chat(message);
+		this.player.spoofChatInput(message);
 	}
 	
 	
@@ -103,31 +108,31 @@ private final @NotNull ProxiedPlayer player;
 
 	@Override
 	public void disconnect(@NotNull String reason) {
-		this.player.disconnect(TextComponent.fromLegacyText(reason));		
+		this.player.disconnect(LegacyComponentSerializer.legacySection().deserialize(reason));		
 	}
 
 
 	@Override
 	public void connect(@NotNull String server) {
-		this.player.connect(this.plugin.getProxy().getServerInfo(server));
+		this.plugin.getProxy().getServer(server).map(player::createConnectionRequest).ifPresent(ConnectionRequestBuilder::fireAndForget);
 	}
 
 
 	@Override
 	public void executeServerCommand(@NotNull String command) {
-		this.player.chat("/" + command);
+		this.player.spoofChatInput("/" + command);
 	}
 
 
 	@Override
 	public @NotNull String getWorldName() {
-		return Optional.ofNullable(this.player.getServer()).map(s -> s.getInfo().getName()).orElse("");
+		return this.player.getCurrentServer().map(ServerConnection::getServerInfo).map(ServerInfo::getName).orElse("");
 	}
 
 
 	@Override
 	public @Nullable Locale locale() {
-		return this.player.getLocale();
+		return this.player.getEffectiveLocale();
 	}
 
 
@@ -139,41 +144,39 @@ private final @NotNull ProxiedPlayer player;
 
 	@Override
 	public void sendActionBar(@NotNull Component message) {
-		this.plugin.adventure().player(this.player).sendActionBar(message);
+		this.player.sendActionBar(message);
 	}
 
 
 	@Override
 	public void showTitle(@NotNull Component title, @NotNull Component subtitle, @Nullable Times times) {
-		this.plugin.adventure().player(this.player).showTitle(Title.title(title, subtitle, times));
+		this.player.showTitle(Title.title(title, subtitle, times));
 	}
 
 
 	@Override
 	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
 		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, new HashSet<>(Arrays.asList(flags)));
-		this.plugin.adventure().player(this.player).showBossBar(bar);
-		this.plugin.getProxyServer().getScheduler().runTaskLater(() -> this.plugin.adventure().player(this.player).hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
+		this.player.showBossBar(bar);
+		this.plugin.getProxyServer().getScheduler().runTaskLater(() -> this.player.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 
 	@Override
 	public void sendPluginMessage(@NotNull String tag, @NotNull byte[] message) {
-		// TODO Auto-generated method stub
-		
+		this.player.sendPluginMessage(tag.indexOf(':') >= 0 ? MinecraftChannelIdentifier.from(tag) : new LegacyChannelIdentifier(tag), message);
 	}
 
 
 	@Override
 	public boolean isConnected() {
-		return this.player.isConnected();
+		return this.player.isActive();
 	}
 
 
 	@Override
 	public Optional<ProxyServerConnection> getServer() {
-		return Optional.ofNullable(this.player.getServer()).map(srv -> new BungeeServerConnection(this.plugin, srv));
+		return this.player.getCurrentServer().map(srv -> new VelocityServerConnection(this.plugin, srv));
 	}
-	
 
 }

@@ -13,7 +13,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>portfelx-bungee-api</artifactId>
+			<artifactId>portfelx-proxy-api</artifactId>
 		</dependency>
 	</dependencies>
 	
