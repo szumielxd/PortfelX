@@ -107,7 +107,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 						if (index < 0) return;
 						for (int i = index-1; i >= 0; i--) {
 							OrderData o = orderList.get(i);
-							if (!o.isAvailableToBuy(player) && o.isDenied(player)) break;
+							if (!o.isAvailableToBuy(player) || o.isDenied(player)) break;
 							price += o.getPrice();
 						}
 					}
@@ -189,7 +189,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 			Component prefix = Component.text(" ┗╸ ");
 			for (int i = orderIndex-1; i >= 0; i--) {
 				OrderData o = orders.get(i);
-				if (!o.isAvailableToBuy(player)) done = true;
+				if (!o.isAvailableToBuy(player) || o.isDenied(player)) done = true;
 				if (!done) {
 					price += o.getPrice();
 					discounts.add(prefix.color(GRAY).append(Component.text(MiscUtils.firstToUpper(o.getName()), DARK_GRAY)).append(Component.text(" -" + o.getPrice(), DARK_AQUA)));
