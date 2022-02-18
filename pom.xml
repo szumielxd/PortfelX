@@ -15,11 +15,13 @@
 
 	<properties>
 		<java.version>1.8</java.version>
+		<pluginId>portfel</pluginId>
 		<pluginName>Portfel</pluginName>
 		<author>szumielxd</author>
+		<website>https://github.com/szumielxd/PortfelX</website>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<package>me.szumielxd.portfel</package>
-		<bukkitMainClass>${package}.bukkit.PortfelBukkitImpl</bukkitMainClass>
+		<bukkitMainClass>${package}.bukkit.bootstrap.PortfelBukkitBootstrap</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
 		<revision>3.3.0-SNAPSHOT</revision>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
@@ -342,6 +344,13 @@
 			<version>31.0.1-jre</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.20</version>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 
 	<!-- Build -->
@@ -506,6 +515,14 @@
 							<relocation>
 								<pattern>com.zaxxer</pattern>
 								<shadedPattern>${package}.lib.com.zaxxer</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>me.lucko.jarrelocator</pattern>
+								<shadedPattern>${package}.lib.me.lucko.jarrelocator</shadedPattern>
+							</relocation>
+							<relocation>
+								<pattern>org.objectweb</pattern>
+								<shadedPattern>${package}.lib.org.objectweb</shadedPattern>
 							</relocation>
 							<relocation>
 								<pattern>com.google.gson</pattern>
