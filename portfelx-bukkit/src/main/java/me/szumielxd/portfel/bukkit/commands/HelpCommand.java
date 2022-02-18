@@ -34,13 +34,13 @@ public class HelpCommand extends SimpleCommand {
 		String[] shortLabel = Arrays.copyOf(label, label.length-1);
 		String helpCmd = "/" + String.join(" ", shortLabel) + " help";
 		PortfelBukkitImpl pl = (PortfelBukkitImpl) this.getPlugin();
-		String pluginVersion = pl.getDescription().getName() + " " + pl.getDescription().getVersion();
+		String pluginVersion = pl.asPlugin().getDescription().getName() + " " + pl.asPlugin().getDescription().getVersion();
 		Component running = Portfel.PREFIX.append(LangKey.COMMAND_MAIN_RUNNING.component(DARK_PURPLE, Component.text(pluginVersion, LIGHT_PURPLE)));
 		Component runningHover = Component.text(pluginVersion, LIGHT_PURPLE);
 		//description
 		runningHover = runningHover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_DESCRIPTION.component(AQUA))
 				.append(Component.space())
-				.append(Component.text(pl.getDescription().getDescription(), GRAY));
+				.append(Component.text(pl.asPlugin().getDescription().getDescription(), GRAY));
 		//enabled
 		runningHover = runningHover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_ENABLED.component(AQUA))
 				.append(Component.space())
@@ -48,7 +48,7 @@ public class HelpCommand extends SimpleCommand {
 		//authors
 		runningHover = runningHover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_AUTHORS.component(AQUA))
 				.append(Component.space())
-				.append(Component.text(String.join(", ", pl.getDescription().getAuthors()), GRAY));
+				.append(Component.text(String.join(", ", pl.asPlugin().getDescription().getAuthors()), GRAY));
 		sender.sendTranslated(running.hoverEvent(runningHover));
 		if (!label[shortLabel.length].equals("")) {
 			MainCommand parent = (MainCommand) this.getParent();

@@ -1,6 +1,0 @@
-name: ${pluginName}
-description: ${description}
-version: ${version}
-author: ${author}
-main: ${bungeeMainClass}
-website: ${parent.url}

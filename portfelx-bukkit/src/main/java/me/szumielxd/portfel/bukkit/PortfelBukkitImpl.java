@@ -9,9 +9,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.event.HandlerList;
@@ -33,6 +36,7 @@ import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.managers.IdentifierManager;
+import me.szumielxd.portfel.bukkit.bootstrap.PortfelBukkitBootstrap;
 import me.szumielxd.portfel.bukkit.commands.MainCommand;
 import me.szumielxd.portfel.bukkit.commands.WalletCommand;
 import me.szumielxd.portfel.bukkit.hooks.MVdWHandler;
@@ -49,12 +53,16 @@ import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.ValidateAccess;
+import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 
-public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
+public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
+	
+	
+	private final @NotNull PortfelBukkitBootstrap bootstrap;
 	
 	
 	private BukkitAudiences adventure;
@@ -74,15 +82,25 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 	private String serverHashKey;
 	
 	
+	public PortfelBukkitImpl(@NotNull PortfelBukkitBootstrap bootstrap) {
+		this.bootstrap = Objects.requireNonNull(bootstrap, "bootstrap cannot be null");
+	}
+	
+	
+	public JavaPlugin asPlugin() {
+		return this.bootstrap;
+	}
+	
+	
 	@Override
 	public void onEnable() {
 		if (ValidateAccess.checkAccess() == false) {
 			this.getLogger().warning("You have no power here. Die potato!");
-			this.getServer().getPluginManager().disablePlugin(this);
+			this.getServer().getPluginManager().disablePlugin(this.asPlugin());
 			return;
 		}
 		PortfelProvider.register(this);
-		this.adventure = BukkitAudiences.create(this);
+		this.adventure = BukkitAudiences.create(this.asPlugin());
 		this.taskManager = new BukkitTaskManagerImpl(this);
 		
 		this.load();
@@ -96,8 +114,8 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 		this.userManager = new BukkitUserManagerImpl(this).init();
 		this.topManager = new BukkitTopManagerImpl(this).init();
 		this.getLogger().info("Registering listeners...");
-		this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
-		this.getServer().getPluginManager().registerEvents(new UserListener(this), this);
+		this.getServer().getPluginManager().registerEvents(new GuiListener(), this.asPlugin());
+		this.getServer().getPluginManager().registerEvents(new UserListener(this), this.asPlugin());
 		this.getLogger().info("Registering commands...");
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
@@ -163,7 +181,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 			Field f = Class.forName("net.kyori.adventure.platform.bukkit.BukkitAudiencesImpl").getDeclaredField("INSTANCES");
 			f.setAccessible(true);
 			Map<?, ?> INSTANCES = (Map<?, ?>) f.get(null);
-			INSTANCES.remove(this.getDescription().getName());
+			INSTANCES.remove(this.asPlugin().getDescription().getName());
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
@@ -171,12 +189,12 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
 			commands.getCommands().stream().filter(PluginCommand.class::isInstance).map(PluginCommand.class::cast)
-					.filter(cmd -> this.equals(cmd.getPlugin())).forEach(cmd -> cmd.unregister(commands));
+					.filter(cmd -> this.asPlugin().equals(cmd.getPlugin())).forEach(cmd -> cmd.unregister(commands));
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		this.getLogger().info("Unregistering listeners");
-		HandlerList.unregisterAll(this);
+		HandlerList.unregisterAll(this.asPlugin());
 		
 		this.unload();
 		if (this.mvdwHandler != null) this.mvdwHandler.unregister();
@@ -298,7 +316,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 	
 	private void sendMotd() {
 		this.getServer().getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
-		this.getServer().getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.getDescription().getVersion()+"\u001b[0m");
+		this.getServer().getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.asPlugin().getDescription().getVersion()+"\u001b[0m");
 		this.getServer().getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on Bukkit - " + this.getServer().getName() + "\u001b[0m");
 		this.getServer().getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
 		this.getServer().getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
@@ -325,6 +343,30 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+
+	@Override
+	public @NotNull File getDataFolder() {
+		return this.bootstrap.getDataFolder();
+	}
+
+
+	@Override
+	public @NotNull String getName() {
+		return this.bootstrap.getName();
+	}
+
+
+	@Override
+	public @NotNull Logger getLogger() {
+		return this.bootstrap.getLogger();
+	}
+
+
+	@Override
+	public @NotNull Server getServer() {
+		return this.bootstrap.getServer();
 	}
 	
 

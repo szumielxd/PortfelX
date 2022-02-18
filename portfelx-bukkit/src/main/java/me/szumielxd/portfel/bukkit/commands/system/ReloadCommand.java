@@ -38,7 +38,7 @@ public class ReloadCommand extends SimpleCommand {
 			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_RELOAD_ERROR.component(DARK_RED)).hoverEvent(Component.text(sw.toString(), RED)));
 			return;
 		}
-		sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_RELOAD_SUCCESS.component(GREEN, Component.text(plugin.getName()+" "+plugin.getDescription().getVersion(), AQUA))));
+		sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_RELOAD_SUCCESS.component(GREEN, Component.text(plugin.getName()+" "+plugin.asPlugin().getDescription().getVersion(), AQUA))));
 	}
 
 	@Override

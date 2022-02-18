@@ -33,7 +33,7 @@ public class VelocityScheduler implements ProxyScheduler {
 	@Override
 	public @NotNull VelocityExecutedTask runTask(@NotNull Runnable task) {
 		final int id = this.lastId.addAndGet(1);
-		VelocityExecutedTask ex = new VelocityExecutedTask(id, this.plugin.getProxy().getScheduler().buildTask(this.plugin, () -> {
+		VelocityExecutedTask ex = new VelocityExecutedTask(id, this.plugin.getProxy().getScheduler().buildTask(this.plugin.asPlugin(), () -> {
 			// remove task from list after finish
 			task.run();
 			this.activeTasks.remove(id);
@@ -50,7 +50,7 @@ public class VelocityScheduler implements ProxyScheduler {
 	@Override
 	public @NotNull VelocityExecutedTask runTaskLater(@NotNull Runnable task, long delay, @NotNull TimeUnit unit) {
 		final int id = this.lastId.addAndGet(1);
-		VelocityExecutedTask ex = new VelocityExecutedTask(id, this.plugin.getProxy().getScheduler().buildTask(this.plugin, () -> {
+		VelocityExecutedTask ex = new VelocityExecutedTask(id, this.plugin.getProxy().getScheduler().buildTask(this.plugin.asPlugin(), () -> {
 			// remove task from list after finish
 			task.run();
 			this.activeTasks.remove(id);
@@ -68,7 +68,7 @@ public class VelocityScheduler implements ProxyScheduler {
 	public @NotNull VelocityExecutedTask runTaskTimer(@NotNull Runnable task, long delay, long period, @NotNull TimeUnit unit) {
 		
 		final int id = this.lastId.addAndGet(1);
-		VelocityExecutedTask ex = new VelocityExecutedTask(id, this.plugin.getProxy().getScheduler().buildTask(this.plugin, () -> {
+		VelocityExecutedTask ex = new VelocityExecutedTask(id, this.plugin.getProxy().getScheduler().buildTask(this.plugin.asPlugin(), () -> {
 			// this is periodical task, so it's never ending fun! No need to be removed from list until cancelled
 			task.run();
 		}).delay(delay, unit).repeat(period, unit).schedule());

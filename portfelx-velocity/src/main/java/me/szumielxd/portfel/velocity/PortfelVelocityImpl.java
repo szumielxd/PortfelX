@@ -4,12 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-
-import javax.inject.Inject;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +15,6 @@ import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
-import com.velocitypowered.api.plugin.Plugin;
-import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 
@@ -64,31 +60,22 @@ import me.szumielxd.portfel.velocity.managers.VelocityAccessManagerImpl;
 import me.szumielxd.portfel.velocity.objects.VelocityProxy;
 import net.kyori.adventure.platform.AudienceProvider;
 
-@Plugin(
-		id = "id----",
-		name = "@pluginName@",
-		version = "@version@",
-		authors = { "@author@" },
-		description = "@description@",
-		url = "https://github.com/szumielxd/PortfelX/"
-)
 public class PortfelVelocityImpl implements PortfelProxyImpl {
 	
 	
-	
-	private final ProxyServer server;
-	private final Logger logger;
-	private final File dataFolder;
+	private final @NotNull PortfelVelocityBootstrap bootstrap;
 	
 	
 	private @NotNull VelocityProxy proxy;
 	
 	
-	@Inject
-	public PortfelVelocityImpl(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
-		this.server = server;
-		this.logger = logger;
-		this.dataFolder = dataDirectory.toFile();
+	public PortfelVelocityImpl(PortfelVelocityBootstrap bootstrap) {
+		this.bootstrap = Objects.requireNonNull(bootstrap, "bootstrap cannot be null");
+	}
+	
+	
+	public Object asPlugin() {
+		return this.bootstrap;
 	}
 	
 	
@@ -100,18 +87,18 @@ public class PortfelVelocityImpl implements PortfelProxyImpl {
 	
 	@Override
 	public @NotNull Logger getLogger() {
-		return this.logger;
+		return this.bootstrap.getLogger();
 	}
 	
 	
 	@Override
 	public @NotNull File getDataFolder() {
-		return this.dataFolder;
+		return this.bootstrap.getDataFolder();
 	}
 	
 	
 	public @NotNull ProxyServer getProxy() {
-		return this.server;
+		return this.bootstrap.getProxy();
 	}
 
 
@@ -185,8 +172,8 @@ public class PortfelVelocityImpl implements PortfelProxyImpl {
 		this.topManager = (ProxyTopManagerImpl) new ProxyTopManagerImpl(this).init();
 		this.tokenManager = new TokenManager(this).init();
 		this.getLogger().info("Registering listeners...");
-		this.getProxy().getEventManager().register(this, new VelocityUserListener(this));
-		this.getProxy().getEventManager().register(this, new VelocityChannelListener(this));
+		this.getProxy().getEventManager().register(this.asPlugin(), new VelocityUserListener(this));
+		this.getProxy().getEventManager().register(this.asPlugin(), new VelocityChannelListener(this));
 		this.getLogger().info("Registering commands...");
 		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
 		this.tokenCommand = new MainTokenCommand(this, this.config.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.config.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
@@ -231,7 +218,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl {
 		this.tokenDatabase.shutdown();
 		this.taskManager.cancelAll();
 		this.getLogger().info("Unregistering listeners");
-		this.getProxy().getEventManager().unregisterListeners(this);
+		this.getProxy().getEventManager().unregisterListeners(this.asPlugin());
 		this.getLogger().info("Unregistering channels");
 		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_SETUP));
 		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_USERS));
@@ -287,25 +274,25 @@ public class PortfelVelocityImpl implements PortfelProxyImpl {
 	
 	@Override
 	public @NotNull String getName() {
-		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getName().orElse("");
+		return this.bootstrap.getName();
 	}
 	
 	
 	@Override
 	public @NotNull String getVersion() {
-		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getVersion().orElse("");
+		return this.getProxy().getPluginManager().ensurePluginContainer(this.asPlugin()).getDescription().getVersion().orElse("");
 	}
 	
 	
 	@Override
 	public @NotNull String getAuthor() {
-		return String.join(", ", this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getAuthors());
+		return String.join(", ", this.getProxy().getPluginManager().ensurePluginContainer(this.asPlugin()).getDescription().getAuthors());
 	}
 	
 	
 	@Override
 	public @NotNull String getDescriptionText() {
-		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getDescription().orElse("");
+		return this.getProxy().getPluginManager().ensurePluginContainer(this.asPlugin()).getDescription().getDescription().orElse("");
 	}
 	
 	

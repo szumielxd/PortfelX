@@ -28,7 +28,7 @@ public class BukkitTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTask(@NotNull Runnable task) {
-		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTask(this.plugin, task));
+		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTask(this.plugin.asPlugin(), task));
 	}
 	
 	/**
@@ -39,7 +39,7 @@ public class BukkitTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTaskAsynchronously(@NotNull Runnable task) {
-		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, task));
+		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin.asPlugin(), task));
 	}
 	
 	/**
@@ -52,7 +52,7 @@ public class BukkitTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTaskLater(@NotNull Runnable task, long delay, @NotNull TimeUnit unit) {
-		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskLater(this.plugin, task, unit.toMillis(delay)/50));
+		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskLater(this.plugin.asPlugin(), task, unit.toMillis(delay)/50));
 	}
 	
 	/**
@@ -65,7 +65,7 @@ public class BukkitTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTaskLaterAsynchronously(@NotNull Runnable task, long delay, @NotNull TimeUnit unit) {
-		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin, task, unit.toMillis(delay)/50));
+		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin.asPlugin(), task, unit.toMillis(delay)/50));
 	}
 	
 	/**
@@ -81,7 +81,7 @@ public class BukkitTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTaskTimer(@NotNull Runnable task, long delay, long period, @NotNull TimeUnit unit) {
-		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, task, unit.toMillis(delay)/50, unit.toMillis(period)/50));
+		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskTimer(this.plugin.asPlugin(), task, unit.toMillis(delay)/50, unit.toMillis(period)/50));
 	}
 	
 	/**
@@ -97,7 +97,7 @@ public class BukkitTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTaskTimerAsynchronously(@NotNull Runnable task, long delay, long period, @NotNull TimeUnit unit) {
-		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, task, unit.toMillis(delay)/50, unit.toMillis(period)/50));
+		return new BukkitTaskWrapper(this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin.asPlugin(), task, unit.toMillis(delay)/50, unit.toMillis(period)/50));
 	}
 	
 	/**
@@ -116,7 +116,7 @@ public class BukkitTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public void cancelAll() {
-		this.plugin.getServer().getScheduler().cancelTasks(this.plugin);
+		this.plugin.getServer().getScheduler().cancelTasks(this.plugin.asPlugin());
 	}
 	
 

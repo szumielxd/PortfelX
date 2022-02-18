@@ -69,7 +69,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 	
 	@Override
 	public String getAuthor() {
-		return String.join(", ", this.plugin.getDescription().getAuthors());
+		return String.join(", ", this.plugin.asPlugin().getDescription().getAuthors());
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 
 	@Override
 	public String getVersion() {
-		return this.plugin.getDescription().getVersion();
+		return this.plugin.asPlugin().getDescription().getVersion();
 	}
 	
 	@Override

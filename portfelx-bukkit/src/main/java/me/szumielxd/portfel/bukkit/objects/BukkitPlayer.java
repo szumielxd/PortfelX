@@ -77,7 +77,7 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 		out.writeUTF("Connect");
 		out.writeUTF(this.getName());
 		out.writeUTF(server);
-		this.player.sendPluginMessage(this.plugin, "bungeecord:main", out.toByteArray());
+		this.player.sendPluginMessage(this.plugin.asPlugin(), "bungeecord:main", out.toByteArray());
 	}
 	
 	/**

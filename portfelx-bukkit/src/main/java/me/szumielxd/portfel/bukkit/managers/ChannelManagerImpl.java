@@ -67,26 +67,26 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	public ChannelManagerImpl(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_SETUP);
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS);
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_USERS);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_SETUP);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_USERS);
 		try {
-			this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, BUNGEE_CHANNEL = Portfel.CHANNEL_LEGACY_BUNGEE);
+			this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL = Portfel.CHANNEL_LEGACY_BUNGEE);
 		} catch (IllegalArgumentException e) { // fallback to new BungeeCord channel
-			this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, BUNGEE_CHANNEL = Portfel.CHANNEL_BUNGEE);
+			this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL = Portfel.CHANNEL_BUNGEE);
 		}
-		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, BUNGEE_CHANNEL, this::onSetupValidator);
-		this.setup = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_SETUP, this::onSetupChannel);
-		this.transactions = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
-		this.users = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_USERS, this::onUsersChannel);
+		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL, this::onSetupValidator);
+		this.setup = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_SETUP, this::onSetupChannel);
+		this.transactions = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
+		this.users = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_USERS, this::onUsersChannel);
 	}
 	
 	
 	public void killManager() {
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, BUNGEE_CHANNEL, this.bungee.getListener());
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_SETUP, this.setup.getListener());
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_TRANSACTIONS, this.transactions.getListener());
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_USERS, this.users.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.asPlugin(), BUNGEE_CHANNEL, this.bungee.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.asPlugin(), Portfel.CHANNEL_SETUP, this.setup.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, this.transactions.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.asPlugin(), Portfel.CHANNEL_USERS, this.users.getListener());
 	}
 	
 	
@@ -186,7 +186,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		}
 		out.writeShort(baos.toByteArray().length);
 		out.write(baos.toByteArray());
-		player.sendPluginMessage(plugin, BUNGEE_CHANNEL, out.toByteArray());
+		player.sendPluginMessage(plugin.asPlugin(), BUNGEE_CHANNEL, out.toByteArray());
 	}
 	
 	private void sendSetupChannel(@NotNull String channel, @NotNull Player player, @NotNull UUID operationId, @NotNull UUID proxyId, @NotNull UUID serverId) {
@@ -211,7 +211,7 @@ public class ChannelManagerImpl implements ChannelManager {
 			e.printStackTrace();
 		}
 		
-		player.sendPluginMessage(this.plugin, channel, out.toByteArray());
+		player.sendPluginMessage(this.plugin.asPlugin(), channel, out.toByteArray());
 	}
 	
 	
@@ -377,7 +377,7 @@ public class ChannelManagerImpl implements ChannelManager {
 			out.writeUTF("ServerId");
 			out.writeUTF(serverId.toString());
 			out.writeUTF(this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
-			player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
+			player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
 		}
 	}
 	
@@ -385,7 +385,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void sendUserRequest(Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("User");
-		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
+		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
 	}
 	
 	
@@ -434,7 +434,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void sendTopRequest(Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("LightTop");
-		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
+		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
 	}
 	
 	
@@ -501,7 +501,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		player.sendPluginMessage(plugin, Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 	}
 	
 	

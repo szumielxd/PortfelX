@@ -136,9 +136,11 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 				inventory.setItem(order.getSlot(), this.buildNormalIcon(order, lang, player, user, order.isAvailableToBuy(player), order.isDenied(player)));
 			}
 		} else if (this.type.equals(ShopType.UPGRADE)) {
-			for (int i = 0; i < orderList.size(); i++) {
+			boolean available = true;
+			for (int i = orderList.size()-1; i >= 0; i--) {
 				OrderData order = orderList.get(i);
-				inventory.setItem(order.getSlot(), this.buildUpgradeIcon(orderList, i, lang, player, user, order.isAvailableToBuy(player), order.isDenied(player)));
+				available = available && order.isAvailableToBuy(player);
+				inventory.setItem(order.getSlot(), this.buildUpgradeIcon(orderList, i, lang, player, user, available, order.isDenied(player)));
 			}
 		}
 		player.openInventory(inventory);

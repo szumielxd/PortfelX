@@ -90,11 +90,11 @@ public class MVdWHandler {
 		};
 		
 		// REGISTER
-		if(PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_balance", this.simpleBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_balance_*", this.extendedBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_top_balance_*", this.topBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_top_uuid_*", this.topUUID)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_top_player_*", this.topPlayer)) {
+		if(PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_balance", this.simpleBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_balance_*", this.extendedBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_balance_*", this.topBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_uuid_*", this.topUUID)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_player_*", this.topPlayer)) {
 			this.plugin.getLogger().info("Hooked placeholders into MVdWPlaceholderAPI");
 		}
 	}
