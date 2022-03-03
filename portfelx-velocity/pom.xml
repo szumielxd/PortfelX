@@ -58,11 +58,6 @@
 		</resources>
 		
 		<plugins>
-		
-			<plugin>
-				<groupId>com.coderplus.maven.plugins</groupId>
-				<artifactId>copy-rename-maven-plugin</artifactId>
-			</plugin>
 			
 			<!-- Replacer Plugin -->
 			<plugin>
@@ -109,6 +104,12 @@
 						</replacement>
 					</replacements>						
 				</configuration>
+			</plugin>
+			
+			<!-- Copy plugin -->
+			<plugin>
+				<groupId>com.coderplus.maven.plugins</groupId>
+				<artifactId>copy-rename-maven-plugin</artifactId>
 			</plugin>
 			
 			<!-- Compiler plugin -->

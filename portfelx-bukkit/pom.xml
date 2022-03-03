@@ -87,6 +87,7 @@
 	
 		<plugins>
 			
+			<!-- Copy plugin -->
 			<plugin>
 				<groupId>com.coderplus.maven.plugins</groupId>
 				<artifactId>copy-rename-maven-plugin</artifactId>
@@ -105,10 +106,10 @@
 			</plugin>
 			
 			<!-- Assembly plugin -->
-			<plugin>
+			<!--plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-			</plugin>
+			</plugin-->
 			
 			<!-- Jar plugin -->
 			<plugin>
