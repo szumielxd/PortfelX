@@ -13,6 +13,10 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>portfelx-bungee-bootstrap</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-proxy</artifactId>
 		</dependency>
 		<dependency>
@@ -22,13 +26,7 @@
 		<dependency>
 			<groupId>net.kyori</groupId>
 			<artifactId>adventure-platform-bungeecord</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-			<version>4.0.3</version>
-			<type>jar</type>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>net.md-5</groupId>
@@ -58,6 +56,12 @@
 		</resources>
 		
 		<plugins>
+			
+			<plugin>
+				<groupId>com.coderplus.maven.plugins</groupId>
+				<artifactId>copy-rename-maven-plugin</artifactId>
+			</plugin>
+			
 			<!-- Compiler plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

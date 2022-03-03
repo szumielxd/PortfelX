@@ -12,7 +12,7 @@ public enum ProxyConfigKey implements AbstractKey {
 	
 	MAIN_TOP_SIZE("main.top-size", 20),
 	//
-	DATABASE_TYPE("database.type", "MySQL"),
+	DATABASE_TYPE("database.type", "H2"),
 	//
 	DATABASE_HOST("database.host", "localhost"),
 	DATABASE_DATABASE("database.database", "portfel"),
@@ -50,7 +50,7 @@ public enum ProxyConfigKey implements AbstractKey {
 	//
 	TOKEN_MANAGER_POOLSIZE("token.manager.pool-size", 10),
 	//
-	TOKEN_DATABASE_TYPE("token.token-database.type", "MySQL"),
+	TOKEN_DATABASE_TYPE("token.token-database.type", "H2"),
 	//
 	TOKEN_DATABASE_HOST("token.token-database.host", "localhost"),
 	TOKEN_DATABASE_DATABASE("token.token-database.database", "portfel"),

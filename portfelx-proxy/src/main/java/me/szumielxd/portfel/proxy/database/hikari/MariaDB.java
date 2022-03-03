@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.zaxxer.hikari.HikariConfig;
 
+import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 
 public class MariaDB extends HikariDB {
@@ -58,7 +59,13 @@ public class MariaDB extends HikariDB {
 	 */
 	@Override
 	public void setupDatabase(@NotNull HikariConfig config, @NotNull String address, int port, @NotNull String database, @NotNull String user, @NotNull String password) {
-		config.setDataSourceClassName("org.mariadb.jdbc.MariaDbDataSource");
+		String dataSource = "me.szumielxd.portfel.lib.org.mariadb.jdbc.MariaDbDataSource";
+		try {
+			Class.forName(dataSource);
+		} catch (ClassNotFoundException e) {
+			this.plugin.addToRuntime(CommonDependency.MARIADB);
+		}
+		config.setDataSourceClassName(dataSource);
 		config.addDataSourceProperty("serverName", address);
 		config.addDataSourceProperty("port", port);
 		config.addDataSourceProperty("databaseName", database);

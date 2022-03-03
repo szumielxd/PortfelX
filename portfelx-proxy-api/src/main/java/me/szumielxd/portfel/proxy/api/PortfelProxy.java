@@ -31,7 +31,8 @@ public interface PortfelProxy extends Portfel {
 	 * 
 	 * @return proxy server
 	 */
-	public @NotNull CommonProxy getProxyServer();
+	@Override
+	public @NotNull CommonProxy getCommonServer();
 
 	/**
 	 * Get top manager.

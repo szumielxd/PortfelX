@@ -22,7 +22,7 @@ private final @NotNull PortfelBungeeImpl plugin;
 
 	@Override
 	public @NotNull BungeeExecutedTask runTask(@NotNull Runnable task) {
-		return new BungeeExecutedTask(this.plugin.getProxy().getScheduler().runAsync(this.plugin, task));
+		return new BungeeExecutedTask(this.plugin.asPlugin().getProxy().getScheduler().runAsync(this.plugin.asPlugin(), task));
 	}
 
 	@Override
@@ -32,7 +32,7 @@ private final @NotNull PortfelBungeeImpl plugin;
 
 	@Override
 	public @NotNull BungeeExecutedTask runTaskLater(@NotNull Runnable task, long delay, @NotNull TimeUnit unit) {
-		return new BungeeExecutedTask(this.plugin.getProxy().getScheduler().schedule(this.plugin, task, delay, unit));
+		return new BungeeExecutedTask(this.plugin.asPlugin().getProxy().getScheduler().schedule(this.plugin.asPlugin(), task, delay, unit));
 	}
 
 	@Override
@@ -42,7 +42,7 @@ private final @NotNull PortfelBungeeImpl plugin;
 
 	@Override
 	public @NotNull BungeeExecutedTask runTaskTimer(@NotNull Runnable task, long delay, long period, @NotNull TimeUnit unit) {
-		return new BungeeExecutedTask(this.plugin.getProxy().getScheduler().schedule(this.plugin, task, delay, period, unit));
+		return new BungeeExecutedTask(this.plugin.asPlugin().getProxy().getScheduler().schedule(this.plugin.asPlugin(), task, delay, period, unit));
 	}
 
 	@Override
@@ -52,12 +52,12 @@ private final @NotNull PortfelBungeeImpl plugin;
 
 	@Override
 	public void cancel(int id) {
-		this.plugin.getProxy().getScheduler().cancel(id);
+		this.plugin.asPlugin().getProxy().getScheduler().cancel(id);
 	}
 
 	@Override
 	public void cancelAll() {
-		this.plugin.getProxy().getScheduler().cancel(this.plugin);
+		this.plugin.asPlugin().getProxy().getScheduler().cancel(this.plugin.asPlugin());
 	}
 	
 	

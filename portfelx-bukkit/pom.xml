@@ -13,15 +13,36 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>portfelx-bukkit-bootstrap</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-bukkit-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.kyori</groupId>
 			<artifactId>adventure-platform-bukkit</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>me.carleslc.Simple-YAML</groupId>
+			<artifactId>Simple-Yaml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.curious-odd-man</groupId>
+			<artifactId>rgxgen</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.spigotmc</groupId>
 			<artifactId>spigot-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>me.clip</groupId>
@@ -65,6 +86,12 @@
 		</resources>
 	
 		<plugins>
+			
+			<plugin>
+				<groupId>com.coderplus.maven.plugins</groupId>
+				<artifactId>copy-rename-maven-plugin</artifactId>
+			</plugin>
+			
 			<!-- Compiler plugin -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

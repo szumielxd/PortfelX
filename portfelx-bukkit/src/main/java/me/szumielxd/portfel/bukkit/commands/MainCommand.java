@@ -96,12 +96,12 @@ public class MainCommand implements AbstractCommand, TabExecutor {
 
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		return this.onTabComplete(BukkitSender.get(this.plugin, sender), new String[] {alias}, args);
+		return this.onTabComplete(BukkitSender.wrap(this.plugin, sender), new String[] {alias}, args);
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		this.plugin.getTaskManager().runTaskAsynchronously(() -> this.onCommand(BukkitSender.get(this.plugin, sender), new Object[0], new String[] {label}, args));
+		this.plugin.getTaskManager().runTaskAsynchronously(() -> this.onCommand(BukkitSender.wrap(this.plugin, sender), new Object[0], new String[] {label}, args));
 		return true;
 	}
 

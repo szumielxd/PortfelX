@@ -6,7 +6,9 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -26,6 +28,8 @@ import me.szumielxd.portfel.bungee.objects.BungeeProxy;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.ValidateAccess;
+import me.szumielxd.portfel.common.loader.CommonDependency;
+import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.common.utils.MiscUtils;
@@ -54,21 +58,39 @@ import me.szumielxd.portfel.proxy.managers.TokenManager;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.plugin.Plugin;
 
-public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
+public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	
+	
+	private final @NotNull PortfelBungeeBootstrap bootstrap;
 	
 	
 	private @NotNull BungeeProxy proxy;
 	
 	
+	public PortfelBungeeImpl(@NotNull PortfelBungeeBootstrap bootstrap) {
+		this.bootstrap = Objects.requireNonNull(bootstrap, "bootstrap cannot be null");
+	}
+	
+
+	public Plugin asPlugin() {
+		return this.bootstrap;
+	}
+
+
 	@Override
-	public @NotNull CommonProxy getProxyServer() {
+	public void addToRuntime(CommonDependency... dependency) {
+		this.bootstrap.addToRuntime(dependency);
+	}
+	
+	
+	@Override
+	public @NotNull CommonProxy getCommonServer() {
 		return this.proxy;
 	}
 	
 	
 	private void registerCommand(@NotNull CommonCommand command) {
-		this.getProxy().getPluginManager().registerCommand(this, new BungeeCommandWrapper(this, command));
+		this.asPlugin().getProxy().getPluginManager().registerCommand(this.asPlugin(), new BungeeCommandWrapper(this, command));
 	}
 	
 	
@@ -108,7 +130,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 		CommonArgs.init(this);
 		this.setupProxyId();
 		this.proxy = new BungeeProxy(this);
-		this.adventure = BungeeAudiences.create(this);
+		this.adventure = BungeeAudiences.create(this.asPlugin());
 		this.taskManager = new ProxyTaskManagerImpl(this);
 		this.accessManager = new BungeeAccessManagerImpl(this).init();
 		this.load();
@@ -131,16 +153,16 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 		this.topManager = (ProxyTopManagerImpl) new ProxyTopManagerImpl(this).init();
 		this.tokenManager = new TokenManager(this).init();
 		this.getLogger().info("Registering listeners...");
-		this.getProxy().getPluginManager().registerListener(this, new BungeeUserListener(this));
-		this.getProxy().getPluginManager().registerListener(this, new BungeeChannelListener(this));
+		this.asPlugin().getProxy().getPluginManager().registerListener(this.asPlugin(), new BungeeUserListener(this));
+		this.asPlugin().getProxy().getPluginManager().registerListener(this.asPlugin(), new BungeeChannelListener(this));
 		this.getLogger().info("Registering commands...");
 		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
 		this.tokenCommand = new MainTokenCommand(this, this.config.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.config.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
-		this.getProxy().registerChannel(CHANNEL_SETUP);
-		this.getProxy().registerChannel(CHANNEL_USERS);
-		this.getProxy().registerChannel(CHANNEL_TRANSACTIONS);
+		this.asPlugin().getProxy().registerChannel(CHANNEL_SETUP);
+		this.asPlugin().getProxy().registerChannel(CHANNEL_USERS);
+		this.asPlugin().getProxy().registerChannel(CHANNEL_TRANSACTIONS);
 		
 		this.sendMotd();
 		
@@ -154,7 +176,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 		Lang.load(new File(this.getDataFolder(), "languages"), this);
 		this.ordersManager = new OrdersManager(this).init();
 		this.prizesManager = new PrizesManager(this).init();
-		if (this.getProxy().getPluginManager().getPlugin("LuckPerms") != null) {
+		if (this.asPlugin().getProxy().getPluginManager().getPlugin("LuckPerms") != null) {
 			this.luckpermsContextProvider = new ContextProvider(this);
 		}
 	}
@@ -181,18 +203,18 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 			Field f = Class.forName("net.kyori.adventure.platform.bungeecord.BungeeAudiencesImpl").getDeclaredField("INSTANCES");
 			f.setAccessible(true);
 			Map<?, ?> INSTANCES = (Map<?, ?>) f.get(null);
-			INSTANCES.remove(this.getDescription().getName());
+			INSTANCES.remove(this.asPlugin().getDescription().getName());
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		this.getLogger().info("Unregistering commands");
-		this.getProxy().getPluginManager().unregisterCommands(this);
+		this.asPlugin().getProxy().getPluginManager().unregisterCommands(this.asPlugin());
 		this.getLogger().info("Unregistering listeners");
-		this.getProxy().getPluginManager().unregisterListeners(this);
+		this.asPlugin().getProxy().getPluginManager().unregisterListeners(this.asPlugin());
 		this.getLogger().info("Unregistering channels");
-		this.getProxy().unregisterChannel(CHANNEL_SETUP);
-		this.getProxy().unregisterChannel(CHANNEL_USERS);
-		this.getProxy().unregisterChannel(CHANNEL_TRANSACTIONS);
+		this.asPlugin().getProxy().unregisterChannel(CHANNEL_SETUP);
+		this.asPlugin().getProxy().unregisterChannel(CHANNEL_USERS);
+		this.asPlugin().getProxy().unregisterChannel(CHANNEL_TRANSACTIONS);
 		this.unload();
 		this.getLogger().info("Everything OK, miss you");
 		this.getLogger().info("Goodbye my friend...");
@@ -244,25 +266,25 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	
 	@Override
 	public @NotNull String getName() {
-		return this.getDescription().getName();
+		return this.asPlugin().getDescription().getName();
 	}
 	
 	
 	@Override
 	public @NotNull String getVersion() {
-		return this.getDescription().getVersion();
+		return this.asPlugin().getDescription().getVersion();
 	}
 	
 	
 	@Override
 	public @NotNull String getAuthor() {
-		return this.getDescription().getAuthor();
+		return this.asPlugin().getDescription().getAuthor();
 	}
 	
 	
 	@Override
 	public @NotNull String getDescriptionText() {
-		return this.getDescription().getDescription();
+		return this.asPlugin().getDescription().getDescription();
 	}
 	
 	
@@ -289,7 +311,6 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	 * 
 	 * @return audiences
 	 */
-	@Override
 	public @NotNull BungeeAudiences adventure() {
 		if (this.adventure == null) throw new IllegalStateException("Cannot retrieve audience provider while plugin is not enabled");
 		return this.adventure;
@@ -301,7 +322,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	 * @return current console sender
 	 */
 	public @NotNull CommonSender getConsole() {
-		return this.getProxyServer().getConsole();
+		return this.getCommonServer().getConsole();
 	}
 	
 	
@@ -329,17 +350,33 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl {
 	
 	
 	private void sendMotd() {
-		this.getProxy().getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
-		this.getProxy().getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.getDescription().getVersion()+"\u001b[0m");
-		this.getProxy().getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on BungeeCord - " + this.getProxy().getName() + "\u001b[0m");
-		this.getProxy().getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
-		this.getProxy().getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
+		this.getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
+		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.asPlugin().getDescription().getVersion()+"\u001b[0m");
+		this.getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on BungeeCord - " + this.asPlugin().getProxy().getName() + "\u001b[0m");
+		this.getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
+		this.getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
 	}
 
 
 	@Override
 	public @NotNull Config getConfiguration() {
 		return this.config;
+	}
+
+
+
+
+	@Override
+	public @NotNull File getDataFolder() {
+		return this.asPlugin().getDataFolder();
+	}
+
+
+
+
+	@Override
+	public @NotNull Logger getLogger() {
+		return this.asPlugin().getLogger();
 	}
 	
 

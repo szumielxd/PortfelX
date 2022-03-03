@@ -1,13 +1,19 @@
-package me.szumielxd.portfel.bukkit.bootstrap;
+package me.szumielxd.portfel.bungee;
 
 import java.lang.reflect.InvocationTargetException;
-import org.bukkit.plugin.java.JavaPlugin;
+
+import org.jetbrains.annotations.NotNull;
+
+import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.common.loader.DependencyLoader;
 import me.szumielxd.portfel.common.loader.JarClassLoader;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.loader.PortfelBootstrap;
+import net.md_5.bungee.api.plugin.Plugin;
 
-public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstrap {
+import static me.szumielxd.portfel.common.loader.CommonDependency.*;
+
+public class PortfelBungeeBootstrap extends Plugin implements PortfelBootstrap {
 	
 	
 	private LoadablePortfel realPlugin;
@@ -18,15 +24,19 @@ public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstr
 	@Override
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
-		this.jarClassLoader = this.dependencyLoader.load();
+		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), HIKARICP4, HIKARICP5, GSON, RGXGEN, YAML);
 		try {
-			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bukkit.PortfelBukkitImpl");
-			Class<? extends LoadablePortfel> subClazz = clazz.asSubclass(LoadablePortfel.class);
-			this.realPlugin = subClazz.getConstructor(PortfelBukkitBootstrap.class).newInstance(this);
+			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bungee.PortfelBungeeImpl");
+			this.realPlugin = clazz.asSubclass(LoadablePortfel.class).getConstructor(PortfelBungeeBootstrap.class).newInstance(this);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 		this.realPlugin.onLoad();
+	}
+	
+	
+	public void addToRuntime(CommonDependency... dependency) {
+		this.dependencyLoader.addToLoader(jarClassLoader, dependency);
 	}
 	
 	
@@ -39,6 +49,12 @@ public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstr
 	@Override
 	public void onDisable() {
 		this.realPlugin.onDisable();
+	}
+
+
+	@Override
+	public @NotNull String getName() {
+		return this.getDescription().getName();
 	}
 	
 

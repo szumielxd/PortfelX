@@ -89,7 +89,7 @@ public class BungeeSender implements ProxySender {
 
 	@Override
 	public void executeProxyCommand(@NotNull String command) {
-		this.plugin.getProxy().getPluginManager().dispatchCommand(this.sender, command);
+		this.plugin.asPlugin().getProxy().getPluginManager().dispatchCommand(this.sender, command);
 	}
 	
 	

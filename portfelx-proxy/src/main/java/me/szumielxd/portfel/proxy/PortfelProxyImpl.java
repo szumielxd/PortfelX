@@ -6,10 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
+import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.proxy.api.PortfelProxy;
 import me.szumielxd.portfel.proxy.api.managers.ProxyTopManager;
-import me.szumielxd.portfel.proxy.api.objects.CommonProxy;
 import me.szumielxd.portfel.proxy.database.AbstractDB;
 import me.szumielxd.portfel.proxy.database.AbstractDBLogger;
 import me.szumielxd.portfel.proxy.database.token.AbstractTokenDB;
@@ -22,7 +22,7 @@ public interface PortfelProxyImpl extends PortfelProxy {
 	
 	public @NotNull Logger getLogger();
 	
-	public @NotNull CommonProxy getProxyServer();
+	public void addToRuntime(CommonDependency... dependency);
 	
 	public @NotNull String getName();
 	

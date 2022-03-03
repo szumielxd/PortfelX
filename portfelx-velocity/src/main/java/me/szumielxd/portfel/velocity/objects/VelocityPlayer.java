@@ -158,7 +158,7 @@ public class VelocityPlayer extends VelocitySender implements ProxyPlayer {
 	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
 		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, new HashSet<>(Arrays.asList(flags)));
 		this.player.showBossBar(bar);
-		this.plugin.getProxyServer().getScheduler().runTaskLater(() -> this.player.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
+		this.plugin.getCommonServer().getScheduler().runTaskLater(() -> this.player.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 

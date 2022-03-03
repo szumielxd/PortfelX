@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -18,7 +19,6 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.base.Objects;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -80,6 +80,17 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 		TOKENS_CREATIONDATE = escapeSql(cfg.getString(ProxyConfigKey.TOKEN_DATABASE_TABLE_TOKENS_COLLUMN_CREATIONDATE));
 		TOKENS_EXPIRATIONDATE = escapeSql(cfg.getString(ProxyConfigKey.TOKEN_DATABASE_TABLE_TOKENS_COLLUMN_EXPIRATIONDATE));
 		
+	}
+	
+	
+	/**
+	 * Applies additional mappings depending on database type.
+	 * 
+	 * @param query to process
+	 * @return given query with applied mappings
+	 */
+	protected @NotNull String mapQuery(@NotNull String query) {
+		return Objects.requireNonNull(query, "query cannot be null");
 	}
 	
 	
@@ -203,15 +214,15 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	@Override
 	public @Nullable PrizeToken getToken(@NotNull String token) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? AND (`%s` = -1 OR `%s` >= UNIX_TIMESTAMP())",
+		String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? AND (`%s` = -1 OR `%s` >= UNIX_TIMESTAMP());",
 				TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID, TOKENS_CREATIONDATE, TOKENS_EXPIRATIONDATE,
-				TABLE_TOKENS, TOKENS_TOKEN, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE);
+				TABLE_TOKENS, TOKENS_TOKEN, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE));
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, token);
 				try (ResultSet rs = stm.executeQuery()) {
 					if (rs.next()) {
-						if (!Objects.equal(token, rs.getString(1))) return null;
+						if (!Objects.equals(token, rs.getString(1))) return null;
 						String order = rs.getString(3);
 						ActionExecutor creator = new ActionExecutor(rs.getString(4), UUID.fromString(rs.getString(5))) {};
 						Date creationDate = new Date(rs.getTimestamp(6).getTime());
@@ -246,7 +257,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	@Override
 	public boolean destroyToken(@NotNull String token) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("DELETE FROM `%s` WHERE `%s` = ?", TABLE_TOKENS, TOKENS_TOKEN);
+		String sql = this.mapQuery(String.format("DELETE FROM `%s` WHERE `%s` = ?;", TABLE_TOKENS, TOKENS_TOKEN));
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, token);
@@ -268,8 +279,8 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	@Override
 	public void registerToken(@NotNull String token, @NotNull String servers, @NotNull String order, @NotNull ActionExecutor creator, long expiration) throws SQLException {
 		this.checkConnection();
-		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?)",
-				TABLE_TOKENS, TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID, TOKENS_EXPIRATIONDATE);
+		String sql = this.mapQuery(String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?);",
+				TABLE_TOKENS, TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID, TOKENS_EXPIRATIONDATE));
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, token);
@@ -330,6 +341,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 				TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID,
 				TOKENS_CREATIONDATE, TOKENS_EXPIRATIONDATE, TABLE_TOKENS, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE);
 		if (whereClause.length() > 0) sql = whereClause.insert(0, sql).toString();
+		sql = this.mapQuery(sql + ";");
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				int i = 0;
@@ -379,7 +391,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	@Override
 	public void cleanupExpired() throws SQLException {
 		this.checkConnection();
-		String sql = String.format("DELETE FROM `%s` WHERE `%s` <> -1 AND `%s` < UNIX_TIMESTAMP()", TABLE_TOKENS, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE);
+		String sql = this.mapQuery(String.format("DELETE FROM `%s` WHERE `%s` <> -1 AND `%s` < UNIX_TIMESTAMP();", TABLE_TOKENS, TOKENS_EXPIRATIONDATE, TOKENS_EXPIRATIONDATE));
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.executeUpdate();
@@ -403,9 +415,9 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	 */
 	private void setupTables() throws SQLException {
 		this.checkConnection();
-		String tokensTable = String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` VARCHAR(32) BINARY NOT NULL, `%s` TEXT NOT NULL, `%s` VARCHAR(32) NOT NULL,"
+		String tokensTable = this.mapQuery(String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` VARCHAR(32) BINARY NOT NULL, `%s` TEXT NOT NULL, `%s` VARCHAR(32) NOT NULL,"
 				+ "`%s` VARCHAR(16) NOT NULL, `%s` VARCHAR(36) NOT NULL, `%s` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP , `%s` BIGINT NOT NULL DEFAULT '-1' , PRIMARY KEY (`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
-				TABLE_TOKENS, TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID, TOKENS_CREATIONDATE, TOKENS_EXPIRATIONDATE, TOKENS_TOKEN);
+				TABLE_TOKENS, TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID, TOKENS_CREATIONDATE, TOKENS_EXPIRATIONDATE, TOKENS_TOKEN));
 		try (Connection conn = this.hikari.getConnection()) {
 			try (Statement stm = conn.createStatement()) {
 				stm.execute(tokensTable);

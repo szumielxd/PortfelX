@@ -101,7 +101,7 @@ public class MVdWHandler {
 	
 	
 	private String formatCurrency(OfflinePlayer player, long value) {
-		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((CommonPlayer)BukkitSender.get(this.plugin, player.getPlayer())).locale();
+		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((CommonPlayer)BukkitSender.wrap(this.plugin, player.getPlayer())).locale();
 		return this.formatCurrency(locale, value);
 	}
 	

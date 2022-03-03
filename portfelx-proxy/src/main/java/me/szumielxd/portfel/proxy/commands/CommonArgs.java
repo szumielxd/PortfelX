@@ -58,7 +58,7 @@ public class CommonArgs {
 			}
 			return null;
 	},
-	s -> plugin.getProxyServer().getPlayers().stream().map(ProxyPlayer::getName).collect(Collectors.toList()));
+	s -> plugin.getCommonServer().getPlayers().stream().map(ProxyPlayer::getName).collect(Collectors.toList()));
 	
 	//
 	

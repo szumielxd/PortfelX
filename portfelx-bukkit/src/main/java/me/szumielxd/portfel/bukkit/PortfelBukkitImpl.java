@@ -31,12 +31,12 @@ import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.api.objects.CommonServer;
 import me.szumielxd.portfel.bukkit.api.PortfelBukkit;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.managers.IdentifierManager;
-import me.szumielxd.portfel.bukkit.bootstrap.PortfelBukkitBootstrap;
 import me.szumielxd.portfel.bukkit.commands.MainCommand;
 import me.szumielxd.portfel.bukkit.commands.WalletCommand;
 import me.szumielxd.portfel.bukkit.hooks.MVdWHandler;
@@ -49,7 +49,7 @@ import me.szumielxd.portfel.bukkit.managers.BukkitUserManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.ChannelManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.IdentifierManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.OrdersManager;
-import me.szumielxd.portfel.bukkit.objects.BukkitSender;
+import me.szumielxd.portfel.bukkit.objects.BukkitServer;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.ValidateAccess;
@@ -63,6 +63,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	
 	
 	private final @NotNull PortfelBukkitBootstrap bootstrap;
+	private @NotNull CommonServer server;
 	
 	
 	private BukkitAudiences adventure;
@@ -90,6 +91,12 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	public JavaPlugin asPlugin() {
 		return this.bootstrap;
 	}
+
+
+	@Override
+	public @NotNull CommonServer getCommonServer() {
+		return this.server;
+	}
 	
 	
 	@Override
@@ -100,6 +107,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 			return;
 		}
 		PortfelProvider.register(this);
+		this.server = new BukkitServer(this);
 		this.adventure = BukkitAudiences.create(this.asPlugin());
 		this.taskManager = new BukkitTaskManagerImpl(this);
 		
@@ -287,7 +295,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	 */
 	@Override
 	public @NotNull CommonSender getConsole() {
-		return BukkitSender.get(this, this.getServer().getConsoleSender());
+		return this.getCommonServer().getConsole();
 	}
 	
 	

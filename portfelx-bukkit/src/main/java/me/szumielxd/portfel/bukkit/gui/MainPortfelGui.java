@@ -59,7 +59,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 
 	@Override
 	public @NotNull Component getTitle(User user, @NotNull Player player) {
-		Lang lang = player != null ? Lang.get(BukkitPlayer.get(this.plugin, player)) : Lang.def();
+		Lang lang = player != null ? Lang.get(BukkitPlayer.wrap(this.plugin, player)) : Lang.def();
 		return lang.translateComponent(LangKey.SHOP_TITLE.component(DARK_PURPLE, Sets.newHashSet(BOLD), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Sets.newHashSet(BOLD), Component.text(user.getBalance()))));
 	}
 

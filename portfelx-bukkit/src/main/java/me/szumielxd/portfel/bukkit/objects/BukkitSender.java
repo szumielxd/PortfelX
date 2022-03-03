@@ -1,6 +1,7 @@
 package me.szumielxd.portfel.bukkit.objects;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -128,8 +129,19 @@ public class BukkitSender implements CommonSender {
 	 * @param sender sender to wrap
 	 * @return CommonSender or its subclass
 	 */
-	public static @NotNull BukkitSender get(@NotNull PortfelBukkitImpl plugin, @NotNull CommandSender sender) {
-		return sender instanceof Player ? new BukkitPlayer(plugin, (Player)sender) : new BukkitSender(plugin, sender);
+	public static @NotNull BukkitSender wrap(@NotNull PortfelBukkitImpl plugin, @NotNull CommandSender sender) {
+		if (Objects.requireNonNull(sender, "sender cannot be null") instanceof Player) return new BukkitPlayer(plugin, (Player) sender);
+		return new BukkitSender(plugin, sender);
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.sender.hashCode();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return this.sender.equals(obj);
 	}
 	
 

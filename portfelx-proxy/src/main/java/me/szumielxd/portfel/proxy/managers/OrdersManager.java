@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
-import net.kyori.adventure.audience.Audience;
+import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
@@ -165,9 +166,9 @@ public class OrdersManager {
 		public boolean examine(User user, String orderName) {
 			final Matcher match = this.pattern.matcher(orderName);
 			if (!match.matches()) return false;
-			Audience all = plugin.adventure().all();
-			Audience player = plugin.adventure().player(user.getUniqueId());
-			CommonSender console = plugin.getProxyServer().getConsole();
+			Collection<ProxyPlayer> all = plugin.getCommonServer().getPlayers();
+			ProxyPlayer player = plugin.getCommonServer().getPlayer(user.getUniqueId());
+			CommonSender console = plugin.getCommonServer().getConsole();
 			Function<String, String> replacer = s -> {
 				s = s.replace("%player%", user.getName())
 						.replace("%playerId%", user.getUniqueId().toString());
@@ -176,7 +177,7 @@ public class OrdersManager {
 			};
 			
 			// Broadcast
-			this.broadcast.stream().map(replacer).map(MiscUtils::parseComponent).forEach(all::sendMessage);
+			this.broadcast.stream().map(replacer).map(MiscUtils::parseComponent).forEach(msg -> all.forEach(p -> p.sendMessage(msg)));
 			
 			// Message
 			this.message.stream().map(replacer).map(MiscUtils::parseComponent).forEach(player::sendMessage);

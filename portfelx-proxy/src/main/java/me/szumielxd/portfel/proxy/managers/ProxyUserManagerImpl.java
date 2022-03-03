@@ -34,7 +34,7 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 	@Override
 	public ProxyUserManagerImpl init() {
 		super.init();
-		this.plugin.getProxyServer().getPlayers().stream().map(ProxyPlayer::getUniqueId).toArray(UUID[]::new);
+		this.plugin.getCommonServer().getPlayers().stream().map(ProxyPlayer::getUniqueId).toArray(UUID[]::new);
 		//this.plugin.getDB();
 		return this;
 	}

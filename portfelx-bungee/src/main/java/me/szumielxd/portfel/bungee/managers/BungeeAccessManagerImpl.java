@@ -29,7 +29,7 @@ public class BungeeAccessManagerImpl extends AccessManagerImpl implements Listen
 
 	@Override
 	protected void postInit() {
-		((PortfelBungeeImpl) this.getPlugin()).getProxy().getPluginManager().registerListener((PortfelBungeeImpl) this.getPlugin(), this);;		
+		((PortfelBungeeImpl) this.getPlugin()).asPlugin().getProxy().getPluginManager().registerListener(((PortfelBungeeImpl) this.getPlugin()).asPlugin(), this);;		
 	}
 	
 	

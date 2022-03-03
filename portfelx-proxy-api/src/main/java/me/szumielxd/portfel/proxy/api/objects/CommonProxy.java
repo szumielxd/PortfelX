@@ -8,13 +8,18 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface CommonProxy {
+import me.szumielxd.portfel.api.objects.CommonServer;
+
+public interface CommonProxy extends CommonServer {
 	
 	
+	@Override
 	public @Nullable ProxyPlayer getPlayer(@NotNull UUID uuid);
 	
+	@Override
 	public @Nullable ProxyPlayer getPlayer(@NotNull String name);
 	
+	@Override
 	public @NotNull Collection<ProxyPlayer> getPlayers();
 	
 	public @NotNull Optional<Collection<ProxyPlayer>> getPlayers(@NotNull String serverName);
@@ -23,6 +28,7 @@ public interface CommonProxy {
 	
 	public @NotNull Optional<ProxyServer> getServer(@NotNull String serverName);
 	
+	@Override
 	public @NotNull ProxySender getConsole();
 	
 	public @NotNull ProxyScheduler getScheduler();

@@ -38,7 +38,7 @@ public class ProxyTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTaskAsynchronously(@NotNull Runnable task) {
-		return this.plugin.getProxyServer().getScheduler().runTask(task);
+		return this.plugin.getCommonServer().getScheduler().runTask(task);
 	}
 	
 	/**
@@ -64,7 +64,7 @@ public class ProxyTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTaskLaterAsynchronously(@NotNull Runnable task, long delay, @NotNull TimeUnit unit) {
-		return this.plugin.getProxyServer().getScheduler().runTaskLaterAsynchronously(task, delay, unit);
+		return this.plugin.getCommonServer().getScheduler().runTaskLaterAsynchronously(task, delay, unit);
 	}
 	
 	/**
@@ -96,7 +96,7 @@ public class ProxyTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public @NotNull ExecutedTask runTaskTimerAsynchronously(@NotNull Runnable task, long delay, long period, @NotNull TimeUnit unit) {
-		return this.plugin.getProxyServer().getScheduler().runTaskTimer(task, delay, period, unit);
+		return this.plugin.getCommonServer().getScheduler().runTaskTimer(task, delay, period, unit);
 	}
 	
 	/**
@@ -106,7 +106,7 @@ public class ProxyTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public void cancel(int id) {
-		this.plugin.getProxyServer().getScheduler().cancel(id);
+		this.plugin.getCommonServer().getScheduler().cancel(id);
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class ProxyTaskManagerImpl implements TaskManager {
 	 */
 	@Override
 	public void cancelAll() {
-		this.plugin.getProxyServer().getScheduler().cancelAll();
+		this.plugin.getCommonServer().getScheduler().cancelAll();
 	}
 	
 

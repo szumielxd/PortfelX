@@ -28,6 +28,8 @@ import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.ValidateAccess;
+import me.szumielxd.portfel.common.loader.CommonDependency;
+import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.common.utils.MiscUtils;
@@ -41,10 +43,12 @@ import me.szumielxd.portfel.proxy.commands.MainCommand;
 import me.szumielxd.portfel.proxy.commands.MainTokenCommand;
 import me.szumielxd.portfel.proxy.database.AbstractDB;
 import me.szumielxd.portfel.proxy.database.AbstractDBLogger;
+import me.szumielxd.portfel.proxy.database.hikari.H2DB;
 import me.szumielxd.portfel.proxy.database.hikari.MariaDB;
 import me.szumielxd.portfel.proxy.database.hikari.MysqlDB;
 import me.szumielxd.portfel.proxy.database.hikari.logging.HikariDBLogger;
 import me.szumielxd.portfel.proxy.database.token.AbstractTokenDB;
+import me.szumielxd.portfel.proxy.database.token.hikari.H2TokenDB;
 import me.szumielxd.portfel.proxy.database.token.hikari.MariaTokenDB;
 import me.szumielxd.portfel.proxy.database.token.hikari.MysqlTokenDB;
 import me.szumielxd.portfel.proxy.managers.AccessManagerImpl;
@@ -58,9 +62,8 @@ import me.szumielxd.portfel.velocity.listeners.VelocityChannelListener;
 import me.szumielxd.portfel.velocity.listeners.VelocityUserListener;
 import me.szumielxd.portfel.velocity.managers.VelocityAccessManagerImpl;
 import me.szumielxd.portfel.velocity.objects.VelocityProxy;
-import net.kyori.adventure.platform.AudienceProvider;
 
-public class PortfelVelocityImpl implements PortfelProxyImpl {
+public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	
 	private final @NotNull PortfelVelocityBootstrap bootstrap;
@@ -76,6 +79,12 @@ public class PortfelVelocityImpl implements PortfelProxyImpl {
 	
 	public Object asPlugin() {
 		return this.bootstrap;
+	}
+	
+	
+	@Override
+	public void addToRuntime(CommonDependency... dependency) {
+		this.bootstrap.addToRuntime(dependency);
 	}
 	
 	
@@ -103,7 +112,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl {
 
 
 	@Override
-	public @NotNull CommonProxy getProxyServer() {
+	public @NotNull CommonProxy getCommonServer() {
 		return this.proxy;
 	}
 	
@@ -156,13 +165,15 @@ public class PortfelVelocityImpl implements PortfelProxyImpl {
 		//
 		String dbType = this.getConfiguration().getString(ProxyConfigKey.DATABASE_TYPE).toLowerCase();
 		if ("mariadb".equals(dbType)) this.database = new MariaDB(this);
-		else this.database = new MysqlDB(this);
+		else if ("mysql".equals(dbType)) this.database = new MysqlDB(this);
+		else this.database = new H2DB(this);
 		this.getLogger().info("Establishing connection with database...");
 		this.database.setup();
 		//
 		String tokenDbType = this.getConfiguration().getString(ProxyConfigKey.TOKEN_DATABASE_TYPE).toLowerCase();
 		if ("mariadb".equals(tokenDbType)) this.tokenDatabase = new MariaTokenDB(this);
-		else this.tokenDatabase = new MysqlTokenDB(this);
+		else if ("mysql".equals(tokenDbType)) this.tokenDatabase = new MysqlTokenDB(this);
+		else this.tokenDatabase = new H2TokenDB(this);
 		this.getLogger().info("Establishing connection with tokens database...");
 		this.tokenDatabase.setup();
 		
@@ -354,14 +365,8 @@ public class PortfelVelocityImpl implements PortfelProxyImpl {
 
 
 	@Override
-	public @NotNull AudienceProvider adventure() {
-		throw new IllegalArgumentException("Velocity has native support for kyori");
-	}
-
-
-	@Override
 	public @NotNull CommonSender getConsole() {
-		return this.getProxyServer().getConsole();
+		return this.getCommonServer().getConsole();
 	}
 	
 

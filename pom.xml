@@ -24,6 +24,7 @@
 		<bukkitMainClass>${package}.bukkit.bootstrap.PortfelBukkitBootstrap</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
 		<revision>3.3.0-SNAPSHOT</revision>
+		<finalNameBootstrap>/../../${project.artifactId}-assembly/src/main/resources/${pluginId}.jarinjar</finalNameBootstrap>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
 		<finalNameObf>/../../target/${project.artifactId}-obf-${git.commit.id.abbrev}-${project.version}</finalNameObf>
 		<renamelog>${project.artifactId}_renamelog.xml</renamelog>
@@ -100,6 +101,11 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-common-bootstrap</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-proxy</artifactId>
 				<version>${revision}</version>
 			</dependency>
@@ -110,7 +116,27 @@
 			</dependency>
 			<dependency>
 				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-bukkit-bootstrap</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-bukkit-assembly</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
 				<artifactId>portfelx-bungee</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-bungee-bootstrap</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-bungee-assembly</artifactId>
 				<version>${revision}</version>
 			</dependency>
 			<dependency>
@@ -118,143 +144,100 @@
 				<artifactId>portfelx-velocity</artifactId>
 				<version>${revision}</version>
 			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-velocity-bootstrap</artifactId>
+				<version>${revision}</version>
+			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>portfelx-velocity-assembly</artifactId>
+				<version>${revision}</version>
+			</dependency>
 			
 			<!-- Adventure platform -->
 			<dependency>
 				<groupId>net.kyori</groupId>
 				<artifactId>adventure-platform-bungeecord</artifactId>
-				<version>4.0.0-SNAPSHOT</version>
+				<version>4.1.0</version>
 				<type>jar</type>
-				<scope>compile</scope>
-				<optional>true</optional>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jetbrains</groupId>
-						<artifactId>annotations</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.checkerframework</groupId>
-						<artifactId>checker-qual</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>examination-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-nbt</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-platform-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-text-serializer-bungeecord</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-text-serializer-gson</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-text-serializer-legacy</artifactId>
-					</exclusion>
-				</exclusions>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>net.kyori</groupId>
 				<artifactId>adventure-platform-bukkit</artifactId>
-				<version>4.0.0-SNAPSHOT</version>
+				<version>4.1.0</version>
 				<type>jar</type>
-				<scope>compile</scope>
-				<optional>true</optional>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jetbrains</groupId>
-						<artifactId>annotations</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.checkerframework</groupId>
-						<artifactId>checker-qual</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>examination-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-api</artifactId>
-					</exclusion>
-					<!--exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-nbt</artifactId>
-					</exclusion-->
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-platform-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-text-serializer-bungeecord</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-text-serializer-gson</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>net.kyori</groupId>
-						<artifactId>adventure-text-serializer-legacy</artifactId>
-					</exclusion>
-				</exclusions>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>net.kyori</groupId>
-				<artifactId>adventure-platform-api</artifactId>
-				<version>4.0.0-SNAPSHOT</version>
-				<scope>compile</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jetbrains</groupId>
-						<artifactId>annotations</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.checkerframework</groupId>
-						<artifactId>checker-qual</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>net.kyori</groupId>
-				<artifactId>adventure-text-serializer-bungeecord</artifactId>
-				<version>4.0.0-SNAPSHOT</version>
-				<scope>compile</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>org.jetbrains</groupId>
-						<artifactId>annotations</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.checkerframework</groupId>
-						<artifactId>checker-qual</artifactId>
-					</exclusion>
-				</exclusions>
+				<artifactId>adventure-api</artifactId>
+				<version>4.10.0</version>
+				<type>jar</type>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>net.kyori</groupId>
 				<artifactId>adventure-text-serializer-legacy</artifactId>
-				<version>4.8.1</version>
-				<scope>compile</scope>
+				<version>4.10.0</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>net.kyori</groupId>
 				<artifactId>adventure-text-serializer-gson</artifactId>
-				<version>4.8.1</version>
-				<scope>compile</scope>
+				<version>4.10.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<!--dependency>
+				<groupId>net.kyori</groupId>
+				<artifactId>adventure-platform-api</artifactId>
+				<version>4.0.0-SNAPSHOT</version>
+				<scope>provided</scope>
+			</dependency-->
+			<!--dependency>
+				<groupId>net.kyori</groupId>
+				<artifactId>adventure-text-serializer-bungeecord</artifactId>
+				<version>4.0.0-SNAPSHOT</version>
+				<scope>provided</scope>
+			</dependency-->
+			
+			<dependency>
+				<groupId>com.github.curious-odd-man</groupId>
+				<artifactId>rgxgen</artifactId>
+				<version>1.4-SNAPSHOT</version>
+				<type>jar</type>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.zaxxer</groupId>
+				<artifactId>HikariCP</artifactId>
+				<version>5.0.1</version>
+				<type>jar</type>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>me.carleslc.Simple-YAML</groupId>
+				<artifactId>Simple-Yaml</artifactId>
+				<version>1.7.1</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.9.0</version>
+				<scope>provided</scope>
+			</dependency>
+			
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>23.0</version>
+				<type>jar</type>
+				<scope>provided</scope>
 			</dependency>
 			
 			<!-- BungeeCord -->
@@ -337,13 +320,6 @@
 			<version>5.3</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>31.0.1-jre</version>
-			<scope>provided</scope>
-		</dependency>
 		<!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -360,6 +336,25 @@
 
 		<pluginManagement>
 			<plugins>
+				<!-- Copy plugin -->
+				<plugin>
+					<groupId>com.coderplus.maven.plugins</groupId>
+					<artifactId>copy-rename-maven-plugin</artifactId>
+					<version>1.0</version>
+					<executions>
+						<execution>
+							<id>rename-file</id>
+							<phase>install</phase>
+							<goals>
+								<goal>rename</goal>
+							</goals>
+								<configuration>
+									<sourceFile>target/${project.build.finalName}.jar</sourceFile>
+									<destinationFile>${project.build.directory}/${finalNameBootstrap}</destinationFile>
+								</configuration>
+						</execution>
+					</executions>
+				</plugin>
 				<!-- Compile plugin -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -572,23 +567,6 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
-			<!-- NotNull plugin -->
-			<!--plugin>
-				<groupId>se.eris</groupId>
-				<artifactId>notnull-instrumenter-maven-plugin</artifactId>
-				<version>1.0.0</version>
-				<executions>
-					<execution>
-						<id>instrument</id>
-						<goals>
-							<goal>instrument</goal>
-							<goal>tests-instrument</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin-->
-		</plugins>
 	</build>
 
 	<modules>
@@ -596,10 +574,17 @@
 		<module>portfelx-bukkit-api</module>
 		<module>portfelx-proxy-api</module>
 		<module>portfelx-common</module>
+		<module>portfelx-common-bootstrap</module>
+		<module>portfelx-bukkit-bootstrap</module>
 		<module>portfelx-bukkit</module>
+		<module>portfelx-bukkit-assembly</module>
 		<module>portfelx-proxy</module>
+		<!--module>portfelx-bungee-bootstrap</module>
 		<module>portfelx-bungee</module>
+		<module>portfelx-bungee-assembly</module-->
+		<module>portfelx-velocity-bootstrap</module>
 		<module>portfelx-velocity</module>
+		<module>portfelx-velocity-assembly</module>
 		<module>portfelx-api</module>
 	</modules>
 </project>

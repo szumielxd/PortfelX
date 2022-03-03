@@ -4,7 +4,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.logging.Logger;
-
 import javax.inject.Inject;
 
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +16,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 
+import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.common.loader.DependencyLoader;
 import me.szumielxd.portfel.common.loader.JarClassLoader;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
@@ -53,21 +53,24 @@ public class PortfelVelocityBootstrap implements PortfelBootstrap {
 		this.server = server;
 		this.logger = logger;
 		this.dataFolder = dataDirectory.toFile();
-		this.onLoad();
 	}
 	
 	
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
-		this.jarClassLoader = this.dependencyLoader.load(HIKARICP, MARIADB);
+		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), HIKARICP4, HIKARICP5, GSON, RGXGEN, YAML);
 		try {
 			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.velocity.PortfelVelocityImpl");
-			Class<? extends LoadablePortfel> subClazz = clazz.asSubclass(LoadablePortfel.class);
-			this.realPlugin = subClazz.getConstructor(PortfelVelocityBootstrap.class).newInstance(this);
+			this.realPlugin = clazz.asSubclass(LoadablePortfel.class).getConstructor(PortfelVelocityBootstrap.class).newInstance(this);
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException(e);
 		}
 		this.realPlugin.onLoad();
+	}
+	
+	
+	public void addToRuntime(CommonDependency... dependency) {
+		this.dependencyLoader.addToLoader(jarClassLoader, dependency);
 	}
 	
 	
@@ -76,13 +79,14 @@ public class PortfelVelocityBootstrap implements PortfelBootstrap {
 	
 	@Subscribe
 	public void onProxyInitialization(ProxyInitializeEvent event) {
-	    this.realPlugin.onEnable();
+		this.onLoad();
+		this.realPlugin.onEnable();
 	}
 	
 	
 	@Subscribe
 	public void onProxyInitialization(ProxyShutdownEvent event) {
-	    this.realPlugin.onDisable();
+		this.realPlugin.onDisable();
 	}
 
 

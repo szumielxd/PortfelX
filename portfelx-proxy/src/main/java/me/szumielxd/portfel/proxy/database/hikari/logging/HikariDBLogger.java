@@ -298,7 +298,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 	@Override
 	public void handleIncomingLog(@NotNull LogEntry log) {
 		this.validate();
-		this.plugin.getProxyServer().getPlayers().forEach(player -> {
+		this.plugin.getCommonServer().getPlayers().forEach(player -> {
 			if (player.isConnected() && player.hasPermission("portfel.verbose")) {
 				User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 				if (user != null) {

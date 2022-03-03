@@ -12,7 +12,7 @@ import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.TopManager;
 import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import net.kyori.adventure.platform.AudienceProvider;
+import me.szumielxd.portfel.api.objects.CommonServer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -50,6 +50,13 @@ public interface Portfel {
 	public static String CHANNEL_LEGACY_BUNGEE = "BungeeCord";
 	
 	/**
+	 * Get proxy server.
+	 * 
+	 * @return proxy server
+	 */
+	public @NotNull CommonServer getCommonServer();
+	
+	/**
 	 * Get user manager.
 	 * 
 	 * @return user manager
@@ -69,13 +76,6 @@ public interface Portfel {
 	 * @return task manager
 	 */
 	public @NotNull TaskManager getTaskManager();
-	
-	/**
-	 * Get audience implementation.
-	 * 
-	 * @return audiences
-	 */
-	public @NotNull AudienceProvider adventure();
 	
 	/**
 	 * Get Console Sender.

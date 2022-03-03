@@ -30,7 +30,8 @@ public class VelocityAccessManagerImpl extends AccessManagerImpl {
 
 	@Override
 	protected void postInit() {
-		((PortfelVelocityImpl) this.getPlugin()).getProxy().getEventManager().register(this.getPlugin(), this);
+		PortfelVelocityImpl portfel = (PortfelVelocityImpl) this.getPlugin();
+		portfel.getProxy().getEventManager().register(portfel.asPlugin(), this);
 	}
 	
 	

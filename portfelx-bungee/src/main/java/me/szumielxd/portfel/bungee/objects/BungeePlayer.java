@@ -109,7 +109,7 @@ private final @NotNull ProxiedPlayer player;
 
 	@Override
 	public void connect(@NotNull String server) {
-		this.player.connect(this.plugin.getProxy().getServerInfo(server));
+		this.player.connect(this.plugin.asPlugin().getProxy().getServerInfo(server));
 	}
 
 
@@ -153,7 +153,7 @@ private final @NotNull ProxiedPlayer player;
 	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
 		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, new HashSet<>(Arrays.asList(flags)));
 		this.plugin.adventure().player(this.player).showBossBar(bar);
-		this.plugin.getProxyServer().getScheduler().runTaskLater(() -> this.plugin.adventure().player(this.player).hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
+		this.plugin.getCommonServer().getScheduler().runTaskLater(() -> this.plugin.adventure().player(this.player).hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
 	}
 
 

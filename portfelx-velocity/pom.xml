@@ -13,6 +13,15 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>portfelx-common-bootstrap</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>portfelx-velocity-bootstrap</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-proxy</artifactId>
 		</dependency>
 		<dependency>
@@ -20,11 +29,8 @@
 			<artifactId>portfelx-proxy-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.zaxxer</groupId>
-			<artifactId>HikariCP</artifactId>
-			<version>4.0.3</version>
-			<type>jar</type>
-			<scope>compile</scope>
+			<groupId>net.kyori</groupId>
+			<artifactId>adventure-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.velocitypowered</groupId>
@@ -40,7 +46,6 @@
 				<directory>src/main/resources</directory>
 				<filtering>true</filtering>
 				<includes>
-					<include>bungee.yml</include>
 				</includes>
 			</resource>
 			<resource>
@@ -48,19 +53,23 @@
 				<filtering>false</filtering>
 				<excludes>
 					<exclude>**/*.java</exclude>
-					<exclude>bungee.yml</exclude>
 				</excludes>
 			</resource>
 		</resources>
 		
 		<plugins>
+		
+			<plugin>
+				<groupId>com.coderplus.maven.plugins</groupId>
+				<artifactId>copy-rename-maven-plugin</artifactId>
+			</plugin>
 			
 			<!-- Replacer Plugin -->
 			<plugin>
 				<groupId>com.google.code.maven-replacer-plugin</groupId>
 				<artifactId>replacer</artifactId>
 				<version>1.5.3</version>
-				<executions>                
+				<executions>				
 					<execution>
 						<phase>prepare-package</phase>
 						<goals>
@@ -98,7 +107,7 @@
 							<token>@url@</token>
 							<value>${website}</value>
 						</replacement>
-					</replacements>                        
+					</replacements>						
 				</configuration>
 			</plugin>
 			
@@ -115,10 +124,13 @@
 			</plugin>
 			
 			<!-- Assembly plugin -->
-			<plugin>
+			<!--plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-			</plugin>
+				<configuration>
+					<finalName>${finalNameBootstrap}</finalName>
+				</configuration>
+			</plugin-->
 			
 			<!-- Jar plugin -->
 			<plugin>
