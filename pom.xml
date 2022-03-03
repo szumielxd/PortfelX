@@ -579,9 +579,9 @@
 		<module>portfelx-bukkit</module>
 		<module>portfelx-bukkit-assembly</module>
 		<module>portfelx-proxy</module>
-		<!--module>portfelx-bungee-bootstrap</module>
+		<module>portfelx-bungee-bootstrap</module>
 		<module>portfelx-bungee</module>
-		<module>portfelx-bungee-assembly</module-->
+		<module>portfelx-bungee-assembly</module>
 		<module>portfelx-velocity-bootstrap</module>
 		<module>portfelx-velocity</module>
 		<module>portfelx-velocity-assembly</module>
