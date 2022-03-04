@@ -120,7 +120,7 @@
 						</goals>
 							<configuration>
 								<sourceFile>target/${project.build.finalName}.jar</sourceFile>
-								<destinationFile>${parent.basedir}/${finalNameBootstrap}</destinationFile>
+								<destinationFile>../${finalNameBootstrap}</destinationFile>
 							</configuration>
 					</execution>
 				</executions>

@@ -90,6 +90,20 @@
 			<plugin>
 				<groupId>com.coderplus.maven.plugins</groupId>
 				<artifactId>copy-rename-maven-plugin</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<id>rename-file</id>
+						<phase>install</phase>
+						<goals>
+							<goal>rename</goal>
+						</goals>
+							<configuration>
+								<sourceFile>target/${project.build.finalName}.jar</sourceFile>
+								<destinationFile>../${finalNameBootstrap}</destinationFile>
+							</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			
 			<!-- Compiler plugin -->
