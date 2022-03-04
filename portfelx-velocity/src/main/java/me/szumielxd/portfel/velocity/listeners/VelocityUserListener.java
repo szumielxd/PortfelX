@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.player.ServerConnectedEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 
@@ -27,9 +27,10 @@ public class VelocityUserListener extends UserListener {
 	
 	
 	@Subscribe
-	public void onServerConnect(ServerConnectedEvent event) {
+	public void onServerConnect(ServerPostConnectEvent event) {
 		Optional<ServerConnection> srv = event.getPlayer().getCurrentServer();
 		ProxyPlayer player = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), event.getPlayer());
+		this.getPlugin().debug("[%s] Connect: %s -> %s", "VelocityUserListener", event.getPlayer().getUsername(), srv.orElse(null));
 		if (srv.isPresent()) {
 			this.onConnect(player, new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), srv.get()));
 		}
@@ -38,6 +39,7 @@ public class VelocityUserListener extends UserListener {
 	
 	@Subscribe
 	public void onDisconnect(DisconnectEvent event) {
+		this.getPlugin().debug("[%s] Disconnect: %s", "VelocityUserListener", event.getPlayer().getUsername());
 		Player player = event.getPlayer();
 		try {
 			User user = this.getPlugin().getUserManager().getUser(player.getUniqueId());
