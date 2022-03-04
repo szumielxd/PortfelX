@@ -2,8 +2,6 @@ package me.szumielxd.portfel.api;
 
 import java.io.File;
 import java.util.Objects;
-import java.util.logging.Logger;
-
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +11,7 @@ import me.szumielxd.portfel.api.managers.TopManager;
 import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.CommonServer;
+import me.szumielxd.portfel.common.loader.CommonLogger;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -110,7 +109,7 @@ public interface Portfel {
 	 * 
 	 * @return plugin's logger
 	 */
-	public @NotNull Logger getLogger();
+	public @NotNull CommonLogger getLogger();
 	
 	/**
 	 * Log debug message in console.

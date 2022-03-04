@@ -8,6 +8,11 @@
 	</parent>
 	<dependencies>
 		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>portfelx-common-bootstrap</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>net.kyori</groupId>
 			<artifactId>adventure-api</artifactId>
 		</dependency>
@@ -16,15 +21,5 @@
 			<artifactId>adventure-text-serializer-legacy</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<!--dependency>
-			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.kyori</groupId>
-			<artifactId>adventure-text-serializer-bungeecord</artifactId>
-			<scope>provided</scope>
-		</dependency-->
 	</dependencies>
 </project>

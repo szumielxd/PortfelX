@@ -2,7 +2,10 @@ package me.szumielxd.portfel.bukkit;
 
 import java.lang.reflect.InvocationTargetException;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+
 import me.szumielxd.portfel.common.loader.CommonDependency;
+import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.DependencyLoader;
 import me.szumielxd.portfel.common.loader.JarClassLoader;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
@@ -16,11 +19,13 @@ public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstr
 	private LoadablePortfel realPlugin;
 	private DependencyLoader dependencyLoader;
 	private JarClassLoader jarClassLoader;
+	private CommonLogger logger;
 	
 	
 	@Override
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
+		this.logger = new BukkitLogger(this.getLogger());
 		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), GSON, RGXGEN, YAML, KYORI_BUKKIT);
 		try {
 			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bukkit.PortfelBukkitImpl");
@@ -46,6 +51,13 @@ public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstr
 	@Override
 	public void onDisable() {
 		this.realPlugin.onDisable();
+	}
+	
+	
+	@Override
+	public @NotNull CommonLogger getCommonLogger() {
+		if (this.logger == null) throw new IllegalStateException("plugin hasn't been already initialized");
+		return this.logger;
 	}
 	
 

@@ -6,7 +6,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +28,7 @@ import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.ValidateAccess;
 import me.szumielxd.portfel.common.loader.CommonDependency;
+import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
@@ -95,8 +95,8 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	
 	@Override
-	public @NotNull Logger getLogger() {
-		return this.bootstrap.getLogger();
+	public @NotNull CommonLogger getLogger() {
+		return this.bootstrap.getCommonLogger();
 	}
 	
 	
@@ -152,7 +152,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	@Override
 	public void onEnable() {
 		if (ValidateAccess.checkAccess() == false) {
-			this.getLogger().warning("You have no power here. Die potato!");
+			this.getLogger().warn("You have no power here. Die potato!");
 			return;
 		}
 		PortfelProvider.register(this);

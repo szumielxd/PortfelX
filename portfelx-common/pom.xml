@@ -9,6 +9,11 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>portfelx-common-bootstrap</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-common-api</artifactId>
 		</dependency>
 		<dependency>

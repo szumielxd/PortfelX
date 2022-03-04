@@ -3,10 +3,10 @@ package me.szumielxd.portfel.velocity;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
-import java.util.logging.Logger;
 import javax.inject.Inject;
 
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -17,6 +17,7 @@ import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 
 import me.szumielxd.portfel.common.loader.CommonDependency;
+import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.DependencyLoader;
 import me.szumielxd.portfel.common.loader.JarClassLoader;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
@@ -44,14 +45,14 @@ public class PortfelVelocityBootstrap implements PortfelBootstrap {
 	
 	
 	private final ProxyServer server;
-	private final Logger logger;
+	private final CommonLogger logger;
 	private final File dataFolder;
 	
 	
 	@Inject
 	public PortfelVelocityBootstrap(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
 		this.server = server;
-		this.logger = logger;
+		this.logger = new VelocityLogger(logger);
 		this.dataFolder = dataDirectory.toFile();
 	}
 	
@@ -97,7 +98,7 @@ public class PortfelVelocityBootstrap implements PortfelBootstrap {
 
 
 	@Override
-	public @NotNull Logger getLogger() {
+	public @NotNull CommonLogger getCommonLogger() {
 		return this.logger;
 	}
 

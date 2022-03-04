@@ -24,7 +24,7 @@
 		<bukkitMainClass>${package}.bukkit.bootstrap.PortfelBukkitBootstrap</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
 		<revision>3.3.0-SNAPSHOT</revision>
-		<finalNameBootstrap>/../../${project.artifactId}-assembly/src/main/resources/${pluginId}.jarinjar</finalNameBootstrap>
+		<finalNameBootstrap>${project.artifactId}-assembly/src/main/resources/${pluginId}.jarinjar</finalNameBootstrap>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
 		<finalNameObf>/../../target/${project.artifactId}-obf-${git.commit.id.abbrev}-${project.version}</finalNameObf>
 		<renamelog>${project.artifactId}_renamelog.xml</renamelog>
@@ -45,11 +45,6 @@
 			<id>sonatype-oss-snapshots</id>
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</repository>
-		<!--repository>
-			<id>mvdw-software</id>
-			<name>MVdW Public Repositories</name>
-			<url>http://repo.mvdw-software.be/content/groups/public/</url>
-		</repository-->
 		<repository>
 			<id>minefox</id>
 			<name>MineFox Public Repository</name>
@@ -336,25 +331,6 @@
 
 		<pluginManagement>
 			<plugins>
-				<!-- Copy plugin -->
-				<plugin>
-					<groupId>com.coderplus.maven.plugins</groupId>
-					<artifactId>copy-rename-maven-plugin</artifactId>
-					<version>1.0</version>
-					<executions>
-						<execution>
-							<id>rename-file</id>
-							<phase>install</phase>
-							<goals>
-								<goal>rename</goal>
-							</goals>
-								<configuration>
-									<sourceFile>target/${project.build.finalName}.jar</sourceFile>
-									<destinationFile>${project.build.directory}/${finalNameBootstrap}</destinationFile>
-								</configuration>
-						</execution>
-					</executions>
-				</plugin>
 				<!-- Compile plugin -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>

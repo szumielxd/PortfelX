@@ -1,7 +1,5 @@
 package me.szumielxd.portfel.proxy;
 
-import java.util.logging.Logger;
-
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.managers.TaskManager;
@@ -18,9 +16,6 @@ import me.szumielxd.portfel.proxy.managers.OrdersManager;
 import me.szumielxd.portfel.proxy.managers.TokenManager;
 
 public interface PortfelProxyImpl extends PortfelProxy {
-	
-	
-	public @NotNull Logger getLogger();
 	
 	public void addToRuntime(CommonDependency... dependency);
 	

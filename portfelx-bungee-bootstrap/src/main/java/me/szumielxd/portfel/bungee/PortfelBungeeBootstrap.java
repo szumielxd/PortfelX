@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.common.loader.CommonDependency;
+import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.DependencyLoader;
 import me.szumielxd.portfel.common.loader.JarClassLoader;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
@@ -19,11 +20,13 @@ public class PortfelBungeeBootstrap extends Plugin implements PortfelBootstrap {
 	private LoadablePortfel realPlugin;
 	private DependencyLoader dependencyLoader;
 	private JarClassLoader jarClassLoader;
+	private CommonLogger logger;
 	
 	
 	@Override
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
+		this.logger = new BungeeLogger(this.getLogger());
 		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), HIKARICP4, HIKARICP5, GSON, RGXGEN, YAML, KYORI_BUNGEE);
 		try {
 			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bungee.PortfelBungeeImpl");
@@ -55,6 +58,13 @@ public class PortfelBungeeBootstrap extends Plugin implements PortfelBootstrap {
 	@Override
 	public @NotNull String getName() {
 		return this.getDescription().getName();
+	}
+	
+	
+	@Override
+	public @NotNull CommonLogger getCommonLogger() {
+		if (this.logger == null) throw new IllegalStateException("plugin hasn't been already initialized");
+		return this.logger;
 	}
 	
 

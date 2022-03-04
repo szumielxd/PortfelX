@@ -167,7 +167,7 @@ public class DependencyLoader {
 	
 	
 	private void download(@NotNull CommonDependency dependency) throws MalformedURLException, IOException {
-		this.plugin.getLogger().info(String.format("Downloading %s lib...", dependency.getArtifactId()));
+		this.plugin.getCommonLogger().info(String.format("Downloading %s lib...", dependency.getArtifactId()));
 		long start = System.currentTimeMillis();
 		File cache = new File(REPO_CACHE_DIR, UUID.randomUUID().toString());
 		try (ReadableByteChannel ch = Channels.newChannel(new URL(buildDownloadUrl(dependency)).openStream());
@@ -181,7 +181,7 @@ public class DependencyLoader {
 				}
 			}
 		}
-		this.plugin.getLogger().info(String.format("Successfully downloaded %s! (%s ms)", dependency.getArtifactId(), System.currentTimeMillis() - start));
+		this.plugin.getCommonLogger().info(String.format("Successfully downloaded %s! (%s ms)", dependency.getArtifactId(), System.currentTimeMillis() - start));
 	}
 	
 	
