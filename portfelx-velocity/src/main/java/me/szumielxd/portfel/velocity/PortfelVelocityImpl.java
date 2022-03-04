@@ -186,7 +186,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.getProxy().getEventManager().register(this.asPlugin(), new VelocityUserListener(this));
 		this.getProxy().getEventManager().register(this.asPlugin(), new VelocityChannelListener(this));
 		this.getLogger().info("Registering commands...");
-		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
+		this.command = new MainCommand(this, "dpv", "portfel.command", "devportfelvelocity");
 		this.tokenCommand = new MainTokenCommand(this, this.config.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.config.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
