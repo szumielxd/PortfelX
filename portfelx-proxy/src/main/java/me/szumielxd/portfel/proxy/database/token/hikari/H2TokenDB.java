@@ -79,7 +79,7 @@ public class H2TokenDB extends HikariTokenDB {
 	 */
 	@Override
 	public void setupDatabase(@NotNull HikariConfig config, @NotNull String address, int port, @NotNull String database, @NotNull String user, @NotNull String password) {
-		File file = new File(this.plugin.getDataFolder(), this.plugin.getName().toLowerCase() + "-tokens-h2.mv.db");
+		File file = new File(this.plugin.getDataFolder(), this.plugin.getName().toLowerCase() + "-tokens-h2");
 		String dataSource = "me.szumielxd.portfel.lib.org.h2.jdbcx.JdbcDataSource";
 		try {
 			Class.forName(dataSource);
