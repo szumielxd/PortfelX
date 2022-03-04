@@ -19,6 +19,8 @@ public enum CommonDependency {
 	GSON(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "com,google,code,gson", "gson", "2.9.0", "53fa3e6753e90d931d62cb89580fde2f", "com,google,gson"),
 	RGXGEN(Repository.SONATYPE_SNAPSHOTS, JavaVersionRange.ALL, "com,github,curious-odd-man", "rgxgen", "1.4-SNAPSHOT", "9001282c58fcc6acff13e118ab8c1117", "com,github,curiousoddman"),
 	YAML(Repository.JITPACK, JavaVersionRange.ALL, "me,carleslc,Simple-YAML", "Simple-Yaml", "1.7.3", "cf302a9468e1d16154d93a6cdc763ca9", "org,simpleyaml", "org,yaml"),
+	KYORI_BUNGEE(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-platform-bungeecord", "4.1.0", "362673bae7a435ba98693485b589c323", new String[0]),
+	KYORI_BUKKIT(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-platform-bukkit", "4.1.0", "9022357d3878482b183a2943de4ed066", new String[0]),
 	;
 	
 	

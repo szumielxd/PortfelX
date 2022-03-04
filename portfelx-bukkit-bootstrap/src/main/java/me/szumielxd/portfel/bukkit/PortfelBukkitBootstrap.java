@@ -21,7 +21,7 @@ public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstr
 	@Override
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
-		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), HIKARICP4, HIKARICP5, GSON, RGXGEN, YAML);
+		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), GSON, RGXGEN, YAML, KYORI_BUKKIT);
 		try {
 			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bukkit.PortfelBukkitImpl");
 			this.realPlugin = clazz.asSubclass(LoadablePortfel.class).getConstructor(PortfelBukkitBootstrap.class).newInstance(this);

@@ -24,7 +24,7 @@ public class PortfelBungeeBootstrap extends Plugin implements PortfelBootstrap {
 	@Override
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
-		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), HIKARICP4, HIKARICP5, GSON, RGXGEN, YAML);
+		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), HIKARICP4, HIKARICP5, GSON, RGXGEN, YAML, KYORI_BUNGEE);
 		try {
 			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bungee.PortfelBungeeImpl");
 			this.realPlugin = clazz.asSubclass(LoadablePortfel.class).getConstructor(PortfelBungeeBootstrap.class).newInstance(this);
