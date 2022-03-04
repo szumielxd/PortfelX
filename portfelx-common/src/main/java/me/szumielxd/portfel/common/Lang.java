@@ -177,7 +177,7 @@ public class Lang {
 		COMMAND_USER_INFO_BALANCE("command.user.info.balance", "Balance: {0}"),
 		COMMAND_USER_INFO_INTOP("command.user.info.intop", "Can be in Top: {0}"),
 		COMMAND_USER_INFO_SUGGEST("command.user.info.suggest", "Click to suggest command on chat"),
-		COMMAND_USER_INFO_INSERT("command.user.info.intop", "Click+Shift to insert above text on chat"),
+		COMMAND_USER_INFO_INSERT("command.user.info.insert", "Click+Shift to insert above text on chat"),
 		//
 		COMMAND_USER_ECO_DESCRIPTION("command.user.eco.description", "Manage user's economy."),
 		//
