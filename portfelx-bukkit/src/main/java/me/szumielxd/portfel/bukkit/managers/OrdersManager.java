@@ -99,7 +99,7 @@ public class OrdersManager {
 			String id = file.getName().substring(0, file.getName().length()-4);
 			this.categories.put(id.toLowerCase(), new OrderPortfelGui(this.plugin, id, title, slot, rows, name, description, icon, type, orders));
 		} catch (NullPointerException | InvalidConfigurationException | IOException e) {
-			this.plugin.getLogger().log(Level.WARNING, "Cannot load orders category from file "+file.getName(), e);
+			this.plugin.getLogger().warn(e, "Cannot load orders category from file %s", file.getName());
 		}
 	}
 	
@@ -135,7 +135,7 @@ public class OrdersManager {
 						return new DoneConditionImpl(match.group(1).replace("\\" + sign, sign), match.group(3).replace("\\" + sign, sign), type);
 					}
 				}
-				this.plugin.getLogger().warning(String.format("Cannot parse done-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName()));
+				this.plugin.getLogger().warn("Cannot parse done-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName());
 				return null;
 			}).filter(Objects::nonNull).collect(Collectors.toList());
 			
@@ -148,7 +148,7 @@ public class OrdersManager {
 						return new DoneConditionImpl(match.group(1).replace("\\" + sign, sign), match.group(3).replace("\\" + sign, sign), type);
 					}
 				}
-				this.plugin.getLogger().warning(String.format("Cannot parse deny-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName()));
+				this.plugin.getLogger().warn("Cannot parse deny-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName());
 				return null;
 			}).filter(Objects::nonNull).collect(Collectors.toList());
 			
@@ -157,7 +157,7 @@ public class OrdersManager {
 			List<String> command = yml.getStringList("command").parallelStream().map(replacer).collect(Collectors.toList());
 			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, denyDescription, icon, iconBought, iconDenied, price, donePermission.isEmpty()? null : donePermission, doneConditions, denyConditions, broadcast, message, command);
 		} catch (NullPointerException e) {
-			this.plugin.getLogger().log(Level.WARNING, String.format("Cannot load order `%s` from category `%s`", yml.getName(), yml.getRoot().getName()), e);
+			this.plugin.getLogger().warn(e, "Cannot load order `%s` from category `%s`", yml.getName(), yml.getRoot().getName());
 		}
 		return null;
 	}

@@ -1,5 +1,8 @@
 package me.szumielxd.portfel.common.loader;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 public interface CommonLogger {
 	
 	
@@ -8,7 +11,7 @@ public interface CommonLogger {
 	 * 
 	 * @param message the message string to be logged
 	 */
-	public void info(String message);
+	public void info(@NotNull String message);
 	
 	
 	/**
@@ -17,7 +20,7 @@ public interface CommonLogger {
 	 * @param format the format string
 	 * @param args the arguments
 	 */
-	public void info(String format, Object... args);
+	public void info(@NotNull String format, @Nullable Object... args);
 	
 	
 	/**
@@ -25,7 +28,7 @@ public interface CommonLogger {
 	 * 
 	 * @param message the message string to be logged
 	 */
-	public void warn(String message);
+	public void warn(@NotNull String message);
 	
 	
 	/**
@@ -34,7 +37,16 @@ public interface CommonLogger {
 	 * @param format the format string
 	 * @param args the arguments
 	 */
-	public void warn(String format, Object... args);
+	public void warn(@NotNull String format, @Nullable Object... args);
+	
+	
+	/**
+	 * Log throwable and message at the WARN level according to the specified format and arguments.
+	 * 
+	 * @param format the format string
+	 * @param args the arguments
+	 */
+	public void warn(@NotNull Throwable throwable, @NotNull String format, @Nullable Object... args);
 	
 	
 	/**
@@ -42,7 +54,7 @@ public interface CommonLogger {
 	 * 
 	 * @param message the message string to be logged
 	 */
-	public void severe(String message);
+	public void severe(@NotNull String message);
 	
 	
 	/**
@@ -51,7 +63,7 @@ public interface CommonLogger {
 	 * @param format the format string
 	 * @param args the arguments
 	 */
-	public void severe(String format, Object... args);
+	public void severe(@NotNull String format, @Nullable Object... args);
 	
 
 }

@@ -1,9 +1,11 @@
 package me.szumielxd.portfel.bungee;
 
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.common.loader.CommonLogger;
 
@@ -24,7 +26,7 @@ public class BungeeLogger implements CommonLogger {
 	 * @param message the message string to be logged
 	 */
 	@Override
-	public void info(String message) {
+	public void info(@NotNull String message) {
 		this.logger.info(message);
 	}
 	
@@ -36,7 +38,7 @@ public class BungeeLogger implements CommonLogger {
 	 * @param args the arguments
 	 */
 	@Override
-	public void info(String format, Object... args) {
+	public void info(@NotNull String format, @Nullable Object... args) {
 		this.logger.info(String.format(format, args));
 	}
 	
@@ -47,7 +49,7 @@ public class BungeeLogger implements CommonLogger {
 	 * @param message the message string to be logged
 	 */
 	@Override
-	public void warn(String message) {
+	public void warn(@NotNull String message) {
 		this.logger.warning(message);
 	}
 	
@@ -59,8 +61,19 @@ public class BungeeLogger implements CommonLogger {
 	 * @param args the arguments
 	 */
 	@Override
-	public void warn(String format, Object... args) {
+	public void warn(@NotNull String format, @Nullable Object... args) {
 		this.logger.warning(String.format(format, args));
+	}
+	
+	
+	/**
+	 * Log throwable and message at the WARN level according to the specified format and arguments.
+	 * 
+	 * @param format the format string
+	 * @param args the arguments
+	 */
+	public void warn(@NotNull Throwable throwable, @NotNull String format, @Nullable Object... args) {
+		this.logger.log(Level.WARNING, String.format(format, args), throwable);
 	}
 	
 	
@@ -70,7 +83,7 @@ public class BungeeLogger implements CommonLogger {
 	 * @param message the message string to be logged
 	 */
 	@Override
-	public void severe(String message) {
+	public void severe(@NotNull String message) {
 		this.logger.severe(message);
 	}
 	
@@ -82,7 +95,7 @@ public class BungeeLogger implements CommonLogger {
 	 * @param args the arguments
 	 */
 	@Override
-	public void severe(String format, Object... args) {
+	public void severe(@NotNull String format, @Nullable Object... args) {
 		this.logger.severe(String.format(format, args));
 	}
 	
