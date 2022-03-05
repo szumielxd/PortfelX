@@ -315,7 +315,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		try {
 			Constructor<PluginCommand> constr = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
 			constr.setAccessible(true);
-			return constr.newInstance(name, this);
+			return constr.newInstance(name, this.asPlugin());
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
 		}
