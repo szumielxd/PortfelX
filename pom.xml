@@ -21,8 +21,8 @@
 		<website>https://github.com/szumielxd/PortfelX</website>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<package>me.szumielxd.portfel</package>
-		<bukkitMainClass>${package}.bukkit.bootstrap.PortfelBukkitBootstrap</bukkitMainClass>
-		<bungeeMainClass>${package}.bungee.PortfelBungeeImpl</bungeeMainClass>
+		<bukkitMainClass>${package}.bukkit.PortfelBukkitBootstrap</bukkitMainClass>
+		<bungeeMainClass>${package}.bungee.PortfelBungeeBootstrap</bungeeMainClass>
 		<revision>3.3.0-SNAPSHOT</revision>
 		<finalNameBootstrap>${project.artifactId}-assembly/src/main/resources/${pluginId}.jarinjar</finalNameBootstrap>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
