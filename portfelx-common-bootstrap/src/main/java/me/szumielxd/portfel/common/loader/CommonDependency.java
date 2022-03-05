@@ -24,8 +24,9 @@ public enum CommonDependency {
 	ADVENTURE_PLATFORM_API(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-platform-api", "4.1.0", "a547973483a351b05d011b8dd5082a2d", new String[0]),
 	ADVENTURE_PLATFORM_FACET(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-platform-facet", "4.1.0", "110781c9f639d65deb1dcfd331796f1f", new String[0]),
 	ADVENTURE_TEXT_BUNGEE(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-text-serializer-bungeecord", "4.1.0", "72e0486e4da445bc0bf76155c8f5e4d4", new String[0]),
-	ADVENTURE_TEXT_LEGACY(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-text-serializer-legacy", "4.1.0", "ad8fbf4ec03a72836e392fbbd9c12aad", new String[0]),
 	ADVENTURE_TEXT_GSON(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-text-serializer-gson", "4.1.0", "ce4a72944ff16bd58e785486ff8c0be1", new String[0]),
+	ADVENTURE_TEXT_GSON_LEGACY(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-text-serializer-gson-legacy-impl", "4.10.0", "b0d567180e32bc9d24d4a18f21dd721d", new String[0]),
+	ADVENTURE_TEXT_LEGACY(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-text-serializer-legacy", "4.1.0", "ad8fbf4ec03a72836e392fbbd9c12aad", new String[0]),
 	ADVENTURE_API(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-api", "4.10.0", "d7150507993fe6a0faddcedebeb12897", new String[0]),
 	ADVENTURE_NBT(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-nbt", "4.10.0", "960d4803b5e8095e9cee84ef1c7ffa26", new String[0]),
 	;
