@@ -64,7 +64,6 @@ public class H2TokenDB extends HikariTokenDB {
 	@Override
 	protected void setupProperties(@NotNull HikariConfig config, @NotNull Map<String, String> properties) {
 		properties.putIfAbsent("loginTimeout", "30000");
-		//properties.forEach((k,v) -> config.addDataSourceProperty(k, v));
 	}
 
 	/**
@@ -87,7 +86,7 @@ public class H2TokenDB extends HikariTokenDB {
 			this.plugin.addToRuntime(CommonDependency.H2);
 		}
 		config.setDataSourceClassName(dataSource);
-		config.addDataSourceProperty("URL", "jdbc:h2:" + file.getAbsolutePath());
+		config.addDataSourceProperty("URL", "jdbc:h2:" + file.getAbsolutePath() + ";IGNORECASE=TRUE");
 		config.setUsername(user);
 		config.setPassword(password);
 	}
