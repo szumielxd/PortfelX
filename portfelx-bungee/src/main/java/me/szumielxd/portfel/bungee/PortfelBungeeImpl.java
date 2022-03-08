@@ -129,11 +129,11 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		PortfelProvider.register(this);
 		CommonArgs.init(this);
 		this.setupProxyId();
+		this.load();
 		this.proxy = new BungeeProxy(this);
 		this.adventure = BungeeAudiences.create(this.asPlugin());
 		this.taskManager = new ProxyTaskManagerImpl(this);
 		this.accessManager = new BungeeAccessManagerImpl(this).init();
-		this.load();
 		//
 		String dbType = this.getConfiguration().getString(ProxyConfigKey.DATABASE_TYPE).toLowerCase();
 		if ("mariadb".equals(dbType)) this.database = new MariaDB(this);

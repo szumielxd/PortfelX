@@ -159,9 +159,9 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.proxy = new VelocityProxy(this);
 		CommonArgs.init(this);
 		this.setupProxyId();
+		this.load();
 		this.taskManager = new ProxyTaskManagerImpl(this);
 		this.accessManager = new VelocityAccessManagerImpl(this).init();
-		this.load();
 		//
 		String dbType = this.getConfiguration().getString(ProxyConfigKey.DATABASE_TYPE).toLowerCase();
 		if ("mariadb".equals(dbType)) this.database = new MariaDB(this);
@@ -193,6 +193,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_SETUP));
 		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_USERS));
 		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_TRANSACTIONS));
+		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_BUNGEE));
 		
 		this.sendMotd();
 		
