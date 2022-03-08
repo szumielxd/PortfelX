@@ -159,8 +159,7 @@ private final @NotNull ProxiedPlayer player;
 
 	@Override
 	public void sendPluginMessage(@NotNull String tag, @NotNull byte[] message) {
-		// TODO Auto-generated method stub
-		
+		this.player.sendData(tag, message);
 	}
 
 
