@@ -504,6 +504,10 @@
 								<shadedPattern>${package}.lib.net.kyori.adventure.platform</shadedPattern>
 							</relocation>
 							<relocation>
+								<pattern>net.kyori.examination</pattern>
+								<shadedPattern>${package}.lib.net.kyori.adventure.examination</shadedPattern>
+							</relocation>
+							<relocation>
 								<pattern>org.simpleyaml</pattern>
 								<shadedPattern>${package}.lib.org.simpleyaml</shadedPattern>
 							</relocation>

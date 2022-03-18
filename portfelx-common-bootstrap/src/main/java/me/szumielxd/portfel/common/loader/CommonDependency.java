@@ -29,6 +29,7 @@ public enum CommonDependency {
 	ADVENTURE_TEXT_LEGACY(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-text-serializer-legacy", "4.10.0", "edb9d7c4c875f77d7ab7ddace2fa34ad", new String[0]),
 	ADVENTURE_API(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-api", "4.10.0", "d7150507993fe6a0faddcedebeb12897", "net.kyori.adventure.util"),
 	ADVENTURE_NBT(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "adventure-nbt", "4.10.0", "960d4803b5e8095e9cee84ef1c7ffa26", new String[0]),
+	EXAMINATION_API(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "net,kyori", "examination-api", "1.3.0", "b1887361d811c89ccca4dbf61b88def4", "net.kyori.examination"),
 	;
 	
 	
