@@ -26,7 +26,7 @@ public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstr
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
 		this.logger = new BukkitLogger(this.getLogger());
-		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), GSON, RGXGEN, YAML, EXAMINATION_API, ADVENTURE_PLATFORM_BUKKIT, ADVENTURE_PLATFORM_API, ADVENTURE_PLATFORM_FACET, ADVENTURE_TEXT_BUNGEE, ADVENTURE_TEXT_GSON, ADVENTURE_TEXT_GSON_LEGACY, ADVENTURE_TEXT_LEGACY, ADVENTURE_API, ADVENTURE_NBT);
+		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), GSON, RGXGEN, YAML, EXAMINATION_API, ADVENTURE_PLATFORM_BUKKIT, ADVENTURE_PLATFORM_API, ADVENTURE_PLATFORM_FACET, ADVENTURE_TEXT_BUNGEE, ADVENTURE_TEXT_GSON, ADVENTURE_TEXT_GSON_LEGACY, ADVENTURE_TEXT_LEGACY, ADVENTURE_API, ADVENTURE_NBT, ADVENTURE_KEY);
 		try {
 			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bukkit.PortfelBukkitImpl");
 			this.realPlugin = clazz.asSubclass(LoadablePortfel.class).getConstructor(PortfelBukkitBootstrap.class).newInstance(this);
