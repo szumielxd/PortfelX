@@ -29,6 +29,7 @@ public abstract class UserListener {
 
 	
 	protected void onConnect(@NotNull ProxyPlayer player, @NotNull ProxyServerConnection server) {
+		this.plugin.debug("UserListener::onConnect(%s, %s)", player, server);
 		this.plugin.getTaskManager().runTaskAsynchronously(() -> {
 			try {
 				ProxyOperableUser user = (ProxyOperableUser) this.plugin.getUserManager().getOrCreateUser(player.getUniqueId());
@@ -42,6 +43,7 @@ public abstract class UserListener {
 				out.writeLong(user.getBalance());
 				out.writeBoolean(user.isDeniedInTop());
 				server.sendPluginMessage(Portfel.CHANNEL_USERS, out.toByteArray());
+				
 			} catch (Exception e) {	
 				e.printStackTrace();
 			}

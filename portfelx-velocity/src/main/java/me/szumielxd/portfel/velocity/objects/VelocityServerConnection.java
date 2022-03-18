@@ -42,7 +42,8 @@ public class VelocityServerConnection implements ProxyServerConnection {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return this.server.equals(obj);
+		if (obj == null || !(obj instanceof VelocityServerConnection)) return false;
+		return this.server.equals(((VelocityServerConnection)obj).server);
 	}
 
 }

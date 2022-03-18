@@ -31,13 +31,15 @@ public class VelocityAccessManagerImpl extends AccessManagerImpl {
 	@Override
 	protected void postInit() {
 		PortfelVelocityImpl portfel = (PortfelVelocityImpl) this.getPlugin();
+		this.getPlugin().debug("[%s] postInit call", "VelocityAccessManagerImpl");
 		portfel.getProxy().getEventManager().register(portfel.asPlugin(), this);
 	}
 	
 	
 	@Subscribe
 	public void onPluginMessageChannel(PluginMessageEvent event) {
-		String tag = event.getIdentifier().toString();
+		String tag = event.getIdentifier().getId();
+		this.getPlugin().debug("[%s] Message: %s - %s - %s", "VelocityAccessManagerImpl", tag, event.getSource(), event.getTarget());
 		if (this.isListendChannel(tag)) {
 			if (event.getSource() instanceof ServerConnection && event.getTarget() instanceof Player) {
 				ServerConnection server = (ServerConnection) event.getSource();

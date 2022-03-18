@@ -15,7 +15,7 @@ public enum CommonDependency {
 	MYSQL(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "mysql", "mysql-connector-java", "8.0.28", "95cde01c78e7b04e13305338d60e056a", "com.mysql"),
 	H2(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "com.h2database", "h2", "2.1.210", "af4adae008b4f91819f078c55dbef025", "org.h2"),
 	HIKARICP4(Repository.MAVEN_CENTRAL, new JavaVersionRange(52.0f, 54.0f), "com,zaxxer", "HikariCP", "4.0.3", "e725642926105cd1bbf4ad7fdff5d5a9"),
-	HIKARICP5(Repository.MAVEN_CENTRAL, new JavaVersionRange(52.0f, Float.MAX_VALUE), "com,zaxxer", "HikariCP", "5.0.1", "3bc96d2ce8285470da11ec41bff6129f"),
+	HIKARICP5(Repository.MAVEN_CENTRAL, new JavaVersionRange(55.0f, Float.MAX_VALUE), "com,zaxxer", "HikariCP", "5.0.1", "3bc96d2ce8285470da11ec41bff6129f"),
 	GSON(Repository.MAVEN_CENTRAL, JavaVersionRange.ALL, "com,google,code,gson", "gson", "2.9.0", "53fa3e6753e90d931d62cb89580fde2f", "com,google,gson"),
 	RGXGEN(Repository.SONATYPE_SNAPSHOTS, JavaVersionRange.ALL, "com,github,curious-odd-man", "rgxgen", "1.4-SNAPSHOT", "9001282c58fcc6acff13e118ab8c1117", "com,github,curiousoddman"),
 	YAML(Repository.JITPACK, JavaVersionRange.ALL, "me,carleslc,Simple-YAML", "Simple-Yaml", "1.7.3", "cf302a9468e1d16154d93a6cdc763ca9", "org,simpleyaml", "org,yaml"),

@@ -321,6 +321,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 			
 			if (Portfel.CHANNEL_SETUP.equals(tag)) {
 				if ("Register".equals(subchannel)) return this.onRegistrationCallback(server, player, tag, subchannel, in);
+				if ("Validate".equals(subchannel)) return this.onNonBungeeRegistrationValidCheck(server, player, tag, subchannel, in);
 			}
 			if (Portfel.CHANNEL_BUNGEE.equals(tag) || Portfel.CHANNEL_LEGACY_BUNGEE.equals(tag)) {
 				if ("ForwardToPlayer".equals(subchannel)) return this.onRegistrationValidCheck(server, player, tag, subchannel, in);
@@ -337,6 +338,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 	// BungeeCord
 	// ForwardToPlayer
 	private Optional<Boolean> onRegistrationValidCheck(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+		this.plugin.debug("[%s] onRegistrationValidCheck", "AccessManagerImpl");
 		in.readUTF(); // username
 		String channel = in.readUTF(); // custom channel
 		if (Portfel.CHANNEL_SETUP.equals(channel)) {
@@ -368,9 +370,32 @@ public abstract class AccessManagerImpl implements AccessManager {
 	}
 	
 	
+	private Optional<Boolean> onNonBungeeRegistrationValidCheck(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+		this.plugin.debug("[%s] onNonBungeeRegistrationValidCheck", "AccessManagerImpl");
+		UUID uuid = UUID.fromString(in.readUTF()); // actionId to validate
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("ForwardToPlayer");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream os = new DataOutputStream(baos); 
+		try {
+			os.writeUTF("Validate");
+			os.writeUTF(uuid.toString());
+			os.writeBoolean(this.registerRequests.containsKey(uuid)); // validity result
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		// validated actionId
+		out.writeShort(baos.toByteArray().length);
+		out.write(baos.toByteArray());
+		sender.sendPluginMessage(Portfel.CHANNEL_BUNGEE, out.toByteArray());
+		return Optional.of(true);
+	}
+	
+	
 	// Setup
 	// Register
 	private Optional<Boolean> onRegistrationCallback(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+		this.plugin.debug("[%s] onRegistrationCallback", "AccessManagerImpl");
 		UUID operationId = null;
 		try {
 			operationId = UUID.fromString(in.readUTF());
@@ -408,7 +433,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 											));
 									
 									holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SUCCESS
-											.component(LIGHT_PURPLE, srvIdComp, srvNameComp)));
+											.component(LIGHT_PURPLE, srvNameComp, srvIdComp)));
 									return Optional.of(true);
 								}
 							}

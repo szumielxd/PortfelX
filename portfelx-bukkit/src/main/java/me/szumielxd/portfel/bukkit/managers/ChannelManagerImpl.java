@@ -172,7 +172,9 @@ public class ChannelManagerImpl implements ChannelManager {
 	}
 	
 	private void validateSetup(@NotNull Player player, @NotNull UUID operationId) {
-		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		
+		// BungeeCord
+		/*ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("ForwardToPlayer"); // subchannel
 		out.writeUTF(player.getName()); // player
 		out.writeUTF(Portfel.CHANNEL_SETUP); // custom channel
@@ -186,7 +188,15 @@ public class ChannelManagerImpl implements ChannelManager {
 		}
 		out.writeShort(baos.toByteArray().length);
 		out.write(baos.toByteArray());
-		player.sendPluginMessage(plugin.asPlugin(), BUNGEE_CHANNEL, out.toByteArray());
+		player.sendPluginMessage(plugin.asPlugin(), BUNGEE_CHANNEL, out.toByteArray());*/
+		
+		
+		// Velocity
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("Validate"); // channel
+		out.writeUTF(operationId.toString()); // operationId
+		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_SETUP, out.toByteArray());
+		
 	}
 	
 	private void sendSetupChannel(@NotNull String channel, @NotNull Player player, @NotNull UUID operationId, @NotNull UUID proxyId, @NotNull UUID serverId) {

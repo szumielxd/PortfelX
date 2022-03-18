@@ -29,8 +29,9 @@ public class VelocityUserListener extends UserListener {
 	@Subscribe
 	public void onServerConnect(ServerPostConnectEvent event) {
 		Optional<ServerConnection> srv = event.getPlayer().getCurrentServer();
+		String previousServer = Optional.ofNullable(event.getPreviousServer()).map(s -> s.getServerInfo().getName()).orElse(null);
 		ProxyPlayer player = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), event.getPlayer());
-		this.getPlugin().debug("[%s] Connect: %s -> %s", "VelocityUserListener", event.getPlayer().getUsername(), srv.orElse(null));
+		this.getPlugin().debug("[%s] Connect: (%s) %s -> %s", "VelocityUserListener", event.getPlayer().getUsername(), previousServer, srv.orElse(null));
 		if (srv.isPresent()) {
 			this.onConnect(player, new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), srv.get()));
 		}

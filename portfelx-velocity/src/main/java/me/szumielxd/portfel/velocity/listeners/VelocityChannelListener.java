@@ -26,7 +26,8 @@ public class VelocityChannelListener extends ChannelListener {
 	
 	@Subscribe
 	public void onPluginMessageChannel(PluginMessageEvent event) {
-		String tag = event.getIdentifier().toString();
+		String tag = event.getIdentifier().getId();
+		this.getPlugin().debug("[%s] Message: %s", "VelocityChannelListener", tag);
 		if (this.isListendChannel(tag)) {
 			if (event.getSource() instanceof ServerConnection && event.getTarget() instanceof Player) {
 				ServerConnection server = (ServerConnection) event.getSource();
