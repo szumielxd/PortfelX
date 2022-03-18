@@ -13,13 +13,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.Range;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+
+import com.google.common.collect.Range;
 
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
@@ -58,7 +59,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		this.description = Collections.unmodifiableList(description);
 		this.icon = icon;
 		this.type = type;
-		Range<Integer> range = Range.between(0, this.getSize()-1);
+		Range<Integer> range = Range.closed(0, this.getSize()-1);
 		this.orders = orders.stream().filter(o -> range.contains(o.getSlot())).collect(Collectors.toMap(o -> o.getSlot(), Function.identity(), (a,b) -> b));
 	}
 	
