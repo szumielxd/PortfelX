@@ -59,7 +59,7 @@ public enum CommonDependency {
 				int j = 0;
 				for (; j < i; j++) newArray[j] = groupPaths[j];
 				j++; // skip actual index
-				for (; j < groupPaths.length; j++) newArray[j] = groupPaths[j];
+				for (; j < groupPaths.length; j++) newArray[j-1] = groupPaths[j];
 				for (String path : KYORI_RELOCATIONS) newArray[++j] = path;
 				groupPaths = newArray;
 			}
