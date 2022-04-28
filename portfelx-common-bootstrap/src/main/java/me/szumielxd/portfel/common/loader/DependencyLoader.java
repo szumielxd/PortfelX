@@ -16,6 +16,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -53,20 +54,20 @@ public class DependencyLoader {
 	
 	private final PortfelBootstrap plugin;
 	
-	private final File REPO_DIR;
-	private final File REPO_CACHE_DIR;
+	private final Path REPO_DIR;
+	private final Path REPO_CACHE_DIR;
 	private final String LIBS_PATH;
-	private final File REAL_JAR;
+	private final Path REAL_JAR;
 	
 	
 	public DependencyLoader(@NotNull PortfelBootstrap plugin) {
 		this.plugin = plugin;
 		
-		REPO_DIR = new File(this.plugin.getDataFolder(), "libs");
-		REPO_CACHE_DIR = new File(REPO_DIR, "cache");
+		REPO_DIR = new File(this.plugin.getDataFolder(), "libs").toPath();
+		REPO_CACHE_DIR = Paths.get(REPO_DIR.toString(), "cache");
 		LIBS_PATH = Optional.of(this.plugin.getClass().getName().substring(0, this.plugin.getClass().getName().lastIndexOf('.')))
-				.map(str -> str.substring(0, str.lastIndexOf('.'))).get();
-		REAL_JAR = new File(REPO_DIR, plugin.getName().toLowerCase() + "-origin.jar");
+				.map(str -> str.substring(0, str.lastIndexOf('.'))).orElseThrow(NullPointerException::new);
+		REAL_JAR = Paths.get(REPO_DIR.toString(), plugin.getName().toLowerCase() + "-origin.jar");
 	}
 	
 	
@@ -84,12 +85,16 @@ public class DependencyLoader {
 	
 	
 	public JarClassLoader load(@NotNull ClassLoader parentClassLoader, @NotNull Set<CommonDependency> dependencies) {
-		if (!REPO_DIR.exists()) REPO_DIR.mkdirs();
-		if (!REPO_CACHE_DIR.exists()) REPO_CACHE_DIR.mkdirs();
+		try {
+			Files.createDirectories(REPO_DIR);
+			Files.createDirectories(REPO_CACHE_DIR);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		dependencies = dependencies.isEmpty()? new HashSet<>() : EnumSet.copyOf(dependencies);
 		dependencies.removeIf(d -> !d.getVersionRange().isApplicable());
 		try {
-			Files.copy(this.getClass().getClassLoader().getResourceAsStream(String.format("%s.jarinjar", this.plugin.getName().toLowerCase())), REAL_JAR.toPath(), 
+			Files.copy(this.getClass().getClassLoader().getResourceAsStream(String.format("%s.jarinjar", this.plugin.getName().toLowerCase())), REAL_JAR, 
 					StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -101,9 +106,9 @@ public class DependencyLoader {
 				e.printStackTrace();
 			}
 		});
-		if (REPO_CACHE_DIR.exists()) {
-			try {
-				Files.walk(REPO_CACHE_DIR.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+		if (Files.exists(REPO_CACHE_DIR)) {
+			try (Stream<Path> fileStream = Files.walk(REPO_CACHE_DIR)) {
+				fileStream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -124,8 +129,12 @@ public class DependencyLoader {
 	
 	
 	public void addToLoader(@NotNull JarClassLoader classLoader, @NotNull Set<CommonDependency> dependencies) {
-		if (!REPO_DIR.exists()) REPO_DIR.mkdirs();
-		if (!REPO_CACHE_DIR.exists()) REPO_CACHE_DIR.mkdirs();
+		try {
+			Files.createDirectories(REPO_DIR);
+			Files.createDirectories(REPO_CACHE_DIR);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		dependencies = dependencies.isEmpty()? new HashSet<>() : EnumSet.copyOf(dependencies);
 		dependencies.removeIf(d -> !d.getVersionRange().isApplicable());
 		dependencies.parallelStream().filter(d -> !validateDependency(d)).forEach(d -> {
@@ -135,9 +144,9 @@ public class DependencyLoader {
 				e.printStackTrace();
 			}
 		});
-		if (REPO_CACHE_DIR.exists()) {
-			try {
-				Files.walk(REPO_CACHE_DIR.toPath()).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+		if (Files.exists(REPO_CACHE_DIR)) {
+			try (Stream<Path> fileStream = Files.walk(REPO_CACHE_DIR)) {
+				fileStream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -150,9 +159,9 @@ public class DependencyLoader {
 	
 	
 	private boolean validateDependency(@NotNull CommonDependency dependency) {
-		File f = new File(REPO_DIR, dependency.getFileName());
-		if (!f.exists()) return false;
-		try (JarFile jar = new JarFile(f)) {
+		Path path = Paths.get(REPO_DIR.toString(), dependency.getFileName());
+		if (!Files.exists(path)) return false;
+		try (JarFile jar = new JarFile(path.toFile())) {
 			ZipEntry entry = jar.getEntry("checksum.md5");
 			if (entry == null) return false;
 			try (InputStream is = jar.getInputStream(entry)) {
@@ -169,13 +178,13 @@ public class DependencyLoader {
 	private void download(@NotNull CommonDependency dependency) throws MalformedURLException, IOException {
 		this.plugin.getCommonLogger().info(String.format("Downloading %s lib...", dependency.getArtifactId()));
 		long start = System.currentTimeMillis();
-		File cache = new File(REPO_CACHE_DIR, UUID.randomUUID().toString());
+		Path cache = Paths.get(REPO_CACHE_DIR.toString(), UUID.randomUUID().toString());
 		try (ReadableByteChannel ch = Channels.newChannel(new URL(buildDownloadUrl(dependency)).openStream());
-				FileOutputStream out = new FileOutputStream(cache)) {
+				FileOutputStream out = new FileOutputStream(cache.toString())) {
 			out.getChannel().transferFrom(ch, 0, Long.MAX_VALUE);
-			File f = new File(REPO_DIR, dependency.getFileName());
-			new JarRelocator(cache, f, Stream.of(dependency.getGroupPaths()).collect(Collectors.toMap(Function.identity(), path -> LIBS_PATH + ".lib." + path))).run();
-			try (FileSystem jar = FileSystems.newFileSystem(URI.create("jar:" + f.toURI()), Collections.singletonMap("create", "true"))) {
+			Path destPath = Paths.get(REPO_DIR.toString(), dependency.getFileName());
+			new JarRelocator(cache.toFile(), destPath.toFile(), Stream.of(dependency.getGroupPaths()).collect(Collectors.toMap(Function.identity(), path -> LIBS_PATH + ".lib." + path))).run();
+			try (FileSystem jar = FileSystems.newFileSystem(URI.create("jar:" + destPath.toString()), Collections.singletonMap("create", "true"))) {
 				try (Writer writer = Files.newBufferedWriter(jar.getPath("checksum.md5"), StandardCharsets.UTF_8, StandardOpenOption.CREATE)) {
 					writer.write(dependency.getMd5());
 				}
@@ -188,13 +197,13 @@ public class DependencyLoader {
 	private JarClassLoader loadDependencies(@NotNull Set<CommonDependency> dependencies, @NotNull ClassLoader parentClassLoader) {
 		List<URL> list = new ArrayList<>();
 		try {
-			list.add(REAL_JAR.toURI().toURL());
+			list.add(REAL_JAR.toUri().toURL());
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
 		dependencies.parallelStream().map(d -> {
 			try {
-				return new File(REPO_DIR, d.getFileName()).toURI().toURL();
+				return Paths.get(REPO_DIR.toString(), d.getFileName()).toUri().toURL();
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e);
 			}
@@ -206,13 +215,13 @@ public class DependencyLoader {
 	private void appendDependencies(@NotNull Set<CommonDependency> dependencies, @NotNull JarClassLoader classLoader) {
 		List<URL> list = new ArrayList<>();
 		try {
-			list.add(REAL_JAR.toURI().toURL());
+			list.add(REAL_JAR.toUri().toURL());
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
 		dependencies.parallelStream().map(d -> {
 			try {
-				return new File(REPO_DIR, d.getFileName()).toURI().toURL();
+				return Paths.get(REPO_DIR.toString(), d.getFileName()).toUri().toURL();
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e);
 			}
