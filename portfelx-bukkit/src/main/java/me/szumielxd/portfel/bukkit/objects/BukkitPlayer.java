@@ -140,7 +140,8 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	 * @param message message to send
 	 */
 	public void sendActionBar(@NotNull Component message) {
-		this.plugin.adventure().player(this.player).sendActionBar(message);
+		Audience audience = this.player instanceof Audience ? this.player : this.plugin.adventure().player(this.player);
+		audience.sendActionBar(message);
 	}
 	
 	/**
@@ -151,7 +152,8 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	 * @param times title timings (fade-in -> static -> fade-out)
 	 */
 	public void showTitle(@NotNull Component title, @NotNull Component subtitle, @NotNull Times times) {
-		this.plugin.adventure().player(this.player).showTitle(Title.title(title, subtitle, times));
+		Audience audience = this.player instanceof Audience ? this.player : this.plugin.adventure().player(this.player);
+		audience.showTitle(Title.title(title, subtitle, times));
 	}
 	
 	/**
@@ -166,9 +168,9 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	 */
 	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
 		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, new HashSet<>(Arrays.asList(flags)));
-		final Audience a = this.plugin.adventure().player(player);
-		a.showBossBar(bar);
-		plugin.getTaskManager().runTaskLater(() -> a.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
+		Audience audience = this.player instanceof Audience ? this.player : this.plugin.adventure().player(this.player);
+		audience.showBossBar(bar);
+		plugin.getTaskManager().runTaskLater(() -> audience.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
 	}
 	
 

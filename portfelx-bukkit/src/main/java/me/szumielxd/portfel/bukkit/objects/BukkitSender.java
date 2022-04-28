@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.common.Lang;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -63,7 +64,8 @@ public class BukkitSender implements CommonSender {
 	 * @param message message to send
 	 */
 	public void sendMessage(@NotNull Component message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(message);
+		Audience audience = this.sender instanceof Audience ? this.sender : this.plugin.adventure().sender(this.sender);
+		audience.sendMessage(message);
 	}
 	
 	/**
@@ -72,7 +74,8 @@ public class BukkitSender implements CommonSender {
 	 * @param message message to send
 	 */
 	public void sendMessage(@NotNull Component... message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(Component.empty().children(Arrays.asList(message)));
+		Audience audience = this.sender instanceof Audience ? this.sender : this.plugin.adventure().sender(this.sender);
+		audience.sendMessage(Component.empty().children(Arrays.asList(message)));
 	}
 	
 	/**
@@ -81,7 +84,8 @@ public class BukkitSender implements CommonSender {
 	 * @param message message to translate and send
 	 */
 	public void sendTranslated(@NotNull Component message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(message));
+		Audience audience = this.sender instanceof Audience ? this.sender : this.plugin.adventure().sender(this.sender);
+		audience.sendMessage(Lang.get(this).translateComponent(message));
 	}
 	
 	/**
@@ -90,7 +94,8 @@ public class BukkitSender implements CommonSender {
 	 * @param message message to translate and send
 	 */
 	public void sendTranslated(@NotNull Component... message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(Component.empty().children(Arrays.asList(message))));
+		Audience audience = this.sender instanceof Audience ? this.sender : this.plugin.adventure().sender(this.sender);
+		audience.sendMessage(Lang.get(this).translateComponent(Component.empty().children(Arrays.asList(message))));
 	}
 	
 	/**
