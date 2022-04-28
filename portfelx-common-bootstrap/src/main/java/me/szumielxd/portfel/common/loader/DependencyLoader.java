@@ -167,7 +167,7 @@ public class DependencyLoader {
 			if (entry == null) return false;
 			try (InputStream is = jar.getInputStream(entry)) {
 				byte[] checksum = new byte[is.available()];
-				is.read(checksum);
+				if (is.read(checksum) == 0) return false;
 				return dependency.getMd5().equals(new String(checksum, StandardCharsets.UTF_8));
 			}
 		} catch (IOException e) {
@@ -242,7 +242,7 @@ public class DependencyLoader {
 				DocumentBuilder builder = factory.newDocumentBuilder();
 				Document xml = builder.parse(conn.getInputStream());
 				Element versioning = (Element) xml.getElementsByTagName("versioning").item(0);
-				Element snapshots = ((Element) xml.getElementsByTagName("snapshotVersions").item(0));
+				Element snapshots = (Element) xml.getElementsByTagName("snapshotVersions").item(0);
 				if (snapshots != null) {
 					NodeList nodes = snapshots.getElementsByTagName("snapshotVersion");
 					String lastUpdated = versioning.getElementsByTagName("timestamp").item(0).getTextContent().replace(".", "");
