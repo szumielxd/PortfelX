@@ -21,7 +21,7 @@ public class JarClassLoader extends URLClassLoader {
 	
 	public void appendUrls(@NotNull URL... urls) {
 		Stream.of(urls).forEachOrdered(obj -> Objects.requireNonNull(obj, "urls array cannot contain null elements."));
-		Stream.of(urls).forEachOrdered(url -> this.addURL(url));
+		Stream.of(urls).forEachOrdered(this::addURL);
 	}
 
 }
