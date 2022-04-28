@@ -32,8 +32,8 @@
 			<artifactId>rgxgen</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot-api</artifactId>
+			<groupId>io.papermc.paper</groupId>
+			<artifactId>paper-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

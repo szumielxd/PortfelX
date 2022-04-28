@@ -175,27 +175,15 @@
 			<dependency>
 				<groupId>net.kyori</groupId>
 				<artifactId>adventure-text-serializer-legacy</artifactId>
-				<version>4.10.0</version>
+				<version>4.8.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>net.kyori</groupId>
 				<artifactId>adventure-text-serializer-gson</artifactId>
-				<version>4.10.0</version>
+				<version>4.8.0</version>
 				<scope>provided</scope>
 			</dependency>
-			<!--dependency>
-				<groupId>net.kyori</groupId>
-				<artifactId>adventure-platform-api</artifactId>
-				<version>4.0.0-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency-->
-			<!--dependency>
-				<groupId>net.kyori</groupId>
-				<artifactId>adventure-text-serializer-bungeecord</artifactId>
-				<version>4.0.0-SNAPSHOT</version>
-				<scope>provided</scope>
-			</dependency-->
 			
 			<dependency>
 				<groupId>com.github.curious-odd-man</groupId>
@@ -216,7 +204,7 @@
 			<dependency>
 				<groupId>me.carleslc.Simple-YAML</groupId>
 				<artifactId>Simple-Yaml</artifactId>
-				<version>1.7.1</version>
+				<version>1.8</version>
 				<scope>provided</scope>
 			</dependency>
 			
@@ -265,9 +253,9 @@
 			
 			<!-- Spigot -->
 			<dependency>
-				<groupId>org.spigotmc</groupId>
-				<artifactId>spigot-api</artifactId>
-				<version>1.8.8-R0.1-SNAPSHOT</version>
+				<groupId>io.papermc.paper</groupId>
+				<artifactId>paper-api</artifactId>
+				<version>1.18.2-R0.1-SNAPSHOT</version>
 				<scope>provided</scope>
 				<exclusions>
 					<exclusion>
@@ -495,18 +483,22 @@
 								<pattern>org.objectweb</pattern>
 								<shadedPattern>${package}.lib.org.objectweb</shadedPattern>
 							</relocation>
-							<relocation>
+							<!--relocation>
 								<pattern>com.google.gson</pattern>
 								<shadedPattern>${package}.lib.com.google.gson</shadedPattern>
-							</relocation>
+							</relocation-->
 							<relocation>
-								<pattern>net.kyori.platform</pattern>
+								<pattern>net.kyori.adventure.platform</pattern>
 								<shadedPattern>${package}.lib.net.kyori.adventure.platform</shadedPattern>
 							</relocation>
 							<relocation>
 								<pattern>net.kyori.examination</pattern>
 								<shadedPattern>${package}.lib.net.kyori.adventure.examination</shadedPattern>
 							</relocation>
+							<!--relocation>
+								<pattern>net.kyori.adventure.text.serializer</pattern>
+								<shadedPattern>${package}.lib.net.kyori.adventure.text.serializer</shadedPattern>
+							</relocation-->
 							<relocation>
 								<pattern>org.simpleyaml</pattern>
 								<shadedPattern>${package}.lib.org.simpleyaml</shadedPattern>
@@ -532,7 +524,7 @@
 							</relocation>
 							<relocation>
 								<pattern>@version@</pattern>
-								<shadedPattern>${version}</shadedPattern>
+								<shadedPattern>${project.version}</shadedPattern>
 							</relocation>
 							<relocation>
 								<pattern>@author@</pattern>
@@ -540,7 +532,7 @@
 							</relocation>
 							<relocation>
 								<pattern>@description@</pattern>
-								<shadedPattern>${description}</shadedPattern>
+								<shadedPattern>${project.description}</shadedPattern>
 							</relocation>
 						</relocations>
 					</configuration>
