@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -175,7 +176,7 @@ public class DependencyLoader {
 	}
 	
 	
-	private void download(@NotNull CommonDependency dependency) throws MalformedURLException, IOException {
+	private void download(@NotNull CommonDependency dependency) throws IOException {
 		this.plugin.getCommonLogger().info(String.format("Downloading %s lib...", dependency.getArtifactId()));
 		long start = System.currentTimeMillis();
 		Path cache = Paths.get(REPO_CACHE_DIR.toString(), UUID.randomUUID().toString());
@@ -184,13 +185,13 @@ public class DependencyLoader {
 			out.getChannel().transferFrom(ch, 0, Long.MAX_VALUE);
 			Path destPath = Paths.get(REPO_DIR.toString(), dependency.getFileName());
 			new JarRelocator(cache.toFile(), destPath.toFile(), Stream.of(dependency.getGroupPaths()).collect(Collectors.toMap(Function.identity(), path -> LIBS_PATH + ".lib." + path))).run();
-			try (FileSystem jar = FileSystems.newFileSystem(URI.create("jar:" + destPath.toString()), Collections.singletonMap("create", "true"))) {
+			try (FileSystem jar = FileSystems.newFileSystem(URI.create("jar:" + destPath.toFile().toURI()), Collections.singletonMap("create", "true"))) {
 				try (Writer writer = Files.newBufferedWriter(jar.getPath("checksum.md5"), StandardCharsets.UTF_8, StandardOpenOption.CREATE)) {
 					writer.write(dependency.getMd5());
 				}
 			}
 		}
-		this.plugin.getCommonLogger().info(String.format("Successfully downloaded %s! (%s ms)", dependency.getArtifactId(), System.currentTimeMillis() - start));
+		this.plugin.getCommonLogger().info("Successfully downloaded %s! (%s ms)", dependency.getArtifactId(), System.currentTimeMillis() - start);
 	}
 	
 	
@@ -201,7 +202,7 @@ public class DependencyLoader {
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
-		dependencies.parallelStream().map(d -> {
+		dependencies.stream().map(d -> {
 			try {
 				return Paths.get(REPO_DIR.toString(), d.getFileName()).toUri().toURL();
 			} catch (MalformedURLException e) {
@@ -219,7 +220,7 @@ public class DependencyLoader {
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
-		dependencies.parallelStream().map(d -> {
+		dependencies.stream().map(d -> {
 			try {
 				return Paths.get(REPO_DIR.toString(), d.getFileName()).toUri().toURL();
 			} catch (MalformedURLException e) {
@@ -235,7 +236,10 @@ public class DependencyLoader {
 			HttpURLConnection conn = (HttpURLConnection) new URL(dependency.getDownloadPath() + "maven-metadata.xml").openConnection();
 			conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Safari/537.36 OPR/83.0.4254.66");
 			if (conn.getResponseCode() == 200) {
-				DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+				DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+				factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+				factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+				DocumentBuilder builder = factory.newDocumentBuilder();
 				Document xml = builder.parse(conn.getInputStream());
 				Element versioning = (Element) xml.getElementsByTagName("versioning").item(0);
 				Element snapshots = ((Element) xml.getElementsByTagName("snapshotVersions").item(0));
@@ -245,12 +249,10 @@ public class DependencyLoader {
 					for (int i = 0; i < nodes.getLength(); i++) {
 						if (nodes.item(i).getNodeType() == Node.ELEMENT_NODE) {
 							Element version = (Element) nodes.item(i);
-							if (version.getElementsByTagName("extension").item(0).getTextContent().equals("jar")) {
-								if (version.getElementsByTagName("updated").item(0).getTextContent().equals(lastUpdated)) {
-									if (version.getElementsByTagName("classifier").getLength() == 0) {
-										return dependency.getDownloadPath() + dependency.getArtifactId() + "-" + version.getElementsByTagName("value").item(0).getTextContent() + ".jar";
-									}
-								}
+							if (version.getElementsByTagName("extension").item(0).getTextContent().equals("jar")
+								&& version.getElementsByTagName("updated").item(0).getTextContent().equals(lastUpdated)
+								&& version.getElementsByTagName("classifier").getLength() == 0) {
+									return dependency.getDownloadPath() + dependency.getArtifactId() + "-" + version.getElementsByTagName("value").item(0).getTextContent() + ".jar";
 							}
 						}
 					}
