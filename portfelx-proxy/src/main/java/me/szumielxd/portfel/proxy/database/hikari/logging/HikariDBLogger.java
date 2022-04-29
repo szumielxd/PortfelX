@@ -19,8 +19,8 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Objects;
 
-import me.szumielxd.portfel.api.Config;
 import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
 import me.szumielxd.portfel.api.objects.User;

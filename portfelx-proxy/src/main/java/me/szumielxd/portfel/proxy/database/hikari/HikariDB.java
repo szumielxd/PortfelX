@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.szumielxd.portfel.api.Config;
+import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;

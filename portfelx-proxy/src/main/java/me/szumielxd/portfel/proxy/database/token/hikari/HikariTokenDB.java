@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import me.szumielxd.portfel.api.Config;
+import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;

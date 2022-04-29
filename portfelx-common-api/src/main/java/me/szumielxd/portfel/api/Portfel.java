@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.TopManager;
