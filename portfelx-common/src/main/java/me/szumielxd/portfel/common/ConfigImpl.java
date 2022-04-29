@@ -11,11 +11,10 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
-import org.simpleyaml.exceptions.InvalidConfigurationException;
 
-import me.szumielxd.portfel.api.Config;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
+import me.szumielxd.portfel.api.configuration.Config;
 
 public class ConfigImpl implements Config {
 	
@@ -40,7 +39,7 @@ public class ConfigImpl implements Config {
 		try {
 			this.yaml.createOrLoadWithComments();
 			this.yaml.save();
-		} catch (IOException | InvalidConfigurationException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return this;
