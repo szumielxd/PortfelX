@@ -17,8 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.MemoryConfiguration;
 import org.simpleyaml.configuration.file.YamlFile;
-import org.simpleyaml.exceptions.InvalidConfigurationException;
-
 import com.google.gson.Gson;
 
 import me.szumielxd.portfel.api.Portfel;
@@ -96,7 +94,7 @@ public class PrizesManager {
 						+ "For instance `$1` will be replaced with matcher section with number 1");
 				yaml.save();
 			}
-		} catch (IOException | InvalidConfigurationException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
