@@ -3,6 +3,7 @@ package me.szumielxd.portfel.bukkit.api.managers;
 import java.util.List;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.api.objects.User;
@@ -51,7 +52,7 @@ public interface ChannelManager {
 	 * @param order order to complete
 	 * @return transaction, with completed state on success
 	 */
-	public @NotNull Transaction requestTransaction(@NotNull Player player, @NotNull OrderDataOnAir order);
+	public @Nullable Transaction requestTransaction(@NotNull Player player, @NotNull OrderDataOnAir order);
 	
 
 }
