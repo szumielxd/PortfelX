@@ -12,9 +12,9 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.api.Config;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
+import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
