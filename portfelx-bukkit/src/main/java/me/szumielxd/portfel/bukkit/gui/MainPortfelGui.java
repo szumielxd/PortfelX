@@ -11,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.Range;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -19,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import com.google.common.collect.Range;
 import com.google.common.collect.Sets;
 
 import me.szumielxd.portfel.api.objects.User;
@@ -38,7 +38,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	
 	
 	static {
-		try { BACKGROUND = new ItemStack(Material.getMaterial("STAINED_GLASS_PANE"), 1, (byte)15); } catch (NullPointerException e) { BACKGROUND = new ItemStack(Material.getMaterial("BLACK_STAINED_GLASS_PANE")); }; {
+		try { BACKGROUND = new ItemStack(Material.valueOf("STAINED_GLASS_PANE"), 1, (byte)15); } catch (Exception e) { BACKGROUND = new ItemStack(Material.BLACK_STAINED_GLASS_PANE); }; {
 			ItemMeta meta = BACKGROUND.getItemMeta();
 			meta.setDisplayName("§0");
 			BACKGROUND.setItemMeta(meta);
@@ -52,7 +52,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	
 	public MainPortfelGui(PortfelBukkitImpl plugin, OrderPortfelGui... shops) {
 		this.plugin = plugin;
-		Range<Integer> range = Range.between(0, this.getSize()-1);
+		Range<Integer> range = Range.closed(0, this.getSize()-1);
 		this.guis = Stream.of(shops).filter(s -> range.contains(s.getSlot())).collect(Collectors.toMap(s -> s.getSlot(), Function.identity(), (a,b) -> b));
 	}
 	
