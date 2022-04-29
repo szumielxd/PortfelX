@@ -320,7 +320,7 @@ public class ChannelManagerImpl implements ChannelManager {
 					String username = in.readUTF(); // username
 					long balance = in.readLong(); // balance
 					boolean deniedInTop = in.readBoolean(); // deniedInTop
-					user = new BukkitOperableUser(this.plugin, uuid, username, online, deniedInTop, balance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
+					user = new BukkitOperableUser(this.plugin, uuid, username, true, deniedInTop, balance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
 				} else {
 					user.setName(in.readUTF()); // username
 					user.setPlainBalance(in.readLong()); // balance
