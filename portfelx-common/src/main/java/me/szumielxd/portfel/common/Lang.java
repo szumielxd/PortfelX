@@ -140,6 +140,9 @@ public class Lang {
 		
 		COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
 		//
+		COMMAND_TESTMODE_DESCRIPTION("command.testmode.decription", "Toggle your test-mode state. When toggled on, allows you to purchase orders without charge. Disabled on disconnect."),
+		COMMAND_TESTMODE_EXECUTE("command.testmode.execute", "You've toggled {0} portfel test-mode."),
+		//
 		COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
 		//
 		COMMAND_SYSTEM_RELOAD_DESCRIPTION("command.system.reload.description", "Reload partially plugin's configuration."),
@@ -293,6 +296,8 @@ public class Lang {
 		MAIN_VALUE_FALSE("main.value.false", "false"),
 		MAIN_VALUE_YES("main.value.yes", "yes"),
 		MAIN_VALUE_NO("main.value.no", "no"),
+		MAIN_VALUE_ON("main.value.on", "on"),
+		MAIN_VALUE_OFF("main.value.off", "off"),
 		MAIN_VALUE_ONLINE("main.value.online", "Online"),
 		MAIN_VALUE_OFFLINE("main.value.offline", "Offline"),
 		MAIN_VALUE_TIME_MINUTES("main.value.time.minutes", "{0}m"),

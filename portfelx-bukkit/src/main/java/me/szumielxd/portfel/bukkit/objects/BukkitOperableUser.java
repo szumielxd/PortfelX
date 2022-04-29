@@ -14,6 +14,8 @@ public class BukkitOperableUser extends User {
 	
 	
 	private final PortfelBukkitImpl plugin;
+	private boolean testmode = false;
+	
 	/**
 	 * Real hero and true worker of user instance.
 	 * 
@@ -122,6 +124,32 @@ public class BukkitOperableUser extends User {
 	 */
 	public void setRemoteId(@NotNull UUID proxyId) {
 		this.remoteId = proxyId;
+	}
+	
+	/**
+	 * Set user's test-mode status.
+	 * 
+	 * @param testmode status of user's test-mode
+	 */
+	public void setTestmode(boolean testmode) {
+		this.testmode = testmode;
+	}
+	
+	/**
+	 * Toggle user's test-mode status.
+	 * 
+	 * @return new test-mode status
+	 */
+	public boolean toggleTestMode() {
+		this.testmode = !this.testmode;
+		return this.testmode;
+	}
+	
+	/**
+	 * Get user's test-mode status.
+	 */
+	public boolean inTestmode() {
+		return this.testmode;
 	}
 	
 	/**

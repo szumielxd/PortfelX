@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -115,13 +116,13 @@ public class TransactionImpl implements Transaction {
 		};
 		
 		// broadcast
-		Audience all = this.plugin.adventure().all();
+		Audience all = this.plugin.getServer() instanceof Audience ? this.plugin.getServer() : this.plugin.adventure().all();
 		this.getOrder().getBroadcast().forEach(msg -> {
 			all.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer));
 		});
 		
 		// message
-		Audience player = this.plugin.adventure().player(user.getUniqueId());
+		Audience player = Audience.class.isAssignableFrom(Player.class) ? Bukkit.getPlayer(user.getUniqueId()) : this.plugin.adventure().player(user.getUniqueId());
 		this.getOrder().getMessage().forEach(msg -> {
 			player.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer));
 		});
