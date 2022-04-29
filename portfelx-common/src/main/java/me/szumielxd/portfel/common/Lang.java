@@ -285,6 +285,8 @@ public class Lang {
 		LOG_VALUE_OLD_BALANCE("log.value.old-balance", "Old balance: {0}"),
 		LOG_VALUE_DATE("log.value.date", "Date: {0}"),
 		
+		TESTMODE_NOTIFICATION("testmode.notification", "You're in test-mode, all your transactions are completed without taking charge. Remember to disable test-mode after all done."),
+		
 		MAIN_VALUENAME_DESCRIPTION("main.value-name.description", "Description:"),
 		MAIN_VALUENAME_ALIASES("main.value-name.aliases", "Aliases:"),
 		MAIN_VALUENAME_ENABLED("main.value-name.enabled", "Enabled:"),
@@ -292,6 +294,7 @@ public class Lang {
 		MAIN_VALUENAME_PERMISSION("main.value-name.permission", "Permission:"),
 		
 		MAIN_CURRENCY_FORMAT("main.currrency.format", "${0}"),
+		MAIN_WARNING("main.warning", "WARNING: {0}"),
 		MAIN_VALUE_TRUE("main.value.true", "true"),
 		MAIN_VALUE_FALSE("main.value.false", "false"),
 		MAIN_VALUE_YES("main.value.yes", "yes"),

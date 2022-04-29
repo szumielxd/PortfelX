@@ -23,6 +23,7 @@ public class UserListener implements Listener {
 		BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(event.getPlayer().getUniqueId());
 		if (user != null) {
 			user.setOnline(false);
+			user.setTestmode(false);
 		}
 		this.plugin.getChannelManager().ensureNotTopRequestSource(event.getPlayer());
 		this.plugin.getChannelManager().ensureNotUserUpdating(event.getPlayer());

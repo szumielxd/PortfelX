@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.CompletableFuture;
@@ -32,6 +34,7 @@ import java.util.stream.IntStream;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListenerRegistration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -50,7 +53,15 @@ import me.szumielxd.portfel.bukkit.api.objects.Transaction;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction.TransactionResult;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.TransactionImpl;
+import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.format.TextDecoration.State;
+
+import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class ChannelManagerImpl implements ChannelManager {
 	
@@ -62,7 +73,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	private final PluginMessageListenerRegistration setup;
 	private final PluginMessageListenerRegistration transactions;
 	private final PluginMessageListenerRegistration users;
-	private String BUNGEE_CHANNEL;
+	private static String BUNGEE_CHANNEL;
 	
 	
 	public ChannelManagerImpl(@NotNull PortfelBukkitImpl plugin) {
@@ -523,12 +534,18 @@ public class ChannelManagerImpl implements ChannelManager {
 	 * @return transaction, with completed state on success
 	 */
 	@Override
-	public @NotNull Transaction requestTransaction(@NotNull Player player, @NotNull OrderDataOnAir order) {
+	public @Nullable Transaction requestTransaction(@NotNull Player player, @NotNull OrderDataOnAir order) {
 		UUID transactionId = UUID.randomUUID();
 		try {
 			User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
 			if (user == null) return null;
 			Transaction trans = new TransactionImpl(this.plugin, user, transactionId, order);
+			if (user instanceof BukkitOperableUser && ((BukkitOperableUser)user).inTestmode()) {
+				Audience audience = player instanceof Audience ? (Audience) player : this.plugin.adventure().player(player);
+				audience.sendMessage(Portfel.PREFIX.append(LangKey.MAIN_WARNING.component(DARK_RED, new HashSet<>(Arrays.asList(TextDecoration.BOLD)), LangKey.TESTMODE_NOTIFICATION.component(Style.style(TextDecoration.BOLD.withState(false)).color(RED)))));
+				trans.finish(new TransactionResult(transactionId, TransactionStatus.OK, user.getBalance(), 0, null));
+				return trans;
+			}
 			CompletableFuture<TransactionResult> future = new CompletableFuture<>();
 			this.waitingTransactions.put(transactionId, new SimpleEntry<>(trans, future));
 			this.sendTransaction(player, trans);
