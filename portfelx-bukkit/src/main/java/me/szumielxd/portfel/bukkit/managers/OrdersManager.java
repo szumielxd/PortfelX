@@ -24,8 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
-import org.simpleyaml.exceptions.InvalidConfigurationException;
-
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.objects.DoneCondition;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData;
@@ -97,7 +95,7 @@ public class OrdersManager {
 			List<OrderData> orders = section.getKeys(false).stream().filter(section::isConfigurationSection).map(section::getConfigurationSection).map(this::loadOrder).filter(Objects::nonNull).collect(Collectors.toList());
 			String id = file.getName().substring(0, file.getName().length()-4);
 			this.categories.put(id.toLowerCase(), new OrderPortfelGui(this.plugin, id, title, slot, rows, name, description, icon, type, orders));
-		} catch (NullPointerException | InvalidConfigurationException | IOException e) {
+		} catch (NullPointerException | IOException e) {
 			this.plugin.getLogger().warn(e, "Cannot load orders category from file %s", file.getName());
 		}
 	}
