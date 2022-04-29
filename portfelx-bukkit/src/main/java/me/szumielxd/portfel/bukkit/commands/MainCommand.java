@@ -31,14 +31,15 @@ public class MainCommand implements AbstractCommand, TabExecutor {
 	private final PortfelBukkitImpl plugin;
 	private final PluginCommand command;
 	private Map<String, SimpleCommand> childrens = new HashMap<>();
-	private final String help = "help";
+	private static final String HELP = "help";
 	
 	
 	public MainCommand(@NotNull PortfelBukkitImpl plugin, @NotNull PluginCommand command) {
 		this.plugin = plugin;
 		this.command = command;
 		this.register(
-				new HelpCommand(plugin, this, help),
+				new HelpCommand(plugin, this, HELP),
+				new TestmodeCommand(plugin, this, "testmode"),
 				new SystemParentCommand(plugin, this)
 		);
 	}
@@ -54,7 +55,7 @@ public class MainCommand implements AbstractCommand, TabExecutor {
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		if (args.length == 0) args = new String[] { "" };
 		SimpleCommand cmd = this.childrens.get(args[0].toLowerCase());
-		if (cmd == null) cmd = this.childrens.get(this.help);
+		if (cmd == null) cmd = this.childrens.get(HELP);
 		if (!cmd.hasPermission(sender)) {
 			sender.sendMessage(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_PERMISSION.component(RED)));
 			return;
@@ -63,7 +64,6 @@ public class MainCommand implements AbstractCommand, TabExecutor {
 			return;
 		}
 		cmd.onCommand(sender, parsedArgs, MiscUtils.mergeArrays(label, args[0]), MiscUtils.popArray(args));
-		return;
 	}
 
 	@Override
