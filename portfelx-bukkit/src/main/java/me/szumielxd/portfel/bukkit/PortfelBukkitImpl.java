@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -23,9 +24,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
 
-import me.szumielxd.portfel.api.Config;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
+import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
@@ -85,6 +86,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	
 	public PortfelBukkitImpl(@NotNull PortfelBukkitBootstrap bootstrap) {
 		this.bootstrap = Objects.requireNonNull(bootstrap, "bootstrap cannot be null");
+		this.server = new BukkitServer(this);
 	}
 	
 	
@@ -101,14 +103,15 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	
 	@Override
 	public void onEnable() {
-		if (ValidateAccess.checkAccess() == false) {
+		if (!ValidateAccess.checkAccess()) {
 			this.getLogger().warn("You have no power here. Die potato!");
 			this.getServer().getPluginManager().disablePlugin(this.asPlugin());
 			return;
 		}
 		PortfelProvider.register(this);
-		this.server = new BukkitServer(this);
-		this.adventure = BukkitAudiences.create(this.asPlugin());
+		try {
+			this.adventure = BukkitAudiences.create(this.asPlugin());
+		} catch (NoSuchFieldError e) {} // older kyori version, let my try to hook into paper native kyori support
 		this.taskManager = new BukkitTaskManagerImpl(this);
 		
 		this.load();
@@ -188,10 +191,10 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		try {
 			Field f = Class.forName("net.kyori.adventure.platform.bukkit.BukkitAudiencesImpl").getDeclaredField("INSTANCES");
 			f.setAccessible(true);
-			Map<?, ?> INSTANCES = (Map<?, ?>) f.get(null);
-			INSTANCES.remove(this.asPlugin().getDescription().getName());
+			Map<?, ?> instances = (Map<?, ?>) f.get(null);
+			instances.remove(this.asPlugin().getDescription().getName());
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			e.printStackTrace();
+			
 		}
 		this.getLogger().info("Unregistering commands");
 		try {
@@ -311,15 +314,14 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	}
 	
 	
-	private PluginCommand getPluginCommand(String name) {
+	private @NotNull PluginCommand getPluginCommand(String name) {
 		try {
 			Constructor<PluginCommand> constr = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
 			constr.setAccessible(true);
 			return constr.newInstance(name, this.asPlugin());
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
-		return null;
 	}
 	
 	private void sendMotd() {
@@ -340,14 +342,18 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 			} catch (IllegalArgumentException | IOException e) {
 				e.printStackTrace();
 				File to = new File(this.getDataFolder(), "server-key.dat.broken");
-				if (to.exists()) to.delete();
-				f.renameTo(to);
+				try {
+					Files.move(f.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e1) {
+					throw new RuntimeException(e1);
+				}
 			}
 		}
 		try {
 			File parent = f.getParentFile();
 			if (!parent.exists()) parent.mkdirs();
-			Files.write(f.toPath(), (this.serverHashKey = new RgxGen("[a-zA-Z0-9]{16}").generate()).getBytes(StandardCharsets.US_ASCII));
+			this.serverHashKey = new RgxGen("[a-zA-Z0-9]{16}").generate();
+			Files.write(f.toPath(), this.serverHashKey.getBytes(StandardCharsets.US_ASCII));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
