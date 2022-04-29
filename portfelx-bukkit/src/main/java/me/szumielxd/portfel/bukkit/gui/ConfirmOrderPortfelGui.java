@@ -28,8 +28,8 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 	
 	
 	static {
-		try { ACCEPT = new ItemStack(Material.getMaterial("WOOL"), 1, (byte)5); } catch (NullPointerException e) { ACCEPT = new ItemStack(Material.getMaterial("LIME_WOOL")); };
-		try { REJECT = new ItemStack(Material.getMaterial("WOOL"), 1, (byte)14); } catch (NullPointerException e) { REJECT = new ItemStack(Material.getMaterial("RED_WOOL")); };
+		try { ACCEPT = new ItemStack(Material.valueOf("WOOL"), 1, (byte)5); } catch (Exception e) { ACCEPT = new ItemStack(Material.getMaterial("LIME_WOOL")); };
+		try { REJECT = new ItemStack(Material.valueOf("WOOL"), 1, (byte)14); } catch (Exception e) { REJECT = new ItemStack(Material.getMaterial("RED_WOOL")); };
 	}
 	
 	
