@@ -1,10 +1,8 @@
-package me.szumielxd.portfel.api;
+package me.szumielxd.portfel.api.configuration;
 
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
-
-import me.szumielxd.portfel.api.configuration.AbstractKey;
 
 public interface Config {
 	
