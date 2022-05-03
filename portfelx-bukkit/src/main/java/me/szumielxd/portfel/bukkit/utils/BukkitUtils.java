@@ -58,9 +58,9 @@ public class BukkitUtils {
 	public static void setDisplayName(@NotNull ItemMeta meta, @Nullable Component display) {
 		Objects.requireNonNull(meta, "meta cannot be null");
 		try {
-			if (ITEMMETA_DISPLAYNAME != null) ITEMMETA_DISPLAYNAME.invoke(meta, KyoriUtils.toCommonKyori(display));
-			else if (ITEMMETA_SETDISPLAYNAMECOMPONENT != null) ITEMMETA_SETDISPLAYNAMECOMPONENT.invoke(meta, (Object) BUNGEE.serialize(display));
-			else ITEMMETA_SETDISPLAYNAME.invoke(meta, LEGACY.serialize(display));
+			if (ITEMMETA_DISPLAYNAME != null) ITEMMETA_DISPLAYNAME.invoke(meta, display == null ? null : KyoriUtils.toCommonKyori(display));
+			else if (ITEMMETA_SETDISPLAYNAMECOMPONENT != null) ITEMMETA_SETDISPLAYNAMECOMPONENT.invoke(meta, display == null ? null : (Object) BUNGEE.serialize(display));
+			else ITEMMETA_SETDISPLAYNAME.invoke(meta, display == null ? null : LEGACY.serialize(display));
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
