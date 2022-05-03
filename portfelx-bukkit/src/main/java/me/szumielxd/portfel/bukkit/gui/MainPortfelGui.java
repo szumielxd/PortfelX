@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,7 +25,7 @@ import com.google.common.collect.Sets;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
-import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
+import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
@@ -50,7 +51,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	private final Map<Integer, OrderPortfelGui> guis;
 	
 	
-	public MainPortfelGui(PortfelBukkitImpl plugin, OrderPortfelGui... shops) {
+	public MainPortfelGui(@NotNull PortfelBukkitImpl plugin, @NotNull OrderPortfelGui... shops) {
 		this.plugin = plugin;
 		Range<Integer> range = Range.closed(0, this.getSize()-1);
 		this.guis = Stream.of(shops).filter(s -> range.contains(s.getSlot())).collect(Collectors.toMap(s -> s.getSlot(), Function.identity(), (a,b) -> b));
@@ -58,9 +59,10 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	
 
 	@Override
-	public @NotNull Component getTitle(User user, @NotNull Player player) {
-		Lang lang = player != null ? Lang.get(BukkitPlayer.wrap(this.plugin, player)) : Lang.def();
-		return lang.translateComponent(LangKey.SHOP_TITLE.component(DARK_PURPLE, Sets.newHashSet(BOLD), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Sets.newHashSet(BOLD), Component.text(user.getBalance()))));
+	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player) {
+		Objects.requireNonNull(user, "user cannot be null");
+		Objects.requireNonNull(player, "player cannot be null");
+		return Lang.get(BukkitSender.wrap(this.plugin, player)).translateComponent(LangKey.SHOP_TITLE.component(DARK_PURPLE, Sets.newHashSet(BOLD), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Sets.newHashSet(BOLD), Component.text(user.getBalance()))));
 	}
 
 	@Override

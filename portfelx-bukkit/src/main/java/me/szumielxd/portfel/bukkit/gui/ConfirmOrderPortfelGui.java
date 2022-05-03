@@ -3,6 +3,7 @@ package me.szumielxd.portfel.bukkit.gui;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
-import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
+import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
@@ -44,8 +45,10 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 
 
 	@Override
-	public @NotNull Component getTitle(User user, @NotNull Player player) {
-		return (player != null ? Lang.get(BukkitPlayer.wrap(this.plugin, player)) : Lang.def()).translateComponent(LangKey.SHOP_CONFIRM_TITLE.component(AQUA, LangKey.MAIN_CURRENCY_FORMAT.component(Component.text(this.order.getPrice()))));
+	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player) {
+		Objects.requireNonNull(user, "user cannot be null");
+		Objects.requireNonNull(player, "player cannot be null");
+		return Lang.get(BukkitSender.wrap(this.plugin, player)).translateComponent(LangKey.SHOP_CONFIRM_TITLE.component(AQUA, LangKey.MAIN_CURRENCY_FORMAT.component(Component.text(this.order.getPrice()))));
 	}
 
 
@@ -64,8 +67,8 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 
 	@Override
 	public void setup(@NotNull Player player, @NotNull Inventory inventory) {
-		inventory.clear();
-		Lang lang = player != null ? Lang.get(BukkitPlayer.wrap(this.plugin, player)) : Lang.def();
+		Objects.requireNonNull(inventory, "inventory cannot be null").clear();
+		Lang lang = Lang.get(BukkitSender.wrap(this.plugin, Objects.requireNonNull(player, "player cannot be null")));
 		
 		ItemStack reject = REJECT.clone(); {
 			ItemMeta meta = reject.getItemMeta();

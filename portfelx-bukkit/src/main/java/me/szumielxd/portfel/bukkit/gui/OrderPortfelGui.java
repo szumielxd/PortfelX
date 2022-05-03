@@ -99,27 +99,25 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		OrderData order = this.orders.get(slot);
 		if (order != null) {
 			User user = this.plugin.getUserManager().getUser(player.getUniqueId());
-			if (user != null) {
-				if (order.isAvailableToBuy(player) && !order.isDenied(player)) {
-					long price = order.getPrice();
-					if (this.type.equals(ShopType.UPGRADE)) {
-						List<OrderData> orderList = orders.entrySet().stream().map(Entry::getValue).sorted((a,b) -> Integer.compare(a.getLevel(), b.getLevel())).collect(Collectors.toList());
-						int index = orderList.indexOf(order);
-						if (index < 0) return;
-						for (int i = index-1; i >= 0; i--) {
-							OrderData o = orderList.get(i);
-							if (!o.isAvailableToBuy(player) || o.isDenied(player)) break;
-							price += o.getPrice();
-						}
+			if (user != null && order.isAvailableToBuy(player) && !order.isDenied(player)) {
+				long price = order.getPrice();
+				if (this.type.equals(ShopType.UPGRADE)) {
+					List<OrderData> orderList = orders.entrySet().stream().map(Entry::getValue).sorted((a,b) -> Integer.compare(a.getLevel(), b.getLevel())).collect(Collectors.toList());
+					int index = orderList.indexOf(order);
+					if (index < 0) return;
+					for (int i = index-1; i >= 0; i--) {
+						OrderData o = orderList.get(i);
+						if (!o.isAvailableToBuy(player) || o.isDenied(player)) break;
+						price += o.getPrice();
 					}
-					if (price > user.getBalance()) {
-						Optional<Sound> sound = Stream.of(Sound.values()).filter(s -> s.name().equals("ENTITY_VILLAGER_NO")||s.name().equals("VILLAGER_NO")).findAny();
-						if (sound.isPresent()) player.playSound(player.getLocation(), sound.get(), 2, 1);
-						return;
-					}
-					PortfelGuiHolder newHolder = new PortfelGuiHolder(this.plugin, new ConfirmOrderPortfelGui(this.plugin, order.onAirWithPrice(price)), user, player);
-					newHolder.getGui().setup(player, newHolder.getInventory());
 				}
+				if (price > user.getBalance()) {
+					Optional<Sound> sound = Stream.of(Sound.values()).filter(s -> s.name().equals("ENTITY_VILLAGER_NO")||s.name().equals("VILLAGER_NO")).findAny();
+					if (sound.isPresent()) player.playSound(player.getLocation(), sound.get(), 2, 1);
+					return;
+				}
+				PortfelGuiHolder newHolder = new PortfelGuiHolder(this.plugin, new ConfirmOrderPortfelGui(this.plugin, order.onAirWithPrice(price)), user, player);
+				newHolder.getGui().setup(player, newHolder.getInventory());
 			}
 		}
 	}
@@ -187,7 +185,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		
 		long fullPrice = order.getPrice();
 		long price = order.getPrice();
-		List<Component> discounts = new ArrayList<>();{
+		List<Component> discounts = new ArrayList<>(); {
 			boolean done = false;
 			Component prefix = Component.text(" ┗╸ ");
 			for (int i = orderIndex-1; i >= 0; i--) {

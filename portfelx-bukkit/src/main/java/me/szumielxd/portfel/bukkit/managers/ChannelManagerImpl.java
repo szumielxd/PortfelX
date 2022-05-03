@@ -39,8 +39,6 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.google.gson.Gson;
-
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.enums.TransactionStatus;
 import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
@@ -56,11 +54,8 @@ import me.szumielxd.portfel.bukkit.objects.TransactionImpl;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.format.TextDecoration.State;
-
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class ChannelManagerImpl implements ChannelManager {
@@ -264,13 +259,13 @@ public class ChannelManagerImpl implements ChannelManager {
 						Throwable throwable = null;
 						if (status.get().equals(TransactionStatus.OK)) {
 							globalOrders = din.readInt();
-						} else if (status.get().equals(TransactionStatus.OK)) {
+						}/* else if (status.get().equals(TransactionStatus.OK)) {
 							try {
 								throwable = new Gson().fromJson(din.readUTF(), Throwable.class);
 							} catch (Exception e) {
 								throwable = e;
 							}
-						}
+						}*/
 						result = new TransactionResult(transactionId, status.get(), newBalance, globalOrders, throwable);
 					}
 				}
@@ -390,7 +385,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	}
 	
 	
-	private void sendServerId(Player player) {
+	private void sendServerId(@NotNull Player player) {
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user != null) {
 			UUID serverId = this.plugin.getIdentifierManager().getComplementary(user.getRemoteId());
@@ -403,7 +398,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	}
 	
 	
-	private void sendUserRequest(Player player) {
+	private void sendUserRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("User");
 		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
@@ -452,7 +447,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	}
 	
 	
-	private void sendTopRequest(Player player) {
+	private void sendTopRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("LightTop");
 		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
@@ -506,7 +501,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	}
 	
 	
-	private void sendTransaction(Player player, Transaction transaction) {
+	private void sendTransaction(@NotNull Player player, @NotNull Transaction transaction) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("Buy"); // subchannel
 		out.writeUTF(this.plugin.getIdentifierManager().getComplementary(transaction.getUser().getRemoteId()).toString()); // serverId
