@@ -21,28 +21,32 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
+import lombok.experimental.UtilityClass;
+import me.szumielxd.portfel.common.utils.KyoriUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.chat.BaseComponent;
 
+@UtilityClass
 public class BukkitUtils {
 	
 	
-	private static Class<?> Damageable;
-	private static Method Damageable_setDamage;
-	private static Method ItemMeta_displayName;
-	private static Method ItemMeta_setDisplayNameComponent;
-	private static Method ItemMeta_setDisplayName;
+	private static final @Nullable Class<?> DAMAGEABLE_CLAZZ = Optional.of("org.bukkit.inventory.meta.Damageable").map(clazz -> { try { return Class.forName(clazz); } catch (Exception e) { return null; } }).get();
+	private static final @Nullable Method DAMAGEABLE_SETDAMAGE = Optional.ofNullable(DAMAGEABLE_CLAZZ).map(clazz -> { try { return clazz.getMethod("setDamage", Integer.TYPE); } catch (Exception e) { return null; } }).get();
 	//
-	private static Method ItemMeta_lore;
-	private static Method ItemMeta_setLoreComponents;
-	private static Method ItemMeta_setLore;
-	
+	private static final @Nullable Method ITEMMETA_DISPLAYNAME = Optional.ofNullable(KyoriUtils.COMPONENT_CLAZZ).map(clazz -> { try { return ItemMeta.class.getMethod("displayName", clazz); } catch (Exception e) { return null; } }).orElse(null);
+	private static final @Nullable Method ITEMMETA_SETDISPLAYNAMECOMPONENT = Optional.ofNullable(BaseComponent[].class).map(clazz -> { try { return ItemMeta.class.getMethod("setDisplayNameComponent", clazz); } catch (Exception e) { return null; } }).orElse(null);
+	private static final @Nullable Method ITEMMETA_SETDISPLAYNAME = Optional.ofNullable(String.class).map(clazz -> { try { return ItemMeta.class.getMethod("setDisplayName", clazz); } catch (Exception e) { return null; } }).orElse(null);
+	//
+	private static final @Nullable Method ITEMMETA_LORE = Optional.ofNullable(List.class).map(clazz -> { try { return ItemMeta.class.getMethod("lore", clazz); } catch (Exception e) { return null; } }).orElse(null);
+	private static final @Nullable Method ITEMMETA_SETLORECOMPONENTS = Optional.ofNullable(List.class).map(clazz -> { try { return ItemMeta.class.getMethod("setLoreComponents", clazz); } catch (Exception e) { return null; } }).orElse(null);
+	private static final @Nullable Method ITEMMETA_SETLORE = Optional.ofNullable(List.class).map(clazz -> { try { return ItemMeta.class.getMethod("setLore", clazz); } catch (Exception e) { return null; } }).orElse(null);
 	
 	private static final boolean LEGACY_MATERIALS = Material.getMaterial("RED_WOOL") == null;
 	private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
@@ -51,37 +55,26 @@ public class BukkitUtils {
 	private static final Function<String, Optional<ItemStack>> ITEM_PARSER = LEGACY_MATERIALS ? BukkitUtils::parseLegacyItem : BukkitUtils::parseNewItem;
 	
 	
-	static {
-		try {Damageable = Class.forName("org.bukkit.inventory.meta.Damageable");} catch (ClassNotFoundException e) {}
-		try {Damageable_setDamage = Damageable.getMethod("setDamage", Integer.TYPE);} catch (NullPointerException | NoSuchMethodException | SecurityException e) {}
-		try {ItemMeta_displayName = ItemMeta.class.getMethod("displayName", Component.class);} catch (NoSuchMethodException | SecurityException e) {}
-		try {ItemMeta_setDisplayNameComponent = ItemMeta.class.getMethod("setDisplayNameComponent", BaseComponent[].class);} catch (NoSuchMethodException | SecurityException e) {}
-		try {ItemMeta_setDisplayName = ItemMeta.class.getMethod("setDisplayName", String.class);} catch (NoSuchMethodException | SecurityException e) {}
-		//
-		try {ItemMeta_lore = ItemMeta.class.getMethod("lore", List.class);} catch (NoSuchMethodException | SecurityException e) {}
-		try {ItemMeta_setLoreComponents = ItemMeta.class.getMethod("setLoreComponents", List.class);} catch (NoSuchMethodException | SecurityException e) {}
-		try {ItemMeta_setLore = ItemMeta.class.getMethod("setLore", List.class);} catch (NoSuchMethodException | SecurityException e) {}
-	}
-	
-	
-	public static void setDisplayName(ItemMeta meta, Component display) {
+	public static void setDisplayName(@NotNull ItemMeta meta, @Nullable Component display) {
+		Objects.requireNonNull(meta, "meta cannot be null");
 		try {
-			if (ItemMeta_displayName != null) ItemMeta_displayName.invoke(meta, display);
-			else if (ItemMeta_setDisplayNameComponent != null) ItemMeta_setDisplayNameComponent.invoke(meta, (Object) BUNGEE.serialize(display));
-			else ItemMeta_setDisplayName.invoke(meta, LEGACY.serialize(display));
+			if (ITEMMETA_DISPLAYNAME != null) ITEMMETA_DISPLAYNAME.invoke(meta, KyoriUtils.toCommonKyori(display));
+			else if (ITEMMETA_SETDISPLAYNAMECOMPONENT != null) ITEMMETA_SETDISPLAYNAMECOMPONENT.invoke(meta, (Object) BUNGEE.serialize(display));
+			else ITEMMETA_SETDISPLAYNAME.invoke(meta, LEGACY.serialize(display));
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 	
 	
-	public static void setLore(ItemMeta meta, List<Component> lore) {
+	public static void setLore(@NotNull ItemMeta meta, @Nullable List<Component> lore) {
+		Objects.requireNonNull(meta, "meta cannot be null");
 		try {
-			if (ItemMeta_lore != null) ItemMeta_lore.invoke(meta, lore);
-			else if (ItemMeta_setLoreComponents != null) ItemMeta_setDisplayNameComponent.invoke(meta, lore.stream().map(BUNGEE::serialize).collect(Collectors.toList()));
-			else ItemMeta_setLore.invoke(meta, lore.stream().map(LEGACY::serialize).collect(Collectors.toList()));
+			if (ITEMMETA_LORE != null) ITEMMETA_LORE.invoke(meta, lore == null ? null : lore.stream().map(KyoriUtils::toCommonKyori).collect(Collectors.toList()));
+			else if (ITEMMETA_SETLORECOMPONENTS != null) ITEMMETA_SETLORECOMPONENTS.invoke(meta, lore == null ? null : lore.stream().map(BUNGEE::serialize).collect(Collectors.toList()));
+			else ITEMMETA_SETLORE.invoke(meta, lore == null ? null : lore.stream().map(LEGACY::serialize).collect(Collectors.toList()));
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -92,7 +85,7 @@ public class BukkitUtils {
 	
 	
 	
-	private static Optional<ItemStack> parseNewItem(@NotNull String text) throws IllegalArgumentException {
+	private static @NotNull Optional<ItemStack> parseNewItem(@NotNull String text) throws IllegalArgumentException {
 		if (Objects.requireNonNull(text, "text cannot be null").isEmpty()) return Optional.empty();
 		Matcher match = ITEM_PATTERN.matcher(text);
 		if (!match.matches()) throw new IllegalArgumentException("Malformed text");
@@ -140,9 +133,9 @@ public class BukkitUtils {
 					}
 				}
 			}
-			if (damage != null && Damageable.isInstance(damage)) {
+			if (damage != null && DAMAGEABLE_CLAZZ.isInstance(damage)) {
 				try {
-					Damageable_setDamage.invoke(meta, damage);
+					DAMAGEABLE_SETDAMAGE.invoke(meta, damage);
 				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 					e.printStackTrace();
 				}
@@ -153,7 +146,7 @@ public class BukkitUtils {
 		return Optional.of(item);
 	}
 	
-	private static Optional<ItemStack> parseLegacyItem(@NotNull String text) throws IllegalArgumentException {
+	private static @NotNull Optional<ItemStack> parseLegacyItem(@NotNull String text) throws IllegalArgumentException {
 		if (Objects.requireNonNull(text, "text cannot be null").isEmpty()) return Optional.empty();
 		Matcher match = ITEM_PATTERN.matcher(text);
 		if (!match.matches()) throw new IllegalArgumentException("Malformed text");

@@ -500,6 +500,10 @@
 								<shadedPattern>${package}.lib.net.kyori.adventure.text.serializer</shadedPattern>
 							</relocation-->
 							<relocation>
+								<pattern>net.kyori.adventure</pattern>
+								<shadedPattern>${package}.lib.net.kyori.adventure</shadedPattern>
+							</relocation>
+							<relocation>
 								<pattern>org.simpleyaml</pattern>
 								<shadedPattern>${package}.lib.org.simpleyaml</shadedPattern>
 							</relocation>
