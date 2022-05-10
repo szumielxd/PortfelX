@@ -17,7 +17,7 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 public class KyoriUtils {
 	
 	
-	private static final String ADVENTURE_PATH = "net/kyori/adventure".replace('/', '.');
+	private static final String ADVENTURE_PATH = "net,kyori,adventure".replace(',', '.');
 	
 	public static final @Nullable Class<?> COMPONENT_CLAZZ = Optional.of(ADVENTURE_PATH+".text.Component").map(clazz -> { try { return Class.forName(clazz); } catch (Exception e) { return null; } } ).orElse(null);
 	public static final @Nullable Class<?> COMPONENTLIKE_CLAZZ = Optional.of(ADVENTURE_PATH+".text.ComponentLike").map(clazz -> { try { return Class.forName(clazz); } catch (Exception e) { return null; } } ).orElse(null);
