@@ -50,10 +50,10 @@ import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction.TransactionResult;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
+import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.objects.TransactionImpl;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -536,8 +536,7 @@ public class ChannelManagerImpl implements ChannelManager {
 			if (user == null) return null;
 			Transaction trans = new TransactionImpl(this.plugin, user, transactionId, order);
 			if (user instanceof BukkitOperableUser && ((BukkitOperableUser)user).inTestmode()) {
-				Audience audience = player instanceof Audience ? (Audience) player : this.plugin.adventure().player(player);
-				audience.sendMessage(Portfel.PREFIX.append(LangKey.MAIN_WARNING.component(DARK_RED, new HashSet<>(Arrays.asList(TextDecoration.BOLD)), LangKey.TESTMODE_NOTIFICATION.component(Style.style(TextDecoration.BOLD.withState(false)).color(RED)))));
+				BukkitSender.wrap(plugin, player).sendTranslated(Portfel.PREFIX.append(LangKey.MAIN_WARNING.component(DARK_RED, new HashSet<>(Arrays.asList(TextDecoration.BOLD)), LangKey.TESTMODE_NOTIFICATION.component(Style.style(TextDecoration.BOLD.withState(false)).color(RED)))));
 				trans.finish(new TransactionResult(transactionId, TransactionStatus.OK, user.getBalance(), 0, null));
 				return trans;
 			}
