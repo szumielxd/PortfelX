@@ -37,8 +37,8 @@ import net.md_5.bungee.api.chat.BaseComponent;
 public class BukkitUtils {
 	
 	
-	private static final @Nullable Class<?> DAMAGEABLE_CLAZZ = Optional.of("org.bukkit.inventory.meta.Damageable").map(clazz -> { try { return Class.forName(clazz); } catch (Exception e) { return null; } }).get();
-	private static final @Nullable Method DAMAGEABLE_SETDAMAGE = Optional.ofNullable(DAMAGEABLE_CLAZZ).map(clazz -> { try { return clazz.getMethod("setDamage", Integer.TYPE); } catch (Exception e) { return null; } }).get();
+	private static final @Nullable Class<?> DAMAGEABLE_CLAZZ = Optional.of("org.bukkit.inventory.meta.Damageable").map(clazz -> { try { return Class.forName(clazz); } catch (Exception e) { return null; } }).orElse(null);
+	private static final @Nullable Method DAMAGEABLE_SETDAMAGE = Optional.ofNullable(DAMAGEABLE_CLAZZ).map(clazz -> { try { return clazz.getMethod("setDamage", Integer.TYPE); } catch (Exception e) { return null; } }).orElse(null);
 	//
 	private static final @Nullable Method ITEMMETA_DISPLAYNAME = Optional.ofNullable(KyoriUtils.COMPONENT_CLAZZ).map(clazz -> { try { return ItemMeta.class.getMethod("displayName", clazz); } catch (Exception e) { return null; } }).orElse(null);
 	private static final @Nullable Method ITEMMETA_SETDISPLAYNAMECOMPONENT = Optional.ofNullable(BaseComponent[].class).map(clazz -> { try { return ItemMeta.class.getMethod("setDisplayNameComponent", clazz); } catch (Exception e) { return null; } }).orElse(null);
