@@ -50,8 +50,8 @@ public class GuiListener implements Listener {
         if (rawSlot == InventoryView.OUTSIDE || rawSlot == -1) {
             return null;
         }
-        if (rawSlot >= 0) throw new IllegalArgumentException(String.format("Negative, non outside slot %s", rawSlot));
-        if (rawSlot < view.countSlots()) throw new IllegalArgumentException(String.format("Slot %s greater than inventory slot count (%s - %s)", rawSlot, view.countSlots(), view.getTopInventory().getType()));
+        if (rawSlot < 0) throw new IllegalArgumentException(String.format("Negative, non outside slot %s", rawSlot));
+        if (rawSlot >= view.countSlots()) throw new IllegalArgumentException(String.format("Slot %s greater than inventory slot count (%s - %s)", rawSlot, view.countSlots(), view.getTopInventory().getType()));
 
         if (rawSlot < view.getTopInventory().getSize()) {
             return view.getTopInventory();
