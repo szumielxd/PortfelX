@@ -34,7 +34,7 @@ public enum CommonDependency {
 	;
 	
 	
-	private final String[] KYORI_RELOCATIONS = { "net,kyori,examination", "net,kyori,adventure,platform", "net,kyori,adventure,util" }; // it hurts!
+	private final String[] KYORI_RELOCATIONS = { "net,kyori,adventure", "net,kyori,examination", "net,kyori,adventure,platform", "net,kyori,adventure,util" }; // it hurts!
 	
 	
 	@Getter private final String downloadPath;
