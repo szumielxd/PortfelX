@@ -11,8 +11,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.base.Preconditions;
-
 import me.szumielxd.portfel.bukkit.gui.PortfelGuiHolder;
 
 public class GuiListener implements Listener {
@@ -24,11 +22,11 @@ public class GuiListener implements Listener {
 			Player player = (Player) event.getWhoClicked();
 			Inventory inv = event.getClickedInventory();
 			if (inv != null) {
-				if (PortfelGuiHolder.class.isInstance(inv.getHolder())) {
+				if (inv.getHolder() instanceof PortfelGuiHolder) {
 					event.setResult(Result.DENY);
 					PortfelGuiHolder holder = (PortfelGuiHolder) inv.getHolder();
 					holder.getGui().onClick(player, event.getSlot());
-				} else if (event.isShiftClick() && PortfelGuiHolder.class.isInstance(event.getInventory().getHolder())) {
+				} else if (event.isShiftClick() && event.getInventory().getHolder() instanceof PortfelGuiHolder) {
 					event.setResult(Result.DENY);
 				}
 			}
@@ -52,8 +50,8 @@ public class GuiListener implements Listener {
         if (rawSlot == InventoryView.OUTSIDE || rawSlot == -1) {
             return null;
         }
-        Preconditions.checkArgument(rawSlot >= 0, "Negative, non outside slot %s", rawSlot);
-        Preconditions.checkArgument(rawSlot < view.countSlots(), "Slot %s greater than inventory slot count (%s - %s)", rawSlot, view.countSlots(), view.getTopInventory().getType());
+        if (rawSlot >= 0) throw new IllegalArgumentException(String.format("Negative, non outside slot %s", rawSlot));
+        if (rawSlot < view.countSlots()) throw new IllegalArgumentException(String.format("Slot %s greater than inventory slot count (%s - %s)", rawSlot, view.countSlots(), view.getTopInventory().getType()));
 
         if (rawSlot < view.getTopInventory().getSize()) {
             return view.getTopInventory();
