@@ -314,7 +314,7 @@ public class MiscUtils {
 		try {
 			JsonObject json = new Gson().fromJson(text, JsonObject.class);
 			return GsonComponentSerializer.gson().deserializeFromTree(json);
-		} catch (JsonSyntaxException e) {
+		} catch (JsonSyntaxException | ClassCastException e) {
 			return LegacyComponentSerializer.legacySection().deserialize(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1"));
 		}
 	}
@@ -334,7 +334,7 @@ public class MiscUtils {
 			JsonObject json = new Gson().fromJson(text, JsonObject.class);
 			replaceTextInJson(json, pattern, replacer);
 			return GsonComponentSerializer.gson().deserializeFromTree(json);
-		} catch (JsonSyntaxException e) {
+		} catch (JsonSyntaxException | ClassCastException e) {
 			return LegacyComponentSerializer.legacySection().deserialize(replaceAll(pattern.matcher(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1")), replacer));
 		}
 	}
