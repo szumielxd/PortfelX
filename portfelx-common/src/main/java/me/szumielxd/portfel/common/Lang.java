@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -515,7 +516,7 @@ public class Lang {
 	
 	///////////////////////////////////////////////////////////////////////////////////////
 	
-	private final Map<LangKey, String> texts = new HashMap<>();
+	private final Map<LangKey, String> texts = new EnumMap<>(LangKey.class);
 	
 	private Lang(@NotNull Locale loc, @NotNull File f) {
 		JsonObject json = null;

@@ -9,11 +9,13 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 
@@ -69,7 +71,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	private final @NotNull PortfelVelocityBootstrap bootstrap;
 	
 	
-	private @NotNull VelocityProxy proxy;
+	private @Nullable VelocityProxy proxy;
 	
 	
 	public PortfelVelocityImpl(PortfelVelocityBootstrap bootstrap) {
@@ -146,12 +148,12 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	private MainTokenCommand tokenCommand;
 	private UUID proxyID;
 	
-	private ContextProvider luckpermsContextProvider;
+	private ContextProvider<Player> luckpermsContextProvider;
 	
 	
 	@Override
 	public void onEnable() {
-		if (ValidateAccess.checkAccess() == false) {
+		if (!ValidateAccess.checkAccess()) {
 			this.getLogger().warn("You have no power here. Die potato!");
 			return;
 		}
@@ -180,7 +182,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.getLogger().info("Setup managers...");
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new ProxyUserManagerImpl(this).init();
-		this.topManager = (ProxyTopManagerImpl) new ProxyTopManagerImpl(this).init();
+		this.topManager = new ProxyTopManagerImpl(this).init();
 		this.tokenManager = new TokenManager(this).init();
 		this.getLogger().info("Registering listeners...");
 		this.getProxy().getEventManager().register(this.asPlugin(), new VelocityUserListener(this));
@@ -207,8 +209,8 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		Lang.load(new File(this.getDataFolder(), "languages"), this);
 		this.ordersManager = new OrdersManager(this).init();
 		this.prizesManager = new PrizesManager(this).init();
-		if (this.getProxy().getPluginManager().getPlugin("LuckPerms") != null) {
-			this.luckpermsContextProvider = new ContextProvider(this);
+		if (this.getProxy().getPluginManager().getPlugin("LuckPerms").isPresent()) {
+			this.luckpermsContextProvider = new ContextProvider<>(this, Player.class);
 		}
 	}
 	

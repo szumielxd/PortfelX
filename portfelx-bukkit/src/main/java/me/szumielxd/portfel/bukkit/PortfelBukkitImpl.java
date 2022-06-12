@@ -17,6 +17,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -79,7 +80,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	
 	private PAPIHandler papiHandler;
 	private MVdWHandler mvdwHandler;
-	private ContextProvider luckpermsContextProvider;
+	private ContextProvider<Player> luckpermsContextProvider;
 	
 	private String serverHashKey;
 	
@@ -111,7 +112,9 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		PortfelProvider.register(this);
 		try {
 			this.adventure = BukkitAudiences.create(this.asPlugin());
-		} catch (NoSuchFieldError e) {} // older kyori version, let my try to hook into paper native kyori support
+		} catch (NoSuchFieldError e) {
+			// older kyori version, let my try to hook into paper native kyori support
+		}
 		this.taskManager = new BukkitTaskManagerImpl(this);
 		
 		this.load();
@@ -167,7 +170,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 			this.papiHandler = new PAPIHandler(this);
 		}
 		if(this.getServer().getPluginManager().isPluginEnabled("LuckPerms")) {
-			this.luckpermsContextProvider = new ContextProvider(this);
+			this.luckpermsContextProvider = new ContextProvider<>(this, Player.class);
 		}
 	}
 	
@@ -194,7 +197,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 			Map<?, ?> instances = (Map<?, ?>) f.get(null);
 			instances.remove(this.asPlugin().getDescription().getName());
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			
+			// no kyori today :c
 		}
 		this.getLogger().info("Unregistering commands");
 		try {

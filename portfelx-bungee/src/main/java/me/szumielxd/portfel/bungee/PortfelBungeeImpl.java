@@ -11,6 +11,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
@@ -56,6 +57,7 @@ import me.szumielxd.portfel.proxy.managers.ProxyTopManagerImpl;
 import me.szumielxd.portfel.proxy.managers.ProxyUserManagerImpl;
 import me.szumielxd.portfel.proxy.managers.TokenManager;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
 public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
@@ -64,7 +66,7 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	private final @NotNull PortfelBungeeBootstrap bootstrap;
 	
 	
-	private @NotNull BungeeProxy proxy;
+	private @Nullable BungeeProxy proxy;
 	
 	
 	public PortfelBungeeImpl(@NotNull PortfelBungeeBootstrap bootstrap) {
@@ -117,12 +119,12 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	private MainTokenCommand tokenCommand;
 	private UUID proxyID;
 	
-	private ContextProvider luckpermsContextProvider;
+	private ContextProvider<ProxiedPlayer> luckpermsContextProvider;
 	
 	
 	@Override
 	public void onEnable() {
-		if (ValidateAccess.checkAccess() == false) {
+		if (!ValidateAccess.checkAccess()) {
 			this.getLogger().warn("You have no power here. Die potato!");
 			return;
 		}
@@ -150,7 +152,7 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.getLogger().info("Setup managers...");
 		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new ProxyUserManagerImpl(this).init();
-		this.topManager = (ProxyTopManagerImpl) new ProxyTopManagerImpl(this).init();
+		this.topManager = new ProxyTopManagerImpl(this).init();
 		this.tokenManager = new TokenManager(this).init();
 		this.getLogger().info("Registering listeners...");
 		this.asPlugin().getProxy().getPluginManager().registerListener(this.asPlugin(), new BungeeUserListener(this));
@@ -177,7 +179,7 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.ordersManager = new OrdersManager(this).init();
 		this.prizesManager = new PrizesManager(this).init();
 		if (this.asPlugin().getProxy().getPluginManager().getPlugin("LuckPerms") != null) {
-			this.luckpermsContextProvider = new ContextProvider(this);
+			this.luckpermsContextProvider = new ContextProvider<>(this, ProxiedPlayer.class);
 		}
 	}
 	
