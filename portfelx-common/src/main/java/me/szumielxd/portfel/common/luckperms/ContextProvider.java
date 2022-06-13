@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.common.luckperms.context.PortfelBalanceCalculator;
 import me.szumielxd.portfel.common.luckperms.context.PortfelTopEnabledCalculator;
@@ -20,26 +18,24 @@ public class ContextProvider<T> {
 	
 	private final @NotNull Portfel plugin;
 	private final @NotNull Class<? extends T> playerClass;
-	private final @Nullable ContextManager contextManager;
+	private final @NotNull ContextManager contextManager;
 	private final @NotNull List<ContextCalculator<?>> registeredCalculators = new ArrayList<>();
 	
 	
 	public ContextProvider(@NotNull Portfel plugin, @NotNull Class<? extends T> playerClass) {
 		this.plugin = plugin;
 		this.playerClass = playerClass;
-		ContextManager mgr = null;
 		try {
 			Class.forName("net.luckperms.api.LuckPermsProvider");
 			LuckPerms luckPerms = LuckPermsProvider.get();
 			if (luckPerms == null) {
 				throw new IllegalStateException("LuckPerms API not loaded.");
 			}
-			mgr = luckPerms.getContextManager();
+			this.contextManager = luckPerms.getContextManager();
 			this.setup();
 		} catch (ClassNotFoundException e) {
-			// luckperms not loaded
+			throw new RuntimeException(e);
 		}
-		this.contextManager = mgr;
 	}
 	
 	
