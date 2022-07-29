@@ -254,7 +254,7 @@ public class MiscUtils {
 	 * @return interactive {@link Component} with insertion and hover and click events
 	 */
 	public static @NotNull Component buildCommandUsage(@NotNull Component baseMessage, String fullCommand, SimpleCommand command) {
-		Component hover = Component.text(fullCommand, GREEN);
+		/*Component hover = Component.text(fullCommand, GREEN);
 		//description
 		hover = hover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_DESCRIPTION.component(AQUA))
 				.append(Component.space())
@@ -267,7 +267,7 @@ public class MiscUtils {
 		hover = hover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_PERMISSION.component(AQUA))
 				.append(Component.space())
 				.append(Component.text(command.getPermission(), GRAY));
-		hover = hover.append(Component.newline());
+		hover = hover.append(Component.newline());*/
 		return bindCommand(baseMessage, fullCommand);
 	}
 	
@@ -403,12 +403,14 @@ public class MiscUtils {
 	 * @return formatted text
 	 */
 	public static String formatDuration(Lang lang, long duration, boolean removeZero) {
-		duration /= 60000;
-		long min = duration%60;
+		duration /= 1000;
+		int sec = (int) duration%60;
 		duration /= 60;
-		long hr = duration%24;
+		int min = (int) duration%60;
+		duration /= 60;
+		int hr = (int) duration%24;
 		duration /= 24;
-		long day = duration%365;
+		int day = (int) duration%365;
 		duration /= 365;
 		StringBuilder time = new StringBuilder();
 		if (duration > 0 || !removeZero) {
@@ -422,7 +424,16 @@ public class MiscUtils {
 		if (hr > 0 || !removeZero) {
 			time.append(lang.text(LangKey.MAIN_VALUE_TIME_HOURS, hr)).append(" "); // hours (1-23)
 		}
-		time.append(lang.text(LangKey.MAIN_VALUE_TIME_MINUTES, min)); // minutes (0-59)
+		if (min > 0 || !removeZero) {
+			time.append(lang.text(LangKey.MAIN_VALUE_TIME_MINUTES, min)); // minutes (0-59)
+		}
+		
+		
+		if (day == 0 && hr == 0) {
+			if (time.length() > 0) time.append(" ");
+			time.append(lang.text(LangKey.MAIN_VALUE_TIME_SECONDS, sec)); // seconds
+		}
+		
 		return time.toString();
 	}
 	
