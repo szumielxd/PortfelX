@@ -1,6 +1,5 @@
 package me.szumielxd.portfel.common.loader;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,20 +54,20 @@ public class DependencyLoader {
 	
 	private final PortfelBootstrap plugin;
 	
-	private final Path REPO_DIR;
-	private final Path REPO_CACHE_DIR;
-	private final String LIBS_PATH;
-	private final Path REAL_JAR;
+	private final Path repoDir;
+	private final Path repoCacheDir;
+	private final String libsPath;
+	private final Path realJar;
 	
 	
 	public DependencyLoader(@NotNull PortfelBootstrap plugin) {
 		this.plugin = plugin;
 		
-		REPO_DIR = new File(this.plugin.getDataFolder(), "libs").toPath();
-		REPO_CACHE_DIR = Paths.get(REPO_DIR.toString(), "cache");
-		LIBS_PATH = Optional.of(this.plugin.getClass().getName().substring(0, this.plugin.getClass().getName().lastIndexOf('.')))
+		this.repoDir = this.plugin.getDataFolderPath().resolve("libs");
+		this.repoCacheDir = Paths.get(this.repoDir.toString(), "cache");
+		this.libsPath = Optional.of(this.plugin.getClass().getName().substring(0, this.plugin.getClass().getName().lastIndexOf('.')))
 				.map(str -> str.substring(0, str.lastIndexOf('.'))).orElseThrow(NullPointerException::new);
-		REAL_JAR = Paths.get(REPO_DIR.toString(), plugin.getName().toLowerCase() + "-origin.jar");
+		this.realJar = Paths.get(this.repoDir.toString(), plugin.getName().toLowerCase() + "-origin.jar");
 	}
 	
 	
@@ -87,15 +86,20 @@ public class DependencyLoader {
 	
 	public JarClassLoader load(@NotNull ClassLoader parentClassLoader, @NotNull Set<CommonDependency> dependencies) {
 		try {
-			Files.createDirectories(REPO_DIR);
-			Files.createDirectories(REPO_CACHE_DIR);
+			Files.createDirectories(this.repoDir);
+			Files.createDirectories(this.repoCacheDir);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		dependencies = dependencies.isEmpty()? new HashSet<>() : EnumSet.copyOf(dependencies);
 		dependencies.removeIf(d -> !d.getVersionRange().isApplicable());
+		if (!dependencies.isEmpty()) {
+			final Set<CommonDependency> set = new HashSet<>();
+            dependencies.forEach(dep -> addAllDependencies(set, dep));
+            dependencies = EnumSet.copyOf(set);
+		}
 		try {
-			Files.copy(this.getClass().getClassLoader().getResourceAsStream(String.format("%s.jarinjar", this.plugin.getName().toLowerCase())), REAL_JAR, 
+			Files.copy(this.getClass().getClassLoader().getResourceAsStream(String.format("%s.jarinjar", this.plugin.getName().toLowerCase())), this.realJar, 
 					StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -107,15 +111,29 @@ public class DependencyLoader {
 				e.printStackTrace();
 			}
 		});
-		if (Files.exists(REPO_CACHE_DIR)) {
-			try (Stream<Path> fileStream = Files.walk(REPO_CACHE_DIR)) {
-				fileStream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+		if (Files.exists(this.repoCacheDir)) {
+			try (Stream<Path> fileStream = Files.walk(this.repoCacheDir)) {
+				fileStream.sorted(Comparator.reverseOrder()).forEach(file -> {
+					try {
+						Files.delete(file);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				});
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		return this.loadDependencies(dependencies, parentClassLoader);
 	}
+	
+	
+	private static void addAllDependencies(Set<CommonDependency> set, CommonDependency dependency) {
+        if (!set.contains(dependency)) {
+                set.add(dependency);
+                dependency.getDependencies().forEach(dep -> addAllDependencies(set, dep));
+        }
+}
 	
 	
 
@@ -131,8 +149,8 @@ public class DependencyLoader {
 	
 	public void addToLoader(@NotNull JarClassLoader classLoader, @NotNull Set<CommonDependency> dependencies) {
 		try {
-			Files.createDirectories(REPO_DIR);
-			Files.createDirectories(REPO_CACHE_DIR);
+			Files.createDirectories(this.repoDir);
+			Files.createDirectories(this.repoCacheDir);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -145,9 +163,15 @@ public class DependencyLoader {
 				e.printStackTrace();
 			}
 		});
-		if (Files.exists(REPO_CACHE_DIR)) {
-			try (Stream<Path> fileStream = Files.walk(REPO_CACHE_DIR)) {
-				fileStream.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+		if (Files.exists(this.repoCacheDir)) {
+			try (Stream<Path> fileStream = Files.walk(this.repoCacheDir)) {
+				fileStream.sorted(Comparator.reverseOrder()).forEach(file -> {
+					try {
+						Files.delete(file);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				});
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -160,7 +184,7 @@ public class DependencyLoader {
 	
 	
 	private boolean validateDependency(@NotNull CommonDependency dependency) {
-		Path path = Paths.get(REPO_DIR.toString(), dependency.getFileName());
+		Path path = Paths.get(this.repoDir.toString(), dependency.getFileName());
 		if (!Files.exists(path)) return false;
 		try (JarFile jar = new JarFile(path.toFile())) {
 			ZipEntry entry = jar.getEntry("checksum.md5");
@@ -179,12 +203,12 @@ public class DependencyLoader {
 	private void download(@NotNull CommonDependency dependency) throws IOException {
 		this.plugin.getCommonLogger().info(String.format("Downloading %s lib...", dependency.getArtifactId()));
 		long start = System.currentTimeMillis();
-		Path cache = Paths.get(REPO_CACHE_DIR.toString(), UUID.randomUUID().toString());
+		Path cache = Paths.get(this.repoCacheDir.toString(), UUID.randomUUID().toString());
 		try (ReadableByteChannel ch = Channels.newChannel(new URL(buildDownloadUrl(dependency)).openStream());
 				FileOutputStream out = new FileOutputStream(cache.toString())) {
 			out.getChannel().transferFrom(ch, 0, Long.MAX_VALUE);
-			Path destPath = Paths.get(REPO_DIR.toString(), dependency.getFileName());
-			new JarRelocator(cache.toFile(), destPath.toFile(), Stream.of(dependency.getGroupPaths()).collect(Collectors.toMap(Function.identity(), path -> LIBS_PATH + ".lib." + path))).run();
+			Path destPath = Paths.get(this.repoDir.toString(), dependency.getFileName());
+			new JarRelocator(cache.toFile(), destPath.toFile(), Stream.of(dependency.getGroupPaths()).collect(Collectors.toMap(Function.identity(), path -> this.libsPath + ".lib." + path))).run();
 			try (FileSystem jar = FileSystems.newFileSystem(URI.create("jar:" + destPath.toFile().toURI()), Collections.singletonMap("create", "true"))) {
 				try (Writer writer = Files.newBufferedWriter(jar.getPath("checksum.md5"), StandardCharsets.UTF_8, StandardOpenOption.CREATE)) {
 					writer.write(dependency.getMd5());
@@ -198,13 +222,13 @@ public class DependencyLoader {
 	private JarClassLoader loadDependencies(@NotNull Set<CommonDependency> dependencies, @NotNull ClassLoader parentClassLoader) {
 		List<URL> list = new ArrayList<>();
 		try {
-			list.add(REAL_JAR.toUri().toURL());
+			list.add(this.realJar.toUri().toURL());
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
 		dependencies.stream().map(d -> {
 			try {
-				return Paths.get(REPO_DIR.toString(), d.getFileName()).toUri().toURL();
+				return Paths.get(this.repoDir.toString(), d.getFileName()).toUri().toURL();
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e);
 			}
@@ -216,13 +240,13 @@ public class DependencyLoader {
 	private void appendDependencies(@NotNull Set<CommonDependency> dependencies, @NotNull JarClassLoader classLoader) {
 		List<URL> list = new ArrayList<>();
 		try {
-			list.add(REAL_JAR.toUri().toURL());
+			list.add(this.realJar.toUri().toURL());
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
 		dependencies.stream().map(d -> {
 			try {
-				return Paths.get(REPO_DIR.toString(), d.getFileName()).toUri().toURL();
+				return Paths.get(this.repoDir.toString(), d.getFileName()).toUri().toURL();
 			} catch (MalformedURLException e) {
 				throw new RuntimeException(e);
 			}
