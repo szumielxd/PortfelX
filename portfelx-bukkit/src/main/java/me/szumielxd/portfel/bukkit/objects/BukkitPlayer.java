@@ -63,6 +63,7 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	 * 
 	 * @param reason kick message
 	 */
+	@SuppressWarnings("deprecation")
 	public void disconnect(@NotNull String reason) {
 		this.player.kickPlayer(reason);
 	}
@@ -173,5 +174,14 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 		plugin.getTaskManager().runTaskLater(() -> audience.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		return this.player.equals(obj);
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.player.hashCode();
+	}
 
 }

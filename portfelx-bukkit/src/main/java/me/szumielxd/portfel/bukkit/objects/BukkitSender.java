@@ -13,7 +13,6 @@ import me.szumielxd.portfel.common.Lang;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
 
 
 public class BukkitSender implements CommonSender {
@@ -43,9 +42,10 @@ public class BukkitSender implements CommonSender {
 	 * 
 	 * @param message message to send
 	 */
+	@SuppressWarnings("deprecation")
 	public void sendMessage(@NotNull BaseComponent message) {
 		if (this.sender instanceof Player) ((Player) this.sender).spigot().sendMessage(message);
-		this.sender.sendMessage(TextComponent.toLegacyText(message));
+		this.sender.sendMessage(BaseComponent.toLegacyText(message));
 	}
 	
 	/**
@@ -53,9 +53,10 @@ public class BukkitSender implements CommonSender {
 	 * 
 	 * @param message message to send
 	 */
+	@SuppressWarnings("deprecation")
 	public void sendMessage(@NotNull BaseComponent... message) {
 		if (this.sender instanceof Player) ((Player) this.sender).spigot().sendMessage(message);
-		this.sender.sendMessage(TextComponent.toLegacyText(message));
+		this.sender.sendMessage(BaseComponent.toLegacyText(message));
 	}
 	
 	/**
