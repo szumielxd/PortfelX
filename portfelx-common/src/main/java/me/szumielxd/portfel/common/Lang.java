@@ -1,9 +1,10 @@
 package me.szumielxd.portfel.common;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +24,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
@@ -38,7 +41,7 @@ import net.kyori.adventure.translation.Translator;
 public class Lang {
 	
 	
-	public static enum LangKey {
+	public enum LangKey {
 		
 		
 		
@@ -304,6 +307,7 @@ public class Lang {
 		MAIN_VALUE_OFF("main.value.off", "off"),
 		MAIN_VALUE_ONLINE("main.value.online", "Online"),
 		MAIN_VALUE_OFFLINE("main.value.offline", "Offline"),
+		MAIN_VALUE_TIME_SECONDS("main.value.time.seconds", "{0}s"),
 		MAIN_VALUE_TIME_MINUTES("main.value.time.minutes", "{0}m"),
 		MAIN_VALUE_TIME_HOURS("main.value.time.hours", "{0}h"),
 		MAIN_VALUE_TIME_DAYS("main.value.time.days", "{0}d"),
@@ -459,24 +463,36 @@ public class Lang {
 	 * Setup Lang instances. Internal use only
 	 * @param locales directory
 	 */
-	public static void load(@NotNull File dir, @NotNull Portfel plugin) {
+	public static void load(@NotNull Path dir, @NotNull Portfel plugin) {
 		LANG_BY_LOCALE.clear();
-		if (dir.isFile() && dir.exists()) dir.delete();
-		if (!dir.exists()) dir.mkdirs();
-		File[] files = dir.listFiles((d, name) -> FILE_PATTERN.matcher(name).matches());
-		DEFAULT_LOCALE = Translator.parseLocale(plugin.getConfiguration().getString(ConfigKey.LANG_DEFAULT_LOCALE));
-		if (DEFAULT_LOCALE == null) DEFAULT_LOCALE = Locale.US;
-		if (files.length > 0) for (File f : files) {
-			Locale loc = Translator.parseLocale(f.getName().substring(9, f.getName().length()-5));
-			if (loc != null) {
-				LANG_BY_LOCALE.put(loc, new Lang(loc, f));
-			}
+		try {
+			if (Files.exists(dir) && !Files.isDirectory(dir)) Files.delete(dir);
+			if (!Files.exists(dir)) Files.createDirectories(dir);
+			DEFAULT_LOCALE = Translator.parseLocale(plugin.getConfiguration().getString(ConfigKey.LANG_DEFAULT_LOCALE));
+			if (DEFAULT_LOCALE == null) DEFAULT_LOCALE = Locale.US;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+		try (Stream<Path> files = Files.find(dir, 0, (path, attr) -> FILE_PATTERN.matcher(path.getFileName().toString()).matches())) {
+			files.forEach(f -> {
+				String name = f.getFileName().toString();
+				Locale loc = Translator.parseLocale(name.substring(9, name.length()-5));
+				if (loc != null) {
+					LANG_BY_LOCALE.put(loc, new Lang(loc, f));
+				}
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		if (!LANG_BY_LOCALE.containsKey(DEFAULT_LOCALE)) DEFAULT_LOCALE = Locale.US;
 		if (!LANG_BY_LOCALE.containsKey(Locale.US)) {
-			File f = new File(dir, "messages-en_US.json");
+			Path f = dir.resolve("messages-en_US.json");
 			try {
-				if (!f.exists()) f.createNewFile();
+				if (!Files.exists(f) || Files.isDirectory(f)) {
+					Files.deleteIfExists(f);
+					Files.createFile(f);
+				}
 				LANG_BY_LOCALE.put(Locale.US, new Lang(Locale.US, f));
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -516,11 +532,13 @@ public class Lang {
 	
 	///////////////////////////////////////////////////////////////////////////////////////
 	
+	private final @Getter Locale locale;
 	private final Map<LangKey, String> texts = new EnumMap<>(LangKey.class);
 	
-	private Lang(@NotNull Locale loc, @NotNull File f) {
+	private Lang(@NotNull Locale locale, @NotNull Path f) {
+		this.locale = locale;
 		JsonObject json = null;
-		try (FileReader fr = new FileReader(f)) {
+		try (BufferedReader fr = Files.newBufferedReader(f)) {
 			json = GSON_SERIALIZER.fromJson(fr, JsonObject.class);
 		} catch (JsonIOException | IOException e) {
 			e.printStackTrace();
@@ -528,7 +546,7 @@ public class Lang {
 		}
 		if (json == null) json = new JsonObject();
 		if (loadLang(json) > 0) {
-			try (FileWriter fw = new FileWriter(f)) {
+			try (BufferedWriter fw = Files.newBufferedWriter(f)) {
 				GSON_SERIALIZER.toJson(json, fw);
 			} catch (JsonIOException | IOException e) {
 				e.printStackTrace();
@@ -536,7 +554,8 @@ public class Lang {
 		}
 	}
 	
-	private Lang(@NotNull Locale loc, @NotNull JsonObject json) {
+	private Lang(@NotNull Locale locale, @NotNull JsonObject json) {
+		this.locale = locale;
 		loadLang(json);
 	}
 	
