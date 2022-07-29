@@ -11,11 +11,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,13 +60,13 @@ public abstract class AccessManagerImpl implements AccessManager {
 	
 	
 	private final PortfelProxyImpl plugin;
-	private final File file;
+	private final Path file;
 	private JsonObject accessMap = null;
 	
 	
-	public AccessManagerImpl(@NotNull PortfelProxyImpl plugin) {
+	protected AccessManagerImpl(@NotNull PortfelProxyImpl plugin) {
 		this.plugin = plugin;
-		this.file = new File(this.plugin.getDataFolder(), "access.json");
+		this.file = this.plugin.getDataFolder().resolve("access.json");
 	}
 	
 	/**
@@ -77,20 +76,24 @@ public abstract class AccessManagerImpl implements AccessManager {
 	 */
 	public final AccessManagerImpl init() {
 		this.preInit();
-		if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-		if (!file.exists()) {
-			try {
-				file.createNewFile();
-				Files.write(file.toPath(), GSON.toJson(this.accessMap = new JsonObject()).getBytes(StandardCharsets.UTF_8));
+		try {
+			if (!Files.exists(this.file.getParent())) Files.createDirectories(this.file.getParent());
+				if (!Files.exists(this.file)) {
+				Files.createFile(this.file);
+				this.accessMap = new JsonObject();
+				Files.write(this.file, GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));
 				return this;
-			} catch (JsonSyntaxException | JsonIOException | IOException e) {
-				File to = new File(this.plugin.getDataFolder(), file.getName() + ".broken");
-				file.renameTo(to);
-				e.printStackTrace();
 			}
+		} catch (JsonSyntaxException | JsonIOException | IOException e) {
+			try {
+				Files.move(file, file.getParent().resolve(this.file.getFileName() + ".broken"));
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			e.printStackTrace();
 		}
 		try {
-			this.accessMap = GSON.fromJson(new FileReader(file), JsonObject.class);
+			this.accessMap = GSON.fromJson(Files.newBufferedReader(this.file), JsonObject.class);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -262,9 +265,9 @@ public abstract class AccessManagerImpl implements AccessManager {
 	 * Save servers list.
 	 */
 	private final void save() {
-		if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
 		try {
-			Files.write(file.toPath(), GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));
+			if (!Files.exists(this.file.getParent())) Files.createDirectories(this.file.getParent());
+			Files.write(this.file, GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

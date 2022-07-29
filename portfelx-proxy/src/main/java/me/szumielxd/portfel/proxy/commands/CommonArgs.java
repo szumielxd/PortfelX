@@ -64,7 +64,7 @@ public class CommonArgs {
 	
 	public static final CmdArg TOKEN = new CmdArg(LangKey.COMMAND_ARGTYPES_TOKEN_DISPLAY, LangKey.COMMAND_ARGTYPES_TOKEN_DESCRIPTION, LangKey.COMMAND_ARGTYPES_TOKEN_ERROR, s -> {
 		try {
-			return plugin.getTokenDB().getToken(s);
+			return plugin.getTokenDatabase().getToken(s);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;

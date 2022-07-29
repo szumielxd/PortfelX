@@ -1,11 +1,10 @@
 package me.szumielxd.portfel.bukkit.managers;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
@@ -27,13 +26,13 @@ public class IdentifierManagerImpl implements IdentifierManager {
 	
 	
 	private final PortfelBukkitImpl plugin;
-	private final File file;
+	private final Path file;
 	private JsonObject accessMap = null;
 	
 	
 	public IdentifierManagerImpl(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
-		this.file = new File(this.plugin.getDataFolder(), "access.json");
+		this.file = this.plugin.getDataFolder().resolve("access.json");
 	}
 	
 	
@@ -44,19 +43,28 @@ public class IdentifierManagerImpl implements IdentifierManager {
 	 */
 	@Override
 	public IdentifierManagerImpl init() {
-		if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
-		if (file.exists()) {
+		try {
+			if (!Files.exists(this.file.getParent())) Files.createDirectories(file.getParent());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (Files.exists(this.file)) {
 			try {
-				this.accessMap = GSON.fromJson(new FileReader(file), JsonObject.class);
+				this.accessMap = GSON.fromJson(Files.newBufferedReader(this.file), JsonObject.class);
 				return this;
-			} catch (JsonSyntaxException | JsonIOException | FileNotFoundException e) {
-				File to = new File(this.plugin.getDataFolder(), file.getName() + ".broken");
-				file.renameTo(to);
+			} catch (JsonSyntaxException | JsonIOException | IOException e) {
+				Path to = this.plugin.getDataFolder().resolve(file.getFileName() + ".broken");
+				try {
+					Files.move(this.file, to, StandardCopyOption.REPLACE_EXISTING);
+				} catch (IOException e1) {
+					e.printStackTrace();
+				}
 				e.printStackTrace();
 			}
 		}
 		try {
-			Files.write(file.toPath(), GSON.toJson(this.accessMap = new JsonObject()).getBytes(StandardCharsets.UTF_8));
+			this.accessMap = new JsonObject();
+			Files.write(this.file, GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -106,9 +114,9 @@ public class IdentifierManagerImpl implements IdentifierManager {
 	 * Save servers list.
 	 */
 	private void save() {
-		if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
 		try {
-			Files.write(file.toPath(), GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));
+			if (!Files.exists(this.file.getParent())) Files.createDirectories(this.file.getParent());
+			Files.write(file, GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

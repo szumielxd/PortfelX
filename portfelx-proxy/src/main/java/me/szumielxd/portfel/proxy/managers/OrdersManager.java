@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +37,7 @@ public class OrdersManager {
 	
 	public OrdersManager(PortfelProxyImpl plugin) {
 		this.plugin = plugin;
-		this.file = new File(this.plugin.getDataFolder(), "orders.yml");
+		this.file = new File(this.plugin.getDataFolder().toFile(), "orders.yml");
 	}
 	
 	
@@ -167,7 +167,7 @@ public class OrdersManager {
 			Collection<ProxyPlayer> all = plugin.getCommonServer().getPlayers();
 			ProxyPlayer player = plugin.getCommonServer().getPlayer(user.getUniqueId());
 			CommonSender console = plugin.getCommonServer().getConsole();
-			Function<String, String> replacer = s -> {
+			UnaryOperator<String> replacer = s -> {
 				s = s.replace("%player%", user.getName())
 						.replace("%playerId%", user.getUniqueId().toString());
 				for (int i = 0; i <= match.groupCount(); i++) s = s.replace("$"+i, escapeJson(match.group(i)));

@@ -98,7 +98,7 @@ public class ListgiftcodesCommand extends SimpleCommand {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed != null) {
 			try {
-				List<PrizeToken> tokens = ((PortfelProxyImpl)this.getPlugin()).getTokenDB().getTokens((String[])parsed[2], (String[])parsed[3], (String[])parsed[4], (DateCondition[])parsed[5], (DateCondition[])parsed[6]);
+				List<PrizeToken> tokens = ((PortfelProxyImpl)this.getPlugin()).getTokenDatabase().getTokens((String[])parsed[2], (String[])parsed[3], (String[])parsed[4], (DateCondition[])parsed[5], (DateCondition[])parsed[6]);
 				
 				int size = parsed[1] != null ? (int)parsed[1] : 5;
 				int maxPage = (int) Math.ceil(tokens.size()/(double)size);

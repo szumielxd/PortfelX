@@ -46,9 +46,9 @@ public class ProxyOperableUser extends User {
 		if (balance < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				this.plugin.getDB().updateUsers(this);
-				this.plugin.getDBLogger().logBalanceAdd(this, executor, server, orderName, amount);
-				this.plugin.getDB().addBalance(this, amount);
+				this.plugin.getDatabase().updateUsers(this);
+				this.plugin.getTransactionLogger().logBalanceAdd(this, executor, server, orderName, amount);
+				this.plugin.getDatabase().addBalance(this, amount);
 			} catch (Exception e) {
 				return e;
 			}
@@ -73,9 +73,9 @@ public class ProxyOperableUser extends User {
 		if (this.balance - amount < 0) throw new IllegalArgumentException("balance cannot be lower than 0");
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				this.plugin.getDB().updateUsers(this);
-				this.plugin.getDBLogger().logBalanceTake(this, executor, server, orderName, amount);
-				this.plugin.getDB().takeBalance(this, amount);
+				this.plugin.getDatabase().updateUsers(this);
+				this.plugin.getTransactionLogger().logBalanceTake(this, executor, server, orderName, amount);
+				this.plugin.getDatabase().takeBalance(this, amount);
 			} catch (Exception e) {
 				return e;
 			}
@@ -99,9 +99,9 @@ public class ProxyOperableUser extends User {
 		if (newBalance < 0) throw new IllegalArgumentException("newBalance cannot be lower than 0");
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				this.plugin.getDB().updateUsers(this);
-				this.plugin.getDBLogger().logBalanceSet(this, executor, server, orderName, newBalance);
-				this.plugin.getDB().setBalance(this, newBalance);
+				this.plugin.getDatabase().updateUsers(this);
+				this.plugin.getTransactionLogger().logBalanceSet(this, executor, server, orderName, newBalance);
+				this.plugin.getDatabase().setBalance(this, newBalance);
 			} catch (Exception e) {
 				return e;
 			}
@@ -167,7 +167,7 @@ public class ProxyOperableUser extends User {
 	public @NotNull CompletableFuture<Exception> setDeniedInTop(boolean inTop) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				this.plugin.getDB().setDeniedInTop(this, inTop);
+				this.plugin.getDatabase().setDeniedInTop(this, inTop);
 				super.setDeniedInTop(inTop);
 				return null;
 			} catch (Exception e) {
@@ -186,7 +186,7 @@ public class ProxyOperableUser extends User {
 		this.bumpLastUpdate();
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				this.plugin.getDB().updateUsers(this);
+				this.plugin.getDatabase().updateUsers(this);
 				return null;
 			} catch (Exception e) {
 				return e;

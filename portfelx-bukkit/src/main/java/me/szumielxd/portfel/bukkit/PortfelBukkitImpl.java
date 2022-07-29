@@ -1,12 +1,12 @@
 package me.szumielxd.portfel.bukkit;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Map;
@@ -162,7 +162,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		this.getLogger().info("Loading configuration...");
 		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(BukkitConfigKey.values()).toArray(AbstractKey[]::new)));
 		this.getLogger().info("Setup locales...");
-		Lang.load(new File(this.getDataFolder(), "languages"), this);
+		Lang.load(this.getDataFolder().resolve("languages"), this);
 		this.setupBukkitKey();
 		this.ordersManager = new OrdersManager(this).init();
 		this.prizesManager = new PrizesManager(this).init();
@@ -337,26 +337,25 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	
 	
 	private void setupBukkitKey() {
-		final File f = new File(this.getDataFolder(), "server-key.dat");
-		if (f.exists()) {
+		final Path f = this.getDataFolder().resolve("server-key.dat");
+		if (Files.exists(f)) {
 			try {
-				this.serverHashKey = String.join("\n", Files.readAllLines(f.toPath()));
+				this.serverHashKey = String.join("\n", Files.readAllLines(f));
 				return;
 			} catch (IllegalArgumentException | IOException e) {
 				e.printStackTrace();
-				File to = new File(this.getDataFolder(), "server-key.dat.broken");
+				Path to = this.getDataFolder().resolve(f.getFileName() + ".broken");
 				try {
-					Files.move(f.toPath(), to.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					Files.move(f, to, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e1) {
 					throw new RuntimeException(e1);
 				}
 			}
 		}
 		try {
-			File parent = f.getParentFile();
-			if (!parent.exists()) parent.mkdirs();
+			if (!Files.exists(f.getParent())) Files.createDirectories(f.getParent());
 			this.serverHashKey = new RgxGen("[a-zA-Z0-9]{16}").generate();
-			Files.write(f.toPath(), this.serverHashKey.getBytes(StandardCharsets.US_ASCII));
+			Files.write(f, this.serverHashKey.getBytes(StandardCharsets.US_ASCII));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -364,8 +363,8 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 
 
 	@Override
-	public @NotNull File getDataFolder() {
-		return this.bootstrap.getDataFolder();
+	public @NotNull Path getDataFolder() {
+		return this.bootstrap.getDataFolderPath();
 	}
 
 

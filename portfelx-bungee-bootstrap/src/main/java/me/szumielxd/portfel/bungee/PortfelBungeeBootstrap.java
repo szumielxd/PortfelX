@@ -1,6 +1,7 @@
 package me.szumielxd.portfel.bungee;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +28,7 @@ public class PortfelBungeeBootstrap extends Plugin implements PortfelBootstrap {
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
 		this.logger = new BungeeLogger(this.getLogger());
-		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), HIKARICP4, HIKARICP5, GSON, RGXGEN, YAML, EXAMINATION_API, ADVENTURE_PLATFORM_BUNGEE, ADVENTURE_PLATFORM_API, ADVENTURE_PLATFORM_FACET, ADVENTURE_TEXT_LEGACY, ADVENTURE_TEXT_GSON, ADVENTURE_API, ADVENTURE_NBT, ADVENTURE_KEY);
+		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), HIKARICP4, HIKARICP5, GSON, RGXGEN, YAML, ADVENTURE_PLATFORM_BUNGEE);
 		try {
 			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bungee.PortfelBungeeImpl");
 			this.realPlugin = clazz.asSubclass(LoadablePortfel.class).getConstructor(PortfelBungeeBootstrap.class).newInstance(this);
@@ -65,6 +66,12 @@ public class PortfelBungeeBootstrap extends Plugin implements PortfelBootstrap {
 	public @NotNull CommonLogger getCommonLogger() {
 		if (this.logger == null) throw new IllegalStateException("plugin hasn't been already initialized");
 		return this.logger;
+	}
+
+
+	@Override
+	public @NotNull Path getDataFolderPath() {
+		return this.getDataFolder().toPath();
 	}
 	
 

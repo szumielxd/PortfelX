@@ -35,7 +35,7 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 	public ProxyUserManagerImpl init() {
 		super.init();
 		this.plugin.getCommonServer().getPlayers().stream().map(ProxyPlayer::getUniqueId).toArray(UUID[]::new);
-		//this.plugin.getDB();
+		//this.plugin.getDatabase();
 		return this;
 	}
 	
@@ -76,7 +76,7 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 		this.validate();
 		ProxyOperableUser user = this.users.get(uuid);
 		if (user != null) return user;
-		user = (ProxyOperableUser) this.plugin.getDB().loadUser(uuid);
+		user = (ProxyOperableUser) this.plugin.getDatabase().loadUser(uuid);
 		if (user != null) this.users.put(uuid, user);
 		return user;
 	}
@@ -94,7 +94,7 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 		this.validate();
 		ProxyOperableUser user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
 		if (user != null) return user;
-		user = (ProxyOperableUser) this.plugin.getDB().loadUserByName(username, false);
+		user = (ProxyOperableUser) this.plugin.getDatabase().loadUserByName(username, false);
 		if (user != null) this.users.put(user.getUniqueId(), user);
 		return user;
 	}
@@ -112,7 +112,7 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 		this.validate();
 		ProxyOperableUser user = this.users.get(uuid);
 		if (user != null) return user;
-		user = (ProxyOperableUser) this.plugin.getDB().loadOrCreateUser(uuid);
+		user = (ProxyOperableUser) this.plugin.getDatabase().loadOrCreateUser(uuid);
 		this.users.put(uuid, user);
 		return user;
 	}
@@ -137,7 +137,7 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 	@Override
 	public void updateUsers(User... users) throws Exception {
 		this.validate();
-		this.plugin.getDB().updateUsers(Stream.of(users).toArray(ProxyOperableUser[]::new));
+		this.plugin.getDatabase().updateUsers(Stream.of(users).toArray(ProxyOperableUser[]::new));
 	}
 	
 	/**

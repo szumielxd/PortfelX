@@ -31,7 +31,7 @@ public class TopInfoCommand extends SimpleCommand {
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		User user = (User) parsedArgs[0];
 		try {
-			Integer pos = ((PortfelProxyImpl)this.getPlugin()).getDB().getTopPos(user)[0];
+			Integer pos = ((PortfelProxyImpl)this.getPlugin()).getDatabase().getTopPos(user)[0];
 			Component inTop = Portfel.PREFIX.append(LangKey.COMMAND_USER_TOP_INFO_INTOP.component(DARK_PURPLE, Component.text(user.getName())));
 			Component inTopValue = Portfel.PREFIX.append(Component.text("-> ", LIGHT_PURPLE))
 					.append(user.isDeniedInTop() ? LangKey.MAIN_VALUE_FALSE.component(RED) : LangKey.MAIN_VALUE_TRUE.component(GREEN));

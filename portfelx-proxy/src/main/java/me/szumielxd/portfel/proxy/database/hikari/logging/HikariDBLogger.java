@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -88,11 +89,11 @@ public class HikariDBLogger implements AbstractDBLogger {
 	}
 	
 	public boolean isDead() {
-		return this.initialized == false;
+		return Boolean.FALSE.equals(this.initialized);
 	}
 	
 	public boolean isValid() {
-		return this.initialized == true;
+		return Boolean.TRUE.equals(this.initialized);
 	}
 	
 	protected void validate() {
@@ -107,7 +108,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 	 */
 	public AbstractDBLogger init() {
 		this.logListener = this.plugin.getTaskManager().runTaskTimerAsynchronously(() -> {
-			AbstractDB db = this.plugin.getDB();
+			AbstractDB db = this.plugin.getDatabase();
 			db.checkConnection();
 			long id = this.lastID; // multithread safety
 			final String sql = id < 0 ? String.format("SELECT `%s` FROM `%s` ORDER BY `%s` DESC LIMIT 1", LOGS_ID, TABLE_LOGS, LOGS_ID)
@@ -124,14 +125,17 @@ public class HikariDBLogger implements AbstractDBLogger {
 							if (id >= 0) {
 								ActionExecutor executor = new ActionExecutor(rs.getString(5), UUID.fromString(rs.getString(6))) {};
 								ActionType type = ActionType.parse(rs.getString(9));
+								Calendar currentCalendar = Calendar.getInstance();
 								this.handleIncomingLog(new LogEntry(rs.getInt(1), UUID.fromString(rs.getString(2)), rs.getString(3), executor,
-										rs.getString(4), new Date(rs.getTimestamp(7).getTime()), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
+										rs.getString(4), new Date(rs.getTimestamp(7, currentCalendar).getTime()), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
 							}
 						}
 						if (this.lastID < 0) this.lastID = 0;
 					}
 				}
-			} catch (SQLException e) {}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
 		}, 1, 1, TimeUnit.SECONDS);
 		this.initialized = true;
 		return this;
@@ -159,7 +163,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 	@Override
 	public void logBalanceAdd(@NotNull User target, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName, long value) throws SQLException {
 		this.validate();
-		AbstractDB db = this.plugin.getDB();
+		AbstractDB db = this.plugin.getDatabase();
 		db.checkConnection();
 		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
@@ -194,7 +198,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 	@Override
 	public void logBalanceTake(@NotNull User target, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName, long value) throws SQLException {
 		this.validate();
-		AbstractDB db = this.plugin.getDB();
+		AbstractDB db = this.plugin.getDatabase();
 		db.checkConnection();
 		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
@@ -229,7 +233,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 	@Override
 	public void logBalanceSet(@NotNull User target, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName, long value) throws SQLException {
 		this.validate();
-		AbstractDB db = this.plugin.getDB();
+		AbstractDB db = this.plugin.getDatabase();
 		db.checkConnection();
 		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
@@ -262,7 +266,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 	@Override
 	public void logTokenUse(@NotNull User target, @NotNull String server, @NotNull PrizeToken prize) throws SQLException {
 		this.validate();
-		AbstractDB db = this.plugin.getDB();
+		AbstractDB db = this.plugin.getDatabase();
 		db.checkConnection();
 		String sql = String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				TABLE_LOGS, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
@@ -365,7 +369,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 			whereClause.append(whereClause.length()>0? " AND (" : " (").append(String.join(" AND ", Stream.of(balanceConditions).map(c -> String.format("`%s` %s", LOGS_BALANCE, c.getFormat())).toArray(String[]::new))).append(')');
 		}
 		
-		AbstractDB db = this.plugin.getDB();
+		AbstractDB db = this.plugin.getDatabase();
 		db.checkConnection();
 		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s`",
 				LOGS_ID, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER,
@@ -395,11 +399,12 @@ public class HikariDBLogger implements AbstractDBLogger {
 				
 				try (ResultSet rs = stm.executeQuery()) {
 					List<LogEntry> list = new ArrayList<>(rs.getFetchSize());
+					Calendar currentCalendar = Calendar.getInstance();
 					while (rs.next()) {
 						ActionExecutor executor = new ActionExecutor(rs.getString(5), UUID.fromString(rs.getString(6))) {};
 						ActionType type = ActionType.parse(rs.getString(9));
 						list.add(new LogEntry(rs.getInt(1), UUID.fromString(rs.getString(2)), rs.getString(3), executor,
-								rs.getString(4), new Date(rs.getTimestamp(7).getTime()), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
+								rs.getString(4), new Date(rs.getTimestamp(7, currentCalendar).getTime()), rs.getString(8), type, rs.getLong(10), rs.getLong(11)));
 					}
 					return list;
 				}

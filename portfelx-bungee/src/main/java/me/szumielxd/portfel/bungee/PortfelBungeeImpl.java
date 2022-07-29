@@ -1,10 +1,7 @@
 package me.szumielxd.portfel.bungee;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -13,9 +10,10 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
-import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
@@ -33,7 +31,6 @@ import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
-import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
 import me.szumielxd.portfel.proxy.api.managers.ProxyTopManager;
@@ -44,12 +41,7 @@ import me.szumielxd.portfel.proxy.commands.MainCommand;
 import me.szumielxd.portfel.proxy.commands.MainTokenCommand;
 import me.szumielxd.portfel.proxy.database.AbstractDB;
 import me.szumielxd.portfel.proxy.database.AbstractDBLogger;
-import me.szumielxd.portfel.proxy.database.hikari.MariaDB;
-import me.szumielxd.portfel.proxy.database.hikari.MysqlDB;
-import me.szumielxd.portfel.proxy.database.hikari.logging.HikariDBLogger;
 import me.szumielxd.portfel.proxy.database.token.AbstractTokenDB;
-import me.szumielxd.portfel.proxy.database.token.hikari.MariaTokenDB;
-import me.szumielxd.portfel.proxy.database.token.hikari.MysqlTokenDB;
 import me.szumielxd.portfel.proxy.managers.AccessManagerImpl;
 import me.szumielxd.portfel.proxy.managers.OrdersManager;
 import me.szumielxd.portfel.proxy.managers.ProxyTaskManagerImpl;
@@ -106,18 +98,18 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	private BungeeAudiences adventure;
 	private AccessManagerImpl accessManager;
 	private TaskManager taskManager;
-	private ConfigImpl config;
+	private @Getter ConfigImpl configuration;
 	private ProxyUserManagerImpl userManager;
 	private ProxyTopManagerImpl topManager;
 	private OrdersManager ordersManager;
 	private PrizesManager prizesManager;
 	private TokenManager tokenManager;
-	private AbstractDB database;
-	private AbstractTokenDB tokenDatabase;
-	private AbstractDBLogger transactionLogger;
-	private MainCommand command;
-	private MainTokenCommand tokenCommand;
-	private UUID proxyID;
+	private @Getter @Setter AbstractDB database;
+	private @Getter @Setter AbstractTokenDB tokenDatabase;
+	private @Getter @Setter AbstractDBLogger transactionLogger;
+	private @Getter MainCommand command;
+	private @Getter MainTokenCommand tokenCommand;
+	private @Getter @Setter UUID proxyId;
 	
 	private ContextProvider<ProxiedPlayer> luckpermsContextProvider;
 	
@@ -137,20 +129,9 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.taskManager = new ProxyTaskManagerImpl(this);
 		this.accessManager = new BungeeAccessManagerImpl(this).init();
 		//
-		String dbType = this.getConfiguration().getString(ProxyConfigKey.DATABASE_TYPE).toLowerCase();
-		if ("mariadb".equals(dbType)) this.database = new MariaDB(this);
-		else this.database = new MysqlDB(this);
-		this.getLogger().info("Establishing connection with database...");
-		this.database.setup();
-		//
-		String tokenDbType = this.getConfiguration().getString(ProxyConfigKey.TOKEN_DATABASE_TYPE).toLowerCase();
-		if ("mariadb".equals(tokenDbType)) this.tokenDatabase = new MariaTokenDB(this);
-		else this.tokenDatabase = new MysqlTokenDB(this);
-		this.getLogger().info("Establishing connection with tokens database...");
-		this.tokenDatabase.setup();
+		this.setupDatabases();
 		
 		this.getLogger().info("Setup managers...");
-		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new ProxyUserManagerImpl(this).init();
 		this.topManager = new ProxyTopManagerImpl(this).init();
 		this.tokenManager = new TokenManager(this).init();
@@ -159,7 +140,7 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.asPlugin().getProxy().getPluginManager().registerListener(this.asPlugin(), new BungeeChannelListener(this));
 		this.getLogger().info("Registering commands...");
 		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
-		this.tokenCommand = new MainTokenCommand(this, this.config.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.config.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
+		this.tokenCommand = new MainTokenCommand(this, this.configuration.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.configuration.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
 		this.asPlugin().getProxy().registerChannel(CHANNEL_SETUP);
@@ -173,9 +154,9 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	public void load() {
 		this.getLogger().info("Loading configuration...");
-		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(ProxyConfigKey.values()).toArray(AbstractKey[]::new)));
+		this.configuration = new ConfigImpl(this).init(Stream.of(ConfigKey.values(), ProxyConfigKey.values()).flatMap(Stream::of).toArray(AbstractKey[]::new));
 		this.getLogger().info("Setup locales...");
-		Lang.load(new File(this.getDataFolder(), "languages"), this);
+		Lang.load(this.getDataFolder().resolve("languages"), this);
 		this.ordersManager = new OrdersManager(this).init();
 		this.prizesManager = new PrizesManager(this).init();
 		if (this.asPlugin().getProxy().getPluginManager().getPlugin("LuckPerms") != null) {
@@ -204,8 +185,8 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		try {
 			Field f = Class.forName("net.kyori.adventure.platform.bungeecord.BungeeAudiencesImpl").getDeclaredField("INSTANCES");
 			f.setAccessible(true);
-			Map<?, ?> INSTANCES = (Map<?, ?>) f.get(null);
-			INSTANCES.remove(this.asPlugin().getDescription().getName());
+			Map<?, ?> instances = (Map<?, ?>) f.get(null);
+			instances.remove(this.asPlugin().getDescription().getName());
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
@@ -220,21 +201,6 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.unload();
 		this.getLogger().info("Everything OK, miss you");
 		this.getLogger().info("Goodbye my friend...");
-	}
-	
-	
-	public @NotNull UUID getProxyId() {
-		return this.proxyID;
-	}
-	
-	
-	public @NotNull AbstractDB getDB() {
-		return this.database;
-	}
-	
-	
-	public @NotNull AbstractTokenDB getTokenDB() {
-		return this.tokenDatabase;
 	}
 	
 	
@@ -298,16 +264,6 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		return this.prizesManager;
 	}
 	
-	
-	/**
-	 * Get database-oriented transaction logger.
-	 * 
-	 * @return transaction logger
-	 */
-	public @NotNull AbstractDBLogger getDBLogger() {
-		return this.transactionLogger;
-	}
-	
 	/**
 	 * Get Bungee audience implementation.
 	 * 
@@ -328,29 +284,6 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	}
 	
 	
-	private void setupProxyId() {
-		final File f = new File(this.getDataFolder(), "server-id.dat");
-		if (f.exists()) {
-			try {
-				this.proxyID = UUID.fromString(String.join("\n", Files.readAllLines(f.toPath())));
-				return;
-			} catch (IllegalArgumentException | IOException e) {
-				e.printStackTrace();
-				File to = new File(this.getDataFolder(), "server-id.dat.broken");
-				if (to.exists()) to.delete();
-				f.renameTo(to);
-			}
-		}
-		try {
-			File parent = f.getParentFile();
-			if (!parent.exists()) parent.mkdirs();
-			Files.write(f.toPath(), (this.proxyID = UUID.randomUUID()).toString().getBytes(StandardCharsets.UTF_8));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
 	private void sendMotd() {
 		this.getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
 		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.asPlugin().getDescription().getVersion()+"\u001b[0m");
@@ -360,17 +293,11 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	}
 
 
-	@Override
-	public @NotNull Config getConfiguration() {
-		return this.config;
-	}
-
-
 
 
 	@Override
-	public @NotNull File getDataFolder() {
-		return this.asPlugin().getDataFolder();
+	public @NotNull Path getDataFolder() {
+		return this.asPlugin().getDataFolder().toPath();
 	}
 
 

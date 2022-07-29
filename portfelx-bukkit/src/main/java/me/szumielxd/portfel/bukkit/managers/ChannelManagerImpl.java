@@ -4,9 +4,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -157,7 +157,8 @@ public class ChannelManagerImpl implements ChannelManager {
 				this.plugin.getTaskManager().runTaskAsynchronously(() -> {
 					CompletableFuture<Boolean> future = this.waitingForValidation.get(operationId);
 					if (future == null) {
-						this.waitingForValidation.put(operationId, future = new CompletableFuture<>());
+						future = new CompletableFuture<>();
+						this.waitingForValidation.put(operationId, future);
 						this.validateSetup(player, operationId);
 					}
 					Boolean res = null;
@@ -165,6 +166,7 @@ public class ChannelManagerImpl implements ChannelManager {
 						res = future.get(3, TimeUnit.SECONDS);
 					} catch (InterruptedException | ExecutionException | TimeoutException e) {
 						e.printStackTrace();
+						Thread.currentThread().interrupt();
 					}
 					this.waitingForValidation.remove(operationId);
 					if (Boolean.TRUE == res) this.sendSetupChannel(channel, player, operationId, proxyId, serverId);
@@ -177,25 +179,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		
 	}
 	
-	private void validateSetup(@NotNull Player player, @NotNull UUID operationId) {
-		
-		// BungeeCord
-		/*ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF("ForwardToPlayer"); // subchannel
-		out.writeUTF(player.getName()); // player
-		out.writeUTF(Portfel.CHANNEL_SETUP); // custom channel
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream os = new DataOutputStream(baos);
-		try {
-			os.writeUTF("Validate"); // channel
-			os.writeUTF(operationId.toString()); // operationId
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		out.writeShort(baos.toByteArray().length);
-		out.write(baos.toByteArray());
-		player.sendPluginMessage(plugin.asPlugin(), BUNGEE_CHANNEL, out.toByteArray());*/
-		
+	private void validateSetup(@NotNull Player player, @NotNull UUID operationId) {		
 		
 		// Velocity
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
@@ -259,13 +243,7 @@ public class ChannelManagerImpl implements ChannelManager {
 						Throwable throwable = null;
 						if (status.get().equals(TransactionStatus.OK)) {
 							globalOrders = din.readInt();
-						}/* else if (status.get().equals(TransactionStatus.OK)) {
-							try {
-								throwable = new Gson().fromJson(din.readUTF(), Throwable.class);
-							} catch (Exception e) {
-								throwable = e;
-							}
-						}*/
+						}
 						result = new TransactionResult(transactionId, status.get(), newBalance, globalOrders, throwable);
 					}
 				}
@@ -371,7 +349,7 @@ public class ChannelManagerImpl implements ChannelManager {
 				List<TopEntry> list = new ArrayList<>();
 				for (int i = 0; i < size; i++) {
 					UUID uuid = new UUID(in.readLong(), in.readLong()); // UUID
-					String name = IntStream.range(0, 16).mapToObj(j -> (char)(((int)in.readByte()) + 128)).filter(ch -> !ch.equals(' ')).map(String::valueOf).collect(Collectors.joining()); // Name
+					String name = IntStream.range(0, 16).mapToObj(j -> (char)((in.readByte()) + 128)).filter(ch -> !ch.equals(' ')).map(String::valueOf).collect(Collectors.joining()); // Name
 					long balance = in.readLong();
 					list.add(new TopEntry(uuid, name, balance));
 				}
@@ -415,16 +393,17 @@ public class ChannelManagerImpl implements ChannelManager {
 	@Override
 	public @NotNull BukkitOperableUser requestPlayer(@NotNull Player player) throws Exception {
 		UUID uuid = player.getUniqueId();
-		CompletableFuture<BukkitOperableUser> future = this.waitingUserUpdates.get(uuid);
-		if (future == null) {
-			this.waitingUserUpdates.put(uuid, future = new CompletableFuture<>());
+		CompletableFuture<BukkitOperableUser> future = this.waitingUserUpdates.computeIfAbsent(uuid, id -> {
 			this.sendUserRequest(player);
-		}
+			return new CompletableFuture<>();
+		});
 		try {
-			BukkitOperableUser user = future.get(5, TimeUnit.SECONDS);
-			return user;
-		} catch (ExecutionException | InterruptedException | TimeoutException e) {
-			throw e;
+			return future.get(5, TimeUnit.SECONDS);
+		} catch (ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
 		} finally {
 			this.waitingUserUpdates.remove(uuid);
 		}
@@ -467,17 +446,19 @@ public class ChannelManagerImpl implements ChannelManager {
 		if (user == null) return new ArrayList<>();
 		UUID uuid = user.getUniqueId();
 		UUID proxyId = user.getRemoteId();
-		CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.get(proxyId);
-		if (future == null) {
+		
+		CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.computeIfAbsent(proxyId, id -> {
 			this.topUpdatesByUser.put(uuid, proxyId);
-			this.waitingTopUpdates.put(proxyId, future = new CompletableFuture<>());
 			this.sendTopRequest(player);
-		}
+			return new CompletableFuture<>();
+		});
 		try {
-			List<TopEntry> top = future.get(5, TimeUnit.SECONDS);
-			return top;
-		} catch (ExecutionException | InterruptedException | TimeoutException e) {
-			throw e;
+			return future.get(5, TimeUnit.SECONDS);
+		} catch (ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
 		} finally {
 			this.waitingTopUpdates.remove(proxyId);
 			this.topUpdatesByUser.remove(uuid, proxyId);
@@ -545,14 +526,20 @@ public class ChannelManagerImpl implements ChannelManager {
 			this.sendTransaction(player, trans);
 			try {
 				TransactionResult result = future.get(5, TimeUnit.SECONDS);
-				this.waitingUserUpdates.remove(transactionId);
 				trans.finish(result);
 				return trans;
-			} catch (ExecutionException | InterruptedException | TimeoutException e) {
+			} catch (ExecutionException | TimeoutException e) {
+				throw new RuntimeException(e);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			} finally {
 				this.waitingUserUpdates.remove(transactionId);
-				throw e;
 			}
 			
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -562,11 +549,11 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	
 	private void logTokenPrize(@NotNull String text) {
-		File f = new File(this.plugin.getDataFolder(), "token-prize.log");
-		if (!f.getParentFile().exists()) f.getParentFile().mkdirs();
-		text = String.format("[%s] %s%n", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
 		try {
-			Files.write(f.toPath(), Collections.singletonList(text), StandardOpenOption.APPEND);
+			Path f = this.plugin.getDataFolder().resolve("token-prize.log");
+			if (!Files.exists(f.getParent())) Files.createDirectories(f.getParent());
+			text = String.format("[%s] %s%n", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
+			Files.write(f, Collections.singletonList(text), StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

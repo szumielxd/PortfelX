@@ -1,6 +1,8 @@
 package me.szumielxd.portfel.bukkit;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,7 +28,7 @@ public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstr
 	public void onLoad() {
 		this.dependencyLoader = new DependencyLoader(this);
 		this.commonLogger = new BukkitLogger(this.getLogger());
-		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), GSON, RGXGEN, YAML, EXAMINATION_API, ADVENTURE_PLATFORM_BUKKIT, ADVENTURE_PLATFORM_API, ADVENTURE_PLATFORM_FACET, ADVENTURE_TEXT_BUNGEE, ADVENTURE_TEXT_GSON, ADVENTURE_TEXT_GSON_LEGACY, ADVENTURE_TEXT_LEGACY, ADVENTURE_API, ADVENTURE_NBT, ADVENTURE_KEY);
+		this.jarClassLoader = this.dependencyLoader.load(getClass().getClassLoader(), GSON, RGXGEN, YAML, ADVENTURE_PLATFORM_BUKKIT);
 		try {
 			Class<?> clazz = this.jarClassLoader.loadClass("me.szumielxd.portfel.bukkit.PortfelBukkitImpl");
 			this.realPlugin = clazz.asSubclass(LoadablePortfel.class).getConstructor(PortfelBukkitBootstrap.class).newInstance(this);
@@ -58,6 +60,12 @@ public class PortfelBukkitBootstrap extends JavaPlugin implements PortfelBootstr
 	public @NotNull CommonLogger getCommonLogger() {
 		if (this.commonLogger == null) throw new IllegalStateException("plugin hasn't been already initialized");
 		return this.commonLogger;
+	}
+
+
+	@Override
+	public @NotNull Path getDataFolderPath() {
+		return this.getDataFolder().toPath();
 	}
 	
 

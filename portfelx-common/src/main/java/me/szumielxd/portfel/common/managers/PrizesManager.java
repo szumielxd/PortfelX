@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +37,7 @@ public class PrizesManager {
 	
 	public PrizesManager(Portfel plugin) {
 		this.plugin = plugin;
-		this.file = new File(this.plugin.getDataFolder(), "token-prizes.yml");
+		this.file = new File(this.plugin.getDataFolder().toFile(), "token-prizes.yml");
 	}
 	
 	
@@ -164,7 +164,7 @@ public class PrizesManager {
 			Collection<? extends CommonPlayer> all = plugin.getCommonServer().getPlayers();
 			CommonPlayer player = plugin.getCommonServer().getPlayer(user.getUniqueId());
 			CommonSender console = plugin.getCommonServer().getConsole();
-			Function<String, String> replacer = s -> {
+			UnaryOperator<String> replacer = s -> {
 				s = s.replace("%player%", user.getName())
 						.replace("%playerId%", user.getUniqueId().toString())
 						.replace("%token%", token);

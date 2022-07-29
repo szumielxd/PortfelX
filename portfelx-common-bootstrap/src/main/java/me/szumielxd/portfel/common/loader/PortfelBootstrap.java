@@ -1,12 +1,13 @@
 package me.szumielxd.portfel.common.loader;
 
-import java.io.File;
+import java.nio.file.Path;
+
 import org.jetbrains.annotations.NotNull;
 
 public interface PortfelBootstrap {
 	
 	
-	public @NotNull File getDataFolder();
+	public @NotNull Path getDataFolderPath();
 	
 	public @NotNull CommonLogger getCommonLogger();
 	

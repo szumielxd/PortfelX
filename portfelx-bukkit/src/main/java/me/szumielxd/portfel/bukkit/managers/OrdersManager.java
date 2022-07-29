@@ -1,10 +1,9 @@
 package me.szumielxd.portfel.bukkit.managers;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -38,32 +37,39 @@ public class OrdersManager {
 	
 	
 	private final PortfelBukkitImpl plugin;
-	private final File ordersFolder;
+	private final Path ordersFolder;
 	private final Map<String, OrderPortfelGui> categories = new HashMap<>();
 	
 	
 	public OrdersManager(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
-		this.ordersFolder = new File(this.plugin.getDataFolder(), "orders");
+		this.ordersFolder = this.plugin.getDataFolder().resolve("orders");
 	}
 	
 	
 	public OrdersManager init() {
-		// set defaults
-		if (!this.ordersFolder.exists()) {
-			this.ordersFolder.mkdirs();
-			for (String name : Arrays.asList("money.yml", "rankups.yml")) {
-				try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("orders/" + name)) {
-					Files.copy(is, new File(this.ordersFolder, name).toPath());
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+		try {
+			// set defaults
+			if (!Files.exists(this.ordersFolder)) {
+				Files.createDirectories(this.ordersFolder);
+				Stream.of("money.yml", "rankups.yml").forEach(this::setupOrder);
 			}
+			
+			try (Stream<Path> paths = Files.find(this.ordersFolder, 0, (path, attr) -> path.endsWith(".yml"))) {
+				paths.forEach(this::load);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		
-		Stream.of(this.ordersFolder.listFiles((dir, f) -> f.endsWith(".yml"))).forEach(this::load);
-		
 		return this;
+	}
+	
+	private void setupOrder(String name) {
+		try (InputStream is = this.getClass().getClassLoader().getResourceAsStream("orders/" + name)) {
+			Files.copy(is, this.ordersFolder.resolve(name));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -80,8 +86,8 @@ public class OrdersManager {
 	}
 	
 	
-	private void load(@NotNull File file) {
-		YamlFile yml = new YamlFile(file);
+	private void load(@NotNull Path file) {
+		YamlFile yml = new YamlFile(file.toFile());
 		try {
 			yml.load();
 			String title = Objects.requireNonNull(yml.getString("title", null), "title must be set");
@@ -93,10 +99,11 @@ public class OrdersManager {
 			List<String> description = yml.getStringList("description");
 			ConfigurationSection section = Objects.requireNonNull(yml.getConfigurationSection("orders"), "orders section must be set");
 			List<OrderData> orders = section.getKeys(false).stream().filter(section::isConfigurationSection).map(section::getConfigurationSection).map(this::loadOrder).filter(Objects::nonNull).collect(Collectors.toList());
-			String id = file.getName().substring(0, file.getName().length()-4);
+			String fileName = file.getFileName().toString();
+			String id = fileName.substring(0, fileName.length()-4);
 			this.categories.put(id.toLowerCase(), new OrderPortfelGui(this.plugin, id, title, slot, rows, name, description, icon, type, orders));
 		} catch (NullPointerException | IOException e) {
-			this.plugin.getLogger().warn(e, "Cannot load orders category from file %s", file.getName());
+			this.plugin.getLogger().warn(e, "Cannot load orders category from file %s", file.getFileName());
 		}
 	}
 	
@@ -104,7 +111,7 @@ public class OrdersManager {
 	private @Nullable OrderData loadOrder(@NotNull ConfigurationSection yml) {
 		try {
 			final Map<Pattern, String> replacements = yml.getKeys(false).parallelStream().filter(s -> s.startsWith("--")).filter(yml::isString).collect(Collectors.toMap(s -> Pattern.compile(String.format("(?<!(?<!\\\\)\\\\)\\{%s\\}", Pattern.quote(s.substring(2)))), yml::getString));
-			Function<String, String> replacer = (str) -> {
+			UnaryOperator<String> replacer = str -> {
 				Iterator<Map.Entry<Pattern, String>> iter = replacements.entrySet().iterator();
 				while (iter.hasNext()) {
 					Map.Entry<Pattern, String> e = iter.next();

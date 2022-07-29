@@ -1,9 +1,9 @@
 package me.szumielxd.portfel.bukkit.objects;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -117,15 +117,11 @@ public class TransactionImpl implements Transaction {
 		
 		// broadcast
 		Audience all = this.plugin.getServer() instanceof Audience ? this.plugin.getServer() : this.plugin.adventure().all();
-		this.getOrder().getBroadcast().forEach(msg -> {
-			all.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer));
-		});
+		this.getOrder().getBroadcast().forEach(msg -> all.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer)));
 		
 		// message
 		Audience player = Audience.class.isAssignableFrom(Player.class) ? Bukkit.getPlayer(user.getUniqueId()) : this.plugin.adventure().player(user.getUniqueId());
-		this.getOrder().getMessage().forEach(msg -> {
-			player.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer));
-		});
+		this.getOrder().getMessage().forEach(msg -> player.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer)));
 		
 		// command
 		this.plugin.getTaskManager().runTask(() -> this.getOrder().getCommand().forEach(cmd -> {
@@ -143,12 +139,12 @@ public class TransactionImpl implements Transaction {
 	
 	private void log(@NotNull String text) {
 		Objects.requireNonNull(text, "text cannot be null");
-		File f = new File(this.plugin.getDataFolder(), "transactions.log");
-		if (!f.getParentFile().exists()) f.getParentFile().mkdirs();
-		text = String.format("[%s] %s", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
+		Path f = this.plugin.getDataFolder().resolve("transactions.log");
 		try {
-			if (!f.exists()) f.createNewFile();
-			Files.write(f.toPath(), Collections.singletonList(text), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
+			if (!Files.exists(f.getParent())) Files.createDirectories(f.getParent());
+			text = String.format("[%s] %s", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
+			if (!Files.exists(f)) Files.createFile(f);
+			Files.write(f, Collections.singletonList(text), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -1,9 +1,6 @@
 package me.szumielxd.portfel.velocity;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -19,6 +16,8 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
 import me.szumielxd.portfel.api.configuration.Config;
@@ -45,14 +44,7 @@ import me.szumielxd.portfel.proxy.commands.MainCommand;
 import me.szumielxd.portfel.proxy.commands.MainTokenCommand;
 import me.szumielxd.portfel.proxy.database.AbstractDB;
 import me.szumielxd.portfel.proxy.database.AbstractDBLogger;
-import me.szumielxd.portfel.proxy.database.hikari.H2DB;
-import me.szumielxd.portfel.proxy.database.hikari.MariaDB;
-import me.szumielxd.portfel.proxy.database.hikari.MysqlDB;
-import me.szumielxd.portfel.proxy.database.hikari.logging.HikariDBLogger;
 import me.szumielxd.portfel.proxy.database.token.AbstractTokenDB;
-import me.szumielxd.portfel.proxy.database.token.hikari.H2TokenDB;
-import me.szumielxd.portfel.proxy.database.token.hikari.MariaTokenDB;
-import me.szumielxd.portfel.proxy.database.token.hikari.MysqlTokenDB;
 import me.szumielxd.portfel.proxy.managers.AccessManagerImpl;
 import me.szumielxd.portfel.proxy.managers.OrdersManager;
 import me.szumielxd.portfel.proxy.managers.ProxyTaskManagerImpl;
@@ -103,8 +95,8 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	
 	@Override
-	public @NotNull File getDataFolder() {
-		return this.bootstrap.getDataFolder();
+	public @NotNull Path getDataFolder() {
+		return this.bootstrap.getDataFolderPath();
 	}
 	
 	
@@ -141,12 +133,12 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	private OrdersManager ordersManager;
 	private PrizesManager prizesManager;
 	private TokenManager tokenManager;
-	private AbstractDB database;
-	private AbstractTokenDB tokenDatabase;
-	private AbstractDBLogger transactionLogger;
-	private MainCommand command;
-	private MainTokenCommand tokenCommand;
-	private UUID proxyID;
+	private @Getter @Setter AbstractDB database;
+	private @Getter @Setter AbstractTokenDB tokenDatabase;
+	private @Getter @Setter AbstractDBLogger transactionLogger;
+	private @Getter MainCommand command;
+	private @Getter MainTokenCommand tokenCommand;
+	private @Getter @Setter UUID proxyId;
 	
 	private ContextProvider<Player> luckpermsContextProvider;
 	
@@ -165,22 +157,9 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.taskManager = new ProxyTaskManagerImpl(this);
 		this.accessManager = new VelocityAccessManagerImpl(this).init();
 		//
-		String dbType = this.getConfiguration().getString(ProxyConfigKey.DATABASE_TYPE).toLowerCase();
-		if ("mariadb".equals(dbType)) this.database = new MariaDB(this);
-		else if ("mysql".equals(dbType)) this.database = new MysqlDB(this);
-		else this.database = new H2DB(this);
-		this.getLogger().info("Establishing connection with database...");
-		this.database.setup();
-		//
-		String tokenDbType = this.getConfiguration().getString(ProxyConfigKey.TOKEN_DATABASE_TYPE).toLowerCase();
-		if ("mariadb".equals(tokenDbType)) this.tokenDatabase = new MariaTokenDB(this);
-		else if ("mysql".equals(tokenDbType)) this.tokenDatabase = new MysqlTokenDB(this);
-		else this.tokenDatabase = new H2TokenDB(this);
-		this.getLogger().info("Establishing connection with tokens database...");
-		this.tokenDatabase.setup();
+		this.setupDatabases();
 		
 		this.getLogger().info("Setup managers...");
-		this.transactionLogger = new HikariDBLogger(this).init();
 		this.userManager = new ProxyUserManagerImpl(this).init();
 		this.topManager = new ProxyTopManagerImpl(this).init();
 		this.tokenManager = new TokenManager(this).init();
@@ -206,7 +185,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.getLogger().info("Loading configuration...");
 		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(ProxyConfigKey.values()).toArray(AbstractKey[]::new)));
 		this.getLogger().info("Setup locales...");
-		Lang.load(new File(this.getDataFolder(), "languages"), this);
+		Lang.load(this.getDataFolder().resolve("languages"), this);
 		this.ordersManager = new OrdersManager(this).init();
 		this.prizesManager = new PrizesManager(this).init();
 		if (this.getProxy().getPluginManager().getPlugin("LuckPerms").isPresent()) {
@@ -240,21 +219,6 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.unload();
 		this.getLogger().info("Everything OK, miss you");
 		this.getLogger().info("Goodbye my friend...");
-	}
-	
-	
-	public @NotNull UUID getProxyId() {
-		return this.proxyID;
-	}
-	
-	
-	public @NotNull AbstractDB getDB() {
-		return this.database;
-	}
-	
-	
-	public @NotNull AbstractTokenDB getTokenDB() {
-		return this.tokenDatabase;
 	}
 	
 	
@@ -316,39 +280,6 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	public @NotNull PrizesManager getPrizesManager() {
 		return this.prizesManager;
-	}
-	
-	
-	/**
-	 * Get database-oriented transaction logger.
-	 * 
-	 * @return transaction logger
-	 */
-	public @NotNull AbstractDBLogger getDBLogger() {
-		return this.transactionLogger;
-	}
-	
-	
-	private void setupProxyId() {
-		final File f = new File(this.getDataFolder(), "server-id.dat");
-		if (f.exists()) {
-			try {
-				this.proxyID = UUID.fromString(String.join("\n", Files.readAllLines(f.toPath())));
-				return;
-			} catch (IllegalArgumentException | IOException e) {
-				e.printStackTrace();
-				File to = new File(this.getDataFolder(), "server-id.dat.broken");
-				if (to.exists()) to.delete();
-				f.renameTo(to);
-			}
-		}
-		try {
-			File parent = f.getParentFile();
-			if (!parent.exists()) parent.mkdirs();
-			Files.write(f.toPath(), (this.proxyID = UUID.randomUUID()).toString().getBytes(StandardCharsets.UTF_8));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	

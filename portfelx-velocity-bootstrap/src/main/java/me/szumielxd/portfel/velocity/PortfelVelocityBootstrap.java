@@ -1,6 +1,5 @@
 package me.szumielxd.portfel.velocity;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import javax.inject.Inject;
@@ -16,6 +15,7 @@ import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 
+import lombok.Getter;
 import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.DependencyLoader;
@@ -45,15 +45,15 @@ public class PortfelVelocityBootstrap implements PortfelBootstrap {
 	
 	
 	private final ProxyServer server;
-	private final CommonLogger logger;
-	private final File dataFolder;
+	private final @Getter CommonLogger commonLogger;
+	private final @Getter Path dataFolderPath;
 	
 	
 	@Inject
 	public PortfelVelocityBootstrap(ProxyServer server, Logger logger, @DataDirectory Path dataDirectory) {
 		this.server = server;
-		this.logger = new VelocityLogger(logger);
-		this.dataFolder = dataDirectory.toFile();
+		this.commonLogger = new VelocityLogger(logger);
+		this.dataFolderPath = dataDirectory;
 	}
 	
 	
@@ -88,18 +88,6 @@ public class PortfelVelocityBootstrap implements PortfelBootstrap {
 	@Subscribe
 	public void onProxyInitialization(ProxyShutdownEvent event) {
 		this.realPlugin.onDisable();
-	}
-
-
-	@Override
-	public @NotNull File getDataFolder() {
-		return this.dataFolder;
-	}
-
-
-	@Override
-	public @NotNull CommonLogger getCommonLogger() {
-		return this.logger;
 	}
 
 

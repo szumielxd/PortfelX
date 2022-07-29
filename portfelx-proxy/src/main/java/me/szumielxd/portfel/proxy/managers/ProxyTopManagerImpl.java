@@ -35,7 +35,7 @@ public class ProxyTopManagerImpl extends TopManagerImpl implements ProxyTopManag
 	@Override
 	protected void update() {
 		try {
-			this.cachedTop = this.plugin.getDB().getTop(this.getPlugin().getConfiguration().getInt(ProxyConfigKey.MAIN_TOP_SIZE));
+			this.cachedTop = this.plugin.getDatabase().getTop(this.getPlugin().getConfiguration().getInt(ProxyConfigKey.MAIN_TOP_SIZE));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

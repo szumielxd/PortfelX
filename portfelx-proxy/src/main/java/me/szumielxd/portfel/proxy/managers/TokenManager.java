@@ -88,7 +88,7 @@ public class TokenManager {
 	public CompletableFuture<Boolean> deleteToken(@NotNull String token) {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				if (this.plugin.getTokenDB().destroyToken(token)) {
+				if (this.plugin.getTokenDatabase().destroyToken(token)) {
 					this.cachedTokens.removeIf(t -> token.equals(t.getToken()));
 					return true;
 				}
@@ -110,7 +110,7 @@ public class TokenManager {
 	
 	private void updateTokens() {
 		try {
-			this.cachedTokens = new ArrayList<>(this.plugin.getTokenDB().getTokens(null, null, null, null, null));
+			this.cachedTokens = new ArrayList<>(this.plugin.getTokenDatabase().getTokens(null, null, null, null, null));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -118,7 +118,7 @@ public class TokenManager {
 	
 	
 	private void executeValidation(@NotNull ProxyPlayer target, @NotNull User user, @NotNull CommonPlayer sender, @NotNull String token) throws Exception {
-		PrizeToken prize = this.plugin.getTokenDB().getToken(token);
+		PrizeToken prize = this.plugin.getTokenDatabase().getToken(token);
 		if (prize != null) {
 			boolean valid = false;
 			switch (prize.getSelectorType()) {
@@ -133,9 +133,9 @@ public class TokenManager {
 					break;
 			}
 			if (valid) {
-				if (this.plugin.getTokenDB().destroyToken(token)) {
+				if (this.plugin.getTokenDatabase().destroyToken(token)) {
 					this.cachedTokens.removeIf(t -> token.equals(t.getToken()));
-					this.plugin.getDBLogger().logTokenUse(user, user.getServerName(), prize);
+					this.plugin.getTransactionLogger().logTokenUse(user, user.getServerName(), prize);
 					long executed = this.plugin.getPrizesManager().getOrders().values().stream().filter(o -> o.examine(user, prize.getOrder(), token)).count();
 					if (user.getRemoteId() != null) this.sendTokenPrizeExecution(target, user.getRemoteId(), token, prize.getOrder(), executed);
 					return;

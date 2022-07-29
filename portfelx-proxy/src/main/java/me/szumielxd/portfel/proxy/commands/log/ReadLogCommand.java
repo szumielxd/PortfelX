@@ -84,7 +84,7 @@ public class ReadLogCommand extends SimpleCommand {
 				list.add(prefix+",");
 				return list;
 			}),
-			new CmdArg(true, "values=", LangKey.COMMAND_ARGTYPES_LOGVALCOND_DISPLAY, LangKey.COMMAND_ARGTYPES_LOGVALCOND_DESCRIPTION, null, str -> Stream.of(str.split(",")).map(NumericCondition::parse).filter(o -> o.isPresent()).map(Optional::get).toArray(NumericCondition[]::new), (s, arr) -> {
+			new CmdArg(true, "values=", LangKey.COMMAND_ARGTYPES_LOGVALCOND_DISPLAY, LangKey.COMMAND_ARGTYPES_LOGVALCOND_DESCRIPTION, null, str -> Stream.of(str.split(",")).map(NumericCondition::parse).filter(Optional::isPresent).map(Optional::get).toArray(NumericCondition[]::new), (s, arr) -> {
 				String arg = arr[arr.length-1];
 				String prefix = "values=";
 				String[] elements = arg.substring(prefix.length()).split(",", -1);
@@ -100,7 +100,7 @@ public class ReadLogCommand extends SimpleCommand {
 				list.replaceAll(prefix::concat);
 				return list;
 			}),
-			new CmdArg(true, "balances=", LangKey.COMMAND_ARGTYPES_LOGBALCOND_DISPLAY, LangKey.COMMAND_ARGTYPES_LOGBALCOND_DESCRIPTION, null, str -> Stream.of(str.split(",")).map(NumericCondition::parse).filter(o -> o.isPresent()).map(Optional::get).toArray(NumericCondition[]::new), (s, arr) -> {
+			new CmdArg(true, "balances=", LangKey.COMMAND_ARGTYPES_LOGBALCOND_DISPLAY, LangKey.COMMAND_ARGTYPES_LOGBALCOND_DESCRIPTION, null, str -> Stream.of(str.split(",")).map(NumericCondition::parse).filter(Optional::isPresent).map(Optional::get).toArray(NumericCondition[]::new), (s, arr) -> {
 				String arg = arr[arr.length-1];
 				String prefix = "balances=";
 				String[] elements = arg.substring(prefix.length()).split(",", -1);
@@ -128,7 +128,7 @@ public class ReadLogCommand extends SimpleCommand {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed != null) {
 			try {
-				List<LogEntry> logs = ((PortfelProxyImpl)this.getPlugin()).getDBLogger().getLogs((String[])parsed[2], (String[])parsed[3], (String[])parsed[4], (String[])parsed[5], (ActionType[])parsed[6], (NumericCondition[])parsed[7], (NumericCondition[])parsed[8]);
+				List<LogEntry> logs = ((PortfelProxyImpl)this.getPlugin()).getTransactionLogger().getLogs((String[])parsed[2], (String[])parsed[3], (String[])parsed[4], (String[])parsed[5], (ActionType[])parsed[6], (NumericCondition[])parsed[7], (NumericCondition[])parsed[8]);
 				
 				int size = parsed[1] != null ? (int)parsed[1] : 5;
 				int maxPage = (int) Math.ceil(logs.size()/(double)size);

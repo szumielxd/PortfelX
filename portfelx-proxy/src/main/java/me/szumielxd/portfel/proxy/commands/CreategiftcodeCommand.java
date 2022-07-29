@@ -62,11 +62,11 @@ public class CreategiftcodeCommand extends SimpleCommand {
 			return;
 		}
 		try {
-			if (pl.getTokenDB().getToken(token) != null) {
+			if (pl.getTokenDatabase().getToken(token) != null) {
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_CREATEGIFTCODE_ALREADY.component(RED, Component.text(token, AQUA))));
 				return;
 			}
-			pl.getTokenDB().registerToken(token, servers, order, ProxyActionExecutor.sender(sender), expiration);
+			pl.getTokenDatabase().registerToken(token, servers, order, ProxyActionExecutor.sender(sender), expiration);
 			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_CREATEGIFTCODE_SUCCESS.component(GREEN, Component.text(token, AQUA), Component.text(order, AQUA), Component.text(servers, AQUA), Component.text(expiration, AQUA))));
 		} catch (Exception e) {
 			e.printStackTrace();

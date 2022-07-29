@@ -335,7 +335,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 			whereClause.append(" AND (").append(String.join(" AND ", Stream.of(expirationDateConditions).map(c -> String.format("`%s` %s", TOKENS_EXPIRATIONDATE, c.getFormat())).toArray(String[]::new))).append(')');
 		}
 		whereClause.append(String.format(" ORDER BY `%s` ASC", TOKENS_CREATIONDATE));
-		AbstractDB db = this.plugin.getDB();
+		AbstractDB db = this.plugin.getDatabase();
 		db.checkConnection();
 		String sql = String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE (`%s` = -1 OR `%s` >= UNIX_TIMESTAMP()) ",
 				TOKENS_TOKEN, TOKENS_SERVERS, TOKENS_ORDERNAME, TOKENS_CREATORNAME, TOKENS_CREATORUUID,
