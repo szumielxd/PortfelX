@@ -65,7 +65,6 @@ public class MainCommand extends CommonCommand implements AbstractCommand {
 			return;
 		}
 		cmd.onCommand(sender, parsedArgs, MiscUtils.mergeArrays(label, args[0]), MiscUtils.popArray(args));
-		return;
 	}
 
 	@Override
@@ -98,7 +97,9 @@ public class MainCommand extends CommonCommand implements AbstractCommand {
 
 	@Override
 	public void execute(@NotNull ProxySender sender, @NotNull String[] args) {
-		this.plugin.getTaskManager().runTaskAsynchronously(() -> this.onCommand(sender, new Object[0], new String[] {this.getName()}, args));
+		this.plugin.getTaskManager().runTaskAsynchronously(() -> {
+			this.onCommand(sender, new Object[0], new String[] {this.getName()}, args);
+		});
 	}
 	
 	public @NotNull List<SimpleCommand> getChildrens() {
