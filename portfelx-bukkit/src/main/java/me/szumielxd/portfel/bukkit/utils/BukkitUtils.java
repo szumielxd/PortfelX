@@ -165,6 +165,7 @@ public class BukkitUtils {
 		if (match.group(6) != null) color = Color.fromRGB(Integer.parseInt(match.group(6), 16)); // color
 		if (match.group(8) != null) skin = match.group(8); // skin
 		
+		@SuppressWarnings("deprecation")
 		ItemStack item = new ItemStack(mat, amount, data); {
 			ItemMeta meta = item.getItemMeta();
 			if (glowing) {
