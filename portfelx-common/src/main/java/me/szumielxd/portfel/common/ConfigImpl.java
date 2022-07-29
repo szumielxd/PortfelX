@@ -1,10 +1,10 @@
 package me.szumielxd.portfel.common;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,7 +23,7 @@ public class ConfigImpl implements Config {
 	private final YamlFile yaml;
 	public ConfigImpl(@NotNull Portfel plugin) {
 		this.plugin = plugin;
-		this.yaml = new YamlFile(new File(this.plugin.getDataFolder(), "config.yml"));
+		this.yaml = new YamlFile(this.plugin.getDataFolder().resolve("config.yml").toAbsolutePath().toFile());
 	}
 	
 	
@@ -35,10 +35,10 @@ public class ConfigImpl implements Config {
 	 */
 	@Override
 	public @NotNull ConfigImpl init(@NotNull AbstractKey... values) {
-		this.yaml.addDefaults(Stream.of(values).collect(Collectors.toMap(AbstractKey::getPath, AbstractKey::getDefault)));
+		Stream.of(values).forEach(key -> this.yaml.set(key.getPath(), key.getDefault()));
 		try {
-			this.yaml.createOrLoadWithComments();
-			this.yaml.save();
+			if (this.yaml.exists()) this.yaml.load();
+			else this.yaml.save();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -99,7 +99,7 @@ public class ConfigImpl implements Config {
 	public Map<String, String> getStringMap(@NotNull AbstractKey key) {
 		if (this.yaml.isConfigurationSection(key.getPath())) {
 			final ConfigurationSection cfg = this.yaml.getConfigurationSection(key.getPath());
-			return cfg.getKeys(false).stream().collect(Collectors.toMap(k -> k, k -> cfg.getString(k)));
+			return cfg.getKeys(false).stream().collect(Collectors.toMap(Function.identity(), cfg::getString));
 		}
 		return new HashMap<>();
 	}
