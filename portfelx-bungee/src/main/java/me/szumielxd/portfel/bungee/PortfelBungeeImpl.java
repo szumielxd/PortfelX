@@ -25,7 +25,6 @@ import me.szumielxd.portfel.bungee.managers.BungeeAccessManagerImpl;
 import me.szumielxd.portfel.bungee.objects.BungeeProxy;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.ValidateAccess;
 import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
@@ -116,10 +115,6 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	@Override
 	public void onEnable() {
-		if (!ValidateAccess.checkAccess()) {
-			this.getLogger().warn("You have no power here. Die potato!");
-			return;
-		}
 		PortfelProvider.register(this);
 		CommonArgs.init(this);
 		this.setupProxyId();

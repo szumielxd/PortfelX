@@ -53,7 +53,6 @@ import me.szumielxd.portfel.bukkit.managers.OrdersManager;
 import me.szumielxd.portfel.bukkit.objects.BukkitServer;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.ValidateAccess;
 import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
@@ -104,11 +103,6 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	
 	@Override
 	public void onEnable() {
-		if (!ValidateAccess.checkAccess()) {
-			this.getLogger().warn("You have no power here. Die potato!");
-			this.getServer().getPluginManager().disablePlugin(this.asPlugin());
-			return;
-		}
 		PortfelProvider.register(this);
 		try {
 			this.adventure = BukkitAudiences.create(this.asPlugin());

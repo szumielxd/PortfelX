@@ -27,7 +27,6 @@ import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.ValidateAccess;
 import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
@@ -145,10 +144,6 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	@Override
 	public void onEnable() {
-		if (!ValidateAccess.checkAccess()) {
-			this.getLogger().warn("You have no power here. Die potato!");
-			return;
-		}
 		PortfelProvider.register(this);
 		this.proxy = new VelocityProxy(this);
 		CommonArgs.init(this);
