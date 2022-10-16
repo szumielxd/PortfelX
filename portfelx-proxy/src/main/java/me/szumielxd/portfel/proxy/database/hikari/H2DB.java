@@ -26,7 +26,8 @@ public class H2DB extends HikariDB {
 			new AbstractMap.SimpleEntry<>(Pattern.compile(" UNSIGNED(?= )", Pattern.CASE_INSENSITIVE), ""),
 			new AbstractMap.SimpleEntry<>(Pattern.compile(" CHARACTER SET [^ ;]+", Pattern.CASE_INSENSITIVE), ""),
 			new AbstractMap.SimpleEntry<>(Pattern.compile(" ENGINE = [^ ;]+", Pattern.CASE_INSENSITIVE), ""),
-			new AbstractMap.SimpleEntry<>(Pattern.compile("UNIX_TIMESTAMP\\(\\)"), "DATEDIFF\\('SECOND', DATE '1970-01-01', CURRENT_TIMESTAMP\\(\\)\\) * 1000")
+			new AbstractMap.SimpleEntry<>(Pattern.compile("UNIX_TIMESTAMP\\(\\)"), "DATEDIFF\\('SECOND', DATE '1970-01-01', CURRENT_TIMESTAMP\\(\\)\\) * 1000"),
+			new AbstractMap.SimpleEntry<>(Pattern.compile("^ALTER TABLE ([^ ]+) ADD INDEX ([^ ]+)\\(([^ ]+)\\)$", Pattern.CASE_INSENSITIVE), "CREATE INDEX $2 ON $1 \\($3\\)")
 	).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	
 

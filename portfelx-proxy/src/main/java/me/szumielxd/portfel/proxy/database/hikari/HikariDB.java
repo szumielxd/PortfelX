@@ -579,11 +579,27 @@ public abstract class HikariDB implements AbstractDB {
 				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE, LOGS_ID, LOGS_UUID, TABLE_USERS, USERS_UUID));
 		try (Connection conn = this.hikari.getConnection()) {
 			try (Statement stm = conn.createStatement()) {
+				// users
 				stm.addBatch(usersTable);
+				stm.addBatch(buildIndexQuery(TABLE_USERS, USERS_NAME));
+				stm.addBatch(buildIndexQuery(TABLE_USERS, USERS_IGNORETOP));
+				
+				// logs
+				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_UUID));
+				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_USERNAME));
+				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_SERVER));
+				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_EXECUTOR));
+				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_EXECUTORUUID));
+				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_ORDERNAME));
+				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_ACTION));
 				stm.addBatch(logsTable);
 				stm.executeBatch();
 			}
 		}
+	}
+	
+	private String buildIndexQuery(@NotNull String table, @NotNull String column) {
+		return this.mapQuery(String.format("ALTER TABLE `%s` ADD INDEX `%s`(`%s`)", table, table+"|"+column, column));
 	}
 
 }
