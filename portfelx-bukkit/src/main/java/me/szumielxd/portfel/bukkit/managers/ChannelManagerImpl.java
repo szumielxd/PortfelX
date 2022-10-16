@@ -49,6 +49,7 @@ import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction.TransactionResult;
+import me.szumielxd.portfel.bukkit.objects.BukkitImaginaryUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.objects.TransactionImpl;
@@ -512,10 +513,14 @@ public class ChannelManagerImpl implements ChannelManager {
 			User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
 			if (user == null) return null;
 			Transaction trans = new TransactionImpl(this.plugin, user, transactionId, order);
-			if (user instanceof BukkitOperableUser && ((BukkitOperableUser)user).inTestmode()) {
-				BukkitSender.wrap(plugin, player).sendTranslated(Portfel.PREFIX.append(LangKey.MAIN_WARNING.component(DARK_RED, new HashSet<>(Arrays.asList(TextDecoration.BOLD)), LangKey.TESTMODE_NOTIFICATION.component(Style.style(TextDecoration.BOLD.withState(false)).color(RED)))));
-				trans.finish(new TransactionResult(transactionId, TransactionStatus.OK, user.getBalance(), 0, null));
-				return trans;
+			if (user instanceof BukkitOperableUser) {
+				if (((BukkitOperableUser)user).inTestmode()) {
+					BukkitSender.wrap(plugin, player).sendTranslated(Portfel.PREFIX.append(LangKey.MAIN_WARNING.component(DARK_RED, new HashSet<>(Arrays.asList(TextDecoration.BOLD)), LangKey.TESTMODE_NOTIFICATION.component(Style.style(TextDecoration.BOLD.withState(false)).color(RED)))));
+					trans.finish(new TransactionResult(transactionId, TransactionStatus.OK, user.getBalance(), 0, null));
+					return trans;
+				} else if (user instanceof BukkitImaginaryUser) {
+					return null; // cancel transaction when user is not correctly loaded
+				}
 			}
 			CompletableFuture<TransactionResult> future = new CompletableFuture<>();
 			this.waitingTransactions.put(transactionId, new SimpleEntry<>(trans, future));

@@ -20,6 +20,7 @@ import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
+import me.szumielxd.portfel.bukkit.objects.BukkitImaginaryUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.common.managers.UserManagerImpl;
 
@@ -27,7 +28,7 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 	
 	
 	private final PortfelBukkitImpl plugin;
-	private final Map<UUID, BukkitOperableUser> users;
+	private final Map<UUID, User> users;
 	
 	
 	public BukkitUserManagerImpl(@NotNull PortfelBukkitImpl plugin) {
@@ -45,12 +46,16 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 		super.init();
 		((ChannelManagerImpl)this.plugin.getChannelManager()).setRegisterer(user -> {
 			if (user == null) return;
-			BukkitOperableUser main = this.users.get(user.getUniqueId());
-			if (main != null) {
-				main.setPlainBalance(user.getBalance());
-				main.setPlainDeniedInTop(user.isDeniedInTop());
-				main.setOnline(this.plugin.getServer().getPlayer(user.getUniqueId()) != null);
-			} else {
+			User main = this.users.get(user.getUniqueId());
+			if (main instanceof BukkitImaginaryUser) { // change user class to operable one
+				user.setTestmode(((BukkitImaginaryUser) main).inTestmode());
+				this.users.put(user.getUniqueId(), user);
+			} else if (main instanceof BukkitOperableUser) { // update user status
+				BukkitOperableUser operable = (BukkitOperableUser) main;
+				operable.setPlainBalance(user.getBalance());
+				operable.setPlainDeniedInTop(user.isDeniedInTop());
+				operable.setOnline(this.plugin.getServer().getPlayer(user.getUniqueId()) != null);
+			} else { // insert new user
 				this.users.put(user.getUniqueId(), user);
 			}
 		});
@@ -92,11 +97,11 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 	@Override
 	public @Nullable User getOrLoadUser(@NotNull UUID uuid) throws Exception {
 		this.validate();
-		BukkitOperableUser user = this.users.get(uuid);
+		User user = this.users.get(uuid);
 		if (user != null) return user;
 		Player player = this.plugin.getServer().getPlayer(uuid);
 		if (player == null) return null;
-		user = (BukkitOperableUser) this.plugin.getChannelManager().requestPlayer(player);
+		user = this.plugin.getChannelManager().requestPlayer(player);
 		this.users.put(uuid, user);
 		return user;
 	}
@@ -112,13 +117,13 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 	@Override
 	public @Nullable User getOrLoadUser(@NotNull String username) throws Exception {
 		this.validate();
-		BukkitOperableUser user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
+		User user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
 		if (user != null) return user;
 		Player player = this.plugin.getServer().getPlayerExact(username);
 		if (player == null) throw new IllegalArgumentException("Bukkit implementation only allows online players");
 		
-		user = (BukkitOperableUser) this.plugin.getChannelManager().requestPlayer(player);
-		if (user != null) this.users.put(user.getUniqueId(), user);
+		user = this.plugin.getChannelManager().requestPlayer(player);
+		this.users.put(user.getUniqueId(), user);
 		return user;
 	}
 	
@@ -132,7 +137,7 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 	 */
 	@Override
 	public @NotNull User getOrCreateUser(@NotNull UUID uuid) throws Exception {
-		throw new UnsupportedOperationException("Bukkit instance cannot create new users");
+		return this.users.computeIfAbsent(uuid, key -> new BukkitImaginaryUser(this.plugin, key));
 	}
 	
 	/**

@@ -25,13 +25,18 @@ public class TestmodeCommand extends SimpleCommand {
 
 	@Override
 	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		User user = this.getPlugin().getUserManager().getUser(((CommonPlayer) sender).getUniqueId());
-		if (user instanceof BukkitOperableUser) {
-			LangKey result = ((BukkitOperableUser) user).toggleTestMode() ? LangKey.MAIN_VALUE_ON : LangKey.MAIN_VALUE_OFF;
-			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_TESTMODE_EXECUTE.component(LIGHT_PURPLE, result.component(AQUA))));
-		} else {
-			sender.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(RED)));
+		
+		try {
+			User user = this.getPlugin().getUserManager().getOrCreateUser(((CommonPlayer) sender).getUniqueId());
+			if (user instanceof BukkitOperableUser) {
+				LangKey result = ((BukkitOperableUser) user).toggleTestMode() ? LangKey.MAIN_VALUE_ON : LangKey.MAIN_VALUE_OFF;
+				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_TESTMODE_EXECUTE.component(LIGHT_PURPLE, result.component(AQUA))));
+				return;
+			}
+		} catch (Exception e) {
+			// empty catch
 		}
+		sender.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(RED)));
 		
 	}
 	

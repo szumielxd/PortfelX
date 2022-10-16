@@ -45,8 +45,8 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 		try {
 			final ChannelManager channel = this.plugin.getChannelManager();
 			this.cachedTop = this.plugin.getUserManager().getLoadedUsers().stream().filter(User::isOnline)
-					.collect(Collectors.toMap(u -> u.getRemoteId(), Function.identity(), (p, q) -> p)).values().parallelStream()
-					.collect(Collectors.toMap(u -> u.getRemoteId(), u -> {
+					.collect(Collectors.toMap(User::getRemoteId, Function.identity(), (p, q) -> p)).values().parallelStream()
+					.collect(Collectors.toMap(User::getRemoteId, u -> {
 						try{
 							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());
 							return channel.requestTop(player);
