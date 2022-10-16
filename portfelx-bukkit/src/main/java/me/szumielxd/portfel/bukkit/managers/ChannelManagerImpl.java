@@ -64,11 +64,11 @@ public class ChannelManagerImpl implements ChannelManager {
 	private final PortfelBukkitImpl plugin;
 	
 	private Consumer<BukkitOperableUser> registerer = null;
-	private final PluginMessageListenerRegistration bungee;
-	private final PluginMessageListenerRegistration setup;
-	private final PluginMessageListenerRegistration transactions;
-	private final PluginMessageListenerRegistration users;
-	private static String BUNGEE_CHANNEL;
+	private final @NotNull PluginMessageListenerRegistration bungee;
+	private final @NotNull PluginMessageListenerRegistration setup;
+	private final @NotNull PluginMessageListenerRegistration transactions;
+	private final @NotNull PluginMessageListenerRegistration users;
+	private static final @NotNull String BUNGEE_CHANNEL = Portfel.CHANNEL_LEGACY_BUNGEE;
 	
 	
 	public ChannelManagerImpl(@NotNull PortfelBukkitImpl plugin) {
@@ -76,11 +76,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_SETUP);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_USERS);
-		try {
-			this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL = Portfel.CHANNEL_LEGACY_BUNGEE);
-		} catch (IllegalArgumentException e) { // fallback to new BungeeCord channel
-			this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL = Portfel.CHANNEL_BUNGEE);
-		}
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL);
 		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL, this::onSetupValidator);
 		this.setup = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_SETUP, this::onSetupChannel);
 		this.transactions = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
