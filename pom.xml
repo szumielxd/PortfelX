@@ -23,7 +23,7 @@
 		<package>me.szumielxd.portfel</package>
 		<bukkitMainClass>${package}.bukkit.PortfelBukkitBootstrap</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeBootstrap</bungeeMainClass>
-		<revision>3.3.1</revision>
+		<revision>3.3.2</revision>
 		<finalNameBootstrap>${project.artifactId}-assembly/src/main/resources/${pluginId}.jarinjar</finalNameBootstrap>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
 		<finalNameObf>/../../target/${project.artifactId}-obf-${git.commit.id.abbrev}-${project.version}</finalNameObf>
@@ -48,7 +48,7 @@
 		<repository>
 			<id>minefox</id>
 			<name>MineFox Public Repository</name>
-			<url>http://repo.minefox.pl/repository/maven-public/</url>
+			<url>https://repo.mcsurvi.pl/repository/maven-public/</url>
 		</repository>
 		<repository>
 			<id>placeholderapi</id>
@@ -330,6 +330,7 @@
 						<showDeprecation>true</showDeprecation>
 					</configuration>
 				</plugin>
+				
 				<!-- Git Commit plugin -->
 				<plugin>
 					<groupId>io.github.git-commit-id</groupId>
@@ -346,66 +347,6 @@
 					</executions>
 					<configuration>
 						<dotGitDirectory>${project.parent.basedir}/.git</dotGitDirectory>
-					</configuration>
-				</plugin>
-				
-				<plugin>
-					<groupId>com.github.wvengen</groupId>
-					<artifactId>proguard-maven-plugin</artifactId>
-					<version>2.4.0</version>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<goals><goal>proguard</goal></goals>
-						</execution>
-					</executions>
-					<configuration>
-						<obfuscate>true</obfuscate>
-						<injar>${finalName}.jar</injar>
-						<options>
-							<option>-allowaccessmodification</option>
-							<option>-dontshrink</option>
-							<option>-keep public class me.szumielxd.portfel.bukkit.PortfelBukkitImpl { *; }</option>
-							<option>-keep public class net.kyori.** { *; }</option>
-							<option>-keep public class net.** { *; }</option>
-							<option>-dontnote me.clip.**</option>
-							<option>-dontnote be.maximvdw.**</option>
-							<option>-dontnote me.szumielxd.portfel.lib.**</option>
-							<option>-dontnote java.**</option>
-							<option>-dontnote sun.**</option>
-							<option>-dontnote com.sun.**</option>
-							<option>-dontnote org.**</option>
-							<option>-dontnote javax.**</option>
-							<option>-dontnote com.github.**</option>
-							<option>-dontnote com.google.**</option>
-							<option>-dontnote com.**</option>
-							<option>-dontnote net.**</option>
-							<option>-dontwarn com.**</option>
-							<option>-dontwarn org.**</option>
-							<option>-dontwarn net.**</option>
-							<option>-dontwarn net.**</option>
-							<option>-dontwarn me.clip.**</option>
-						</options>
-						<libs>
-							<lib>${java.home}/jmods/java.base.jmod</lib>
-							<lib>${java.home}/jmods/java.logging.jmod</lib>
-							<lib>${java.home}/jmods/java.desktop.jmod</lib>
-							<lib>${java.home}/jmods/java.sql.jmod</lib>
-						</libs>
-						<exclusions>
-							<exclusion>
-								<groupId>${project.groupId}</groupId>
-								<artifactId>portfelx-common</artifactId>
-							</exclusion>
-							<exclusion>
-								<groupId>${project.groupId}</groupId>
-								<artifactId>portfelx-api</artifactId>
-							</exclusion>
-							<exclusion>
-								<groupId>${project.groupId}</groupId>
-								<artifactId>portfelx-bukkit</artifactId>
-							</exclusion>
-						</exclusions>
 					</configuration>
 				</plugin>
 				
@@ -483,10 +424,6 @@
 								<pattern>org.objectweb</pattern>
 								<shadedPattern>${package}.lib.org.objectweb</shadedPattern>
 							</relocation>
-							<!--relocation>
-								<pattern>com.google.gson</pattern>
-								<shadedPattern>${package}.lib.com.google.gson</shadedPattern>
-							</relocation-->
 							<relocation>
 								<pattern>net.kyori.adventure.platform</pattern>
 								<shadedPattern>${package}.lib.net.kyori.adventure.platform</shadedPattern>
@@ -495,10 +432,6 @@
 								<pattern>net.kyori.examination</pattern>
 								<shadedPattern>${package}.lib.net.kyori.adventure.examination</shadedPattern>
 							</relocation>
-							<!--relocation>
-								<pattern>net.kyori.adventure.text.serializer</pattern>
-								<shadedPattern>${package}.lib.net.kyori.adventure.text.serializer</shadedPattern>
-							</relocation-->
 							<relocation>
 								<pattern>net.kyori.adventure</pattern>
 								<shadedPattern>${package}.lib.net.kyori.adventure</shadedPattern>
