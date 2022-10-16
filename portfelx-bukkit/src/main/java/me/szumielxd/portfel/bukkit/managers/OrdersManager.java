@@ -55,8 +55,12 @@ public class OrdersManager {
 				Stream.of("money.yml", "rankups.yml").forEach(this::setupOrder);
 			}
 			
-			try (Stream<Path> paths = Files.find(this.ordersFolder, 0, (path, attr) -> path.endsWith(".yml"))) {
-				paths.forEach(this::load);
+			try (Stream<Path> paths = Files.find(this.ordersFolder, 1, (path, attr) -> path.toString().endsWith(".yml"))) {
+				int sum = paths.mapToInt(path -> {
+					this.load(path);
+					return 1;
+				}).sum();
+				this.plugin.getLogger().info("Loaded %d order files!", sum, this.ordersFolder);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -87,6 +91,7 @@ public class OrdersManager {
 	
 	
 	private void load(@NotNull Path file) {
+		this.plugin.getLogger().info("Loading order file `%s`...", file);
 		YamlFile yml = new YamlFile(file.toFile());
 		try {
 			yml.load();
