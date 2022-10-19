@@ -78,7 +78,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 		this.preInit();
 		try {
 			if (!Files.exists(this.file.getParent())) Files.createDirectories(this.file.getParent());
-				if (!Files.exists(this.file)) {
+			if (!Files.exists(this.file)) {
 				Files.createFile(this.file);
 				this.accessMap = new JsonObject();
 				Files.write(this.file, GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));

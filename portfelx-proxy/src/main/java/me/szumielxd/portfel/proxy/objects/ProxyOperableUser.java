@@ -6,6 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import lombok.Getter;
+import lombok.Setter;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
@@ -13,7 +15,11 @@ import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 public class ProxyOperableUser extends User {
 	
 	
-	private final PortfelProxyImpl plugin;
+	private final @NotNull PortfelProxyImpl plugin;
+	/**
+	 * Flag an object as changed since last update
+	 */
+	@Getter @Setter private @NotNull boolean changed = false;
 	
 
 	/**
@@ -26,8 +32,8 @@ public class ProxyOperableUser extends User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public ProxyOperableUser(@NotNull PortfelProxyImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance) {
-		super(uuid, name, online, deniedInTop, balance);
+	public ProxyOperableUser(@NotNull PortfelProxyImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, long minorBalance) {
+		super(uuid, name, online, deniedInTop, balance, minorBalance);
 		this.plugin = plugin;
 	}
 	
@@ -110,12 +116,27 @@ public class ProxyOperableUser extends User {
 		});
 	}
 	
+	
+	public void setMinorBalance(long newBalance) {
+		if (newBalance < 0) throw new IllegalArgumentException("`newBalance` cannot be lower than 0");
+		this.minorBalance = newBalance;
+	}
+	
 	/**
 	 * Set specified amount of money as user's balance.
 	 * 
 	 * @param newBalance new user's balance
 	 */
 	public void setPlainBalance(long newBalance) {
+		this.balance = newBalance;
+	}
+	
+	/**
+	 * Set specified amount of money as user's minor balance.
+	 * 
+	 * @param newBalance new user's minor balance
+	 */
+	public void setPlainMinorBalance(long newBalance) {
 		this.balance = newBalance;
 	}
 	

@@ -15,6 +15,7 @@ public abstract class User {
 	protected long lastUpdated;
 	protected boolean deniedInTop;
 	protected long balance;
+	protected long minorBalance;
 	protected String serverName;
 	protected UUID remoteId;
 	
@@ -28,12 +29,13 @@ public abstract class User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public User(@NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance) {
+	protected User(@NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, long minorBalance) {
 		this.uuid = uuid;
 		this.name = name;
 		this.online = online;
 		this.deniedInTop = deniedInTop;
 		this.balance = balance;
+		this.minorBalance = minorBalance;
 		this.lastUpdated = System.currentTimeMillis();
 	}
 	
@@ -97,6 +99,15 @@ public abstract class User {
 	 */
 	public long getBalance() {
 		return this.balance;
+	}
+	
+	/**
+	 * Get user's balance.
+	 * 
+	 * @return user's balance
+	 */
+	public long getMinorBalance() {
+		return this.minorBalance;
 	}
 	
 	/**

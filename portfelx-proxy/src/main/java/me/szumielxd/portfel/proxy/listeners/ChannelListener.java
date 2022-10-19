@@ -67,14 +67,23 @@ public abstract class ChannelListener {
 			String subchannel = in.readUTF();
 			
 			if (Portfel.CHANNEL_USERS.equals(tag)) {
-				if ("User".equals(subchannel)) return Optional.of(this.onUserData(server, player, tag, subchannel, in));
-				if ("ServerId".equals(subchannel)) return Optional.of(this.onServerData(server, player, tag, subchannel, in));
-				if ("Top".equals(subchannel)) return Optional.of(this.onTopData(server, player, tag, subchannel, in));
-				if ("LightTop".equals(subchannel)) return Optional.of(this.onLightTopData(server, player, tag, subchannel, in));
+				switch (subchannel) {
+					case "User": return Optional.of(this.onUserData(server, player, tag, subchannel, in));
+					case "ServerId": return Optional.of(this.onServerData(server, player, tag, subchannel, in));
+					case "Top": return Optional.of(this.onTopData(server, player, tag, subchannel, in));
+					case "LightTop": return Optional.of(this.onLightTopData(server, player, tag, subchannel, in));
+					case "MinorTop": return Optional.of(this.onMinorTopData(server, player, tag, subchannel, in));
+					default: break;
+				}
 			}
 			if (Portfel.CHANNEL_TRANSACTIONS.equals(tag)) {
-				if ("Buy".equals(subchannel)) return Optional.of(this.onTransaction(server, player, tag, subchannel, in));
-			}	
+				switch (subchannel) {
+					case "Buy": return Optional.of(this.onTransaction(server, player, tag, subchannel, in));
+					case "MinorTake": return Optional.of(this.onMinorEcoTake(server, player, tag, subchannel, in));
+					case "MinorGive": return Optional.of(this.onMinorEcoGive(server, player, tag, subchannel, in));
+					default: break;
+				}
+			}
 		}
 		return Optional.of(true);
 	}
@@ -92,6 +101,7 @@ public abstract class ChannelListener {
 				out.writeUTF(target.getName());
 				out.writeLong(user.getBalance());
 				out.writeBoolean(user.isDeniedInTop());
+				out.writeLong(user.getMinorBalance());
 				sender.sendPluginMessage(tag, out.toByteArray());
 			} catch (Exception e) {	
 				e.printStackTrace();
@@ -119,6 +129,7 @@ public abstract class ChannelListener {
 	
 	
 	// user channel
+	// Legacy format
 	private boolean onTopData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			ByteArrayDataOutput out = ByteStreams.newDataOutput();
@@ -159,7 +170,39 @@ public abstract class ChannelListener {
 				out.writeLong(top.getUniqueId().getLeastSignificantBits());
 				
 				//username
-				IntStream.range(0, 16).forEach(i -> out.write((byte)((int)(top.getName().length() > i ? top.getName().charAt(i) : ' ') - 128)));
+				IntStream.range(0, 16).forEach(i -> out.write((byte)((top.getName().length() > i ? top.getName().charAt(i) : ' ') - 128)));
+				
+				//balance
+				out.writeLong(top.getBalance());
+			});
+			
+			sender.sendPluginMessage(tag, out.toByteArray());
+		} catch (Exception e) {	
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	
+	// user channel
+	private boolean onMinorTopData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+		try {
+			ByteArrayDataOutput out = ByteStreams.newDataOutput();
+			out.writeUTF(subchannel);
+			
+			// proxyId
+			out.writeLong(this.plugin.getProxyId().getMostSignificantBits());
+			out.writeLong(this.plugin.getProxyId().getLeastSignificantBits());
+			
+			List<TopEntry> list = this.plugin.getTopManager().getFullMinorTopCopy();
+			out.writeInt(list.size());
+			list.forEach(top -> {
+				//uuid
+				out.writeLong(top.getUniqueId().getMostSignificantBits());
+				out.writeLong(top.getUniqueId().getLeastSignificantBits());
+				
+				//username
+				IntStream.range(0, 16).forEach(i -> out.write((byte)((top.getName().length() > i ? top.getName().charAt(i) : ' ') - 128)));
 				
 				//balance
 				out.writeLong(top.getBalance());
@@ -195,6 +238,73 @@ public abstract class ChannelListener {
 			e.printStackTrace();
 		}
 		return true;
+	}
+	
+	// transaction channel
+	private boolean onMinorEcoGive(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+		UUID serverKey = UUID.fromString(in.readUTF()); // serverKey
+		if (!this.plugin.getAccessManager().canAccess(serverKey)
+				|| !this.plugin.getAccessManager().canAccess(serverKey, "minorbalance:give")) return true;
+		byte[] data;
+		try {
+			data = CryptoUtils.decodeBytesFromInput(in, this.plugin.getAccessManager().getHashKey(serverKey));
+		} catch (IllegalArgumentException e) {
+			// ignore malformed messages
+			return true;
+		}
+		try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+			final String transactionId = din.readUTF(); // transaction id
+			long value = din.readLong(); // value
+			this.setNewMinorEconomy(transactionId, serverKey, target, tag, value);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	// transaction channel
+	private boolean onMinorEcoTake(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+		UUID serverKey = UUID.fromString(in.readUTF()); // serverKey
+		if (!this.plugin.getAccessManager().canAccess(serverKey)
+				|| !this.plugin.getAccessManager().canAccess(serverKey, "minorbalance:take")) return true;
+		byte[] data;
+		try {
+			data = CryptoUtils.decodeBytesFromInput(in, this.plugin.getAccessManager().getHashKey(serverKey));
+		} catch (IllegalArgumentException e) {
+			// ignore malformed messages
+			return true;
+		}
+		try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+			final String transactionId = din.readUTF(); // transaction id
+			long value = din.readLong(); // value
+			this.setNewMinorEconomy(transactionId, serverKey, target, tag, -value);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	private void setNewMinorEconomy(@NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer target, @NotNull String tag, long value) throws IOException {
+		ProxyOperableUser user = (ProxyOperableUser) this.plugin.getUserManager().getUser(target.getUniqueId());
+		boolean result = false;
+		if (user != null) {
+			synchronized (user) {
+				if (user.getBalance() > -value) {
+					user.setMinorBalance(user.getBalance() + value);
+					result = true;
+				}
+			}
+		}
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF(tag);
+		try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
+				DataOutputStream dout = new DataOutputStream(bout);) {
+			dout.writeUTF(this.plugin.getProxyId().toString()); // proxy id
+			dout.writeUTF(transactionId); // transaction id
+			dout.writeBoolean(result);
+			if (result) dout.writeLong(user.getBalance());
+			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getAccessManager().getHashKey(serverId));
+		}
 	}
 	
 	

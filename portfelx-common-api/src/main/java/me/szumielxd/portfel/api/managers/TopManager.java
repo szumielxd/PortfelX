@@ -6,6 +6,9 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 public interface TopManager {
 	
 	
@@ -36,51 +39,43 @@ public interface TopManager {
 	public @Nullable TopEntry getByPos(int position);
 	
 	/**
+	 * Get minor top entry at specified position. Counted from 1.
+	 * 
+	 * @param position position to obtain
+	 * @return top entry
+	 */
+	public @Nullable TopEntry getByMinorPos(int position);
+	
+	/**
 	 * Get copy of full cached top.
 	 * 
 	 * @return copy of actually cached top
 	 */
-	public @Nullable List<TopEntry> getFullTopCopy();
+	public @NotNull List<TopEntry> getFullTopCopy();
+	
+	/**
+	 * Get copy of full cached minor top.
+	 * 
+	 * @return copy of actually cached top
+	 */
+	public @NotNull List<TopEntry> getFullMinorTopCopy();
 	
 	
+	@AllArgsConstructor
 	public static class TopEntry {
 		
-		private final UUID uuid;
-		private final String name;
-		private final long balance;
-		
-		public TopEntry(@NotNull UUID uuid, @NotNull String name, long balance) {
-			this.uuid = uuid;
-			this.name = name;
-			this.balance = balance;
-		}
-		
 		/**
-		 * Get player's UUID
-		 * 
-		 * @return UUID
+		 * player's UUID
 		 */
-		public @NotNull UUID getUniqueId() {
-			return this.uuid;
-		}
-		
+		@Getter private final UUID uniqueId;
 		/**
-		 * Get player's name
-		 * 
-		 * @return name
+		 * player's name
 		 */
-		public @NotNull String getName() {
-			return this.name;
-		}
-		
+		@Getter private final String name;
 		/**
-		 * Get player's balance
-		 * 
-		 * @return balance
+		 * player's balance
 		 */
-		public long getBalance() {
-			return this.balance;
-		}
+		@Getter private final long balance;
 		
 	}
 	

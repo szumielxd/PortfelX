@@ -114,6 +114,16 @@ public interface AbstractDB {
 	public void addBalance(@NotNull ProxyOperableUser user, long amount) throws Exception;
 	
 	/**
+	 * Add given amount of money to minor balance of specified user.
+	 * 
+	 * @implNote Internal use only, try {@link User} instead. Thread unsafe.
+	 * @param user user to operate on
+	 * @param amount amount of money to add
+	 * @throws SQLException when cannot establish the connection to the database
+	 */
+	public void addMinorBalance(@NotNull ProxyOperableUser user, long amount) throws Exception;
+	
+	/**
 	 * Take given amount of money from balance of specified user.
 	 * 
 	 * @implNote Internal use only, try {@link User} instead. Thread unsafe.
@@ -124,6 +134,16 @@ public interface AbstractDB {
 	public void takeBalance(@NotNull ProxyOperableUser user, long amount) throws Exception;
 	
 	/**
+	 * Take given amount of money from minor balance of specified user.
+	 * 
+	 * @implNote Internal use only, try {@link User} instead. Thread unsafe.
+	 * @param user user to operate on
+	 * @param amount amount of money to take
+	 * @throws SQLException when cannot establish the connection to the database
+	 */
+	public void takeMinorBalance(@NotNull ProxyOperableUser user, long amount) throws Exception;
+	
+	/**
 	 * Set balance of specified user to given amount.
 	 * 
 	 * @implNote Internal use only, try {@link User} instead. Thread unsafe.
@@ -132,6 +152,16 @@ public interface AbstractDB {
 	 * @throws Exception when something went wrong
 	 */
 	public void setBalance(@NotNull ProxyOperableUser user, long balance) throws Exception;
+	
+	/**
+	 * Set minor balance of specified user to given amount.
+	 * 
+	 * @implNote Internal use only, try {@link User} instead. Thread unsafe.
+	 * @param user user to operate on
+	 * @param balance new balance
+	 * @throws SQLException when cannot establish the connection to the database
+	 */
+	public void setMinorBalance(@NotNull ProxyOperableUser user, long balance) throws SQLException;
 	
 	/**
 	 * Set whether user should be visible in balance top.
