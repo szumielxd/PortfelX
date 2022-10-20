@@ -508,6 +508,7 @@ public abstract class HikariDB implements AbstractDB {
 							if (user.isMinorBalanceChanged()) stm.setLong(++index, user.getMinorBalance());
 							stm.setString(++index, user.getUniqueId().toString());
 							if (stm.executeUpdate() == 0) throw new SQLException("Unable to save a userdata. (inexistent uuid)");
+							user.setUnchanged();
 						}
 					}
 				}
