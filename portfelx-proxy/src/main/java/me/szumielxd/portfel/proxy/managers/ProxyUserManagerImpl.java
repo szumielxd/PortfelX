@@ -6,16 +6,17 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.ExecutedTask;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.managers.UserManagerImpl;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
-import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 
 public class ProxyUserManagerImpl extends UserManagerImpl {
@@ -23,6 +24,7 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 	
 	private final PortfelProxyImpl plugin;
 	private final Map<UUID, ProxyOperableUser> users;
+	private @Nullable ExecutedTask usersSaveTask;
 	
 	
 	public ProxyUserManagerImpl(PortfelProxyImpl plugin) {
@@ -34,9 +36,22 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 	@Override
 	public ProxyUserManagerImpl init() {
 		super.init();
-		this.plugin.getCommonServer().getPlayers().stream().map(ProxyPlayer::getUniqueId).toArray(UUID[]::new);
+		//this.plugin.getCommonServer().getPlayers().stream().map(ProxyPlayer::getUniqueId).toArray(UUID[]::new);
 		//this.plugin.getDatabase();
+		this.usersSaveTask = this.plugin.getTaskManager().runTaskTimer(() -> {
+			try {
+				this.saveChangedUsers();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}, 5, 5, TimeUnit.SECONDS);
 		return this;
+	}
+	
+	@Override
+	public void killManager() {
+		if (this.usersSaveTask != null) this.usersSaveTask.cancel();
+		super.killManager();
 	}
 	
 	/**
@@ -137,7 +152,18 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 	@Override
 	public void updateUsers(User... users) throws Exception {
 		this.validate();
-		this.plugin.getDatabase().updateUsers(Stream.of(users).toArray(ProxyOperableUser[]::new));
+		// update only users
+		this.plugin.getDatabase().updateUsers(Stream.of(users).map(ProxyOperableUser.class::cast)
+				.filter(ProxyOperableUser::isNotChanged).toArray(ProxyOperableUser[]::new));
+	}
+	
+	public void saveChangedUsers() throws Exception {
+		this.validate();
+		this.plugin.getDatabase().saveChanges(
+				this.users.values().stream()
+						.filter(ProxyOperableUser::isChanged)
+						.toArray(ProxyOperableUser[]::new)
+		);
 	}
 	
 	/**

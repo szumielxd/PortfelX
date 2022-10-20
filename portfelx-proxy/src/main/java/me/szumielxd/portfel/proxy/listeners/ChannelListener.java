@@ -41,7 +41,7 @@ public abstract class ChannelListener {
 	private final Gson gson;
 	
 	
-	public ChannelListener(@NotNull PortfelProxyImpl plugin) {
+	protected ChannelListener(@NotNull PortfelProxyImpl plugin) {
 		this.plugin = plugin;
 		this.gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	}
@@ -331,11 +331,12 @@ public abstract class ChannelListener {
 						dout.writeUTF(this.gson.toJson(this.gson.toJsonTree(ex))); // status
 					}
 					CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getAccessManager().getHashKey(serverId));
-				} catch (IOException e) {
-					e.printStackTrace();
 				}
 				srv.sendPluginMessage(Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+				Thread.currentThread().interrupt();
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		});

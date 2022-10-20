@@ -104,6 +104,15 @@ public interface AbstractDB {
 	public List<ProxyOperableUser> updateUsers(@NotNull ProxyOperableUser... users) throws Exception;
 	
 	/**
+	 * Save user values marked as changed.
+	 * 
+	 * @implNote Internal use only, users are saved automatically.
+	 * @param users users to operate on
+	 * @throws SQLException when cannot establish the connection to the database
+	 */
+	public void saveChanges(@NotNull ProxyOperableUser... users) throws Exception;
+	
+	/**
 	 * Add given amount of money to balance of specified user.
 	 * 
 	 * @implNote Internal use only, try {@link User} instead. Thread unsafe.

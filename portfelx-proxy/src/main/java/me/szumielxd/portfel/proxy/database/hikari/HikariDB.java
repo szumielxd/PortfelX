@@ -6,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -437,7 +440,7 @@ public abstract class HikariDB implements AbstractDB {
 		return arr;
 	}
 	/**
-	 * Update given user
+	 * Update given user.
 	 * 
 	 * @implNote Internal use only, try {@link User} instead. Thread unsafe.
 	 * @param users user to update
@@ -474,6 +477,42 @@ public abstract class HikariDB implements AbstractDB {
 			}
 		}
 		return updatedUsers;
+	}
+	
+	/**
+	 * Save user values marked as changed.
+	 * 
+	 * @implNote Internal use only, users are saved automatically.
+	 * @param users users to operate on
+	 * @throws SQLException when cannot establish the connection to the database
+	 */
+	@Override
+	public void saveChanges(@NotNull ProxyOperableUser... users) throws Exception {
+		this.checkConnection();
+		Iterator<ProxyOperableUser> iterator = Arrays.stream(users).iterator();
+		try (Connection conn = this.hikari.getConnection()) {
+			while (iterator.hasNext()) {
+				ProxyOperableUser user = iterator.next();
+				synchronized (user) {
+					// format items to change
+					List<String> toChange = new LinkedList<>();
+					if (user.isMinorBalanceChanged()) {
+						toChange.add(String.format("`%s` = ?", USERS_MINORBALANCE));
+					}
+					
+					if (!toChange.isEmpty()) {
+						String sql = this.mapQuery(String.format("UPDATE `%s` SET %s WHERE `%s` = ?;", TABLE_USERS, String.join(", ", toChange), USERS_UUID));
+						try (PreparedStatement stm = conn.prepareStatement(sql)) {
+							int index = 0;
+							// dynamically fill prepared statement 
+							if (user.isMinorBalanceChanged()) stm.setLong(++index, user.getMinorBalance());
+							stm.setString(++index, user.getUniqueId().toString());
+							if (stm.executeUpdate() == 0) throw new SQLException("Unable to save a userdata. (inexistent uuid)");
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	/**
@@ -692,9 +731,9 @@ public abstract class HikariDB implements AbstractDB {
 	private void setupTables() throws SQLException {
 		this.checkConnection();
 		String usersTable = this.mapQuery(String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(16) NOT NULL,"
-				+ "`%s` INT UNSIGNED NOT NULL DEFAULT '0', `%s` BOOLEAN NOT NULL DEFAULT FALSE,"
+				+ "`%s` INT UNSIGNED NOT NULL DEFAULT '0', `%s` INT UNSIGNED NOT NULL DEFAULT '0', `%s` BOOLEAN NOT NULL DEFAULT FALSE,"
 				+ "PRIMARY KEY (`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
-				TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_IGNORETOP, USERS_UUID));
+				TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, USERS_UUID));
 		String logsTable = this.mapQuery(String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT, `%s` VARCHAR(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,"
 				+ "`%s` VARCHAR(16) NOT NULL, `%s` VARCHAR(24) NOT NULL, `%s` VARCHAR(32) NOT NULL, `%s` VARCHAR(36) NOT NULL,"
 				+ "`%s` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, `%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(8) NOT NULL,"

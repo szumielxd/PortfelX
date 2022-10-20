@@ -7,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import lombok.Getter;
-import lombok.Setter;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
@@ -19,7 +18,7 @@ public class ProxyOperableUser extends User {
 	/**
 	 * Flag an object as changed since last update
 	 */
-	@Getter @Setter private @NotNull boolean changed = false;
+	@Getter private @NotNull boolean minorBalanceChanged = false;
 	
 
 	/**
@@ -120,6 +119,7 @@ public class ProxyOperableUser extends User {
 	public void setMinorBalance(long newBalance) {
 		if (newBalance < 0) throw new IllegalArgumentException("`newBalance` cannot be lower than 0");
 		this.minorBalance = newBalance;
+		this.minorBalanceChanged = true;
 	}
 	
 	/**
@@ -213,6 +213,23 @@ public class ProxyOperableUser extends User {
 				return e;
 			}
 		});
+	}
+	
+	public boolean isChanged() {
+		return this.minorBalanceChanged;
+	}
+	
+	public boolean isNotChanged() {
+		return !this.isChanged();
+	}
+	
+	/**
+	 * Set all change flags as false
+	 * 
+	 * @implNote internal use only
+	 */
+	public void setUnchanged() {
+		this.minorBalanceChanged = false;
 	}
 
 }
