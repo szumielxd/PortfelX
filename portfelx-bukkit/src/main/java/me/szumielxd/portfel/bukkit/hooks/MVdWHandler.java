@@ -29,6 +29,11 @@ public class MVdWHandler {
 	public final PlaceholderReplacer topBalance;
 	public final PlaceholderReplacer topPlayer;
 	public final PlaceholderReplacer topUUID;
+	public final PlaceholderReplacer simpleMinorBalance;
+	public final PlaceholderReplacer extendedMinorBalance;
+	public final PlaceholderReplacer minorTopBalance;
+	public final PlaceholderReplacer minorTopPlayer;
+	public final PlaceholderReplacer minorTopUUID;
 	
 	
 	
@@ -82,8 +87,61 @@ public class MVdWHandler {
 		// topUUID
 		this.topUUID = event -> {
 			try {
-				int pos = Integer.parseInt(event.getPlaceholder().substring(19));
+				int pos = Integer.parseInt(event.getPlaceholder().substring(17));
 				TopEntry top = this.plugin.getTopManager().getByPos(pos);
+				return top != null ? String.valueOf(top.getUniqueId()) : "";
+			} catch (NumberFormatException e) {}
+			return "";
+		};
+		// simpleMinorBalance
+		this.simpleMinorBalance = event -> {
+			if(event.getPlayer() != null && event.getPlayer().isOnline()) {
+				User user = this.plugin.getUserManager().getUser(event.getPlayer().getUniqueId());
+				long value = user != null? user.getMinorBalance() : 0;
+				return this.formatCurrency(event.getPlayer(), value);
+			}
+			return null;
+		};
+		// extendedMinorBalance
+		this.extendedMinorBalance = event -> {
+			String str = event.getPlaceholder().substring(21);
+			if(str.startsWith("other_")) {
+				Player p = Bukkit.getPlayerExact(str.substring(6));
+				User user = p != null ? this.plugin.getUserManager().getUser(p.getUniqueId()) : null;
+				long value = user != null ? user.getMinorBalance() : 0;
+				return this.formatCurrency(event.getPlayer(), value);
+			} else {
+				User user = MVdWHandler.this.plugin.getUserManager().getUser(event.getPlayer().getUniqueId());
+				long value = user != null ? user.getMinorBalance() : 0;
+				Optional<Locale> locale = Optional.ofNullable(Translator.parseLocale(str));
+				return this.formatCurrency(locale.orElse(Locale.getDefault()), value);
+			}
+		};
+		// topBalance
+		this.minorTopBalance = event -> {
+			String[] arr = event.getPlaceholder().substring(25).split("_", 2);
+			try {
+				int pos = Integer.parseInt(arr[arr.length-1]);
+				TopEntry top = this.plugin.getTopManager().getByMinorPos(pos);
+				if (top == null) return "";
+				return this.formatCurrency(event.getPlayer(), top.getBalance());
+			} catch (NumberFormatException e) {}
+			return "";
+		};
+		// topPlayer
+		this.minorTopPlayer = event -> {
+			try {
+				int pos = Integer.parseInt(event.getPlaceholder().substring(24));
+				TopEntry top = this.plugin.getTopManager().getByMinorPos(pos);
+				return top != null ? top.getName() : "";
+			} catch (NumberFormatException e) {}
+			return "";
+		};
+		// topUUID
+		this.minorTopUUID = event -> {
+			try {
+				int pos = Integer.parseInt(event.getPlaceholder().substring(22));
+				TopEntry top = this.plugin.getTopManager().getByMinorPos(pos);
 				return top != null ? String.valueOf(top.getUniqueId()) : "";
 			} catch (NumberFormatException e) {}
 			return "";
@@ -94,7 +152,12 @@ public class MVdWHandler {
 				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_balance_*", this.extendedBalance)
 				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_balance_*", this.topBalance)
 				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_uuid_*", this.topUUID)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_player_*", this.topPlayer)) {
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_player_*", this.topPlayer)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minorbalance", this.simpleMinorBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minorbalance_*", this.extendedMinorBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minortop_balance_*", this.minorTopBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minortop_uuid_*", this.minorTopUUID)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minortop_player_*", this.minorTopPlayer)) {
 			this.plugin.getLogger().info("Hooked placeholders into MVdWPlaceholderAPI");
 		}
 	}

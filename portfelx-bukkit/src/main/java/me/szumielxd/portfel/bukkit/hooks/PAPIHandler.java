@@ -2,9 +2,9 @@ package me.szumielxd.portfel.bukkit.hooks;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 		} catch (Exception e) {
 			this.plugin.getLogger().warn("Cannot hook placeholders into PlaceholderAPI");
 		}
-		ArrayList<String> list = new ArrayList<>();
+		List<String> list = new LinkedList<>();
 		list.add(this.getIdentifier()+"_balance");
 		list.add(this.getIdentifier()+"_balance_other_<player>");
 		list.add(this.getIdentifier()+"_balance_<locale>");
@@ -48,6 +48,13 @@ public class PAPIHandler extends PlaceholderExpansion {
 		list.add(this.getIdentifier()+"_top_balance_<locale>_#");
 		list.add(this.getIdentifier()+"_top_player_#");
 		list.add(this.getIdentifier()+"_top_uuid_#");
+		list.add(this.getIdentifier()+"_minorbalance");
+		list.add(this.getIdentifier()+"_minorbalance_other_<player>");
+		list.add(this.getIdentifier()+"_minorbalance_<locale>");
+		list.add(this.getIdentifier()+"_minortop_balance_#");
+		list.add(this.getIdentifier()+"_minortop_balance_<locale>_#");
+		list.add(this.getIdentifier()+"_minortop_player_#");
+		list.add(this.getIdentifier()+"_minortop_uuid_#");
 		list.replaceAll(str -> "%"+str+"%");
 		this.placeholders = Collections.unmodifiableList(list);
 	}
@@ -110,6 +117,27 @@ public class PAPIHandler extends PlaceholderExpansion {
 				return this.formatCurrency(player, val);
 			}
 		}
+		if(identifier.startsWith("minorbalance")) {
+			String id = identifier.substring(12);
+			if(id.startsWith("_")) {
+				id = id.substring(1);
+				if(id.startsWith("other_")) {
+					User user = this.plugin.getUserManager().getUser(id.substring(6));
+					long val = user!=null? user.getMinorBalance() : 0;
+					return this.formatCurrency(player, val);
+				} else {
+					User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+					long val = user!=null? user.getMinorBalance() : 0;
+					Optional<Locale> locale = Optional.ofNullable(Translator.parseLocale(id));
+					return this.formatCurrency(locale.orElse(Locale.getDefault()), val);
+				}
+			} else if(id.isEmpty()) {
+				if(player == null) return null;
+				User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+				long val = user!=null? user.getMinorBalance() : 0;
+				return this.formatCurrency(player, val);
+			}
+		}
 		if(identifier.startsWith("top_balance_")) {
 			String[] arr = identifier.substring(12).split("_");
 			if(arr.length > 1) {
@@ -144,6 +172,44 @@ public class PAPIHandler extends PlaceholderExpansion {
 				int pos = Integer.parseInt(identifier.substring(9));
 				BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
 				TopEntry entry = user!=null ? this.plugin.getTopManager().getByPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByPos(pos);
+				return entry!=null? entry.getUniqueId().toString() : "";
+			} catch (NumberFormatException e) {}
+			return null;
+		}
+		if(identifier.startsWith("minortop_balance_")) {
+			String[] arr = identifier.substring(17).split("_");
+			if(arr.length > 1) {
+				try {
+					int pos = Integer.parseInt(arr[arr.length-1]);
+					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+					TopEntry entry = user!=null ? this.plugin.getTopManager().getByMinorPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByMinorPos(pos);
+					Optional<Locale> locale = Optional.ofNullable(Translator.parseLocale(String.join("_", Arrays.copyOf(arr, arr.length-1))));
+					return entry!=null? this.formatCurrency(locale.orElse(Locale.getDefault()), entry.getBalance()) : "";
+				} catch (NumberFormatException e) {}
+			} else {
+				try {
+					int pos = Integer.parseInt(identifier.substring(12));
+					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+					TopEntry entry = user!=null ? this.plugin.getTopManager().getByMinorPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByMinorPos(pos);
+					return entry!=null? this.formatCurrency(player, entry.getBalance()) : "";
+				} catch (NumberFormatException e) {}
+			}
+			return null;
+		}
+		if(identifier.startsWith("minortop_player_")) {
+			try {
+				int pos = Integer.parseInt(identifier.substring(16));
+				BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+				TopEntry entry = user!=null ? this.plugin.getTopManager().getByMinorPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByMinorPos(pos);
+				return entry!=null? entry.getName() : "";
+			} catch (NumberFormatException e) {}
+			return null;
+		}
+		if(identifier.startsWith("minortop_uuid_")) {
+			try {
+				int pos = Integer.parseInt(identifier.substring(14));
+				BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
+				TopEntry entry = user!=null ? this.plugin.getTopManager().getByMinorPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByMinorPos(pos);
 				return entry!=null? entry.getUniqueId().toString() : "";
 			} catch (NumberFormatException e) {}
 			return null;
