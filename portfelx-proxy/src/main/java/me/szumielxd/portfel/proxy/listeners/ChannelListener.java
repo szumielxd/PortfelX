@@ -255,7 +255,7 @@ public abstract class ChannelListener {
 		try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
 			final String transactionId = din.readUTF(); // transaction id
 			long value = din.readLong(); // value
-			this.setNewMinorEconomy(transactionId, serverKey, target, tag, value);
+			this.setNewMinorEconomy(sender, transactionId, serverKey, target, tag, value);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -277,14 +277,14 @@ public abstract class ChannelListener {
 		try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
 			final String transactionId = din.readUTF(); // transaction id
 			long value = din.readLong(); // value
-			this.setNewMinorEconomy(transactionId, serverKey, target, tag, -value);
+			this.setNewMinorEconomy(sender, transactionId, serverKey, target, tag, -value);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return true;
 	}
 	
-	private void setNewMinorEconomy(@NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer target, @NotNull String tag, long value) throws IOException {
+	private void setNewMinorEconomy(@NotNull ProxyServerConnection sender, @NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer target, @NotNull String tag, long value) throws IOException {
 		ProxyOperableUser user = (ProxyOperableUser) this.plugin.getUserManager().getUser(target.getUniqueId());
 		boolean result = false;
 		if (user != null) {
@@ -305,6 +305,7 @@ public abstract class ChannelListener {
 			if (result) dout.writeLong(user.getBalance());
 			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getAccessManager().getHashKey(serverId));
 		}
+		sender.sendPluginMessage(Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 	}
 	
 	
