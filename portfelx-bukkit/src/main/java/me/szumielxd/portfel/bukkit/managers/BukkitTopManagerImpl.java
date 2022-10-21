@@ -91,7 +91,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 		try {
 			return this.getByPos(this.cachedTop.keySet().iterator().next(), position);
 		} catch (NoSuchElementException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -102,11 +102,12 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	 * @param position position to obtain
 	 * @return top entry
 	 */
+	@Override
 	public @Nullable TopEntry getByPos(@Nullable UUID proxyId, int position) {
 		try {
 			return this.cachedTop.get(proxyId).get(position-1);
 		} catch (IndexOutOfBoundsException|NoSuchElementException|NullPointerException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -116,11 +117,11 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	 * @return copy of actually cached top
 	 */
 	@Override
-	public @Nullable List<TopEntry> getFullTopCopy() {
+	public @NotNull List<TopEntry> getFullTopCopy() {
 		try {
 			return this.getFullTopCopy(this.cachedTop.keySet().iterator().next());
 		} catch (NoSuchElementException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 		
 	}
@@ -131,11 +132,12 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	 * @param proxyId target proxy
 	 * @return copy of actually cached top
 	 */
-	public @Nullable List<TopEntry> getFullTopCopy(@Nullable UUID proxyId) {
+	@Override
+	public @NotNull List<TopEntry> getFullTopCopy(@Nullable UUID proxyId) {
 		try {
 			return new ArrayList<>(this.cachedTop.get(proxyId));
 		} catch (NullPointerException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -150,7 +152,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 		try {
 			return this.getByMinorPos(this.cachedMinorTop.keySet().iterator().next(), position);
 		} catch (NoSuchElementException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -161,11 +163,12 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	 * @param position position to obtain
 	 * @return minor top entry
 	 */
+	@Override
 	public @Nullable TopEntry getByMinorPos(@Nullable UUID proxyId, int position) {
 		try {
 			return this.cachedMinorTop.get(proxyId).get(position-1);
 		} catch (IndexOutOfBoundsException|NoSuchElementException|NullPointerException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -175,11 +178,11 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	 * @return copy of actually cached minor top
 	 */
 	@Override
-	public @Nullable List<TopEntry> getFullMinorTopCopy() {
+	public @NotNull List<TopEntry> getFullMinorTopCopy() {
 		try {
 			return this.getFullMinorTopCopy(this.cachedMinorTop.keySet().iterator().next());
 		} catch (NoSuchElementException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 		
 	}
@@ -190,11 +193,12 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	 * @param proxyId target proxy
 	 * @return copy of actually cached minor top
 	 */
-	public @Nullable List<TopEntry> getFullMinorTopCopy(@Nullable UUID proxyId) {
+	@Override
+	public @NotNull List<TopEntry> getFullMinorTopCopy(@Nullable UUID proxyId) {
 		try {
 			return new ArrayList<>(this.cachedMinorTop.get(proxyId));
 		} catch (NullPointerException e) {
-			return null;
+			throw new RuntimeException(e);
 		}
 	}
 	

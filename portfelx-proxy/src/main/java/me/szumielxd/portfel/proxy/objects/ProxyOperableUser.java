@@ -115,13 +115,6 @@ public class ProxyOperableUser extends User {
 		});
 	}
 	
-	
-	public void setMinorBalance(long newBalance) {
-		if (newBalance < 0) throw new IllegalArgumentException("`newBalance` cannot be lower than 0");
-		this.minorBalance = newBalance;
-		this.minorBalanceChanged = true;
-	}
-	
 	/**
 	 * Set specified amount of money as user's balance.
 	 * 
@@ -176,6 +169,46 @@ public class ProxyOperableUser extends User {
 	public void setRemoteIdAndName(@Nullable UUID serverId, @Nullable String serverName) {
 		this.remoteId = serverId;
 		this.serverName = serverName;
+	}
+	
+	/**
+	 * Give minor balance to user.
+	 * 
+	 * @param amount amount of balance to give
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	@Override
+	public @NotNull CompletableFuture<Boolean> giveMinorBalance(long amount) {
+		this.minorBalance += amount;
+		this.minorBalanceChanged = true;
+		return CompletableFuture.completedFuture(true);
+	}
+	
+	/**
+	 * Take minor balance from user.
+	 * 
+	 * @param amount amount of balance to take
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	@Override
+	public @NotNull CompletableFuture<Boolean> takeMinorBalance(long amount) {
+		if (this.minorBalance < amount) throw new IllegalArgumentException("`amount` cannot be bigger than minor balance");
+		this.minorBalance -= amount;
+		this.minorBalanceChanged = true;
+		return CompletableFuture.completedFuture(true);
+	}
+	
+	/**
+	 * Set minor balance of user.
+	 * 
+	 * @param amount amount of balance to set
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	@Override
+	public @NotNull CompletableFuture<Boolean> setMinorBalance(long amount) {
+		this.minorBalance = amount;
+		this.minorBalanceChanged = true;
+		return CompletableFuture.completedFuture(true);
 	}
 	
 	/**

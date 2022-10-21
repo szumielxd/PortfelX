@@ -32,7 +32,7 @@ public interface ChannelManager {
 	 * @return {@link BalanceUpdateResult} representation of request result
 	 * @throws Exception when something went wrong
 	 */
-	public @Nullable BalanceUpdateResult requestGiveMinorBalance(@NotNull Player player, int amount) throws Exception;
+	public @Nullable BalanceUpdateResult requestGiveMinorBalance(@NotNull Player player, long amount) throws Exception;
 	
 	/**
 	 * Remove given amount to user's minor balance.
@@ -42,7 +42,7 @@ public interface ChannelManager {
 	 * @return {@link BalanceUpdateResult} representation of request result
 	 * @throws Exception when something went wrong
 	 */
-	public @Nullable BalanceUpdateResult requestTakeMinorBalance(@NotNull Player player, int amount) throws Exception;
+	public @Nullable BalanceUpdateResult requestTakeMinorBalance(@NotNull Player player, long amount) throws Exception;
 	
 	/**
 	 * Cancel user update task if actually pending.

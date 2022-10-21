@@ -660,7 +660,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	 * @throws Exception when something went wrong
 	 */
 	@Override
-	public @Nullable BalanceUpdateResult requestGiveMinorBalance(@NotNull Player player, int amount) throws Exception {
+	public @Nullable BalanceUpdateResult requestGiveMinorBalance(@NotNull Player player, long amount) throws Exception {
 		UUID transactionId = UUID.randomUUID();
 		User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
 		if (user == null) return null;
@@ -692,7 +692,8 @@ public class ChannelManagerImpl implements ChannelManager {
 	 * @return {@link BalanceUpdateResult} representation of request result
 	 * @throws Exception when something went wrong
 	 */
-	public @Nullable BalanceUpdateResult requestTakeMinorBalance(@NotNull Player player, int amount) throws Exception {
+	@Override
+	public @Nullable BalanceUpdateResult requestTakeMinorBalance(@NotNull Player player, long amount) throws Exception {
 		UUID transactionId = UUID.randomUUID();
 		User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
 		if (user == null) return null;

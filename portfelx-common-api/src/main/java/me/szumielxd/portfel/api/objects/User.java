@@ -174,6 +174,30 @@ public abstract class User {
 	}
 	
 	/**
+	 * Give minor balance to user.
+	 * 
+	 * @param amount amount of balance to give
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	public abstract @NotNull CompletableFuture<Boolean> giveMinorBalance(long amount);
+	
+	/**
+	 * Take minor balance from user.
+	 * 
+	 * @param amount amount of balance to take
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	public abstract @NotNull CompletableFuture<Boolean> takeMinorBalance(long amount);
+	
+	/**
+	 * Set minor balance of user.
+	 * 
+	 * @param amount amount of balance to set
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	public abstract @NotNull CompletableFuture<Boolean> setMinorBalance(long amount);
+	
+	/**
 	 * Set whether user should be visible in top balance.
 	 * 
 	 * @param inTop set to true to allow this user in top

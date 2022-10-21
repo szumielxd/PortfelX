@@ -159,7 +159,7 @@ public class BukkitOperableUser extends User {
 	 * @param amount amount of balance to give
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
-	public @NotNull CompletableFuture<Boolean> giveMinorBalance(int amount) {
+	public @NotNull CompletableFuture<Boolean> giveMinorBalance(long amount) {
 		return CompletableFuture.supplyAsync(() -> {
 			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
 			try {
@@ -173,12 +173,12 @@ public class BukkitOperableUser extends User {
 	}
 	
 	/**
-	 * Take minor balance to user.
+	 * Take minor balance from user.
 	 * 
 	 * @param amount amount of balance to take
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
-	public @NotNull CompletableFuture<Boolean> takeMinorBalance(int amount) {
+	public @NotNull CompletableFuture<Boolean> takeMinorBalance(long amount) {
 		if (this.minorBalance < amount) throw new IllegalArgumentException("`amount` cannot be smaller than user's current minor balance");
 		return CompletableFuture.supplyAsync(() -> {
 			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
@@ -190,6 +190,16 @@ public class BukkitOperableUser extends User {
 				return false;	
 			}
 		});
+	}
+	
+	/**
+	 * Set minor balance of user.
+	 * 
+	 * @param amount amount of balance to set
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	public @NotNull CompletableFuture<Boolean> setMinorBalance(long amount) {
+		return CompletableFuture.completedFuture(false); // client instance cannot set minor balance
 	}
 	
 	/**
