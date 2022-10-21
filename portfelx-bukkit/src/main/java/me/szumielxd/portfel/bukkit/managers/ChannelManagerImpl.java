@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,6 +47,7 @@ import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
+import me.szumielxd.portfel.bukkit.api.managers.ChannelManager.BalanceUpdateResult;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction.TransactionResult;
@@ -101,9 +103,13 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	private final Map<UUID, CompletableFuture<Boolean>> waitingForValidation = new HashMap<>();
 	private final Map<UUID, CompletableFuture<List<TopEntry>>> waitingTopUpdates = new ConcurrentHashMap<>();
+	private final Map<UUID, CompletableFuture<List<TopEntry>>> waitingMinorTopUpdates = new ConcurrentHashMap<>();
 	private final Map<UUID, UUID> topUpdatesByUser = new HashMap<>();
+	private final Map<UUID, UUID> minorTopUpdatesByUser = new HashMap<>();
 	private final Map<UUID, CompletableFuture<BukkitOperableUser>> waitingUserUpdates = new HashMap<>();
 	private final Map<UUID, Entry<Transaction, CompletableFuture<TransactionResult>>> waitingTransactions = new HashMap<>();
+	private final Map<UUID, CompletableFuture<Entry<Long, Boolean>>> waitingMinorEcoGive = new HashMap<>();
+	private final Map<UUID, CompletableFuture<Entry<Long, Boolean>>> waitingMinorEcoTake = new HashMap<>();
 	
 	
 	private void onSetupValidator(@NotNull String channel, @NotNull Player player, byte[] message) {
@@ -279,6 +285,58 @@ public class ChannelManagerImpl implements ChannelManager {
 				e.printStackTrace();
 			}
 		}
+		
+		/* Handle minor balance give */
+		if ("MinorGive".equals(subchannel)) {
+			byte[] data;
+			try {
+				data = CryptoUtils.decodeBytesFromInput(in, this.plugin.getServerHashKey());
+			} catch (IllegalArgumentException e) {
+				// ignore malformed messages
+				return;
+			}
+			try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+				UUID proxyId = UUID.fromString(din.readUTF()); // proxy id
+				UUID transactionId = UUID.fromString(din.readUTF()); // transaction id
+				Entry<Long, Boolean> result = null;
+				if (this.plugin.getIdentifierManager().isValid(proxyId)) {
+					long newBalance = din.readLong(); // newBalance
+					boolean status = din.readBoolean(); // status
+					result = new AbstractMap.SimpleEntry<>(newBalance, status);
+				}
+				CompletableFuture<Entry<Long, Boolean>> future = this.waitingMinorEcoGive.get(transactionId);
+				if (future == null) return;
+				future.complete(result);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} 
+		
+		/* Handle minor balance take */
+		if ("MinorTake".equals(subchannel)) {
+			byte[] data;
+			try {
+				data = CryptoUtils.decodeBytesFromInput(in, this.plugin.getServerHashKey());
+			} catch (IllegalArgumentException e) {
+				// ignore malformed messages
+				return;
+			}
+			try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
+				UUID proxyId = UUID.fromString(din.readUTF()); // proxy id
+				UUID transactionId = UUID.fromString(din.readUTF()); // transaction id
+				Entry<Long, Boolean> result = null;
+				if (this.plugin.getIdentifierManager().isValid(proxyId)) {
+					long newBalance = din.readLong(); // newBalance
+					boolean status = din.readBoolean(); // status
+					result = new AbstractMap.SimpleEntry<>(newBalance, status);
+				}
+				CompletableFuture<Entry<Long, Boolean>> future = this.waitingMinorEcoTake.get(transactionId);
+				if (future == null) return;
+				future.complete(result);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} 
 	}
 	
 	
@@ -301,7 +359,8 @@ public class ChannelManagerImpl implements ChannelManager {
 					String username = in.readUTF(); // username
 					long balance = in.readLong(); // balance
 					boolean deniedInTop = in.readBoolean(); // deniedInTop
-					user = new BukkitOperableUser(this.plugin, uuid, username, true, deniedInTop, balance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
+					long minorBalance = in.readLong(); // minorBalance
+					user = new BukkitOperableUser(this.plugin, uuid, username, true, deniedInTop, balance, minorBalance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
 				} else {
 					user.setName(in.readUTF()); // username
 					user.setPlainBalance(in.readLong()); // balance
@@ -352,6 +411,25 @@ public class ChannelManagerImpl implements ChannelManager {
 				}
 				
 				CompletableFuture<List<TopEntry>> future = this.waitingTopUpdates.get(proxyId);
+				if (future != null) {
+					future.complete(list);
+				}
+			}
+		}
+		
+		if ("MinorTop".equals(subchannel)) {
+			UUID proxyId = new UUID(in.readLong(), in.readLong()); // proxyId
+			if (this.plugin.getIdentifierManager().isValid(proxyId)) {
+				int size = in.readInt(); // top size
+				List<TopEntry> list = new ArrayList<>();
+				for (int i = 0; i < size; i++) {
+					UUID uuid = new UUID(in.readLong(), in.readLong()); // UUID
+					String name = IntStream.range(0, 16).mapToObj(j -> (char)((in.readByte()) + 128)).filter(ch -> !ch.equals(' ')).map(String::valueOf).collect(Collectors.joining()); // Name
+					long balance = in.readLong();
+					list.add(new TopEntry(uuid, name, balance));
+				}
+				
+				CompletableFuture<List<TopEntry>> future = this.waitingMinorTopUpdates.get(proxyId);
 				if (future != null) {
 					future.complete(list);
 				}
@@ -417,7 +495,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		UUID uuid = Objects.requireNonNull(player, "player cannot be null").getUniqueId();
 		CompletableFuture<BukkitOperableUser> future = this.waitingUserUpdates.get(uuid);
 		if (future != null) {
-			future.complete(new BukkitOperableUser(this.plugin, uuid, player.getName(), false, false, 0L, UUID.fromString("00000000-0000-0000-0000-000000000000"), this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME)));
+			future.complete(new BukkitOperableUser(this.plugin, uuid, player.getName(), false, false, 0L, 0L, UUID.fromString("00000000-0000-0000-0000-000000000000"), this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME)));
 			this.waitingTopUpdates.remove(uuid);
 		}
 	}
@@ -426,6 +504,13 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void sendTopRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("LightTop");
+		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
+	}
+	
+	
+	private void sendMinorTopRequest(@NotNull Player player) {
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("MinorTop");
 		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
 	}
 	
@@ -464,6 +549,39 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	
 	/**
+	 * Request minor top update from proxy the player belongs to.
+	 * 
+	 * @param player to determine proxy
+	 * @return list of all minor top entries from given proxy (miscellaneous size)
+	 * @throws Exception when something went wrong
+	 */
+	@Override
+	public @NotNull List<TopEntry> requestMinorTop(@NotNull Player player) throws Exception {
+		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+		if (user == null) return new ArrayList<>();
+		UUID uuid = user.getUniqueId();
+		UUID proxyId = user.getRemoteId();
+		
+		CompletableFuture<List<TopEntry>> future = this.waitingMinorTopUpdates.computeIfAbsent(proxyId, id -> {
+			this.minorTopUpdatesByUser.put(uuid, proxyId);
+			this.sendMinorTopRequest(player);
+			return new CompletableFuture<>();
+		});
+		try {
+			return future.get(5, TimeUnit.SECONDS);
+		} catch (ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
+		} finally {
+			this.waitingMinorTopUpdates.remove(proxyId);
+			this.minorTopUpdatesByUser.remove(uuid, proxyId);
+		}
+	}
+	
+	
+	/**
 	 * Cancel top update task if given player is used as source for this request.
 	 * 
 	 * @param player player to check
@@ -496,6 +614,105 @@ public class ChannelManagerImpl implements ChannelManager {
 			e.printStackTrace();
 		}
 		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+	}
+	
+	
+	private void sendMinorEcoGive(@NotNull Player player, @NotNull User user, @NotNull UUID transactionId, @NotNull long amount) {
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("MinorGive"); // subchannel
+		out.writeUTF(this.plugin.getIdentifierManager().getComplementary(user.getRemoteId()).toString()); // serverId
+		try {
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			DataOutputStream dout = new DataOutputStream(bout);
+			dout.writeUTF(transactionId.toString()); // transactionId
+			dout.writeLong(amount); // value
+			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getServerHashKey());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+	}
+	
+	
+	private void sendMinorEcoTake(@NotNull Player player, @NotNull User user, @NotNull UUID transactionId, @NotNull long amount) {
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("MinorTake"); // subchannel
+		out.writeUTF(this.plugin.getIdentifierManager().getComplementary(user.getRemoteId()).toString()); // serverId
+		try {
+			ByteArrayOutputStream bout = new ByteArrayOutputStream();
+			DataOutputStream dout = new DataOutputStream(bout);
+			dout.writeUTF(transactionId.toString()); // transactionId
+			dout.writeLong(amount); // value
+			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getServerHashKey());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+	}
+
+	
+	/**
+	 * Add given amount to user's minor balance.
+	 * 
+	 * @param player the player
+	 * @param amount amount of balance to give
+	 * @return {@link BalanceUpdateResult} representation of request result
+	 * @throws Exception when something went wrong
+	 */
+	@Override
+	public @Nullable BalanceUpdateResult requestGiveMinorBalance(@NotNull Player player, int amount) throws Exception {
+		UUID transactionId = UUID.randomUUID();
+		User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
+		if (user == null) return null;
+		if (user instanceof BukkitImaginaryUser) {
+			return null; // cancel transaction when user is not correctly loaded
+		}
+		CompletableFuture<Entry<Long, Boolean>> future = new CompletableFuture<>();
+		this.waitingMinorEcoGive.put(transactionId, future);
+		this.sendMinorEcoGive(player, user, transactionId, amount);
+		try {
+			Entry<Long, Boolean> result = future.get(5, TimeUnit.SECONDS);
+			return new BalanceUpdateResult(result.getValue(), result.getKey());
+		} catch (ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
+		} finally {
+			this.waitingMinorEcoGive.remove(transactionId);
+		}
+	}
+
+	
+	/**
+	 * Remove given amount to user's minor balance.
+	 * 
+	 * @param player the player
+	 * @param amount amount of balance to take
+	 * @return {@link BalanceUpdateResult} representation of request result
+	 * @throws Exception when something went wrong
+	 */
+	public @Nullable BalanceUpdateResult requestTakeMinorBalance(@NotNull Player player, int amount) throws Exception {
+		UUID transactionId = UUID.randomUUID();
+		User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
+		if (user == null) return null;
+		if (user instanceof BukkitImaginaryUser) {
+			return null; // cancel transaction when user is not correctly loaded
+		}
+		CompletableFuture<Entry<Long, Boolean>> future = new CompletableFuture<>();
+		this.waitingMinorEcoTake.put(transactionId, future);
+		this.sendMinorEcoTake(player, user, transactionId, amount);
+		try {
+			Entry<Long, Boolean> result = future.get(5, TimeUnit.SECONDS);
+			return new BalanceUpdateResult(result.getValue(), result.getKey());
+		} catch (ExecutionException | TimeoutException e) {
+			throw new RuntimeException(e);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new RuntimeException(e);
+		} finally {
+			this.waitingMinorEcoTake.remove(transactionId);
+		}
 	}
 	
 	

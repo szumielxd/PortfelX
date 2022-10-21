@@ -12,7 +12,7 @@ import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 public class BukkitImaginaryUser extends BukkitOperableUser {
 
 	public BukkitImaginaryUser(@NotNull PortfelBukkitImpl plugin, @NotNull UUID uuid) {
-		super(plugin, uuid, "", Optional.ofNullable(Bukkit.getPlayer(uuid)).filter(Player::isOnline).isPresent(), false, 0, UUID.randomUUID(), "");
+		super(plugin, uuid, "", Optional.ofNullable(Bukkit.getPlayer(uuid)).filter(Player::isOnline).isPresent(), false, 0, 0, UUID.randomUUID(), "");
 	}
 
 }

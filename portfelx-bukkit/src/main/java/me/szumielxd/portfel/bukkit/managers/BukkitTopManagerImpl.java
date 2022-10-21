@@ -25,6 +25,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	
 	private final PortfelBukkitImpl plugin;
 	private Map<UUID, List<TopEntry>> cachedTop;
+	private Map<UUID, List<TopEntry>> cachedMinorTop;
 	
 	
 	public BukkitTopManagerImpl(PortfelBukkitImpl plugin) {
@@ -50,6 +51,16 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 						try{
 							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());
 							return channel.requestTop(player);
+						} catch(Exception e) {
+							e.printStackTrace();
+							return new ArrayList<>();
+						}}, (p, q) -> p));
+			this.cachedMinorTop = this.plugin.getUserManager().getLoadedUsers().stream().filter(User::isOnline)
+					.collect(Collectors.toMap(User::getRemoteId, Function.identity(), (p, q) -> p)).values().parallelStream()
+					.collect(Collectors.toMap(User::getRemoteId, u -> {
+						try{
+							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());
+							return channel.requestMinorTop(player);
 						} catch(Exception e) {
 							e.printStackTrace();
 							return new ArrayList<>();
@@ -123,6 +134,65 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	public @Nullable List<TopEntry> getFullTopCopy(@Nullable UUID proxyId) {
 		try {
 			return new ArrayList<>(this.cachedTop.get(proxyId));
+		} catch (NullPointerException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Get minor top entry at specified position. Counted from 1.
+	 * 
+	 * @param position position to obtain
+	 * @return minor top entry
+	 */
+	@Override
+	public @Nullable TopEntry getByMinorPos(int position) {
+		try {
+			return this.getByMinorPos(this.cachedMinorTop.keySet().iterator().next(), position);
+		} catch (NoSuchElementException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Get minor top entry at specified position. Counted from 1.
+	 * 
+	 * @param proxyId target proxy
+	 * @param position position to obtain
+	 * @return minor top entry
+	 */
+	public @Nullable TopEntry getByMinorPos(@Nullable UUID proxyId, int position) {
+		try {
+			return this.cachedMinorTop.get(proxyId).get(position-1);
+		} catch (IndexOutOfBoundsException|NoSuchElementException|NullPointerException e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Get copy of full cached minor top.
+	 * 
+	 * @return copy of actually cached minor top
+	 */
+	@Override
+	public @Nullable List<TopEntry> getFullMinorTopCopy() {
+		try {
+			return this.getFullMinorTopCopy(this.cachedMinorTop.keySet().iterator().next());
+		} catch (NoSuchElementException e) {
+			return null;
+		}
+		
+	}
+	
+	/**
+	 * Get copy of full cached minor top.
+	 * 
+	 * @param proxyId target proxy
+	 * @return copy of actually cached minor top
+	 */
+	public @Nullable List<TopEntry> getFullMinorTopCopy(@Nullable UUID proxyId) {
+		try {
+			return new ArrayList<>(this.cachedMinorTop.get(proxyId));
 		} catch (NullPointerException e) {
 			return null;
 		}

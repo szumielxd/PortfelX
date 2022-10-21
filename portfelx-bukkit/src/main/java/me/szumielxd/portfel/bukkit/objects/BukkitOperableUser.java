@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.api.managers.ChannelManager.BalanceUpdateResult;
 
 public class BukkitOperableUser extends User {
 	
@@ -26,8 +27,8 @@ public class BukkitOperableUser extends User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public BukkitOperableUser(@NotNull PortfelBukkitImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, @NotNull UUID proxyId, @NotNull String serverName) {
-		super(uuid, name, online, deniedInTop, balance);
+	public BukkitOperableUser(@NotNull PortfelBukkitImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, long minorBalance, @NotNull UUID proxyId, @NotNull String serverName) {
+		super(uuid, name, online, deniedInTop, balance, minorBalance);
 		this.plugin = plugin;
 		this.remoteId = proxyId;
 		this.serverName = serverName;
@@ -150,6 +151,45 @@ public class BukkitOperableUser extends User {
 	 */
 	public boolean inTestmode() {
 		return this.testmode;
+	}
+	
+	/**
+	 * Give minor balance to user.
+	 * 
+	 * @param amount amount of balance to give
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	public @NotNull CompletableFuture<Boolean> giveMinorBalance(int amount) {
+		return CompletableFuture.supplyAsync(() -> {
+			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
+			try {
+				BalanceUpdateResult result = this.plugin.getChannelManager().requestGiveMinorBalance(player, amount);
+				this.balance = result.getNewBalance();
+				return result.isSuccess();
+			} catch (Exception e) {
+				return false;	
+			}
+		});
+	}
+	
+	/**
+	 * Take minor balance to user.
+	 * 
+	 * @param amount amount of balance to take
+	 * @return A future that will be completed with true if succeeded, otherwise false
+	 */
+	public @NotNull CompletableFuture<Boolean> takeMinorBalance(int amount) {
+		if (this.minorBalance < amount) throw new IllegalArgumentException("`amount` cannot be smaller than user's current minor balance");
+		return CompletableFuture.supplyAsync(() -> {
+			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
+			try {
+				BalanceUpdateResult result = this.plugin.getChannelManager().requestTakeMinorBalance(player, amount);
+				this.balance = result.getNewBalance();
+				return result.isSuccess();
+			} catch (Exception e) {
+				return false;	
+			}
+		});
 	}
 	
 	/**
