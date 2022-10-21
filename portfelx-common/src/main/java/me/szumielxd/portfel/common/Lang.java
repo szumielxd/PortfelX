@@ -182,6 +182,7 @@ public class Lang {
 		COMMAND_USER_INFO_STATUS("command.user.info.status", "Status: {0}"),
 		COMMAND_USER_INFO_USERDATA("command.user.info.userdata", "Userdata:"),
 		COMMAND_USER_INFO_BALANCE("command.user.info.balance", "Balance: {0}"),
+		COMMAND_USER_INFO_MINORBALANCE("command.user.info.minorbalance", "Minor balance: {0}"),
 		COMMAND_USER_INFO_INTOP("command.user.info.intop", "Can be in Top: {0}"),
 		COMMAND_USER_INFO_SUGGEST("command.user.info.suggest", "Click to suggest command on chat"),
 		COMMAND_USER_INFO_INSERT("command.user.info.insert", "Click+Shift to insert above text on chat"),
@@ -197,6 +198,18 @@ public class Lang {
 		COMMAND_USER_ECO_TAKE_DESCRIPTION("command.user.eco.take.description", "Remove given amount from user's balance."),
 		COMMAND_USER_ECO_TAKE_SUCCESS("command.user.eco.take.success", "Remove {1} from {0}'s balance."),
 		COMMAND_USER_ECO_TAKE_SMALLER("command.user.eco.take.smaller", "User balance cannot be smaller than 0."),
+		//
+		COMMAND_USER_MINORECO_DESCRIPTION("command.user.minoreco.description", "Manage user's minor economy."),
+		//
+		COMMAND_USER_MINORECO_SET_DESCRIPTION("command.user.minoreco.set.description", "Set user's minor balance to given amount."),
+		COMMAND_USER_MINORECO_SET_SUCCESS("command.user.minoreco.set.success", "Set {1} as {0}'s minor balance."),
+		//
+		COMMAND_USER_MINORECO_GIVE_DESCRIPTION("command.user.minoreco.give.description", "Add given amount to user's minor balance."),
+		COMMAND_USER_MINORECO_GIVE_SUCCESS("command.user.minoreco.give.success", "Add {1} to {0}'s minor balance."),
+		//
+		COMMAND_USER_MINORECO_TAKE_DESCRIPTION("command.user.minoreco.take.description", "Remove given amount from user's minor balance."),
+		COMMAND_USER_MINORECO_TAKE_SUCCESS("command.user.minoreco.take.success", "Remove {1} from {0}'s minor balance."),
+		COMMAND_USER_MINORECO_TAKE_SMALLER("command.user.minoreco.take.smaller", "User minor balance cannot be smaller than 0."),
 		//
 		COMMAND_USER_TOP_DESCRIPTION("command.user.top.description", "Manage user's top position."),
 		//

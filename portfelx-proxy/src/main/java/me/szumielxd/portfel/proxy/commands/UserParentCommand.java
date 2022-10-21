@@ -11,6 +11,7 @@ import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;
 import me.szumielxd.portfel.proxy.commands.user.EcoParentCommand;
+import me.szumielxd.portfel.proxy.commands.user.MinorEcoParentCommand;
 import me.szumielxd.portfel.proxy.commands.user.TopParentCommand;
 import me.szumielxd.portfel.proxy.commands.user.UserInfoCommand;
 
@@ -25,6 +26,7 @@ public class UserParentCommand extends ParentCommand {
 		this.register(
 				new UserInfoCommand(plugin, this),
 				new EcoParentCommand(plugin, this),
+				new MinorEcoParentCommand(plugin, this),
 				new TopParentCommand(plugin, this)
 		);
 	}

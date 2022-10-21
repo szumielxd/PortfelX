@@ -40,9 +40,11 @@ public class UserInfoCommand extends SimpleCommand {
 		Component userdata = Portfel.PREFIX.append(Component.text("- ", WHITE)).append(LangKey.COMMAND_USER_INFO_USERDATA.component(LIGHT_PURPLE));
 		Component balance = Portfel.PREFIX.append(Component.text("   ")).append(MiscUtils.bindCommand(LangKey.COMMAND_USER_INFO_BALANCE.component(DARK_PURPLE,
 				Component.text(user.getBalance(), AQUA)), "/" + String.join(" ", Arrays.copyOf(label, label.length-1)) + " eco"));
+		Component minorBalance = Portfel.PREFIX.append(Component.text("   ")).append(MiscUtils.bindCommand(LangKey.COMMAND_USER_INFO_MINORBALANCE.component(DARK_PURPLE,
+				Component.text(user.getMinorBalance(), AQUA)), "/" + String.join(" ", Arrays.copyOf(label, label.length-1)) + " meco"));
 		Component inTop = Portfel.PREFIX.append(Component.text("   ", WHITE)).append(LangKey.COMMAND_USER_INFO_INTOP.component(DARK_PURPLE,
 				user.isDeniedInTop()? LangKey.MAIN_VALUE_FALSE.component(RED) : LangKey.MAIN_VALUE_TRUE.component(GREEN)));
-		sender.sendTranslated(MiscUtils.join(Component.newline(), header, uuid, uuidType, status, userdata, balance, inTop));
+		sender.sendTranslated(MiscUtils.join(Component.newline(), header, uuid, uuidType, status, userdata, balance, minorBalance, inTop));
 	}
 
 	@Override
