@@ -302,7 +302,7 @@ public abstract class ChannelListener {
 			dout.writeUTF(this.plugin.getProxyId().toString()); // proxy id
 			dout.writeUTF(transactionId); // transaction id
 			dout.writeBoolean(result);
-			if (result) dout.writeLong(user.getBalance());
+			dout.writeLong(user.getBalance());
 			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getAccessManager().getHashKey(serverId));
 		}
 		sender.sendPluginMessage(Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
