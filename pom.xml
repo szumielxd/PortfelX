@@ -23,7 +23,7 @@
 		<package>me.szumielxd.portfel</package>
 		<bukkitMainClass>${package}.bukkit.PortfelBukkitBootstrap</bukkitMainClass>
 		<bungeeMainClass>${package}.bungee.PortfelBungeeBootstrap</bungeeMainClass>
-		<revision>3.3.2</revision>
+		<revision>3.4.0-SNAPSHOT</revision>
 		<finalNameBootstrap>${project.artifactId}-assembly/src/main/resources/${pluginId}.jarinjar</finalNameBootstrap>
 		<finalName>/../../target/${project.artifactId}-${git.commit.id.abbrev}-${project.version}</finalName>
 		<finalNameObf>/../../target/${project.artifactId}-obf-${git.commit.id.abbrev}-${project.version}</finalNameObf>
