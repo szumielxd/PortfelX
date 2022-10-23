@@ -26,6 +26,7 @@ import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData;
+import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.bukkit.utils.PlaceholderUtils;
@@ -98,7 +99,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	public void onClick(@NotNull Player player, int slot) {
 		OrderData order = this.orders.get(slot);
 		if (order != null) {
-			User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+			BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
 			if (user != null && order.isAvailableToBuy(player) && !order.isDenied(player)) {
 				long price = order.getPrice();
 				if (this.type.equals(ShopType.UPGRADE)) {
@@ -111,7 +112,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 						price += o.getPrice();
 					}
 				}
-				if (price > user.getBalance()) {
+				if (price > user.getBalance() && !user.inTestmode()) {
 					Optional<Sound> sound = Stream.of(Sound.values()).filter(s -> s.name().equals("ENTITY_VILLAGER_NO")||s.name().equals("VILLAGER_NO")).findAny();
 					if (sound.isPresent()) player.playSound(player.getLocation(), sound.get(), 2, 1);
 					return;

@@ -1,6 +1,8 @@
 package me.szumielxd.portfel.bukkit.managers;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
+import me.szumielxd.portfel.bukkit.objects.BukkitImaginaryUser;
 import me.szumielxd.portfel.common.managers.TopManagerImpl;
 
 public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopManager {
@@ -45,8 +48,13 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	protected void update() {
 		try {
 			final ChannelManager channel = this.plugin.getChannelManager();
-			this.cachedTop = this.plugin.getUserManager().getLoadedUsers().stream().filter(User::isOnline)
-					.collect(Collectors.toMap(User::getRemoteId, Function.identity(), (p, q) -> p)).values().parallelStream()
+			Collection<User> distinctServers = this.plugin.getUserManager().getLoadedUsers()
+					.stream()
+					.filter(User::isOnline)
+					.filter(u -> !(u instanceof BukkitImaginaryUser))
+					.collect(Collectors.toMap(User::getRemoteId, Function.identity(), (p, q) -> p))
+					.values();
+			this.cachedTop = distinctServers.parallelStream()
 					.collect(Collectors.toMap(User::getRemoteId, u -> {
 						try{
 							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());
@@ -55,8 +63,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 							e.printStackTrace();
 							return new ArrayList<>();
 						}}, (p, q) -> p));
-			this.cachedMinorTop = this.plugin.getUserManager().getLoadedUsers().stream().filter(User::isOnline)
-					.collect(Collectors.toMap(User::getRemoteId, Function.identity(), (p, q) -> p)).values().parallelStream()
+			this.cachedMinorTop = distinctServers.parallelStream()
 					.collect(Collectors.toMap(User::getRemoteId, u -> {
 						try{
 							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());
@@ -121,7 +128,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 		try {
 			return this.getFullTopCopy(this.cachedTop.keySet().iterator().next());
 		} catch (NoSuchElementException e) {
-			throw new RuntimeException(e);
+			return Collections.emptyList();
 		}
 		
 	}
@@ -137,7 +144,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 		try {
 			return new ArrayList<>(this.cachedTop.get(proxyId));
 		} catch (NullPointerException e) {
-			throw new RuntimeException(e);
+			return Collections.emptyList();
 		}
 	}
 	
@@ -182,7 +189,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 		try {
 			return this.getFullMinorTopCopy(this.cachedMinorTop.keySet().iterator().next());
 		} catch (NoSuchElementException e) {
-			throw new RuntimeException(e);
+			return Collections.emptyList();
 		}
 		
 	}
@@ -198,7 +205,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 		try {
 			return new ArrayList<>(this.cachedMinorTop.get(proxyId));
 		} catch (NullPointerException e) {
-			throw new RuntimeException(e);
+			return Collections.emptyList();
 		}
 	}
 	
