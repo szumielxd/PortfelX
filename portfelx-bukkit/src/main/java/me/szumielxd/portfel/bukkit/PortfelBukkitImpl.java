@@ -161,7 +161,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		this.ordersManager = new OrdersManager(this).init();
 		this.prizesManager = new PrizesManager(this).init();
 		if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-			this.papiHandler = new PAPIHandler(this);
+			this.taskManager.runTask(() -> this.papiHandler = new PAPIHandler(this));
 		}
 		if(this.getServer().getPluginManager().isPluginEnabled("LuckPerms")) {
 			this.luckpermsContextProvider = new ContextProvider<>(this, Player.class);
