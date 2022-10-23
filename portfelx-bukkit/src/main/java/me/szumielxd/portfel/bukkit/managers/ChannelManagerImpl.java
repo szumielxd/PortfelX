@@ -359,7 +359,12 @@ public class ChannelManagerImpl implements ChannelManager {
 					String username = in.readUTF(); // username
 					long balance = in.readLong(); // balance
 					boolean deniedInTop = in.readBoolean(); // deniedInTop
-					long minorBalance = in.readLong(); // minorBalance
+					long minorBalance = 0;
+					try {
+						minorBalance = in.readLong(); // minorBalance
+					} catch (IndexOutOfBoundsException e) {
+						// minor balance not supported on proxy
+					}
 					user = new BukkitOperableUser(this.plugin, uuid, username, true, deniedInTop, balance, minorBalance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
 				} else {
 					user.setName(in.readUTF()); // username
@@ -440,7 +445,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	private void sendServerId(@NotNull Player player) {
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
-		if (user != null) {
+		if (user != null && !(user instanceof BukkitImaginaryUser)) {
 			UUID serverId = this.plugin.getIdentifierManager().getComplementary(user.getRemoteId());
 			ByteArrayDataOutput out = ByteStreams.newDataOutput();
 			out.writeUTF("ServerId");
