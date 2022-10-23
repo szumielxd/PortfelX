@@ -1,6 +1,8 @@
 package me.szumielxd.portfel.bukkit.utils;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -8,6 +10,7 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -113,7 +116,11 @@ public class PlaceholderUtils {
 		Objects.requireNonNull(player, "player cannot be null");
 		if (component instanceof TextComponent) {
 			TextComponent text = (TextComponent) component;
-			component = text.content(replacePlaceholders(user, player, text.content()));
+			TextComponent replacement = LegacyComponentSerializer.legacySection()
+					.deserialize(replacePlaceholders(user, player, text.content()));
+			component = replacement.mergeStyle(text)
+					.children(Stream.concat(replacement.children().stream(),
+							text.children().stream()).collect(Collectors.toList()));
 		}
 		if (component.hoverEvent() != null) {
 			HoverEvent<?> hover = component.hoverEvent();
@@ -121,9 +128,7 @@ public class PlaceholderUtils {
 				component = component.hoverEvent(replacePlaceholders(user, player, (Component) hover.value()));
 			}
 		}
-		if (component.children() != null) {
-			component = component.children(component.children().stream().map(ch -> replacePlaceholders(user, player, ch)).collect(Collectors.toList()));
-		}
+		component = component.children(component.children().stream().map(ch -> replacePlaceholders(user, player, ch)).collect(Collectors.toList()));
 		return component;
 	}
 	
