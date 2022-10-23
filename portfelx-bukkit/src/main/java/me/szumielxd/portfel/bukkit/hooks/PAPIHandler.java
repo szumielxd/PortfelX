@@ -39,6 +39,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 			if(this.register()) this.plugin.getLogger().info("Hooked placeholders into PlaceholderAPI");
 		} catch (Exception e) {
 			this.plugin.getLogger().warn("Cannot hook placeholders into PlaceholderAPI");
+			e.printStackTrace();
 		}
 		List<String> list = new LinkedList<>();
 		list.add(this.getIdentifier()+"_balance");

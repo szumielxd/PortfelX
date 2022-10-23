@@ -1,26 +1,30 @@
 package me.szumielxd.portfel.bukkit.utils;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
+import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.utils.MiscUtils;
@@ -29,22 +33,48 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.md_5.bungee.api.ChatColor;
 
+@UtilityClass
 public class PlaceholderUtils {
 	
 	
-	private static Pattern INTERNAL_PLACEHOLDERS = Pattern.compile("%(player(Id)?|balance)%");
-	private static BiFunction<OfflinePlayer, String, String> REPLACE_PAPI;
+	private static final @NotNull Pattern INTERNAL_PLACEHOLDERS = Pattern.compile("%(player(Id)?|balance)%");
+	private static final @NotNull Pattern RGB_NEEDLE = Pattern.compile("&(#[a-fA-F0-9]{6})");
+	private static final @NotNull BiFunction<OfflinePlayer, String, String> REPLACE_PAPI;
+	private static final @NotNull BiFunction<OfflinePlayer, String, String> REPLACE_COLORED_PAPI;
 	
 	
 	static {
+		BiFunction<OfflinePlayer, String, String> replacePapi = null;
+		BiFunction<OfflinePlayer, String, String> replaceColoredPapi = null;
 		try {
 			Class.forName("me.clip.placeholderapi.PlaceholderAPI");
-			REPLACE_PAPI = PlaceholderAPI::setPlaceholders;
+			replacePapi = PlaceholderAPI::setPlaceholders;
+			replaceColoredPapi = PlaceholderUtils::setColoredPapiPlaceholders;
 		} catch (ClassNotFoundException e) {
-			REPLACE_PAPI = (p,s) -> s;
+			replacePapi = (p,s) -> s;
+			replaceColoredPapi = replacePapi;
 		}
+		REPLACE_PAPI = replacePapi;
+		REPLACE_COLORED_PAPI = replaceColoredPapi;
+	}
+	
+	
+	private static @NotNull String setColoredPapiPlaceholders(@Nullable OfflinePlayer player, @NotNull String text) {
+		Matcher match = PlaceholderAPI.getPlaceholderPattern().matcher(text);
+		StringBuilder sb = new StringBuilder();
+		int lastIndex = 0;
+		while (match.find()) {
+			String replacement = match.group();
+			sb.append(text.substring(lastIndex, match.start()))
+					.append(Optional.of(PlaceholderAPI.setPlaceholders(player, replacement))
+							.filter(s -> !s.equals(replacement))
+							.map(PlaceholderUtils::coloredString)
+							.orElse(replacement));
+			lastIndex = match.end();
+		}
+		sb.append(text.substring(lastIndex));
+		return sb.toString();
 	}
 	
 	
@@ -91,11 +121,11 @@ public class PlaceholderUtils {
 	 * @param player OfflinePlayer representation of target for placeholders
 	 * @param text text to operate
 	 */
-	public static String replacePlaceholders(@NotNull User user, OfflinePlayer player, @NotNull String text) {
+	public static @NotNull String replacePlaceholders(@NotNull User user, OfflinePlayer player, @NotNull String text) {
 		Objects.requireNonNull(text, "text cannot be null");
 		Objects.requireNonNull(user, "user cannot be null");
 		Objects.requireNonNull(player, "player cannot be null");
-		return REPLACE_PAPI.apply(player, MiscUtils.replaceAll(INTERNAL_PLACEHOLDERS.matcher(text), match -> {
+		return REPLACE_COLORED_PAPI.apply(player, MiscUtils.replaceAll(INTERNAL_PLACEHOLDERS.matcher(text), match -> {
 			if (match.group().equals("%player%")) return user.getName();
 			if (match.group().equals("%playerIp%")) return user.getUniqueId().toString();
 			if (match.group().equals("%balance%")) return String.valueOf(user.getBalance());
@@ -110,7 +140,7 @@ public class PlaceholderUtils {
 	 * @param player OfflinePlayer representation of target for placeholders
 	 * @param component component to operate
 	 */
-	public static Component replacePlaceholders(@NotNull User user, @NotNull OfflinePlayer player, @NotNull Component component) {
+	public static @NotNull Component replacePlaceholders(@NotNull User user, @NotNull OfflinePlayer player, @NotNull Component component) {
 		Objects.requireNonNull(component, "component cannot be null");
 		Objects.requireNonNull(user, "user cannot be null");
 		Objects.requireNonNull(player, "player cannot be null");
@@ -118,9 +148,13 @@ public class PlaceholderUtils {
 			TextComponent text = (TextComponent) component;
 			TextComponent replacement = LegacyComponentSerializer.legacySection()
 					.deserialize(replacePlaceholders(user, player, text.content()));
-			component = replacement.mergeStyle(text)
-					.children(Stream.concat(replacement.children().stream(),
-							text.children().stream()).collect(Collectors.toList()));
+			if (replacement.children().isEmpty() && !replacement.hasStyling()) {
+				component = text.content(replacement.content());
+			} else {
+				component = text.content("").children(Stream.concat(Stream.of(replacement), text.children().stream())
+						.collect(Collectors.toList()));
+			}
+			
 		}
 		if (component.hoverEvent() != null) {
 			HoverEvent<?> hover = component.hoverEvent();
@@ -149,7 +183,7 @@ public class PlaceholderUtils {
 			replacePlaceholdersInJson(user, json);
 			return GsonComponentSerializer.gson().deserializeFromTree(json);
 		} catch (JsonSyntaxException e) {
-			return LegacyComponentSerializer.legacySection().deserialize(replacePlaceholders(user, player, ChatColor.translateAlternateColorCodes('&', text)));
+			return LegacyComponentSerializer.legacySection().deserialize(replacePlaceholders(user, player, coloredString(text)));
 		}
 	}
 	
@@ -193,6 +227,10 @@ public class PlaceholderUtils {
 				replacePlaceholdersInJson(e.getValue().getAsJsonArray(), player, replacer);
 			}
 		});
+	}
+	
+	private static @NotNull String coloredString(@NotNull String text) {
+		return RGB_NEEDLE.matcher(ChatColor.translateAlternateColorCodes('&', text)).replaceAll("§$1");
 	}
 	
 
