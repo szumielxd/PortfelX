@@ -1,6 +1,11 @@
 package me.szumielxd.portfel.proxy.database.hikari.logging;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY;
+import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.WHITE;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,12 +25,12 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.base.Objects;
 
-import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
 import me.szumielxd.portfel.proxy.database.AbstractDB;
@@ -35,7 +40,7 @@ import me.szumielxd.portfel.proxy.objects.PrizeToken;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
-public class HikariDBLogger implements AbstractDBLogger {
+public class HikariDBLogger<C> implements AbstractDBLogger {
 	
 	
 	private final String TABLE_LOGS;
@@ -53,7 +58,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 	private final String LOGS_BALANCE;
 	
 	
-	private final PortfelProxyImpl plugin;
+	private final PortfelProxyImpl<C> plugin;
 	private long lastID = -1;
 	private ExecutedTask logListener;
 	private Boolean initialized;
@@ -63,7 +68,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 		return text.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"");
 	}
 	
-	public HikariDBLogger(PortfelProxyImpl plugin) {
+	public HikariDBLogger(PortfelProxyImpl<C> plugin) {
 		this.plugin = plugin;
 		Config cfg = this.plugin.getConfiguration();
 		
@@ -306,7 +311,7 @@ public class HikariDBLogger implements AbstractDBLogger {
 			if (player.isConnected() && player.hasPermission("portfel.verbose")) {
 				User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 				if (user != null) {
-					Component prefix = Portfel.PREFIX.append(LangKey.LOG_PREFIX.component(DARK_AQUA)).append(Component.text(" > ", GRAY));
+					Component prefix = MiscUtils.PREFIX.append(LangKey.LOG_PREFIX.component(DARK_AQUA)).append(Component.text(" > ", GRAY));
 					Component exec = this.prepareInteractive(Component.text(log.getExecutor().getDisplayName() + (Objects.equal(user.getServerName(), log.getServer()) ? "" : ("@" + log.getServer())), GREEN), log.getExecutor().getDisplayName(), log.getExecutor().getUniqueId());
 					Component target = this.prepareInteractive(Component.text(log.getTargetName(), AQUA), log.getTargetName(), log.getTargetUniqueId());
 					Component valComp = Component.text(log.getType().format(String.valueOf(log.getValue())), log.getType().getColor()).hoverEvent(Component.text(log.getType().format(String.valueOf(log.getValue())), log.getType().getColor())

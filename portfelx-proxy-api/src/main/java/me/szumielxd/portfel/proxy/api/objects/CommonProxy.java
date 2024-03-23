@@ -10,26 +10,26 @@ import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.objects.CommonServer;
 
-public interface CommonProxy extends CommonServer {
+public interface CommonProxy<C> extends CommonServer<C> {
 	
 	
 	@Override
-	public @Nullable ProxyPlayer getPlayer(@NotNull UUID uuid);
+	public @Nullable ProxyPlayer<C> getPlayer(@NotNull UUID uuid);
 	
 	@Override
-	public @Nullable ProxyPlayer getPlayer(@NotNull String name);
+	public @Nullable ProxyPlayer<C> getPlayer(@NotNull String name);
 	
 	@Override
-	public @NotNull Collection<ProxyPlayer> getPlayers();
+	public @NotNull Collection<? extends ProxyPlayer<C>> getPlayers();
 	
-	public @NotNull Optional<Collection<ProxyPlayer>> getPlayers(@NotNull String serverName);
+	public @NotNull Optional<Collection<? extends ProxyPlayer<C>>> getPlayers(@NotNull String serverName);
 	
-	public @NotNull Map<String, ProxyServer> getServers();
+	public @NotNull Map<String, ? extends ProxyServer<C>> getServers();
 	
-	public @NotNull Optional<ProxyServer> getServer(@NotNull String serverName);
+	public @NotNull Optional<ProxyServer<C>> getServer(@NotNull String serverName);
 	
 	@Override
-	public @NotNull ProxySender getConsole();
+	public @NotNull ProxySender<C> getConsole();
 	
 	public @NotNull ProxyScheduler getScheduler();
 	

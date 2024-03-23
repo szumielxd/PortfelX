@@ -1,11 +1,11 @@
 package me.szumielxd.portfel.proxy.managers;
 
-import static net.kyori.adventure.text.format.TextDecoration.UNDERLINED;
 import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
 import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
 import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
+import static net.kyori.adventure.text.format.TextDecoration.UNDERLINED;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -40,11 +40,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
+import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
 import me.szumielxd.portfel.proxy.api.objects.PluginMessageTarget;
@@ -53,7 +55,7 @@ import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
-public abstract class AccessManagerImpl implements AccessManager {
+public abstract class AccessManagerImpl<C> implements AccessManager {
 	
 	
 	private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
@@ -74,7 +76,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 	 * 
 	 * @return this object
 	 */
-	public final AccessManagerImpl init() {
+	public final AccessManagerImpl<C> init() {
 		this.preInit();
 		try {
 			if (!Files.exists(this.file.getParent())) Files.createDirectories(this.file.getParent());
@@ -274,7 +276,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 	}
 	
 	
-	public final void pendingRegistration(ProxyPlayer player, String serverName, String hashKey) {
+	public final void pendingRegistration(ProxyPlayer<C> player, String serverName, String hashKey) {
 		if (player != null) {
 			Optional<ProxyServerConnection> srv = player.getServer();
 			if (srv.isPresent()) {
@@ -315,10 +317,10 @@ public abstract class AccessManagerImpl implements AccessManager {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	protected final Optional<Boolean> onPluginMessage(@NotNull PluginMessageTarget sender, @NotNull PluginMessageTarget target, @NotNull String tag, byte[] message) {
-		if (sender instanceof ProxyServerConnection && target instanceof ProxyPlayer) {
-			ProxyServerConnection server = (ProxyServerConnection) sender;
-			ProxyPlayer player = (ProxyPlayer) target;
+		if (sender instanceof ProxyServerConnection server && target instanceof ProxyPlayer) {
+			ProxyPlayer<C> player = (ProxyPlayer<C>) target;
 			ByteArrayDataInput in = ByteStreams.newDataInput(message);
 			String subchannel = in.readUTF();
 			
@@ -340,7 +342,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 	
 	// BungeeCord
 	// ForwardToPlayer
-	private Optional<Boolean> onRegistrationValidCheck(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private Optional<Boolean> onRegistrationValidCheck(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		this.plugin.debug("[%s] onRegistrationValidCheck", "AccessManagerImpl");
 		in.readUTF(); // username
 		String channel = in.readUTF(); // custom channel
@@ -373,7 +375,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 	}
 	
 	
-	private Optional<Boolean> onNonBungeeRegistrationValidCheck(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private Optional<Boolean> onNonBungeeRegistrationValidCheck(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		this.plugin.debug("[%s] onNonBungeeRegistrationValidCheck", "AccessManagerImpl");
 		UUID uuid = UUID.fromString(in.readUTF()); // actionId to validate
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
@@ -397,7 +399,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 	
 	// Setup
 	// Register
-	private Optional<Boolean> onRegistrationCallback(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private Optional<Boolean> onRegistrationCallback(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		this.plugin.debug("[%s] onRegistrationCallback", "AccessManagerImpl");
 		UUID operationId = null;
 		try {
@@ -435,7 +437,7 @@ public abstract class AccessManagerImpl implements AccessManager {
 													.component(AQUA, Component.text("server friendly name"))
 											));
 									
-									holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SUCCESS
+									holder.getSender().sendTranslated(MiscUtils.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SUCCESS
 											.component(LIGHT_PURPLE, srvNameComp, srvIdComp)));
 									return Optional.of(true);
 								}
@@ -453,13 +455,13 @@ public abstract class AccessManagerImpl implements AccessManager {
 												.component(AQUA, Component.text("server ID"))
 										));
 								
-								holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ALREADY
+								holder.getSender().sendTranslated(MiscUtils.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ALREADY
 										.component(RED, srvIdComp)));
 								return Optional.of(true);
 							}
 						}
 					}
-					holder.getSender().sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ERROR.component(DARK_RED)));
+					holder.getSender().sendTranslated(MiscUtils.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ERROR.component(DARK_RED)));
 					return Optional.of(true);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -473,38 +475,22 @@ public abstract class AccessManagerImpl implements AccessManager {
 	private class RegistrationHolder {
 		
 		private final UUID operationId;
-		private final UUID serverId;
-		private final String serverName;
-		private final CommonPlayer sender;
-		private final String hashKey;
+		@Getter private final UUID serverId;
+		@Getter private final String serverFriendyName;
+		@Getter private final CommonPlayer<C> sender;
+		@Getter private final String hashKey;
 		private final ExecutedTask task;
 		
-		public RegistrationHolder(@NotNull UUID operationId, @NotNull UUID serverId, @NotNull String serverName, @NotNull CommonPlayer sender, @NotNull String hashKey) {
+		public RegistrationHolder(@NotNull UUID operationId, @NotNull UUID serverId, @NotNull String serverName, @NotNull CommonPlayer<C> sender, @NotNull String hashKey) {
 			this.operationId = operationId;
 			this.serverId = serverId;
-			this.serverName = serverName;
+			this.serverFriendyName = serverName;
 			this.sender = sender;
 			this.hashKey = hashKey;
 			this.task = plugin.getTaskManager().runTaskLater(() -> {
 				this.done();
-				this.sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT.component(RED)));
+				this.sender.sendTranslated(MiscUtils.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT.component(RED)));
 			}, 1, TimeUnit.SECONDS);
-		}
-		
-		public @NotNull UUID getServerId() {
-			return this.serverId;
-		}
-		
-		public @NotNull String getServerFriendyName() {
-			return this.serverName;
-		}
-		
-		public @NotNull CommonPlayer getSender() {
-			return this.sender;
-		}
-		
-		public @NotNull String getHashKey() {
-			return this.hashKey;
 		}
 		
 		public void done() {

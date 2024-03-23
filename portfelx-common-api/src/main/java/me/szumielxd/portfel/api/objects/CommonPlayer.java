@@ -5,14 +5,9 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import net.kyori.adventure.bossbar.BossBar.Color;
-import net.kyori.adventure.bossbar.BossBar.Flag;
-import net.kyori.adventure.bossbar.BossBar.Overlay;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title.Times;
-
-public interface CommonPlayer extends CommonSender {
+public interface CommonPlayer<C> extends CommonSender<C> {
 
 	/**
 	 * Make this player chat (say something).
@@ -75,7 +70,7 @@ public interface CommonPlayer extends CommonSender {
 	 * 
 	 * @param message message to send
 	 */
-	public void sendActionBar(@NotNull Component message);
+	public void sendActionBar(@NotNull C message);
 	
 	/**
 	 * Show title to this player.
@@ -84,18 +79,8 @@ public interface CommonPlayer extends CommonSender {
 	 * @param subtitle subtitle to show
 	 * @param times title timings (fade-in -> static -> fade-out)
 	 */
-	public void showTitle(@NotNull Component title, @NotNull Component subtitle, @NotNull Times times);
+	public void showTitle(@NotNull C title, @NotNull C subtitle, @Nullable TitleTiming times);
 	
-	/**
-	 * Show BosBar to this player.
-	 * 
-	 * @param name name of bossbar
-	 * @param time time duration to show bossbar
-	 * @param progress progress of bossbar
-	 * @param color color of bossbar
-	 * @param overlay style of bossbar
-	 * @param flags additional flags of bossbar
-	 */
-	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags);
+	public record TitleTiming(@NotNull Duration fadeIn, @NotNull Duration stay, @NotNull Duration fadeOut) {}
 
 }

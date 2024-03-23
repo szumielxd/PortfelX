@@ -16,7 +16,7 @@ import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 
-public class CmdArg {
+public class CmdArg<C> {
 	
 	
 	private final boolean flying;
@@ -25,26 +25,26 @@ public class CmdArg {
 	private final LangKey description;
 	private final LangKey argError;
 	private final Function<String, Object> argParser;
-	private final BiFunction<CommonSender, String[], List<String>> argCompletions;
+	private final BiFunction<CommonSender<C>, String[], List<String>> argCompletions;
 	
 	
-	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender, List<String>> argCompletions) {
+	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender<C>, List<String>> argCompletions) {
 		this(name, description, argError, argParser, (s, args) -> argCompletions.apply(s));
 	}
 	
-	public CmdArg(@Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender, List<String>> argCompletions) {
+	public CmdArg(@Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender<C>, List<String>> argCompletions) {
 		this(prefix, name, description, argError, argParser, (s, args) -> argCompletions.apply(s));
 	}
 	
-	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender, String[], List<String>> argCompletions) {
+	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<C>, String[], List<String>> argCompletions) {
 		this(null, name, description, argError, argParser, argCompletions);
 	}
 	
-	public CmdArg(@Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender, String[], List<String>> argCompletions) {
+	public CmdArg(@Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<C>, String[], List<String>> argCompletions) {
 		this(false, prefix, name, description, argError, argParser, argCompletions);
 	}
 	
-	public CmdArg(boolean flying, @Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender, String[], List<String>> argCompletions) {
+	public CmdArg(boolean flying, @Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<C>, String[], List<String>> argCompletions) {
 		if (flying && (prefix == null || prefix.isEmpty())) throw new IllegalArgumentException("Flying argument must have not empty prefix");
 		this.flying = flying;
 		this.prefix = prefix == null ? null : prefix.toLowerCase();
@@ -163,7 +163,7 @@ public class CmdArg {
 	 * @param sender sender to calculate accessibility
 	 * @return list of (maybe not all) text arguments available for this sender
 	 */
-	public @NotNull List<String> getTabCompletions(@NotNull CommonSender sender, @Nullable String... label) {
+	public @NotNull List<String> getTabCompletions(@NotNull CommonSender<C> sender, @Nullable String... label) {
 		if (this.hasPrefix()) {
 			if (label.length == 0) return Collections.emptyList();
 			String arg = label[label.length-1];

@@ -4,43 +4,23 @@ import org.jetbrains.annotations.NotNull;
 
 import net.kyori.adventure.text.Component;
 
-public interface CommonSender {
-	
-	
-	/**
-	 * Send message to this sender.
-	 * 
-	 * @param message message to send
-	 */
-	public void sendMessage(@NotNull String message);
+public interface CommonSender<C> {
 	
 	/**
 	 * Send message to this sender.
 	 * 
 	 * @param message message to send
 	 */
-	public void sendMessage(@NotNull Component message);
-	
-	/**
-	 * Send message to this sender.
-	 * 
-	 * @param message message to send
-	 */
-	public void sendMessage(@NotNull Component... message);
+	public void sendMessage(@NotNull C message);
 	
 	/**
 	 * Translate and send message to this sender.
 	 * 
 	 * @param message message to translate and send
 	 */
-	public void sendTranslated(@NotNull Component message);
-	
-	/**
-	 * Translate and send message to this sender.
-	 * 
-	 * @param message message to translate and send
-	 */
-	public void sendTranslated(@NotNull Component... message);
+	public default void sendTranslated(@NotNull Component message) {
+		throw new IllegalStateException("Unimplemented");
+	}
 	
 	/**
 	 * Checks if this user has the specified permission node.

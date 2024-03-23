@@ -48,7 +48,7 @@ public class ProxyOperableUser extends User {
 	 */
 	@Override
 	public @NotNull CompletableFuture<Exception> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (balance < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
+		if (this.balance < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
 		return CompletableFuture.supplyAsync(() -> {
 			try {
 				this.plugin.getDatabase().updateUsers(this);
@@ -130,7 +130,7 @@ public class ProxyOperableUser extends User {
 	 * @param newBalance new user's minor balance
 	 */
 	public void setPlainMinorBalance(long newBalance) {
-		this.balance = newBalance;
+		this.minorBalance = newBalance;
 	}
 	
 	/**

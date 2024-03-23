@@ -9,7 +9,7 @@ import me.szumielxd.portfel.proxy.api.managers.AccessManager;
 import me.szumielxd.portfel.proxy.api.managers.ProxyTopManager;
 import me.szumielxd.portfel.proxy.api.objects.CommonProxy;
 
-public interface PortfelProxy extends Portfel {
+public interface PortfelProxy<C> extends Portfel<C> {
 	
 	
 	/**
@@ -32,7 +32,7 @@ public interface PortfelProxy extends Portfel {
 	 * @return proxy server
 	 */
 	@Override
-	public @NotNull CommonProxy getCommonServer();
+	public @NotNull CommonProxy<C> getCommonServer();
 
 	/**
 	 * Get top manager.

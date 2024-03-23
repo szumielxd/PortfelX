@@ -311,6 +311,7 @@ public class Lang {
 		MAIN_VALUENAME_PERMISSION("main.value-name.permission", "Permission:"),
 		
 		MAIN_CURRENCY_FORMAT("main.currrency.format", "${0}"),
+		MAIN_MINORCURRENCY_FORMAT("main.minor-currrency.format", "⧉{0}"),
 		MAIN_WARNING("main.warning", "WARNING: {0}"),
 		MAIN_VALUE_TRUE("main.value.true", "true"),
 		MAIN_VALUE_FALSE("main.value.false", "false"),
@@ -594,8 +595,7 @@ public class Lang {
 	}
 	
 	public @NotNull Component translateComponent(Component comp) {
-		if (comp instanceof TranslatableComponent) {
-			TranslatableComponent trans = (TranslatableComponent) comp;
+		if (comp instanceof TranslatableComponent trans) {
 			if (isLangTranslatable(trans)) {
 				LangKey key = LangKey.getByPath(trans.key().substring(TRANSLATABLE_PREFIX.length()));
 				if (key != null) {

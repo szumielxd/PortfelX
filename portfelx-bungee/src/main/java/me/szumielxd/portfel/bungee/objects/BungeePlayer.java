@@ -1,7 +1,5 @@
 package me.szumielxd.portfel.bungee.objects;
 
-import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,7 +7,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,13 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
-import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.bossbar.BossBar.Color;
-import net.kyori.adventure.bossbar.BossBar.Flag;
-import net.kyori.adventure.bossbar.BossBar.Overlay;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.Title;
-import net.kyori.adventure.title.Title.Times;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.context.ContextManager;
@@ -32,10 +22,14 @@ import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.Title;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public class BungeePlayer extends BungeeSender implements ProxyPlayer {
+public class BungeePlayer extends BungeeSender implements ProxyPlayer<BaseComponent[]> {
 	
 	
 private final @NotNull ProxiedPlayer player;
@@ -44,6 +38,12 @@ private final @NotNull ProxiedPlayer player;
 	public BungeePlayer(@NotNull PortfelBungeeImpl plugin, @NotNull ProxiedPlayer player) {
 		super(plugin, player);
 		this.player = player;
+	}
+	
+	
+	@Override
+	public void sendMessage(@Nullable UUID source, @NotNull BaseComponent[] message) {
+		this.player.sendMessage(source, message);
 	}
 	
 	
@@ -63,7 +63,9 @@ private final @NotNull ProxiedPlayer player;
 			ContextManager cm = api.getContextManager();
 			QueryOptions queryOptions = cm.getQueryOptions(user).orElse(cm.getStaticQueryOptions());
 			user.getNodes(NodeType.INHERITANCE).stream().map(NodeType.INHERITANCE::cast).filter(n -> n.getContexts().isSatisfiedBy(queryOptions.context())).map(InheritanceNode::getGroupName).map(this::convertGroupDisplayName).forEachOrdered(groups::add);
-		} catch(Exception e) {}
+		} catch(Exception e) {
+			// ignore
+		}
 		return Collections.unmodifiableCollection(groups);
 	}
 	
@@ -126,7 +128,7 @@ private final @NotNull ProxiedPlayer player;
 
 
 	@Override
-	public @Nullable Locale locale() {
+	public @NotNull Locale locale() {
 		return this.player.getLocale();
 	}
 
@@ -138,22 +140,22 @@ private final @NotNull ProxiedPlayer player;
 
 
 	@Override
-	public void sendActionBar(@NotNull Component message) {
-		this.plugin.adventure().player(this.player).sendActionBar(message);
+	public void sendActionBar(@NotNull BaseComponent[] message) {
+		this.player.sendMessage(ChatMessageType.ACTION_BAR, message);
 	}
 
 
 	@Override
-	public void showTitle(@NotNull Component title, @NotNull Component subtitle, @Nullable Times times) {
-		this.plugin.adventure().player(this.player).showTitle(Title.title(title, subtitle, times));
-	}
-
-
-	@Override
-	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
-		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, new HashSet<>(Arrays.asList(flags)));
-		this.plugin.adventure().player(this.player).showBossBar(bar);
-		this.plugin.getCommonServer().getScheduler().runTaskLater(() -> this.plugin.adventure().player(this.player).hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
+	public void showTitle(@NotNull BaseComponent[] title, @NotNull BaseComponent[] subtitle, @Nullable TitleTiming times) {
+		Title t = ProxyServer.getInstance().createTitle();
+		t.title(title);
+		t.subTitle(subtitle);
+		if (times != null) {
+			t.fadeIn((int) times.fadeIn().toMillis() / 50);
+			t.stay((int) times.stay().toMillis() / 50);
+			t.fadeOut((int) times.fadeOut().toMillis() / 50);
+		}
+		t.send(this.player);
 	}
 
 

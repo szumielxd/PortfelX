@@ -22,11 +22,11 @@ import me.szumielxd.portfel.proxy.api.objects.ProxyActionExecutor;
 import me.szumielxd.portfel.proxy.database.token.AbstractTokenDB.DateCondition;
 import net.kyori.adventure.text.Component;
 
-public class CreategiftcodeCommand extends SimpleCommand {
+public class CreategiftcodeCommand<C> extends SimpleCommand<C> {
 	
 	public final List<CmdArg> args = Arrays.asList(
 			// order
-			new CmdArg(LangKey.COMMAND_ARGTYPES_GIFTORDER_DISPLAY, LangKey.COMMAND_ARGTYPES_GIFTORDER_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>()),
+			new CmdArg(LangKey.COMMAND_ARGTYPES_GIFTORDER_DISPLAY, LangKey.COMMAND_ARGTYPES_GIFTORDER_DESCRIPTION, LangKey.EMPTY, s -> s, s -> List.of()),
 			// expiration
 			new CmdArg(LangKey.COMMAND_ARGTYPES_GIFTEXPIRATION_DISPLAY, LangKey.COMMAND_ARGTYPES_GIFTEXPIRATION_DESCRIPTION, LangKey.COMMAND_ARGTYPES_GIFTEXPIRATION_ERROR, str -> {try {return DateCondition.parseTime(str);} catch (NumberFormatException e) {return null;}}, (s,args) -> {
 				String last = args[args.length-1];
@@ -38,25 +38,25 @@ public class CreategiftcodeCommand extends SimpleCommand {
 				return list;
 			}),
 			// servers
-			new CmdArg(LangKey.COMMAND_ARGTYPES_GIFTSERVERS_DISPLAY, LangKey.COMMAND_ARGTYPES_GIFTSERVERS_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>()),
+			new CmdArg(LangKey.COMMAND_ARGTYPES_GIFTSERVERS_DISPLAY, LangKey.COMMAND_ARGTYPES_GIFTSERVERS_DESCRIPTION, LangKey.EMPTY, s -> s, s -> List.of()),
 			// token
-			new CmdArg(LangKey.COMMAND_ARGTYPES_GIFTTOKEN_DISPLAY, LangKey.COMMAND_ARGTYPES_GIFTTOKEN_DESCRIPTION, null, s -> s, s -> new ArrayList<>())
+			new CmdArg(LangKey.COMMAND_ARGTYPES_GIFTTOKEN_DISPLAY, LangKey.COMMAND_ARGTYPES_GIFTTOKEN_DESCRIPTION, null, s -> s, s -> List.of())
 	);
 
-	public CreategiftcodeCommand(@NotNull PortfelProxyImpl plugin, @NotNull AbstractCommand parent) {
+	public CreategiftcodeCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "creategiftcode", "creategift", "createcode");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed == null) return;
-		PortfelProxyImpl pl = (PortfelProxyImpl)this.getPlugin();
+		PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>)this.getPlugin();
 		String order = (String)parsed[0];
 		long expiration = (long)parsed[1];
 		String servers = (String)parsed[2];
 		String token = (String)parsed[3];
-		if (token == null) token = new RgxGen("[a-zA-Z0-9]{12}").generate();
+		if (token == null) token = RgxGen.parse("[a-zA-Z0-9]{12}").generate();
 		if (expiration <= System.currentTimeMillis()) {
 			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_CREATEGIFTCODE_PAST.component(RED)));
 			return;

@@ -36,7 +36,7 @@ import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import me.szumielxd.portfel.proxy.objects.PrizeToken;
 import net.kyori.adventure.text.Component;
 
-public class TokenManager {
+public class TokenManager<C> {
 	
 	
 	private final PortfelProxyImpl plugin;
@@ -51,30 +51,30 @@ public class TokenManager {
 	}
 	
 	
-	public TokenManager init() {
+	public TokenManager<C> init() {
 		this.tokenCacheUpdater = this.plugin.getTaskManager().runTaskTimerAsynchronously(this::updateTokens, 0L, 1L, TimeUnit.MINUTES);
 		return this;
 	}
 	
 	
-	public void tryValidateToken(@NotNull ProxyPlayer target, @NotNull String token) {
+	public void tryValidateToken(@NotNull ProxyPlayer<C> target, @NotNull String token) {
 		User user = this.plugin.getUserManager().getUser(target.getUniqueId());
 		if (user == null) {
-			target.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(DARK_RED)));
+			target.sendTranslated(MiscUtils.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(DARK_RED)));
 		}
 		if (this.pendingTokenRequests.size() >= this.plugin.getConfiguration().getInt(ProxyConfigKey.TOKEN_MANAGER_POOLSIZE)) {
-			target.sendTranslated(Portfel.PREFIX.append(LangKey.TOKEN_CHECK_FULLPOOL.component(RED)));
+			target.sendTranslated(MiscUtils.PREFIX.append(LangKey.TOKEN_CHECK_FULLPOOL.component(RED)));
 			return;
 		}
 		if (!this.pendingTokenRequests.add(target.getUniqueId())) {
-			target.sendTranslated(Portfel.PREFIX.append(LangKey.TOKEN_CHECK_ALREADY.component(RED)));
+			target.sendTranslated(MiscUtils.PREFIX.append(LangKey.TOKEN_CHECK_ALREADY.component(RED)));
 			return;
 		}
 		try {
 			this.executeValidation(target, user, target, token);
 		} catch (Exception e) {
 			e.printStackTrace();
-			target.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_EXECUTION.component(DARK_RED)));
+			target.sendTranslated(MiscUtils.PREFIX.append(LangKey.ERROR_COMMAND_EXECUTION.component(DARK_RED)));
 		}
 		this.pendingTokenRequests.remove(target.getUniqueId());
 	}
@@ -117,7 +117,7 @@ public class TokenManager {
 	}
 	
 	
-	private void executeValidation(@NotNull ProxyPlayer target, @NotNull User user, @NotNull CommonPlayer sender, @NotNull String token) throws Exception {
+	private void executeValidation(@NotNull ProxyPlayer<C> target, @NotNull User user, @NotNull CommonPlayer<C> sender, @NotNull String token) throws Exception {
 		PrizeToken prize = this.plugin.getTokenDatabase().getToken(token);
 		if (prize != null) {
 			boolean valid = false;
@@ -143,24 +143,24 @@ public class TokenManager {
 			} else {
 				switch (prize.getSelectorType()) {
 				case REGISTERED:
-					sender.sendTranslated(Portfel.PREFIX.append(LangKey.TOKEN_CHECK_SERVER_INVALID_REGISTERED.component(RED)));
+					sender.sendTranslated(MiscUtils.PREFIX.append(LangKey.TOKEN_CHECK_SERVER_INVALID_REGISTERED.component(RED)));
 					return;
 				case WHITELIST:
-					sender.sendTranslated(Portfel.PREFIX.append(LangKey.TOKEN_CHECK_SERVER_INVALID_WHITELIST.component(RED, MiscUtils.join(Component.text(", ", RED), prize.getServerNames().stream().map(srv -> Component.text(srv, AQUA)).collect(Collectors.toList())))));
+					sender.sendTranslated(MiscUtils.PREFIX.append(LangKey.TOKEN_CHECK_SERVER_INVALID_WHITELIST.component(RED, MiscUtils.join(Component.text(", ", RED), prize.getServerNames().stream().map(srv -> Component.text(srv, AQUA)).collect(Collectors.toList())))));
 					return;
 				default:
 					return;
 				}
 			}
 		}
-		sender.sendTranslated(Portfel.PREFIX.append(LangKey.TOKEN_CHECK_INVALID.component(RED)));
+		sender.sendTranslated(MiscUtils.PREFIX.append(LangKey.TOKEN_CHECK_INVALID.component(RED)));
 	}
 	
 	
 	
 	
 	
-	private void sendTokenPrizeExecution(@NotNull ProxyPlayer player, @NotNull UUID serverId, @NotNull String token, @NotNull String order, long globalOrdersCount) {
+	private void sendTokenPrizeExecution(@NotNull ProxyPlayer<C> player, @NotNull UUID serverId, @NotNull String token, @NotNull String order, long globalOrdersCount) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("Token"); // subchannel
 		try (ByteArrayOutputStream bout = new ByteArrayOutputStream();

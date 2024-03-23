@@ -2,6 +2,7 @@ package me.szumielxd.portfel.api;
 
 import java.nio.file.Path;
 import java.util.Objects;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,48 +14,46 @@ import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.CommonServer;
 import me.szumielxd.portfel.common.loader.CommonLogger;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
-public interface Portfel {
+public interface Portfel<C> {
 	
 	
 	/**
 	 * Plugin prefix {@link Component}. Plain format: <i>§b§l[§5§lP§b§l]§r §3</i>.
 	 */
-	public static Component PREFIX = LegacyComponentSerializer.legacySection().deserialize("§b§l[§5§lP§b§l]§r §3");
+	//protected final C prefix = MiniMessage.miniMessage().deserialize("<b><aqua>[<dark_purple>P</dark_purple>]</aqua></b><dark_aqua> ");
 	
 	/**
 	 * Plugin channel used for user-related messages. Returns <i>portfel:userdata</i>.
 	 */
-	public static String CHANNEL_USERS = "portfel:userdata";
+	public static final String CHANNEL_USERS = "portfel:userdata";
 	
 	/**
 	 * Plugin channel used for setup-related messages. Returns <i>portfel:setup</i>.
 	 */
-	public static String CHANNEL_SETUP = "portfel:setup";
+	public static final String CHANNEL_SETUP = "portfel:setup";
 	
 	/**
 	 * Plugin channel used for transaction-related messages. Returns <i>portfel:transactions</i>.
 	 */
-	public static String CHANNEL_TRANSACTIONS = "portfel:transactions";
+	public static final String CHANNEL_TRANSACTIONS = "portfel:transactions";
 	
 	/**
 	 * Official BungeeCord plugin channel. Returns <i>bungeecord:main</i>.
 	 */
-	public static String CHANNEL_BUNGEE = "bungeecord:main";
+	public static final String CHANNEL_BUNGEE = "bungeecord:main";
 	
 	/**
 	 * Official legacy BungeeCord plugin channel. Returns <i>BungeeCord</i>.
 	 */
-	public static String CHANNEL_LEGACY_BUNGEE = "BungeeCord";
+	public static final String CHANNEL_LEGACY_BUNGEE = "BungeeCord";
 	
 	/**
 	 * Get proxy server.
 	 * 
 	 * @return proxy server
 	 */
-	public @NotNull CommonServer getCommonServer();
+	public @NotNull CommonServer<C> getCommonServer();
 	
 	/**
 	 * Get user manager.
@@ -82,7 +81,7 @@ public interface Portfel {
 	 * 
 	 * @return current console sender
 	 */
-	public @NotNull CommonSender getConsole();
+	public @NotNull CommonSender<C> getConsole();
 	
 	/**
 	 * Get plugin's data folder.

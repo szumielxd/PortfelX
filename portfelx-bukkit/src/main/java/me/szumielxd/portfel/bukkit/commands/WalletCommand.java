@@ -37,14 +37,16 @@ public class WalletCommand implements TabExecutor {
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 1 && sender instanceof Player) {
 			String arg = args[0].toLowerCase();
-			return this.plugin.getOrdersManager().getNames().stream().filter(s -> s.toLowerCase().startsWith(arg)).collect(Collectors.toList());
+			return this.plugin.getOrdersManager().getNames().stream()
+					.filter(s -> s.toLowerCase().startsWith(arg))
+					.toList();
 		}
-		return new ArrayList<>();
+		return List.of();
 	}
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (!(sender instanceof Player)) {
+		if (!(sender instanceof Player player)) {
 			BukkitSender.wrap(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_PLAYERS_ONLY.component(RED)));
 			return true;
 		}
@@ -52,8 +54,9 @@ public class WalletCommand implements TabExecutor {
 		if (args.length > 0) {
 			gui = this.plugin.getOrdersManager().getGui(args[0]);
 		}
-		if (gui == null) gui = new MainPortfelGui(this.plugin, this.plugin.getOrdersManager().getOrderGuis().toArray(new OrderPortfelGui[0]));
-		Player player = (Player) sender;
+		if (gui == null) {
+			gui = new MainPortfelGui(this.plugin, this.plugin.getOrdersManager().getOrderGuis().toArray(OrderPortfelGui[]::new));
+		}
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user == null) {
 			BukkitSender.wrap(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(RED)));

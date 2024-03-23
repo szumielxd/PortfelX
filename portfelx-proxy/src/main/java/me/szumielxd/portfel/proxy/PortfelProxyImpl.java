@@ -29,7 +29,7 @@ import me.szumielxd.portfel.proxy.managers.AccessManagerImpl;
 import me.szumielxd.portfel.proxy.managers.OrdersManager;
 import me.szumielxd.portfel.proxy.managers.TokenManager;
 
-public interface PortfelProxyImpl extends PortfelProxy {
+public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 	
 	public void addToRuntime(CommonDependency... dependency);
 	
@@ -50,10 +50,10 @@ public interface PortfelProxyImpl extends PortfelProxy {
 
 	public void setTokenDatabase(@NotNull AbstractTokenDB database);
 	
-	public @NotNull AccessManagerImpl getAccessManager();
+	public @NotNull AccessManagerImpl<C> getAccessManager();
 	
 	
-	public @NotNull TokenManager getTokenManager();
+	public @NotNull TokenManager<C> getTokenManager();
 
 
 	@Override

@@ -9,9 +9,9 @@ import com.zaxxer.hikari.HikariConfig;
 import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 
-public class MysqlDB extends HikariDB {
+public class MysqlDB<C> extends HikariDB<C> {
 
-	public MysqlDB(PortfelProxyImpl plugin) {
+	public MysqlDB(PortfelProxyImpl<C> plugin) {
 		super(plugin);
 	}
 	

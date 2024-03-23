@@ -47,7 +47,7 @@ import me.szumielxd.portfel.proxy.managers.ProxyTaskManagerImpl;
 import me.szumielxd.portfel.proxy.managers.ProxyTopManagerImpl;
 import me.szumielxd.portfel.proxy.managers.ProxyUserManagerImpl;
 import me.szumielxd.portfel.proxy.managers.TokenManager;
-import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -77,7 +77,7 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	
 	@Override
-	public @NotNull CommonProxy getCommonServer() {
+	public @NotNull CommonProxy<BaseComponent[]> getCommonServer() {
 		return this.proxy;
 	}
 	
@@ -94,7 +94,6 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	
 	
-	private BungeeAudiences adventure;
 	private AccessManagerImpl accessManager;
 	private TaskManager taskManager;
 	private @Getter ConfigImpl configuration;
@@ -120,7 +119,6 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.setupProxyId();
 		this.load();
 		this.proxy = new BungeeProxy(this);
-		this.adventure = BungeeAudiences.create(this.asPlugin());
 		this.taskManager = new ProxyTaskManagerImpl(this);
 		this.accessManager = new BungeeAccessManagerImpl(this).init();
 		//
@@ -260,21 +258,11 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	}
 	
 	/**
-	 * Get Bungee audience implementation.
-	 * 
-	 * @return audiences
-	 */
-	public @NotNull BungeeAudiences adventure() {
-		if (this.adventure == null) throw new IllegalStateException("Cannot retrieve audience provider while plugin is not enabled");
-		return this.adventure;
-	}
-	
-	/**
 	 * Get Console Sender.
 	 * 
 	 * @return current console sender
 	 */
-	public @NotNull CommonSender getConsole() {
+	public @NotNull CommonSender<BaseComponent[]> getConsole() {
 		return this.getCommonServer().getConsole();
 	}
 	

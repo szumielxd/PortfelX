@@ -24,10 +24,6 @@
 			<artifactId>adventure-platform-bukkit</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>me.carleslc.Simple-YAML</groupId>
-			<artifactId>Simple-Yaml</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.github.curious-odd-man</groupId>
 			<artifactId>rgxgen</artifactId>
 		</dependency>

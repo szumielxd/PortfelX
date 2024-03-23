@@ -15,7 +15,7 @@ import com.zaxxer.hikari.HikariConfig;
 import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 
-public class H2DB extends HikariDB {
+public class H2DB<C> extends HikariDB<C> {
 	
 	
 	public static final Map<Pattern, String> mapping = Stream.of(
@@ -31,7 +31,7 @@ public class H2DB extends HikariDB {
 	).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	
 
-	public H2DB(PortfelProxyImpl plugin) {
+	public H2DB(PortfelProxyImpl<C> plugin) {
 		super(plugin);
 	}
 	

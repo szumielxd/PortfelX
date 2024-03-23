@@ -300,8 +300,8 @@ public class ChannelManagerImpl implements ChannelManager {
 				UUID transactionId = UUID.fromString(din.readUTF()); // transaction id
 				Entry<Long, Boolean> result = null;
 				if (this.plugin.getIdentifierManager().isValid(proxyId)) {
-					long newBalance = din.readLong(); // newBalance
 					boolean status = din.readBoolean(); // status
+					long newBalance = din.readLong(); // newBalance
 					result = new AbstractMap.SimpleEntry<>(newBalance, status);
 				}
 				CompletableFuture<Entry<Long, Boolean>> future = this.waitingMinorEcoGive.get(transactionId);
@@ -326,8 +326,8 @@ public class ChannelManagerImpl implements ChannelManager {
 				UUID transactionId = UUID.fromString(din.readUTF()); // transaction id
 				Entry<Long, Boolean> result = null;
 				if (this.plugin.getIdentifierManager().isValid(proxyId)) {
-					long newBalance = din.readLong(); // newBalance
 					boolean status = din.readBoolean(); // status
+					long newBalance = din.readLong(); // newBalance
 					result = new AbstractMap.SimpleEntry<>(newBalance, status);
 				}
 				CompletableFuture<Entry<Long, Boolean>> future = this.waitingMinorEcoTake.get(transactionId);
@@ -354,23 +354,19 @@ public class ChannelManagerImpl implements ChannelManager {
 			UUID uuid = UUID.fromString(in.readUTF()); // UUID
 			if (this.plugin.getIdentifierManager().isValid(proxyId)) {
 				user = (BukkitOperableUser) this.plugin.getUserManager().getUser(uuid);
-				boolean online = this.plugin.getServer().getPlayer(uuid) != null;
+				boolean online = Optional.ofNullable(this.plugin.getServer().getPlayer(uuid)).filter(Player::isOnline).isPresent();
 				if (user == null) {
 					String username = in.readUTF(); // username
 					long balance = in.readLong(); // balance
 					boolean deniedInTop = in.readBoolean(); // deniedInTop
-					long minorBalance = 0;
-					try {
-						minorBalance = in.readLong(); // minorBalance
-					} catch (IndexOutOfBoundsException e) {
-						// minor balance not supported on proxy
-					}
+					long minorBalance = in.readLong(); // minorBalance
 					user = new BukkitOperableUser(this.plugin, uuid, username, true, deniedInTop, balance, minorBalance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
 				} else {
 					user.setName(in.readUTF()); // username
 					user.setPlainBalance(in.readLong()); // balance
 					user.setPlainDeniedInTop(in.readBoolean()); // deniedInTop
 					user.setOnline(online);
+					user.setPlainMinorBalance(in.readLong()); // minorBalance
 				}
 			}
 			

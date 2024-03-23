@@ -33,10 +33,10 @@ import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.database.AbstractDB;
 import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 
-public abstract class HikariDB implements AbstractDB {
+public abstract class HikariDB<C> implements AbstractDB {
 	
 	
-	protected final PortfelProxyImpl plugin;
+	protected final PortfelProxyImpl<C> plugin;
 	protected HikariDataSource hikari;
 	
 	private boolean tablesChecked = false;
@@ -74,7 +74,7 @@ public abstract class HikariDB implements AbstractDB {
 	}
 	
 	
-	protected HikariDB(PortfelProxyImpl plugin) {
+	protected HikariDB(PortfelProxyImpl<C> plugin) {
 		this.plugin = plugin;
 		Config cfg = this.plugin.getConfiguration();
 		
@@ -247,7 +247,7 @@ public abstract class HikariDB implements AbstractDB {
 				try (ResultSet rs = stm.executeQuery()) {
 					if (rs.next()) {
 						UUID uuid = UUID.fromString(rs.getString(1));
-						ProxyPlayer player = this.plugin.getCommonServer().getPlayer(uuid);
+						ProxyPlayer<C> player = this.plugin.getCommonServer().getPlayer(uuid);
 						return new ProxyOperableUser(this.plugin, uuid, rs.getString(2), player != null && player.isConnected(), rs.getBoolean(5), rs.getLong(3), rs.getLong(4));
 					}
 					return null;
@@ -268,7 +268,7 @@ public abstract class HikariDB implements AbstractDB {
 	public @Nullable User loadUser(@NotNull UUID uuid) throws SQLException {
 		this.checkConnection();
 		String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?;", USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID));
-		ProxyPlayer player = this.plugin.getCommonServer().getPlayer(uuid);
+		ProxyPlayer<C> player = this.plugin.getCommonServer().getPlayer(uuid);
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, uuid.toString());
@@ -307,7 +307,7 @@ public abstract class HikariDB implements AbstractDB {
 	public @NotNull User loadOrCreateUser(@NotNull UUID uuid) throws SQLException, IllegalStateException {
 		this.checkConnection();
 		String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?;", USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID));
-		ProxyPlayer player = this.plugin.getCommonServer().getPlayer(uuid);
+		ProxyPlayer<C> player = this.plugin.getCommonServer().getPlayer(uuid);
 		ProxyOperableUser user = null;
 		try (Connection conn = this.connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
@@ -334,7 +334,7 @@ public abstract class HikariDB implements AbstractDB {
 			if (player == null) throw new IllegalStateException("Cannot create new user for offline player");
 			
 			// fallback to old username offline-mode system
-			if (!MiscUtils.isOnlineModeUUID(uuid)) {
+			/*if (!MiscUtils.isOnlineModeUUID(uuid)) {
 				sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = BINARY ? AND `%s` IS NULL;", USERS_UUID, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_NAME, USERS_UUID));
 				try (PreparedStatement stm = conn.prepareStatement(sql)) {
 					stm.setString(1, player.getName());
@@ -352,7 +352,7 @@ public abstract class HikariDB implements AbstractDB {
 					}
 					return user;
 				}
-			}
+			}*/
 			
 			// create new user
 			sql = this.mapQuery(String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?);", TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP));
@@ -361,7 +361,8 @@ public abstract class HikariDB implements AbstractDB {
 				stm.setString(1, user.getUniqueId().toString());
 				stm.setString(2, user.getName());
 				stm.setLong(3, user.getBalance());
-				stm.setBoolean(4, user.isDeniedInTop());
+				stm.setLong(4, user.getMinorBalance());
+				stm.setBoolean(5, user.isDeniedInTop());
 				stm.executeUpdate();
 				return user;
 			}
@@ -746,25 +747,27 @@ public abstract class HikariDB implements AbstractDB {
 			try (Statement stm = conn.createStatement()) {
 				// users
 				stm.addBatch(usersTable);
-				stm.addBatch(buildIndexQuery(TABLE_USERS, USERS_NAME));
+				/*stm.addBatch(buildIndexQuery(TABLE_USERS, USERS_NAME));
 				stm.addBatch(buildIndexQuery(TABLE_USERS, USERS_IGNORETOP));
+				*/
 				
 				// logs
-				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_UUID));
+				stm.addBatch(logsTable);
+				/*stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_UUID));
 				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_USERNAME));
 				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_SERVER));
 				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_EXECUTOR));
 				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_EXECUTORUUID));
 				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_ORDERNAME));
 				stm.addBatch(buildIndexQuery(TABLE_LOGS, LOGS_ACTION));
-				stm.addBatch(logsTable);
+				*/
 				stm.executeBatch();
 			}
 		}
 	}
 	
 	private String buildIndexQuery(@NotNull String table, @NotNull String column) {
-		return this.mapQuery(String.format("ALTER TABLE `%s` ADD INDEX `%s`(`%s`)", table, table+"|"+column, column));
+		return this.mapQuery(String.format("ALTER TABLE `%s` ADD INDEX `%s`(`%s`);", table, table+"|"+column, column));
 	}
 
 }

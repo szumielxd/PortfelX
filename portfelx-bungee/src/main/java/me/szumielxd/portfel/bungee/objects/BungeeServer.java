@@ -3,16 +3,15 @@ package me.szumielxd.portfel.bungee.objects;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
-import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServer;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 
-public class BungeeServer implements ProxyServer {
+public class BungeeServer implements ProxyServer<BaseComponent[]> {
 	
 	
 	private final @NotNull PortfelBungeeImpl plugin;
@@ -26,8 +25,10 @@ public class BungeeServer implements ProxyServer {
 	
 
 	@Override
-	public @NotNull Collection<ProxyPlayer> getPlayers() {
-		return this.server.getPlayers().parallelStream().map(p -> new BungeePlayer(this.plugin, p)).collect(Collectors.toList());
+	public @NotNull Collection<BungeePlayer> getPlayers() {
+		return this.server.getPlayers().parallelStream()
+				.map(p -> new BungeePlayer(this.plugin, p))
+				.toList();
 	}
 
 	@Override

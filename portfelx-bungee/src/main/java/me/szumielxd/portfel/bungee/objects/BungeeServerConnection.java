@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.connection.Server;
 
 public class BungeeServerConnection implements ProxyServerConnection {
@@ -28,7 +29,7 @@ public class BungeeServerConnection implements ProxyServerConnection {
 	}
 
 	@Override
-	public @NotNull ProxyServer getServer() {
+	public @NotNull ProxyServer<BaseComponent[]> getServer() {
 		return new BungeeServer(this.plugin, this.server.getInfo());
 	}
 	

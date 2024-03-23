@@ -1,36 +1,35 @@
 package me.szumielxd.portfel.common.commands;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
-public abstract class SimpleCommand implements AbstractCommand {
+public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 	
 	
-	protected final List<String> emptyList = Collections.unmodifiableList(Collections.emptyList());
-	protected final List<CmdArg> emptyArgList = Collections.unmodifiableList(Collections.emptyList());
-	private final Portfel plugin;
-	private final AbstractCommand parent;
-	private final String name;
-	private final String permission;
-	private final String[] aliases;
+	protected final List<String> emptyList = List.of();
+	protected final List<CmdArg> emptyArgList = List.of();
+	@Getter private final Portfel<C> plugin;
+	@Getter private final AbstractCommand<C> parent;
+	@Getter private final String name;
+	@Getter private final String permission;
+	@Getter private final String[] aliases;
 	
 	
-	public SimpleCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent, @NotNull String name, @NotNull String... aliases) {
+	protected SimpleCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent, @NotNull String name, @NotNull String... aliases) {
 		this.plugin = plugin;
 		this.name = name;
 		this.aliases = aliases;
@@ -40,7 +39,7 @@ public abstract class SimpleCommand implements AbstractCommand {
 	
 	
 	@Override
-	public @NotNull List<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args) {
+	public @NotNull List<String> onTabComplete(@NotNull CommonSender<C> sender, @NotNull String[] label, @NotNull String[] args) {
 		List<CmdArg> origin = this.getArgs();
 		List<CmdArg> flyingArgs = new ArrayList<>();
 		List<CmdArg> argList = new ArrayList<>();
@@ -61,36 +60,15 @@ public abstract class SimpleCommand implements AbstractCommand {
 				if (res.isEmpty()) return Arrays.asList(a.getPrefix());
 				return res;
 			}).forEach(completions::addAll);
-			return completions.stream().filter(s -> s.toLowerCase().startsWith(arg)).sorted().collect(Collectors.toList());
+			return completions.stream()
+					.filter(s -> s.toLowerCase().startsWith(arg))
+					.sorted()
+					.toList();
 		}
 		return this.emptyList;
 	}
 	
-
-	@Override
-	public @NotNull String getName() {
-		return this.name;
-	}
-
-	@Override
-	public @NotNull String[] getAliases() {
-		return this.aliases.clone();
-	}
-
-	@Override
-	public @NotNull String getPermission() {
-		return this.permission;
-	}
-	
-	public @NotNull AbstractCommand getParent() {
-		return this.parent;
-	}
-	
-	protected @NotNull Portfel getPlugin() {
-		return this.plugin;
-	}
-	
-	protected @Nullable Object[] validateArgs(CommonSender sender, String... args) {
+	protected @Nullable Object[] validateArgs(CommonSender<C> sender, String... args) {
 		Map<CmdArg, Integer> flyingArgs = new HashMap<>();
 		List<CmdArg> origin = this.getArgs();
 		for (int i = 0; i < origin.size(); i++) {
@@ -120,7 +98,7 @@ public abstract class SimpleCommand implements AbstractCommand {
 			arr[i] = obj;
 			if (obj == null) {
 				if (!arg.isOptional()) {
-					if (args.length > index) sender.sendTranslated(Portfel.PREFIX.append(arg.getArgError(Component.text(args[index], DARK_RED))));
+					if (args.length > index) sender.sendTranslated(MiscUtils.PREFIX.append(arg.getArgError(Component.text(args[index], DARK_RED))));
 					else sender.sendTranslated(MiscUtils.extendedCommandUsage(this));
 					return null;
 				}

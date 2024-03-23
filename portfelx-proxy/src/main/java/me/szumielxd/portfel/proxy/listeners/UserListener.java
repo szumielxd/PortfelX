@@ -5,30 +5,22 @@ import org.jetbrains.annotations.NotNull;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 
-public abstract class UserListener {
+@RequiredArgsConstructor
+public abstract class UserListener<T extends PortfelProxyImpl, C> {
 	
 	
-	private final PortfelProxyImpl plugin;
-	
-	
-	public UserListener(@NotNull PortfelProxyImpl plugin) {
-		this.plugin = plugin;
-	}
-	
-	
-	protected final PortfelProxyImpl getPlugin() {
-		return this.plugin;
-	}
-	
+	@Getter private final @NotNull T plugin;
 
 	
-	protected void onConnect(@NotNull ProxyPlayer player, @NotNull ProxyServerConnection server) {
+	protected void onConnect(@NotNull ProxyPlayer<C> player, @NotNull ProxyServerConnection server) {
 		this.plugin.debug("UserListener::onConnect(%s, %s)", player, server);
 		this.plugin.getTaskManager().runTaskAsynchronously(() -> {
 			try {
@@ -42,6 +34,7 @@ public abstract class UserListener {
 				out.writeUTF(player.getName());
 				out.writeLong(user.getBalance());
 				out.writeBoolean(user.isDeniedInTop());
+				out.writeLong(user.getMinorBalance());
 				server.sendPluginMessage(Portfel.CHANNEL_USERS, out.toByteArray());
 				
 			} catch (Exception e) {	

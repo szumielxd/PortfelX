@@ -1,5 +1,10 @@
 package me.szumielxd.portfel.common.utils;
 
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY;
+import static net.kyori.adventure.text.format.NamedTextColor.DARK_PURPLE;
+import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
+import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
+
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,13 +20,11 @@ import java.util.stream.IntStream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
 
-import me.szumielxd.portfel.api.Portfel;
+import lombok.experimental.UtilityClass;
 import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.CmdArg;
@@ -29,14 +32,14 @@ import me.szumielxd.portfel.common.commands.SimpleCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent.Action;
-
-import static net.kyori.adventure.text.format.NamedTextColor.*;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
+@UtilityClass
 public class MiscUtils {
+	
+	
+	public final @NotNull Component PREFIX = MiniMessage.miniMessage().deserialize("<b><aqua>[<dark_purple>P</dark_purple>]</aqua></b><dark_aqua> ");
 	
 	
 	/**
@@ -216,7 +219,9 @@ public class MiscUtils {
 	 * @return uncolored string representation of argument
 	 */
 	public static @NotNull String argToCleanText(@NotNull Lang lang, @NotNull CmdArg arg) {
-		return argToPlainText(lang, arg, null, null);
+		String prefix = (arg.isOptional() ? "[" : "") + (arg.hasPrefix()? arg.getPrefix() : "") + "<";
+		String suffix = (arg.isOptional() ? ">]" : ">");
+		return prefix + lang.text(arg.getDisplay()) + suffix;
 	}
 	
 	/**
@@ -226,9 +231,9 @@ public class MiscUtils {
 	 * @param arg the argument
 	 * @return string visual representation of argument
 	 */
-	public static @NotNull String argToPlainText(@NotNull Lang lang, @NotNull CmdArg arg) {
+	/*public static @NotNull String argToPlainText(@NotNull Lang lang, @NotNull CmdArg arg) {
 		return argToPlainText(lang, arg, ChatColor.GRAY, ChatColor.DARK_GRAY);
-	}
+	}*/
 	
 	/**
 	 * Get legacy color text representation of {@link CmdArg}.
@@ -239,11 +244,11 @@ public class MiscUtils {
 	 * @param bracketsColor color of brackets
 	 * @return string visual representation of argument
 	 */
-	public static @NotNull String argToPlainText(@NotNull Lang lang, @NotNull CmdArg arg, @Nullable ChatColor argColor, @Nullable ChatColor bracketsColor) {
-		String prefix = (bracketsColor!=null ? bracketsColor.toString() : "") + (arg.isOptional() ? "[" : "") + (arg.hasPrefix()? arg.getPrefix() : "") + "<" + (argColor!=null ? argColor.toString() : "");
+	/*public static @NotNull String argToPlainText(@NotNull Lang lang, @NotNull CmdArg arg, @Nullable ChatColor argColor, @Nullable ChatColor bracketsColor) {
+		String prefix = (bracketsColor != null ? bracketsColor.toString() : "") + (arg.isOptional() ? "[" : "") + (arg.hasPrefix()? arg.getPrefix() : "") + "<" + (argColor!=null ? argColor.toString() : "");
 		String suffix = (bracketsColor!=null ? bracketsColor.toString() : "") + (arg.isOptional() ? ">]" : ">");
 		return prefix + lang.text(arg.getDisplay()) + suffix;
-	}
+	}*/
 	
 	/**
 	 * Build interactive command usage {@link Component} for given command.
@@ -253,7 +258,7 @@ public class MiscUtils {
 	 * @param command the command used to get data
 	 * @return interactive {@link Component} with insertion and hover and click events
 	 */
-	public static @NotNull Component buildCommandUsage(@NotNull Component baseMessage, String fullCommand, SimpleCommand command) {
+	public static <C> @NotNull Component buildCommandUsage(@NotNull Component baseMessage, String fullCommand, SimpleCommand<C> command) {
 		/*Component hover = Component.text(fullCommand, GREEN);
 		//description
 		hover = hover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_DESCRIPTION.component(AQUA))
@@ -284,19 +289,19 @@ public class MiscUtils {
 		return baseMessage.clickEvent(ClickEvent.runCommand(fullCommand)).insertion(fullCommand);
 	}
 	
-	public static @NotNull Component extendedCommandUsage(@NotNull SimpleCommand command) {
-		Component result = Portfel.PREFIX.append(LangKey.COMMAND_USAGE_TITLE.component(DARK_PURPLE, Component.text(command.getName(), LIGHT_PURPLE)));
-		result = result.append(Component.newline()).append(Portfel.PREFIX).append(Component.text("> ", LIGHT_PURPLE)).append(command.getDescription().component(GRAY));
+	public static <C> @NotNull Component extendedCommandUsage(@NotNull SimpleCommand<C> command) {
+		Component result = PREFIX.append(LangKey.COMMAND_USAGE_TITLE.component(DARK_PURPLE, Component.text(command.getName(), LIGHT_PURPLE)));
+		result = result.append(Component.newline()).append(PREFIX).append(Component.text("> ", LIGHT_PURPLE)).append(command.getDescription().component(GRAY));
 		if (command.getAliases().length > 0) {
-			result = result.append(Component.newline()).append(Portfel.PREFIX).append(LangKey.COMMAND_USAGE_ALIASES.component(DARK_PURPLE));
+			result = result.append(Component.newline()).append(PREFIX).append(LangKey.COMMAND_USAGE_ALIASES.component(DARK_PURPLE));
 			for (String alias : command.getAliases()) {
-				result = result.append(Component.newline()).append(Portfel.PREFIX).append(Component.text("- ", LIGHT_PURPLE)).append(Component.text(alias, GRAY));
+				result = result.append(Component.newline()).append(PREFIX).append(Component.text("- ", LIGHT_PURPLE)).append(Component.text(alias, GRAY));
 			}
 		}
 		if (!command.getArgs().isEmpty()) {
-			result = result.append(Component.newline()).append(Portfel.PREFIX).append(LangKey.COMMAND_USAGE_ARGUMENTS.component(DARK_PURPLE));
+			result = result.append(Component.newline()).append(PREFIX).append(LangKey.COMMAND_USAGE_ARGUMENTS.component(DARK_PURPLE));
 			for (CmdArg arg : command.getArgs()) {
-				result = result.append(Component.newline()).append(Portfel.PREFIX).append(Component.text("- ", LIGHT_PURPLE)).append(MiscUtils.argToComponent(arg))
+				result = result.append(Component.newline()).append(PREFIX).append(Component.text("- ", LIGHT_PURPLE)).append(MiscUtils.argToComponent(arg))
 						.append(Component.text(" -> ")).append(arg.getDescription().component(GRAY));
 			}
 		}
@@ -304,23 +309,20 @@ public class MiscUtils {
 	}
 	
 	/**
-	 * Try to parse given text as JSON component, on fail fallback to plain legacy format.
+	 * Try to parse given text as MiniMessage component.
 	 * 
 	 * @param text text to parse
 	 * @return parsed component
 	 */
 	public static @NotNull Component parseComponent(@NotNull String text) {
-		if (Objects.requireNonNull(text, "text cannot be null").isEmpty()) return Component.empty();
-		try {
-			JsonObject json = new Gson().fromJson(text, JsonObject.class);
-			return GsonComponentSerializer.gson().deserializeFromTree(json);
-		} catch (JsonSyntaxException | ClassCastException e) {
-			return LegacyComponentSerializer.legacySection().deserialize(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1"));
+		if (Objects.requireNonNull(text, "text cannot be null").isEmpty()) {
+			return Component.empty();
 		}
+		return MiniMessage.miniMessage().deserialize(text);
 	}
 	
 	/**
-	 * Try to parse given text as JSON component, on fail fallback to plain legacy format.
+	 * Try to parse given text as MiniMessage component.
 	 * 
 	 * @param text text to parse
 	 * @return parsed component
@@ -329,14 +331,10 @@ public class MiscUtils {
 		Objects.requireNonNull(text, "text cannot be null");
 		Objects.requireNonNull(pattern, "pattern cannot be null");
 		Objects.requireNonNull(replacer, "replacer cannot be null");
-		if (text.isEmpty()) return Component.empty();
-		try {
-			JsonObject json = new Gson().fromJson(text, JsonObject.class);
-			replaceTextInJson(json, pattern, replacer);
-			return GsonComponentSerializer.gson().deserializeFromTree(json);
-		} catch (JsonSyntaxException | ClassCastException e) {
-			return LegacyComponentSerializer.legacySection().deserialize(replaceAll(pattern.matcher(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1")), replacer));
+		if (text.isEmpty()) {
+			return Component.empty();
 		}
+		return MiniMessage.miniMessage().deserialize(replaceAll(pattern.matcher(text.replaceAll("&([0-9A-FK-ORa-fk-or])", "§$1")), replacer));
 	}
 	
 	/**

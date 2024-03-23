@@ -9,12 +9,12 @@ import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.Lang.LangKey;
 
-public interface AbstractCommand {
+public interface AbstractCommand<C> {
 	
 	
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args);
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args);
 	
-	public @NotNull List<String> onTabComplete(@NotNull CommonSender sender, @NotNull String[] label, @NotNull String[] args);
+	public @NotNull List<String> onTabComplete(@NotNull CommonSender<C> sender, @NotNull String[] label, @NotNull String[] args);
 	
 	public @NotNull String getName();
 	
@@ -26,30 +26,30 @@ public interface AbstractCommand {
 	
 	public @NotNull LangKey getDescription();
 	
-	default public @NotNull CommandAccess getAccess() {
+	public default @NotNull CommandAccess getAccess() {
 		return CommandAccess.ALL;
 	}
 	
-	default public boolean hasPermission(@NotNull CommonSender sender) {
+	public default boolean hasPermission(@NotNull CommonSender<C> sender) {
 		return sender.hasPermission(this.getPermission());
 	}
 	
 	
-	public static enum CommandAccess {
+	public enum CommandAccess {
 		ALL(s -> true, LangKey.EMPTY),
-		PLAYERS(s -> s instanceof CommonPlayer, LangKey.ERROR_COMMAND_PLAYERS_ONLY),
+		PLAYERS(CommonPlayer.class::isInstance, LangKey.ERROR_COMMAND_PLAYERS_ONLY),
 		CONSOLE(s -> !(s instanceof CommonPlayer), LangKey.ERROR_COMMAND_CONSOLE_ONLY),
 		;
 		
-		private final Predicate<CommonSender>  validator;
+		private final Predicate<CommonSender<?>>  validator;
 		private final LangKey key;
 		
-		private CommandAccess(Predicate<CommonSender> validator, @NotNull LangKey key) {
+		private CommandAccess(Predicate<CommonSender<?>> validator, @NotNull LangKey key) {
 			this.validator = validator;
 			this.key = key;
 		}
 		
-		public boolean canAccess(CommonSender sender) {
+		public boolean canAccess(CommonSender<?> sender) {
 			return this.validator.test(sender);
 		}
 		

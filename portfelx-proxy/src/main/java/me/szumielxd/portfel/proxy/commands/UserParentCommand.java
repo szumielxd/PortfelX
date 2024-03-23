@@ -15,13 +15,13 @@ import me.szumielxd.portfel.proxy.commands.user.MinorEcoParentCommand;
 import me.szumielxd.portfel.proxy.commands.user.TopParentCommand;
 import me.szumielxd.portfel.proxy.commands.user.UserInfoCommand;
 
-public class UserParentCommand extends ParentCommand {
+public class UserParentCommand extends ParentCommand<C> {
 	
 	
 	public List<CmdArg> args = Arrays.asList(CommonArgs.USER);
 	
 
-	public UserParentCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+	public UserParentCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "user");
 		this.register(
 				new UserInfoCommand(plugin, this),

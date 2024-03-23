@@ -38,11 +38,16 @@
 		</dependency>
 		<dependency>
 			<groupId>net.kyori</groupId>
-			<artifactId>adventure-text-serializer-gson</artifactId>
+			<artifactId>adventure-text-minimessage</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.kyori</groupId>
-			<artifactId>adventure-text-serializer-legacy</artifactId>
+			<artifactId>adventure-text-serializer-gson</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>me.szumielxd</groupId>
+			<artifactId>legacy-miniadventure</artifactId>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 </project>

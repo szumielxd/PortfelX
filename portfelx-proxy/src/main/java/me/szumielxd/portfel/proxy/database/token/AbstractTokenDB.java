@@ -160,17 +160,21 @@ public interface AbstractTokenDB {
 		public static long parseTime(String date) {
 			date = date.toLowerCase();
 			Matcher match = FORMAT_PATTERN.matcher(date);
-			if (!match.matches()) throw new IllegalArgumentException(String.format("date must match regex `%s`, but `%s` doesn't", FORMAT_PATTERN.pattern(), date));
-			long unix = date.equals("-1")? unix = -1L : Long.parseLong(match.group(1));
+			if (!match.matches()) {
+				throw new IllegalArgumentException(String.format("date must match regex `%s`, but `%s` doesn't", FORMAT_PATTERN.pattern(), date));
+			}
+			long unix = date.equals("-1") ? -1L : Long.parseLong(match.group(1));
 			if (match.group(2) != null) {
 				String unit = match.group(2);
-				long time = 1; // default to seconds
-				if (unit.equals("m")) time = 60;
-				else if (unit.equals("h")) time = 60*60;
-				else if (unit.equals("d")) time = 60*60*24;
-				else if (unit.equals("mo")) time = 60*60*24*30;
-				else if (unit.equals("y")) time = 60*60*24*365;
-				unix = System.currentTimeMillis() + unix*1000*time;
+				long time = switch (unit.toLowerCase()) {
+					case "m" -> 60L;
+					case "h" -> 60L * 60;
+					case "d" -> 60L * 60 * 24;
+					case "mo" -> 60L * 60 * 24 * 30;
+					case "y" -> 60L * 60 * 24 * 365;
+					default -> 1L; // default to seconds
+				};
+				unix = System.currentTimeMillis() + unix * 1000 * time;
 			}
 			return unix;
 		}

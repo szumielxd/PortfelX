@@ -9,9 +9,9 @@ import com.zaxxer.hikari.HikariConfig;
 import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 
-public class MariaDB extends HikariDB {
+public class MariaDB<C> extends HikariDB<C> {
 
-	public MariaDB(PortfelProxyImpl plugin) {
+	public MariaDB(PortfelProxyImpl<C> plugin) {
 		super(plugin);
 	}
 	

@@ -92,6 +92,15 @@ public class BukkitOperableUser extends User {
 	}
 	
 	/**
+	 * Set specified amount of money as user's minor balance.
+	 * 
+	 * @param newBalance new user's balance
+	 */
+	public void setPlainMinorBalance(long newBalance) {
+		this.minorBalance = newBalance;
+	}
+	
+	/**
 	 * Set specified visibility state of user's top.
 	 * 
 	 * @param deniedInTop state of user's visibility in top
@@ -164,7 +173,7 @@ public class BukkitOperableUser extends User {
 			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
 			try {
 				BalanceUpdateResult result = this.plugin.getChannelManager().requestGiveMinorBalance(player, amount);
-				this.balance = result.getNewBalance();
+				this.minorBalance = result.getNewBalance();
 				return result.isSuccess();
 			} catch (Exception e) {
 				return false;	
@@ -184,7 +193,7 @@ public class BukkitOperableUser extends User {
 			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
 			try {
 				BalanceUpdateResult result = this.plugin.getChannelManager().requestTakeMinorBalance(player, amount);
-				this.balance = result.getNewBalance();
+				this.minorBalance = result.getNewBalance();
 				return result.isSuccess();
 			} catch (Exception e) {
 				return false;	

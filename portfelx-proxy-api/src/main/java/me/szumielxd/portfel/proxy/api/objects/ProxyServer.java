@@ -5,10 +5,10 @@ import java.util.Collection;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface ProxyServer {
+public interface ProxyServer<C> {
 	
 	
-	public @NotNull Collection<ProxyPlayer> getPlayers();
+	public @NotNull Collection<? extends ProxyPlayer<C>> getPlayers();
 	
 	public @NotNull String getName();
 	

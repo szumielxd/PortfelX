@@ -16,14 +16,17 @@ import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.managers.OrdersManager.GlobalOrder;
 import me.szumielxd.portfel.proxy.objects.PrizeToken;
 
-public class CommonArgs {
+public class CommonArgs<C> {
 	
 	
 	private static PortfelProxyImpl plugin;
 	public static List<String> NUMBERS_LIST = Arrays.asList("1", "2", "5", "10", "20", "50", "100");
 	
 	
-	public static void init(PortfelProxyImpl plugin) {
+	
+	
+	
+	public static <C> void init(PortfelProxyImpl<C> plugin) {
 		CommonArgs.plugin = plugin;
 	}
 	

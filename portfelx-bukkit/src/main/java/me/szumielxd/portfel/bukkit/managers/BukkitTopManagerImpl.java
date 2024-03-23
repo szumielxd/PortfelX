@@ -1,14 +1,14 @@
 package me.szumielxd.portfel.bukkit.managers;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.bukkit.entity.Player;
@@ -48,26 +48,25 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 	protected void update() {
 		try {
 			final ChannelManager channel = this.plugin.getChannelManager();
-			Collection<User> distinctServers = this.plugin.getUserManager().getLoadedUsers()
+			Map<UUID, Player> distinctServers = this.plugin.getUserManager().getLoadedUsers()
 					.stream()
 					.filter(User::isOnline)
 					.filter(u -> !(u instanceof BukkitImaginaryUser))
-					.collect(Collectors.toMap(User::getRemoteId, Function.identity(), (p, q) -> p))
-					.values();
-			this.cachedTop = distinctServers.parallelStream()
-					.collect(Collectors.toMap(User::getRemoteId, u -> {
+					.map(u -> new SimpleEntry<>(u.getRemoteId(), this.plugin.getServer().getPlayer(u.getUniqueId())))
+					.filter(e -> e.getValue() != null)
+					.collect(Collectors.toMap(Entry::getKey, Entry::getValue, (p, q) -> p));
+			this.cachedTop = distinctServers.entrySet().parallelStream()
+					.collect(Collectors.toMap(Entry::getKey, entry -> {
 						try{
-							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());
-							return channel.requestTop(player);
+							return channel.requestTop(entry.getValue());
 						} catch(Exception e) {
 							e.printStackTrace();
 							return new ArrayList<>();
 						}}, (p, q) -> p));
-			this.cachedMinorTop = distinctServers.parallelStream()
-					.collect(Collectors.toMap(User::getRemoteId, u -> {
+			this.cachedMinorTop = distinctServers.entrySet().parallelStream()
+					.collect(Collectors.toMap(Entry::getKey, entry -> {
 						try{
-							Player player = this.plugin.getServer().getPlayer(u.getUniqueId());
-							return channel.requestMinorTop(player);
+							return channel.requestMinorTop(entry.getValue());
 						} catch(Exception e) {
 							e.printStackTrace();
 							return new ArrayList<>();

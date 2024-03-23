@@ -2,8 +2,8 @@ package me.szumielxd.portfel.common.managers;
 
 import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,10 +13,12 @@ import java.util.Map;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.MemoryConfiguration;
 import org.simpleyaml.configuration.file.YamlFile;
+
 import com.google.gson.Gson;
 
 import me.szumielxd.portfel.api.Portfel;
@@ -31,67 +33,83 @@ public class PrizesManager {
 	
 	
 	private final Portfel plugin;
-	private final File file;
+	private final Path file;
 	private Map<String, PrizeOrder> orders = new HashMap<>();
 	
 	
 	public PrizesManager(Portfel plugin) {
 		this.plugin = plugin;
-		this.file = new File(this.plugin.getDataFolder().toFile(), "token-prizes.yml");
+		this.file = this.plugin.getDataFolder().resolve("token-prizes.yml");
 	}
 	
 	
 	public PrizesManager init() {
-		YamlFile yaml = new YamlFile(this.file);
+		YamlFile yaml = new YamlFile(this.file.toUri());
 		// defaults
 		MemoryConfiguration defaults = new MemoryConfiguration();
 		ConfigurationSection defaultNothing = defaults.createSection("nothingOrder");
 		defaultNothing.set("pattern", "nothing");
-		defaultNothing.set("broadcast", Arrays.asList("&5Surprise! %player% won nothing!", "&bNow thanks God it's not about You!"));
-		defaultNothing.set("message", Arrays.asList(GsonComponentSerializer.gson().serialize(Component.text("Congratultions %player%! You have won absolutly nothing!", LIGHT_PURPLE))));
-		defaultNothing.set("command", Arrays.asList("kick %playerId% free kick!"));
+		defaultNothing.set("broadcast", List.of("&5Surprise! %player% won nothing!", "&bNow thanks God it's not about You!"));
+		defaultNothing.set("message", List.of(GsonComponentSerializer.gson().serialize(Component.text("Congratultions %player%! You have won absolutly nothing!", LIGHT_PURPLE))));
+		defaultNothing.set("command", List.of("kick %playerId% free kick!"));
 		ConfigurationSection defaultVip = defaults.createSection("vip");
 		defaultVip.set("pattern", "vip-([1-9]\\d*)d");
-		defaultVip.set("broadcast", Arrays.asList("&5Surprise! %player% won VIP for $1 days!", "&bYou can do so by observing our fanpage: ig.example.com!"));
-		defaultVip.set("command", Arrays.asList("lpb user %player% parent addtemp vip $1d"));
+		defaultVip.set("broadcast", List.of("&5Surprise! %player% won VIP for $1 days!", "&bYou can do so by observing our fanpage: ig.example.com!"));
+		defaultVip.set("command", List.of("lpb user %player% parent addtemp vip $1d"));
 		yaml.addDefaults(defaults);
 		try {
 			if (yaml.exists()) {
-				this.plugin.getLogger().info(String.format("Loading prizes from file `%s`", this.file.getName()));
+				this.plugin.getLogger().info(String.format("Loading prizes from file `%s`", this.file.getFileName().toString()));
 				yaml.load();
 			} else {
-				this.plugin.getLogger().info(String.format("Creating new prizes container as file `%s`", this.file.getName()));
+				this.plugin.getLogger().info(String.format("Creating new prizes container as file `%s`", this.file.getFileName().toString()));
 				yaml.setComment(defaultNothing.getCurrentPath(), 
-						  "This is the simplest example of creating new token-prize order.\n"
-						+ "This prize order will be excuted if pending order's name\n"
-						+ "will match given pattern.");
+						"""  
+						This is the simplest example of creating new token-prize order.
+						This prize order will be executed if pending order's name
+						will match given pattern.
+						""");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-						"This is the only required value. Remember that this is REGEX pattern,\n"
-						+ "so some characters are reserved for other purpose.");
+						"""
+						This is the only required value. Remember that this is REGEX pattern,
+						so some characters are reserved for other purpose.
+						""");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-						"This is list of messages to broadcast when order will be executed.\n"
-						+ "You can use (also in message and command) two placeholders: %player% for player's name\n"
-						+ "and %playerId% for player's unique ID.");
+						"""
+						This is list of messages to broadcast when order will be executed.
+						You can use (also in message and command) two placeholders: %player% for player's name
+						and %playerId% for player's unique ID.
+						""");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-						"This is list of messages to send to player when order will be executed.\n"
-						+ "You can use (also in broadcast) two different formats of mesages: plain with `&` character,\n"
-						+ "or modern json format with support of hover and click events.");
+						"""
+						This is list of messages to send to player when order will be executed.
+						You can use (also in broadcast) two different formats of messages: plain with `&` character,
+						or modern json format with support of hover and click events.
+						""");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-						"This is list of commands to execute by console when order will be executed.\n"
-						+ "Text formatting is not supported");
+						"""
+						This is list of commands to execute by console when order will be executed.
+						Text formatting is not supported
+						""");
 				yaml.setComment(defaultVip.getCurrentPath(), 
-						"This is extended example of prize order.\n"
-						+ "This prize order does not have constant text as pattern,\n"
-						+ "so it will match more than one diffrent pending order names.");
+						"""
+						This is extended example of prize order.
+						This prize order does not have constant text as pattern,
+						so it will match more than one different pending order names.
+						""");
 				yaml.setComment(defaultVip.getCurrentPath() + ".pattern", 
-						"This pattern is more advanced than above, it contains special elements.\n"
-						+ "For example pattern below will match string `vip-10d`,\n"
-						+ "but ignore `vip-0d`, `vip`, `kebab` and lots of others.");
+						"""
+						This pattern is more advanced than above, it contains special elements.
+						For example pattern below will match string `vip-10d`,
+						but ignore `vip-0d`, `vip`, `kebab` and lots of others.
+						""");
 				yaml.setComment(defaultVip.getCurrentPath() + ".command", 
-						"Another benefit of using advanced patterns is\n"
-						+ "ability to use specified matched sections\n"
-						+ "(between parentheses, ex: '(a*)') as replacements.\n"
-						+ "For instance `$1` will be replaced with matcher section with number 1");
+						"""
+						Another benefit of using advanced patterns is
+						ability to use specified matched sections
+						(between parentheses, ex: '(a*)') as replacements.
+						For instance `$1` will be replaced with matcher section with number 1
+						""");
 				yaml.save();
 			}
 		} catch (IOException e) {

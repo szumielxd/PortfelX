@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 
-public interface ProxyPlayer extends CommonPlayer, ProxySender, PluginMessageTarget {
+public interface ProxyPlayer<C> extends CommonPlayer<C>, ProxySender<C>, PluginMessageTarget {
 
 	/**
 	 * Get all groups assigned to player.

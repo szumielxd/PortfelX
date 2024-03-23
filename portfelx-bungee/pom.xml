@@ -24,14 +24,14 @@
 			<artifactId>portfelx-proxy-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-bungeecord</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>net.md-5</groupId>
 			<artifactId>bungeecord-api</artifactId>
 		</dependency>
+		<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<scope>provided</scope>
+			</dependency>
 	</dependencies>
 	
 	<!-- Build -->

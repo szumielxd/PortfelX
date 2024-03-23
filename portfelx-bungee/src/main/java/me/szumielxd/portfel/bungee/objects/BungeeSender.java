@@ -1,20 +1,18 @@
 package me.szumielxd.portfel.bungee.objects;
 
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
-import me.szumielxd.portfel.common.Lang;
 import me.szumielxd.portfel.proxy.api.objects.ProxySender;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public class BungeeSender implements ProxySender {
+public class BungeeSender implements ProxySender<BaseComponent[]> {
 	
 	
 	protected final @NotNull PortfelBungeeImpl plugin;
@@ -25,32 +23,15 @@ public class BungeeSender implements ProxySender {
 		this.plugin = Objects.requireNonNull(plugin, "plugin cannot be null");
 		this.sender = Objects.requireNonNull(sender, "sender cannot be null");
 	}
-	
 
 	@Override
-	public void sendMessage(@NotNull String message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(LegacyComponentSerializer.legacySection().deserialize(message));
-	}
-
-	@Override
-	public void sendMessage(@NotNull Component message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(message);
-		
-	}
-
-	@Override
-	public void sendMessage(@NotNull Component... message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(Component.empty().children(Arrays.asList(message)));
+	public void sendMessage(@NotNull BaseComponent[] message) {
+		this.sender.sendMessage(message);
 	}
 	
 	@Override
-	public void sendMessage(@NotNull Identity source, @NotNull Component message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(source, message);
-	}
-	
-	@Override
-	public void sendMessage(@NotNull Identity source, @NotNull Component... message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(source, Component.empty().children(Arrays.asList(message)));
+	public void sendMessage(@Nullable UUID source, @NotNull BaseComponent[] message) {
+		this.sender.sendMessage(message);
 	}
 	
 	/**
@@ -58,17 +39,9 @@ public class BungeeSender implements ProxySender {
 	 * 
 	 * @param message message to translate and send
 	 */
-	public void sendTranslated(@NotNull Component message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(message));
-	}
-	
-	/**
-	 * Translate and send message to this sender.
-	 * 
-	 * @param message message to translate and send
-	 */
-	public void sendTranslated(@NotNull Component... message) {
-		this.plugin.adventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(Component.empty().children(Arrays.asList(message))));
+	@Override
+	public void sendTranslated(@NotNull BaseComponent[] message) {
+		//this.plugin.adventure().sender(this.sender).sendMessage(Lang.get(this).translateComponent(message));
 	}
 	
 	@Override

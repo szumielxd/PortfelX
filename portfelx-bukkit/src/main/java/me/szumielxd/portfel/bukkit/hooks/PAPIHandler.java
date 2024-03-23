@@ -125,18 +125,18 @@ public class PAPIHandler extends PlaceholderExpansion {
 				if(id.startsWith("other_")) {
 					User user = this.plugin.getUserManager().getUser(id.substring(6));
 					long val = user!=null? user.getMinorBalance() : 0;
-					return this.formatCurrency(player, val);
+					return this.formatMinorCurrency(player, val);
 				} else {
 					User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 					long val = user!=null? user.getMinorBalance() : 0;
 					Optional<Locale> locale = Optional.ofNullable(Translator.parseLocale(id));
-					return this.formatCurrency(locale.orElse(Locale.getDefault()), val);
+					return this.formatMinorCurrency(locale.orElse(Locale.getDefault()), val);
 				}
 			} else if(id.isEmpty()) {
 				if(player == null) return null;
 				User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 				long val = user!=null? user.getMinorBalance() : 0;
-				return this.formatCurrency(player, val);
+				return this.formatMinorCurrency(player, val);
 			}
 		}
 		if(identifier.startsWith("top_balance_")) {
@@ -185,14 +185,14 @@ public class PAPIHandler extends PlaceholderExpansion {
 					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
 					TopEntry entry = user!=null ? this.plugin.getTopManager().getByMinorPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByMinorPos(pos);
 					Optional<Locale> locale = Optional.ofNullable(Translator.parseLocale(String.join("_", Arrays.copyOf(arr, arr.length-1))));
-					return entry!=null? this.formatCurrency(locale.orElse(Locale.getDefault()), entry.getBalance()) : "";
+					return entry!=null? this.formatMinorCurrency(locale.orElse(Locale.getDefault()), entry.getBalance()) : "";
 				} catch (NumberFormatException e) {}
 			} else {
 				try {
 					int pos = Integer.parseInt(identifier.substring(12));
 					BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
 					TopEntry entry = user!=null ? this.plugin.getTopManager().getByMinorPos(user.getRemoteId(), pos) : this.plugin.getTopManager().getByMinorPos(pos);
-					return entry!=null? this.formatCurrency(player, entry.getBalance()) : "";
+					return entry!=null? this.formatMinorCurrency(player, entry.getBalance()) : "";
 				} catch (NumberFormatException e) {}
 			}
 			return null;
@@ -235,6 +235,20 @@ public class PAPIHandler extends PlaceholderExpansion {
 		format.setMinimumFractionDigits(2);
 		format.setMaximumFractionDigits(2);
 		return Lang.get(locale).text(LangKey.MAIN_CURRENCY_FORMAT, format.format(value).replace(' ', ' '));
+	}
+	
+	
+	private String formatMinorCurrency(OfflinePlayer player, long value) {
+		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((CommonPlayer)BukkitSender.wrap(this.plugin, player.getPlayer())).locale();
+		return this.formatMinorCurrency(locale, value);
+	}
+	
+	
+	private String formatMinorCurrency(Locale locale, long value) {
+		NumberFormat format = NumberFormat.getInstance(locale);
+		format.setMinimumFractionDigits(2);
+		format.setMaximumFractionDigits(2);
+		return Lang.get(locale).text(LangKey.MAIN_MINORCURRENCY_FORMAT, format.format(value).replace('\u00A0', ' '));
 	}
 	
 

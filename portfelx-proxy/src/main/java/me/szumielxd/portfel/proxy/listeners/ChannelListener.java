@@ -21,6 +21,9 @@ import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.enums.TransactionStatus;
 import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
@@ -34,22 +37,15 @@ import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.PluginMessageTarget;
 
-public abstract class ChannelListener {
+@RequiredArgsConstructor
+public abstract class ChannelListener<T extends PortfelProxyImpl, C> {
 	
 	
-	private final PortfelProxyImpl plugin;
-	private final Gson gson;
-	
-	
-	protected ChannelListener(@NotNull PortfelProxyImpl plugin) {
-		this.plugin = plugin;
-		this.gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
-	}
-	
-	
-	protected @NotNull PortfelProxyImpl getPlugin() {
-		return this.plugin;
-	}
+	@Getter(AccessLevel.PROTECTED) private final @NotNull T plugin;
+	private final @NotNull Gson gson = new GsonBuilder()
+			.disableHtmlEscaping()
+			.setPrettyPrinting()
+			.create();
 	
 	
 	protected final boolean isListendChannel(@Nullable String tag) {
@@ -59,13 +55,12 @@ public abstract class ChannelListener {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	protected final Optional<Boolean> onPluginMessage(@NotNull PluginMessageTarget sender, @NotNull PluginMessageTarget target, @NotNull String tag, byte[] message) {
-		if (sender instanceof ProxyServerConnection && target instanceof ProxyPlayer) {
-			ProxyServerConnection server = (ProxyServerConnection) sender;
-			ProxyPlayer player = (ProxyPlayer) target;
+		if (sender instanceof ProxyServerConnection server && target instanceof ProxyPlayer<?>) {
 			ByteArrayDataInput in = ByteStreams.newDataInput(message);
 			String subchannel = in.readUTF();
-			
+			ProxyPlayer<C> player = (ProxyPlayer<C>) target;
 			if (Portfel.CHANNEL_USERS.equals(tag)) {
 				switch (subchannel) {
 					case "User": return Optional.of(this.onUserData(server, player, tag, subchannel, in));
@@ -90,7 +85,7 @@ public abstract class ChannelListener {
 	
 	
 	// user channel
-	private boolean onUserData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onUserData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		this.plugin.getTaskManager().runTaskAsynchronously(() -> {
 			try {
 				User user = this.plugin.getUserManager().getOrCreateUser(target.getUniqueId());
@@ -112,7 +107,7 @@ public abstract class ChannelListener {
 	
 	
 	// user channel
-	private boolean onServerData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onServerData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			ProxyOperableUser user = (ProxyOperableUser) this.plugin.getUserManager().getUser(target.getUniqueId());
 			if (user != null) {
@@ -130,7 +125,7 @@ public abstract class ChannelListener {
 	
 	// user channel
 	// Legacy format
-	private boolean onTopData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onTopData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			ByteArrayDataOutput out = ByteStreams.newDataOutput();
 			out.writeUTF(subchannel);
@@ -153,7 +148,7 @@ public abstract class ChannelListener {
 	
 	
 	// user channel
-	private boolean onLightTopData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onLightTopData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			ByteArrayDataOutput out = ByteStreams.newDataOutput();
 			out.writeUTF(subchannel);
@@ -185,7 +180,7 @@ public abstract class ChannelListener {
 	
 	
 	// user channel
-	private boolean onMinorTopData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onMinorTopData(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			ByteArrayDataOutput out = ByteStreams.newDataOutput();
 			out.writeUTF(subchannel);
@@ -217,7 +212,7 @@ public abstract class ChannelListener {
 	
 	
 	// transaction channel
-	private boolean onTransaction(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onTransaction(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		UUID serverKey = UUID.fromString(in.readUTF()); // serverKey
 		if (!this.plugin.getAccessManager().canAccess(serverKey)) return true;
 		byte[] data;
@@ -241,7 +236,7 @@ public abstract class ChannelListener {
 	}
 	
 	// transaction channel
-	private boolean onMinorEcoGive(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onMinorEcoGive(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		UUID serverKey = UUID.fromString(in.readUTF()); // serverKey
 		if (!this.plugin.getAccessManager().canAccess(serverKey)
 				|| !this.plugin.getAccessManager().canAccess(serverKey, "minorbalance:give")) return true;
@@ -255,7 +250,7 @@ public abstract class ChannelListener {
 		try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
 			final String transactionId = din.readUTF(); // transaction id
 			long value = din.readLong(); // value
-			this.setNewMinorEconomy(sender, transactionId, serverKey, target, tag, value);
+			this.setNewMinorEconomy(sender, transactionId, serverKey, target, tag, subchannel, value);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -263,7 +258,7 @@ public abstract class ChannelListener {
 	}
 	
 	// transaction channel
-	private boolean onMinorEcoTake(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onMinorEcoTake(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		UUID serverKey = UUID.fromString(in.readUTF()); // serverKey
 		if (!this.plugin.getAccessManager().canAccess(serverKey)
 				|| !this.plugin.getAccessManager().canAccess(serverKey, "minorbalance:take")) return true;
@@ -277,39 +272,39 @@ public abstract class ChannelListener {
 		try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
 			final String transactionId = din.readUTF(); // transaction id
 			long value = din.readLong(); // value
-			this.setNewMinorEconomy(sender, transactionId, serverKey, target, tag, -value);
+			this.setNewMinorEconomy(sender, transactionId, serverKey, target, tag, subchannel, -value);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return true;
 	}
 	
-	private void setNewMinorEconomy(@NotNull ProxyServerConnection sender, @NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer target, @NotNull String tag, long value) throws IOException {
+	private void setNewMinorEconomy(@NotNull ProxyServerConnection sender, @NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, long value) throws IOException {
 		ProxyOperableUser user = (ProxyOperableUser) this.plugin.getUserManager().getUser(target.getUniqueId());
 		boolean result = false;
 		if (user != null) {
 			synchronized (user) {
-				if (user.getBalance() > -value) {
-					user.setMinorBalance(user.getBalance() + value);
+				if (user.getMinorBalance() > -value) {
+					user.setMinorBalance(user.getMinorBalance() + value);
 					result = true;
 				}
 			}
 		}
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF(tag);
+		out.writeUTF(subchannel);
 		try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
 				DataOutputStream dout = new DataOutputStream(bout);) {
 			dout.writeUTF(this.plugin.getProxyId().toString()); // proxy id
 			dout.writeUTF(transactionId); // transaction id
 			dout.writeBoolean(result);
-			dout.writeLong(user.getBalance());
+			dout.writeLong(user != null ? user.getMinorBalance() : 0); // minorBalance
 			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getAccessManager().getHashKey(serverId));
 		}
 		sender.sendPluginMessage(Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 	}
 	
 	
-	private void runTransaction(@NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyServerConnection srv, @NotNull ProxyPlayer target, @NotNull ActionExecutor pluginExecutor, @NotNull String order, @NotNull String server, long value) {
+	private void runTransaction(@NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyServerConnection srv, @NotNull ProxyPlayer<C> target, @NotNull ActionExecutor pluginExecutor, @NotNull String order, @NotNull String server, long value) {
 		User user = this.plugin.getUserManager().getUser(target.getUniqueId());
 		CompletableFuture<Exception> future = user.takeBalance(value, pluginExecutor, server, order);
 		this.plugin.getTaskManager().runTask(() -> {

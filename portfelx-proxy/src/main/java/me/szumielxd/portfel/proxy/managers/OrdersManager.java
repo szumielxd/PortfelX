@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
 import org.jetbrains.annotations.NotNull;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.MemoryConfiguration;
@@ -62,39 +64,55 @@ public class OrdersManager {
 			} else {
 				this.plugin.getLogger().info(String.format("Creating new orders container as file `%s`", this.file.getName()));
 				yaml.setComment(defaultNothing.getCurrentPath(), 
-						  "This is the simplest example of creating new global order.\n"
-						+ "This global order will be excuted if pending order's name\n"
-						+ "will match given pattern and orign server will have\n"
-						+ "access to this global order. To give access to this global order\n"
-						+ "just execute command `/dpb system server <serverName> grant <orderName>`.\n"
-						+ "Name of order is name of section, so in this case it will be `nothingOrder`");
+						"""
+						This is the simplest example of creating new global order.
+						This global order will be executed if pending order's name
+						will match given pattern and origin server will have
+						access to this global order. To give access to this global order
+						just execute command `/dpb system server <serverName> grant <orderName>`.
+						Name of order is name of section, so in this case it will be `nothingOrder`
+						""");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-						"This is the only required value. Remember that this is REGEX pattern,\n"
-						+ "so some characters are reserved for other purpose.");
+						"""
+						This is the only required value. Remember that this is REGEX pattern,
+						so some characters are reserved for other purpose.
+						""");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-						"This is list of messages to broadcast when order will be executed.\n"
-						+ "You can use (also in message and command) two placeholders: %player% for player's name\n"
-						+ "and %playerId% for player's unique ID.");
+						"""
+						This is list of messages to broadcast when order will be executed.
+						You can use (also in message and command) two placeholders: %player% for player's name
+						and %playerId% for player's unique ID.
+						""");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-						"This is list of messages to send to player when order will be executed.\n"
-						+ "You can use (also in broadcast) two different formats of mesages: plain with `&` character,\n"
-						+ "or modern json format with support of hover and click events.");
+						"""
+						This is list of messages to send to player when order will be executed.
+						You can use (also in broadcast) two different formats of messages: plain with `&` character,
+						or modern json format with support of hover and click events.
+						""");
 				yaml.setComment(defaultNothing.getCurrentPath() + ".pattern", 
-						"This is list of commands to execute by console when order will be executed.\n"
-						+ "Text formatting is not supported");
+						"""
+						This is list of commands to execute by console when order will be executed.
+						Text formatting is not supported
+						""");
 				yaml.setComment(defaultVip.getCurrentPath(), 
-						"This is extended example of global order.\n"
-						+ "This global order does not have constant text as pattern,\n"
-						+ "so it will match more than one diffrent pending order names.");
+						"""
+						This is extended example of global order.
+						This global order does not have constant text as pattern,
+						so it will match more than one different pending order names.
+						""");
 				yaml.setComment(defaultVip.getCurrentPath() + ".pattern", 
-						"This pattern is more advanced than above, it contains special elements.\n"
-						+ "For example pattern below will match string `vip-10d`,\n"
-						+ "but ignore `vip-0d`, `vip`, `kebab` and lots of others.");
+						"""
+						This pattern is more advanced than above, it contains special elements.
+						For example pattern below will match string `vip-10d`,
+						but ignore `vip-0d`, `vip`, `kebab` and lots of others.
+						""");
 				yaml.setComment(defaultVip.getCurrentPath() + ".command", 
-						"Another benefit of using advanced patterns is\n"
-						+ "ability to use specified matched sections\n"
-						+ "(between parentheses, ex: '(a*)') as replacements.\n"
-						+ "For instance `$1` will be replaced with matcher section with number 1");
+						"""
+						Another benefit of using advanced patterns is
+						ability to use specified matched sections
+						(between parentheses, ex: '(a*)') as replacements.
+						For instance `$1` will be replaced with matcher section with number 1
+						""");
 				yaml.save();
 			}
 		} catch (IOException e) {
@@ -102,6 +120,8 @@ public class OrdersManager {
 		}
 		
 		final Map<String, GlobalOrder> ordersMap = new HashMap<>();
+		// permissions
+		Stream.of("minorbalance:give", "minorbalance:take").forEach(key -> ordersMap.put(key, new GlobalOrder(key, Pattern.compile("^$"), Collections.emptyList(), Collections.emptyList(), Collections.emptyList())));
 		
 		yaml.getKeys(false).forEach(key -> {
 			if (yaml.isConfigurationSection(key)) {
@@ -170,7 +190,9 @@ public class OrdersManager {
 			UnaryOperator<String> replacer = s -> {
 				s = s.replace("%player%", user.getName())
 						.replace("%playerId%", user.getUniqueId().toString());
-				for (int i = 0; i <= match.groupCount(); i++) s = s.replace("$"+i, escapeJson(match.group(i)));
+				for (int i = 0; i <= match.groupCount(); i++) {
+					s = s.replace("$" + i, escapeJson(match.group(i)));
+				}
 				return s;
 			};
 			
