@@ -2,9 +2,8 @@ package me.szumielxd.portfel.common.communication.coders;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -16,7 +15,6 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -52,10 +50,10 @@ public abstract class MessageEntryCoder<T> {
 				out.writeLong(data.getLeastSignificantBits());
 			},
 			UUID.class::equals);
-	protected static final MessageEntryCoderCreator<Object> OBJECT_FETCHER = new MessageEntryCoderCreator<>(MessageEntryCoder::decodeObject, (out, data) -> {
-		out.writeLong(data.getMostSignificantBits());
-		out.writeLong(data.getLeastSignificantBits());
-	}, MessageEntryCoder::validateObject);
+	protected static final MessageEntryCoderCreator<Object> OBJECT_FETCHER = new MessageEntryCoderCreator<>(
+			MessageEntryCoder::decodeObject,
+			MessageEntryCoder::encodeObject,
+			MessageEntryCoder::validateObject);
 	
 	
 	public abstract @NotNull T decode(@NotNull ByteArrayDataInput in);
@@ -82,12 +80,32 @@ public abstract class MessageEntryCoder<T> {
 	}
 	
 	private static <T> T decodeObject(@NotNull ByteArrayDataInput in, Class<? extends T> clazz) {
-		for (var field : clazz.getDeclaredFields()) {
+		try {
+			T obj = clazz.getDeclaredConstructor().newInstance();
+			for (var field : clazz.getDeclaredFields()) {
+				var entryMeta = checkIfApplicable(field);
+				if (entryMeta.isPresent()) {
+					field.setAccessible(true);
+					field.set(obj, readFieldValue(in, entryMeta.get(), field.getType()));
+					
+				}
+			}
+			return obj;
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException("Could not decode object for class `%s`:".formatted(clazz), e);
+		}
+	}
+	
+	private static void encodeObject(@NotNull ByteArrayDataOutput out, Object data) {
+		for (var field : data.getClass().getDeclaredFields()) {
 			var entryMeta = checkIfApplicable(field);
 			if (entryMeta.isPresent()) {
-				clazz.getDeclaredConstructor().newInstance();
-				field.setAccessible(true);
-				field.set(in, readFieldValue(in, entryMeta.get(), field.getType()));
+				try {
+					field.setAccessible(true);
+					writeFieldValue(out, entryMeta.get(), field.get(data));
+				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new RuntimeException("Could not encode object `%s`:".formatted(data), e);
+				}
 			}
 		}
 	}
@@ -102,6 +120,19 @@ public abstract class MessageEntryCoder<T> {
 			return arr;
 		} else {
 			return coder.decode(in);
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static void writeFieldValue(@NotNull ByteArrayDataOutput out, @NotNull MessageEntryCoder<?> coder, Object data) {
+		if (data.getClass().isArray()) {
+			int size = Array.getLength(data);
+			out.writeInt(size);
+			for (int i = 0; i < size; i++) {
+				writeFieldValue(out, coder, Array.get(data, i));
+			}
+		} else {
+			((MessageEntryCoder<Object>) coder).encode(out, data);
 		}
 	}
 	

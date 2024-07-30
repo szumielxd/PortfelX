@@ -2,7 +2,7 @@ package me.szumielxd.portfel.api.objects;
 
 import org.jetbrains.annotations.NotNull;
 
-import net.kyori.adventure.text.Component;
+import me.szumielxd.portfel.api.Portfel;
 
 public interface CommonSender<C> {
 	
@@ -11,16 +11,17 @@ public interface CommonSender<C> {
 	 * 
 	 * @param message message to send
 	 */
-	public void sendMessage(@NotNull C message);
+	public default void sendMessage(@NotNull C message) {
+		sendMessage(message, false);
+	}
 	
 	/**
-	 * Translate and send message to this sender.
+	 * Send message to this sender.
 	 * 
-	 * @param message message to translate and send
+	 * @param message message to send
+	 * @param prefix whether send plugin prefix
 	 */
-	public default void sendTranslated(@NotNull Component message) {
-		throw new IllegalStateException("Unimplemented");
-	}
+	public void sendMessage(@NotNull C message, boolean prefix);
 	
 	/**
 	 * Checks if this user has the specified permission node.
@@ -43,6 +44,8 @@ public interface CommonSender<C> {
 	 * @param command command to execute
 	 */
 	public void executeProxyCommand(@NotNull String command);
+	
+	public Portfel<C> getPlugin();
 	
 
 }

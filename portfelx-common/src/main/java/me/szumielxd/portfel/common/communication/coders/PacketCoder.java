@@ -1,27 +1,57 @@
 package me.szumielxd.portfel.common.communication.coders;
 
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.stream.Stream;
+import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
 
 public class PacketCoder {
 	
 	
-	public void decode(@NotNull ByteArrayDataInput in, @NotNull MessagePacket message) {
+	public PacketCoder() {
+		/*try {
+			Map<String, Class<? extends MessagePacket>> messages = new HashMap<>();
+			ClassLoader loader = getClass().getClassLoader();
+			ClassPath.from(loader).getTopLevelClasses(getClass().getPackageName() + ".messages")
+					.stream()
+					.map(ClassInfo::load)
+					.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
+					.filter(MessagePacket.class::isAssignableFrom)
+					.filter(clazz -> clazz.isAnnotationPresent(IdentifiedMessage.class))
+					.forEach(clazz -> {
+							IdentifiedMessage msg = clazz.getAnnotation(IdentifiedMessage.class);
+							if (messages.containsKey(msg.value())) {
+								throw new IllegalStateException("Cannot register packet message %s, because subchannel with name `%s` is already used".formatted(clazz, msg.value()));
+							}
+							messages.put(msg.value(), clazz.asSubclass(MessagePacket.class));
+					});
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}*/
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public <T extends MessagePacket> Optional<T> decode(@NotNull ByteArrayDataInput in, @NotNull Class<T> messageClass) {
+		IdentifiedMessage msgMeta = messageClass.getAnnotation(IdentifiedMessage.class);
+		if (msgMeta == null) {
+			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
+		}
+		return MessageEntryCoder.OBJECT_FETCHER.generateIfValid(messageClass)
+				.map(c -> (T) c.decode(in));
+	}
+	
+	protected static void encode(@NotNull ByteArrayDataOutput out, @NotNull MessagePacket message) {
 		IdentifiedMessage msgMeta = message.getClass().getAnnotation(IdentifiedMessage.class);
 		if (msgMeta == null) {
 			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
 		}
-		
-	}
-	
-	protected static void decodee(@NotNull ByteArrayDataInput in, @NotNull MessagePacket message) {
-		
+		MessageEntryCoder.OBJECT_FETCHER.generateIfValid(message.getClass())
+				.ifPresent(c -> c.encode(out, message));
 	}
 	
 	

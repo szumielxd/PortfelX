@@ -59,6 +59,13 @@ public interface CommonPlayer<C> extends CommonSender<C> {
 	public @NotNull Locale locale();
 	
 	/**
+	 * Gets the player's current locale.
+	 * 
+	 * @return the player's locale
+	 */
+	public int protocolId();
+	
+	/**
 	 * Send this player to given world/server (depending on implementation).
 	 * 
 	 * @param worldName name of destination world/server

@@ -13,6 +13,7 @@ import me.szumielxd.portfel.api.managers.TopManager;
 import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.CommonServer;
+import me.szumielxd.portfel.api.objects.ComponentMapper;
 import me.szumielxd.portfel.common.loader.CommonLogger;
 
 public interface Portfel<C> {
@@ -82,6 +83,13 @@ public interface Portfel<C> {
 	 * @return current console sender
 	 */
 	public @NotNull CommonSender<C> getConsole();
+	
+	/**
+	 * Get ComponentMapper.
+	 * 
+	 * @return component mapping utility
+	 */
+	public @NotNull ComponentMapper<C> getComponentMapper();
 	
 	/**
 	 * Get plugin's data folder.

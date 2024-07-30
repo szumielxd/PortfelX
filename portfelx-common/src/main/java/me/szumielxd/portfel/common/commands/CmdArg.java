@@ -1,9 +1,8 @@
 package me.szumielxd.portfel.common.commands;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -11,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.utils.MiscUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
 
-public class CmdArg<C> {
+public class CmdArg {
 	
 	
 	private final boolean flying;
@@ -25,26 +24,26 @@ public class CmdArg<C> {
 	private final LangKey description;
 	private final LangKey argError;
 	private final Function<String, Object> argParser;
-	private final BiFunction<CommonSender<C>, String[], List<String>> argCompletions;
+	private final BiFunction<CommonSender<?>, String[], List<String>> argCompletions;
 	
 	
-	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender<C>, List<String>> argCompletions) {
+	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender<?>, List<String>> argCompletions) {
 		this(name, description, argError, argParser, (s, args) -> argCompletions.apply(s));
 	}
 	
-	public CmdArg(@Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender<C>, List<String>> argCompletions) {
+	public CmdArg(@Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull Function<CommonSender<?>, List<String>> argCompletions) {
 		this(prefix, name, description, argError, argParser, (s, args) -> argCompletions.apply(s));
 	}
 	
-	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<C>, String[], List<String>> argCompletions) {
+	public CmdArg(@NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<?>, String[], List<String>> argCompletions) {
 		this(null, name, description, argError, argParser, argCompletions);
 	}
 	
-	public CmdArg(@Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<C>, String[], List<String>> argCompletions) {
+	public CmdArg(@Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<?>, String[], List<String>> argCompletions) {
 		this(false, prefix, name, description, argError, argParser, argCompletions);
 	}
 	
-	public CmdArg(boolean flying, @Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<C>, String[], List<String>> argCompletions) {
+	public CmdArg(boolean flying, @Nullable String prefix, @NotNull LangKey name, @NotNull LangKey description, @Nullable LangKey argError, @NotNull Function<String, Object> argParser, @NotNull BiFunction<CommonSender<?>, String[], List<String>> argCompletions) {
 		if (flying && (prefix == null || prefix.isEmpty())) throw new IllegalArgumentException("Flying argument must have not empty prefix");
 		this.flying = flying;
 		this.prefix = prefix == null ? null : prefix.toLowerCase();
@@ -90,6 +89,13 @@ public class CmdArg<C> {
 	 */
 	public boolean isFlying() {
 		return this.flying;
+	}
+	
+	public MessageDraft asDraft() {
+		var lang = isOptional() ?
+				MainLangKey.COMMAND_USAGE_ARGUMENT_OPTIONAL
+				: MainLangKey.COMMAND_USAGE_ARGUMENT_MANDATORY;
+		return lang.draft(getPrefix(), getDisplay());
 	}
 	
 	/**
@@ -143,8 +149,8 @@ public class CmdArg<C> {
 	 * @param arg invalid argument
 	 * @return translatable component with given replacements if this argument is not optional, otherwise null
 	 */
-	public @Nullable TranslatableComponent getArgError(@NotNull String arg) {
-		return this.argError == null? null : this.argError.component(Component.text(arg));
+	public @Nullable MessageDraft getArgError(@NotNull String arg) {
+		return Optional.ofNullable(argError).map(key -> key.draft(arg)).orElse(null);
 	}
 	
 	/**
@@ -153,8 +159,8 @@ public class CmdArg<C> {
 	 * @param arg invalid argument
 	 * @return translatable component with given replacements if this argument is not optional, otherwise null
 	 */
-	public @Nullable TranslatableComponent getArgError(@NotNull Component arg) {
-		return this.argError == null? null : this.argError.component(RED, arg);
+	public @Nullable MessageDraft getArgError(@NotNull MessageDraft arg) {
+		return Optional.ofNullable(argError).map(key -> key.draft(arg)).orElse(null);
 	}
 	
 	/**
@@ -163,7 +169,7 @@ public class CmdArg<C> {
 	 * @param sender sender to calculate accessibility
 	 * @return list of (maybe not all) text arguments available for this sender
 	 */
-	public @NotNull List<String> getTabCompletions(@NotNull CommonSender<C> sender, @Nullable String... label) {
+	public @NotNull List<String> getTabCompletions(@NotNull CommonSender<?> sender, @Nullable String... label) {
 		if (this.hasPrefix()) {
 			if (label.length == 0) return Collections.emptyList();
 			String arg = label[label.length-1];

@@ -42,6 +42,10 @@
 		</dependency>
 		<dependency>
 			<groupId>net.kyori</groupId>
+			<artifactId>adventure-text-serializer-plain</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.kyori</groupId>
 			<artifactId>adventure-text-serializer-gson</artifactId>
 		</dependency>
 		<dependency>

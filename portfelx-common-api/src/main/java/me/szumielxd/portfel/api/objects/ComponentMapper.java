@@ -14,55 +14,55 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
-public interface ComponentMapper<T> {
+public interface ComponentMapper<C> {
 	
 	
-	public @NotNull T jsonToComponent(@NotNull JsonElement json);
+	public @NotNull C jsonToComponent(@NotNull JsonElement json);
 	
-	public @NotNull T jsonStringToComponent(@NotNull String json);
+	public @NotNull C jsonStringToComponent(@NotNull String json);
 
-	public @NotNull JsonElement componentToJson(@NotNull T component);
+	public @NotNull JsonElement componentToJson(@NotNull C component);
 
-	public @NotNull String componentToJsonString(@NotNull T component);
+	public @NotNull String componentToJsonString(@NotNull C component);
 	
-	public @NotNull T replaceText(@NotNull T component, @NotNull String needle, String replacement);
+	public @NotNull C replaceText(@NotNull C component, @NotNull String needle, String replacement);
 	
-	public @NotNull T plainText(@NotNull String text);
+	public @NotNull C plainText(@NotNull String text);
 	
-	public default @NotNull T empty() {
+	public default @NotNull C empty() {
 		return plainText("");
 	}
 	
-	public default @NotNull T parseMiniMessage(@NotNull String message) {
+	public default @NotNull C parseMiniMessage(@NotNull String message) {
 		return this.kyoriToComponent(MiniMessage.miniMessage().deserialize(message));
 	}
 	
-	public default @NotNull T kyoriToComponent(@NotNull Component component) {
+	public default @NotNull C kyoriToComponent(@NotNull Component component) {
 		return this.jsonToComponent(GsonComponentSerializer.gson().serializeToTree(component));
 	}
 	
-	public default @NotNull Component componentToKyori(@NotNull T component) {
+	public default @NotNull Component componentToKyori(@NotNull C component) {
 		return GsonComponentSerializer.gson().deserializeFromTree(this.componentToJson(component));
 	}
 	
-	public @NotNull T parsePlaceholders(@NotNull T comp, Map<String, T> replacements);
+	public @NotNull C parsePlaceholders(@NotNull C comp, Map<String, C> replacements);
 	
-	public @NotNull T parsePlaceholdersInHover(@NotNull T comp, Map<String, T> replacements);
+	public @NotNull C parsePlaceholdersInHover(@NotNull C comp, Map<String, C> replacements);
 	
-	public default @NotNull VersionableObject<T> parseLegacyMessage(@NotNull String message) {
+	public default @NotNull VersionableObject<C> parseLegacyMessage(@NotNull String message) {
 		return LegacyMiniadventure.get().deserialize(message)
 				.map(this::kyoriToComponent);
 	}
 	
-	public default @NotNull T fullyParsePlaceholders(@NotNull T component, Map<String, T> replacements) {
+	public default @NotNull C fullyParsePlaceholders(@NotNull C component, Map<String, C> replacements) {
 		return parsePlaceholders(parsePlaceholdersInHover(component, replacements), replacements);
 	}
 	
-	public default @NotNull VersionableObject<T> replacePlaceholders(@NotNull VersionableObject<T> message, Map<String, T> replacements) {
+	public default @NotNull VersionableObject<C> replacePlaceholders(@NotNull VersionableObject<C> message, Map<String, C> replacements) {
 		return message.map(c -> fullyParsePlaceholders(c, replacements));
 	}
 	
-	public default @NotNull VersionableObject<T> replacePlainPlaceholders(@NotNull VersionableObject<T> message, Map<String, String> replacements) {
+	public default @NotNull VersionableObject<C> replacePlainPlaceholders(@NotNull VersionableObject<C> message, Map<String, String> replacements) {
 		return replacePlaceholders(message, replacements.entrySet().stream()
 				.collect(Collectors.toMap(Entry::getKey, e -> plainText(e.getValue()))));
 	}

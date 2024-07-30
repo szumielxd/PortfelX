@@ -1,12 +1,11 @@
 package me.szumielxd.portfel.common.commands;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-import static net.kyori.adventure.text.format.TextDecoration.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,10 +13,9 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.common.utils.MiscUtils;
-import net.kyori.adventure.text.Component;
 
 public abstract class ParentCommand<C> extends SimpleCommand<C> {
 
@@ -29,7 +27,7 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> {
 		super(plugin, parent, name, aliases);
 	}
 	
-	protected void register(@NotNull SimpleCommand<C>[] childrens) {
+	protected void register(@NotNull Collection<SimpleCommand<C>> childrens) {
 		HashMap<String, SimpleCommand<C>> childs = new HashMap<>();
 		for (final SimpleCommand<C> cmd : childrens) {
 			childs.putIfAbsent(cmd.getName().toLowerCase(), cmd);
@@ -42,7 +40,7 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> {
 
 	@Override
 	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		final List<CmdArg> cmdArgs = this.getArgs();
+		final List<CmdArg> cmdArgs = this.getAllArgs();
 		int offset = 0;
 		Object[] newParsedArgs = new Object[0];
 		if (args.length > offset) {
@@ -51,8 +49,7 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> {
 				if (obj != null) {
 					offset++;
 				} else if (!arg.isOptional()) {
-					Component comp = MiscUtils.PREFIX.append(arg.getArgError(Component.text(args[offset], DARK_RED)));
-					sender.sendTranslated(comp);
+					arg.getArgError(MessageDraft.plain(args[offset])).send(sender, true);
 					return;
 				}
 				newParsedArgs = MiscUtils.mergeArrays(newParsedArgs, obj);
@@ -62,57 +59,21 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> {
 			SimpleCommand<C> cmd = this.childrens.get(args[offset].toLowerCase());
 			if (cmd != null) {
 				if (!cmd.hasPermission(sender)) {
-					sender.sendMessage(MiscUtils.PREFIX.append(LangKey.ERROR_COMMAND_PERMISSION.component(RED)));
-					return;
+					MainLangKey.ERROR_COMMAND_PERMISSION.draft().send(sender, true);
 				} else if (!cmd.getAccess().canAccess(sender)) {
-					sender.sendMessage(MiscUtils.PREFIX.append(cmd.getAccess().getAccessMessage().component(RED)));
-					return;
+					cmd.getAccess().getAccessMessage().draft().send(sender, true);
+				} else {
+					cmd.onCommand(sender, MiscUtils.mergeArrays(parsedArgs, newParsedArgs), MiscUtils.mergeArrays(label, Arrays.copyOf(args, ++offset)), MiscUtils.popArray(args, offset));
 				}
-				cmd.onCommand(sender, MiscUtils.mergeArrays(parsedArgs, newParsedArgs), MiscUtils.mergeArrays(label, Arrays.copyOf(args, ++offset)), MiscUtils.popArray(args, offset));
 				return;
 			}
 		}
-		List<String> suggestCmd = new ArrayList<>(Arrays.asList(label.clone()));
-		List<Component> fullLabel = suggestCmd.stream().map(Component::text).collect(Collectors.toList());
-		offset = 0;
-		for (CmdArg arg : cmdArgs) {
-			if (offset < args.length) {
-				if (arg.isValid(args[offset])) {
-					suggestCmd.add(args[offset]);
-					fullLabel.add(Component.text(args[offset++]));
-				} else if (!arg.isOptional()) {
-					offset++;
-					fullLabel.add(Component.text("<", GRAY).append(arg.getDisplay().component(GRAY)).append(Component.text(">", GRAY)));
-				}
-			} else {
-				if (arg.isOptional()) {
-					fullLabel.add(Component.text("[<", GRAY).append(arg.getDisplay().component(GRAY)).append(Component.text(">]", GRAY)));
-				} else {
-					fullLabel.add(Component.text("<", GRAY).append(arg.getDisplay().component(GRAY)).append(Component.text(">", GRAY)));
-				}
-			}
-		}
-		Lang lang = Lang.get(sender);
-		Component comp = MiscUtils.PREFIX.append(LangKey.COMMAND_SUBCOMMANDS_TITLE
-				.component(LIGHT_PURPLE,Component.text(label[label.length-1], LIGHT_PURPLE)))
-				.append(Component.text(" (/", GRAY).children(MiscUtils.join(" ", fullLabel).children()).append(Component.text("...)")));
-		sender.sendTranslated(comp);
-		Component linePrefix = Component.empty().append(Component.text("> ", LIGHT_PURPLE, BOLD));
-		this.getChildrens().stream().sorted((a,b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getName(), b.getName())).forEachOrdered(cmd -> {
-			if (!cmd.hasPermission(sender) || !cmd.getAccess().canAccess(sender)) return;
-			Component line = linePrefix.append(Component.text(cmd.getName(), AQUA)).append(Component.text(cmd.getArgs().isEmpty()? "" : " - ", DARK_PURPLE))
-					.append(MiscUtils.join(" ", cmd.getArgs().stream().map(MiscUtils::argToComponent).toArray(Component[]::new)));
-			String cmdUsage = "/" + String.join(" ", suggestCmd) + " " + cmd.getName() + String.join(" ", cmd.getArgs().stream()
-					.map(arg -> MiscUtils.argToCleanText(lang, arg))
-					.toArray(String[]::new));
-			sender.sendTranslated(MiscUtils.buildCommandUsage(line, cmdUsage, cmd));
-		});
-		
+		sendHelpMessage(sender, label, cmdArgs, args);		
 	}
 
 	@Override
 	public @NotNull List<String> onTabComplete(@NotNull CommonSender<C> sender, @NotNull String[] label, @NotNull String[] args) {
-		List<CmdArg> subCmds = this.getArgs();
+		List<CmdArg> subCmds = this.getAllArgs();
 		String lastArg = args[args.length-1].toLowerCase();
 		if (subCmds.size() >= args.length) {
 			return subCmds.get(args.length-1).getTabCompletions(sender).stream()
@@ -141,6 +102,60 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> {
 		return this.childrens.values().stream()
 				.distinct()
 				.toList();
+	}
+	
+	private void sendHelpMessage(@NotNull CommonSender<C> sender, String[] label, List<CmdArg> cmdArgs, String[] args) {
+		List<String> suggestCmd = new ArrayList<>(Arrays.asList(label.clone()));
+		var fullLabel = suggestCmd.stream()
+				.map(MessageDraft::plain)
+				.collect(Collectors.toCollection(LinkedList::new));
+		int offset = 0;
+		for (CmdArg arg : cmdArgs) {
+			if (offset < args.length) {
+				if (arg.isValid(args[offset])) {
+					suggestCmd.add(args[offset]);
+					fullLabel.add(MessageDraft.plain(args[offset++]));
+				} else if (!arg.isOptional()) {
+					offset++;
+					fullLabel.add(arg.asDraft());
+				}
+			} else {
+				fullLabel.add(arg.asDraft());
+			}
+		}
+		MainLangKey.COMMAND_SUBCOMMANDS_TITLE.draft(
+				label[label.length-1],
+				fullLabel.stream().collect(MessageDraft.join(" ")))
+				.send(sender, true);
+		getChildrens().stream()
+				.filter(cmd -> cmd.canUse(sender))
+				.sorted(Comparator.comparing(SimpleCommand::getName, String.CASE_INSENSITIVE_ORDER))
+				.forEachOrdered(cmd -> {
+					var cmdArgList = cmd.getAllArgs();
+					String cmdUsage = "/%s %s".formatted(String.join(" ", suggestCmd), cmd.getName()); // 2
+					if (cmdArgList.isEmpty()) {
+						MainLangKey.COMMAND_SUBCOMMANDS_LINE_WITHOUTARGS.draft(
+								cmd.getName(),
+								MessageDraft.array(
+										MainLangKey.COMMAND_SUBCOMMANDS_EXECUTE,
+										MessageDraft.newline(),
+										MainLangKey.COMMAND_SUBCOMMANDS_INSERT),
+								cmdUsage)
+								.send(sender);
+					} else {
+						MainLangKey.COMMAND_SUBCOMMANDS_LINE_WITHOUTARGS.draft(
+								cmd.getName(),
+								cmdArgList.stream()
+										.map(CmdArg::asDraft)
+										.collect(MessageDraft.join(" ")),
+								MessageDraft.array(
+										MainLangKey.COMMAND_SUBCOMMANDS_EXECUTE,
+										MessageDraft.newline(),
+										MainLangKey.COMMAND_SUBCOMMANDS_INSERT),
+								cmdUsage)
+								.send(sender);
+					}
+				});
 	}
 	
 

@@ -1,10 +1,5 @@
 package me.szumielxd.portfel.common.utils;
 
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_GRAY;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_PURPLE;
-import static net.kyori.adventure.text.format.NamedTextColor.GRAY;
-import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
-
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,14 +20,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
 import lombok.experimental.UtilityClass;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.Lang.LangKey;
-import me.szumielxd.portfel.common.commands.CmdArg;
-import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent.Action;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 @UtilityClass
@@ -185,130 +175,6 @@ public class MiscUtils {
 	}
 	
 	/**
-	 * Get <b>untranslated</b> {@link Component} representation of {@link CmdArg} with default argument (LIGHT_GRAY) and brackets (DARK_GRAY) colors.
-	 * 
-	 * @param arg the argument
-	 * @param argColor color of argument display name
-	 * @param bracketsColor color of brackets
-	 * @return component representation of argument
-	 */
-	public static @NotNull Component argToComponent(@NotNull CmdArg arg) {
-		return argToComponent(arg, GRAY, DARK_GRAY);
-	}
-	
-	/**
-	 * Get <b>untranslated</b> {@link Component} representation of {@link CmdArg}.
-	 * 
-	 * @param arg the argument
-	 * @param argColor color of argument display name
-	 * @param bracketsColor color of brackets
-	 * @return component representation of argument
-	 */
-	public static @NotNull Component argToComponent(@NotNull CmdArg arg, @Nullable TextColor argColor, @Nullable TextColor bracketsColor) {
-		String prefix = (arg.isOptional() ? "[" : "") + (arg.hasPrefix()? arg.getPrefix() : "") + "<";
-		String suffix = arg.isOptional() ? ">]" : ">";
-		return Component.empty().children(Arrays.asList(Component.text(prefix, bracketsColor),
-				arg.getDisplay().component(argColor), Component.text(suffix, bracketsColor)));
-	}
-	
-	/**
-	 * Get plain uncolored text representation of {@link CmdArg}.
-	 * 
-	 * @param lang language used to translate {@link LangKey} components
-	 * @param arg the argument
-	 * @return uncolored string representation of argument
-	 */
-	public static @NotNull String argToCleanText(@NotNull Lang lang, @NotNull CmdArg arg) {
-		String prefix = (arg.isOptional() ? "[" : "") + (arg.hasPrefix()? arg.getPrefix() : "") + "<";
-		String suffix = (arg.isOptional() ? ">]" : ">");
-		return prefix + lang.text(arg.getDisplay()) + suffix;
-	}
-	
-	/**
-	 * Get legacy color text representation of {@link CmdArg} with default argument (LIGHT_GRAY) and brackets (DARK_GRAY) colors.
-	 * 
-	 * @param lang language used to translate {@link LangKey} components
-	 * @param arg the argument
-	 * @return string visual representation of argument
-	 */
-	/*public static @NotNull String argToPlainText(@NotNull Lang lang, @NotNull CmdArg arg) {
-		return argToPlainText(lang, arg, ChatColor.GRAY, ChatColor.DARK_GRAY);
-	}*/
-	
-	/**
-	 * Get legacy color text representation of {@link CmdArg}.
-	 * 
-	 * @param lang language used to translate {@link LangKey} components
-	 * @param arg the argument
-	 * @param argColor color of argument display name
-	 * @param bracketsColor color of brackets
-	 * @return string visual representation of argument
-	 */
-	/*public static @NotNull String argToPlainText(@NotNull Lang lang, @NotNull CmdArg arg, @Nullable ChatColor argColor, @Nullable ChatColor bracketsColor) {
-		String prefix = (bracketsColor != null ? bracketsColor.toString() : "") + (arg.isOptional() ? "[" : "") + (arg.hasPrefix()? arg.getPrefix() : "") + "<" + (argColor!=null ? argColor.toString() : "");
-		String suffix = (bracketsColor!=null ? bracketsColor.toString() : "") + (arg.isOptional() ? ">]" : ">");
-		return prefix + lang.text(arg.getDisplay()) + suffix;
-	}*/
-	
-	/**
-	 * Build interactive command usage {@link Component} for given command.
-	 * 
-	 * @param baseMessage message to apply changes
-	 * @param fullCommand string representation of usage string
-	 * @param command the command used to get data
-	 * @return interactive {@link Component} with insertion and hover and click events
-	 */
-	public static <C> @NotNull Component buildCommandUsage(@NotNull Component baseMessage, String fullCommand, SimpleCommand<C> command) {
-		/*Component hover = Component.text(fullCommand, GREEN);
-		//description
-		hover = hover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_DESCRIPTION.component(AQUA))
-				.append(Component.space())
-				.append(command.getDescription().component(GRAY));
-		//aliases
-		if (command.getAliases().length > 0) hover = hover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_ALIASES.component(AQUA))
-				.append(Component.space())
-				.append(Component.text(String.join(", ", command.getAliases()), GRAY));
-		//permission
-		hover = hover.append(Component.newline()).append(LangKey.MAIN_VALUENAME_PERMISSION.component(AQUA))
-				.append(Component.space())
-				.append(Component.text(command.getPermission(), GRAY));
-		hover = hover.append(Component.newline());*/
-		return bindCommand(baseMessage, fullCommand);
-	}
-	
-	public static @NotNull Component bindCommand(@NotNull Component baseMessage, String fullCommand) {
-		Component hover = Component.text("» ", DARK_GRAY).append(LangKey.COMMAND_SUBCOMMANDS_EXECUTE.component(GRAY))
-				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_SUBCOMMANDS_INSERT.component(GRAY));
-		if (baseMessage.hoverEvent() != null) {
-			if (baseMessage.hoverEvent().action().equals(Action.SHOW_TEXT)) {
-				baseMessage = baseMessage.hoverEvent(((Component) baseMessage.hoverEvent().value()).append(Component.newline()).append(hover));
-			}
-		} else {
-			baseMessage = baseMessage.hoverEvent(hover);
-		}
-		return baseMessage.clickEvent(ClickEvent.runCommand(fullCommand)).insertion(fullCommand);
-	}
-	
-	public static <C> @NotNull Component extendedCommandUsage(@NotNull SimpleCommand<C> command) {
-		Component result = PREFIX.append(LangKey.COMMAND_USAGE_TITLE.component(DARK_PURPLE, Component.text(command.getName(), LIGHT_PURPLE)));
-		result = result.append(Component.newline()).append(PREFIX).append(Component.text("> ", LIGHT_PURPLE)).append(command.getDescription().component(GRAY));
-		if (command.getAliases().length > 0) {
-			result = result.append(Component.newline()).append(PREFIX).append(LangKey.COMMAND_USAGE_ALIASES.component(DARK_PURPLE));
-			for (String alias : command.getAliases()) {
-				result = result.append(Component.newline()).append(PREFIX).append(Component.text("- ", LIGHT_PURPLE)).append(Component.text(alias, GRAY));
-			}
-		}
-		if (!command.getArgs().isEmpty()) {
-			result = result.append(Component.newline()).append(PREFIX).append(LangKey.COMMAND_USAGE_ARGUMENTS.component(DARK_PURPLE));
-			for (CmdArg arg : command.getArgs()) {
-				result = result.append(Component.newline()).append(PREFIX).append(Component.text("- ", LIGHT_PURPLE)).append(MiscUtils.argToComponent(arg))
-						.append(Component.text(" -> ")).append(arg.getDescription().component(GRAY));
-			}
-		}
-		return result;
-	}
-	
-	/**
 	 * Try to parse given text as MiniMessage component.
 	 * 
 	 * @param text text to parse
@@ -412,26 +278,26 @@ public class MiscUtils {
 		duration /= 365;
 		StringBuilder time = new StringBuilder();
 		if (duration > 0 || !removeZero) {
-			time.append(lang.text(LangKey.MAIN_VALUE_TIME_YEARS, duration)).append(" "); // years (1+)
+			time.append(MainLangKey.MAIN_VALUE_TIME_YEARS.draft(duration).buildPlain(lang)).append(" "); // years (1+)
 			removeZero = false;
 		}
 		if (day > 0 || !removeZero) {
-			time.append(lang.text(LangKey.MAIN_VALUE_TIME_DAYS, day)).append(" "); // days (1-364)
+			time.append(MainLangKey.MAIN_VALUE_TIME_DAYS.draft(day).buildPlain(lang)).append(" "); // days (1-364)
 			removeZero = false;
 		}
 		if (hr > 0 || !removeZero) {
-			time.append(lang.text(LangKey.MAIN_VALUE_TIME_HOURS, hr)).append(" "); // hours (1-23)
+			time.append(MainLangKey.MAIN_VALUE_TIME_HOURS.draft(hr).buildPlain(lang)).append(" "); // hours (1-23)
 		}
 		if (min > 0 || !removeZero) {
-			time.append(lang.text(LangKey.MAIN_VALUE_TIME_MINUTES, min)); // minutes (0-59)
+			time.append(MainLangKey.MAIN_VALUE_TIME_MINUTES.draft(min).buildPlain(lang)); // minutes (0-59)
 		}
-		
 		
 		if (day == 0 && hr == 0) {
-			if (time.length() > 0) time.append(" ");
-			time.append(lang.text(LangKey.MAIN_VALUE_TIME_SECONDS, sec)); // seconds
+			if (time.length() > 0) {
+				time.append(" ");
+			}
+			time.append(MainLangKey.MAIN_VALUE_TIME_SECONDS.draft(sec).buildPlain(lang)); // seconds
 		}
-		
 		return time.toString();
 	}
 	
