@@ -19,9 +19,9 @@ import me.szumielxd.portfel.api.configuration.Config;
 public class ConfigImpl implements Config {
 	
 	
-	private final Portfel plugin;
+	private final Portfel<?> plugin;
 	private final YamlFile yaml;
-	public ConfigImpl(@NotNull Portfel plugin) {
+	public ConfigImpl(@NotNull Portfel<?> plugin) {
 		this.plugin = plugin;
 		this.yaml = new YamlFile(this.plugin.getDataFolder().resolve("config.yml").toAbsolutePath().toFile());
 	}

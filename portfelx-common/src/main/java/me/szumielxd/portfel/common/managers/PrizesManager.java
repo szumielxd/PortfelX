@@ -4,7 +4,6 @@ import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,29 +20,30 @@ import org.simpleyaml.configuration.file.YamlFile;
 
 import com.google.gson.Gson;
 
+import me.szumielxd.legacyminiadventure.LegacyMiniadventure;
+import me.szumielxd.legacyminiadventure.VersionableObject.ChatVersion;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
-import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
-public class PrizesManager {
+public class PrizesManager<C> {
 	
 	
-	private final Portfel plugin;
+	private final Portfel<C> plugin;
 	private final Path file;
 	private Map<String, PrizeOrder> orders = new HashMap<>();
 	
 	
-	public PrizesManager(Portfel plugin) {
+	public PrizesManager(Portfel<C> plugin) {
 		this.plugin = plugin;
 		this.file = this.plugin.getDataFolder().resolve("token-prizes.yml");
 	}
 	
 	
-	public PrizesManager init() {
+	public PrizesManager<C> init() {
 		YamlFile yaml = new YamlFile(this.file.toUri());
 		// defaults
 		MemoryConfiguration defaults = new MemoryConfiguration();
@@ -179,9 +179,9 @@ public class PrizesManager {
 		public boolean examine(User user, String orderName, String token) {
 			final Matcher match = this.pattern.matcher(orderName);
 			if (!match.matches()) return false;
-			Collection<? extends CommonPlayer> all = plugin.getCommonServer().getPlayers();
-			CommonPlayer player = plugin.getCommonServer().getPlayer(user.getUniqueId());
-			CommonSender console = plugin.getCommonServer().getConsole();
+			Collection<? extends CommonPlayer<C>> all = plugin.getCommonServer().getPlayers();
+			CommonPlayer<C> player = plugin.getCommonServer().getPlayer(user.getUniqueId());
+			CommonSender<C> console = plugin.getCommonServer().getConsole();
 			UnaryOperator<String> replacer = s -> {
 				s = s.replace("%player%", user.getName())
 						.replace("%playerId%", user.getUniqueId().toString())
@@ -189,15 +189,29 @@ public class PrizesManager {
 				for (int i = 0; i <= match.groupCount(); i++) s = s.replace("$"+i, escapeJson(match.group(i)));
 				return s;
 			};
+			var mapper = plugin.getComponentMapper();
 			
 			// Broadcast
-			this.broadcast.stream().map(replacer).map(MiscUtils::parseComponent).forEach(msg -> all.forEach(p -> p.sendMessage(msg)));
+			this.broadcast.stream()
+					.map(replacer)
+					.map(LegacyMiniadventure.get()::deserialize)
+					.forEach(msg -> all.forEach(
+							p -> p.sendMessage(
+									mapper.kyoriToComponent(
+											msg.get(ChatVersion.getCorrect(p.protocolId()))))));
 			
 			// Message
-			this.message.stream().map(replacer).map(MiscUtils::parseComponent).forEach(player::sendMessage);
+			this.message.stream()
+					.map(replacer)
+					.map(LegacyMiniadventure.get()::deserialize)
+					.map(msg -> msg.get(ChatVersion.getCorrect(player.protocolId())))
+					.map(mapper::kyoriToComponent)
+					.forEach(player::sendMessage);
 			
 			// Command
-			this.command.stream().map(replacer).forEach(console::executeProxyCommand);
+			this.command.stream()
+					.map(replacer)
+					.forEach(console::executeProxyCommand);
 			return true;
 		}
 		

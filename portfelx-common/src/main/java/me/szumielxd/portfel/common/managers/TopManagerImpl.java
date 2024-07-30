@@ -1,16 +1,14 @@
 package me.szumielxd.portfel.common.managers;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.managers.TopManager;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
 
-public abstract class TopManagerImpl implements TopManager {
+public abstract class TopManagerImpl<C> implements TopManager {
 	
 	
 	private ExecutedTask topUpdater;
@@ -34,7 +32,9 @@ public abstract class TopManagerImpl implements TopManager {
 	 */
 	@Override
 	public void killManager() {
-		if (this.topUpdater != null) this.topUpdater.cancel();
+		if (this.topUpdater != null) {
+			this.topUpdater.cancel();
+		}
 		this.topUpdater = null;
 		this.initialized = false;
 	}
@@ -46,12 +46,12 @@ public abstract class TopManagerImpl implements TopManager {
 	
 	@Override
 	public boolean isDead() {
-		return this.initialized == false;
+		return isInitialized() && !this.initialized;
 	}
 	
 	@Override
 	public boolean isValid() {
-		return this.initialized == true;
+		return isInitialized() && this.initialized;
 	}
 	
 	protected void validate() {
@@ -70,24 +70,7 @@ public abstract class TopManagerImpl implements TopManager {
 	 * 
 	 * @return plugin
 	 */
-	protected abstract @NotNull Portfel getPlugin();
-	
-	/**
-	 * Get top entry at specified position. Counted from 1.
-	 * 
-	 * @param position position to obtain
-	 * @return top entry
-	 */
-	@Override
-	public abstract @Nullable TopEntry getByPos(int position);
-	
-	/**
-	 * Get copy of full cached top.
-	 * 
-	 * @return copy of actually cached top
-	 */
-	@Override
-	public abstract @Nullable List<TopEntry> getFullTopCopy();
+	protected abstract @NotNull Portfel<C> getPlugin();
 	
 
 }

@@ -51,7 +51,7 @@ public interface TopManager {
 	 * 
 	 * @return copy of actually cached top
 	 */
-	public @NotNull List<TopEntry> getFullTopCopy();
+	public @Nullable List<TopEntry> getFullTopCopy();
 	
 	/**
 	 * Get copy of full cached minor top.

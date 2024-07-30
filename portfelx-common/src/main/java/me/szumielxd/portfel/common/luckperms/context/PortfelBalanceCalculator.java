@@ -13,15 +13,15 @@ import net.luckperms.api.context.ContextConsumer;
 import net.luckperms.api.context.ContextSet;
 import net.luckperms.api.context.ImmutableContextSet;
 
-public class PortfelBalanceCalculator<T> implements ContextCalculator<T> {
+public class PortfelBalanceCalculator<T, C> implements ContextCalculator<T> {
 	
 	
-	private final Portfel plugin;
+	private final Portfel<C> plugin;
 	private final String key;
 	private final Method playerGetUniqueId;
 	
 	
-	public PortfelBalanceCalculator(@NotNull Portfel plugin, @NotNull String key, Class<? extends T> playerClass) {
+	public PortfelBalanceCalculator(@NotNull Portfel<C> plugin, @NotNull String key, Class<? extends T> playerClass) {
 		this.plugin = plugin;
 		this.key = key;
 		try {

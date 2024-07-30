@@ -14,15 +14,15 @@ import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.context.ContextCalculator;
 import net.luckperms.api.context.ContextManager;
 
-public class ContextProvider<T> {
+public class ContextProvider<T, C> {
 	
-	private final @NotNull Portfel plugin;
+	private final @NotNull Portfel<C> plugin;
 	private final @NotNull Class<? extends T> playerClass;
 	private final @NotNull ContextManager contextManager;
 	private final @NotNull List<ContextCalculator<?>> registeredCalculators = new ArrayList<>();
 	
 	
-	public ContextProvider(@NotNull Portfel plugin, @NotNull Class<? extends T> playerClass) {
+	public ContextProvider(@NotNull Portfel<C> plugin, @NotNull Class<? extends T> playerClass) {
 		this.plugin = plugin;
 		this.playerClass = playerClass;
 		try {
