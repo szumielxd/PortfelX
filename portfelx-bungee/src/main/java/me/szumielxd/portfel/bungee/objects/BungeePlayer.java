@@ -27,13 +27,12 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class BungeePlayer extends BungeeSender implements ProxyPlayer<BaseComponent[]> {
 	
-	
-private final @NotNull ProxiedPlayer player;
-	
+	private final @NotNull ProxiedPlayer player;
 	
 	public BungeePlayer(@NotNull PortfelBungeeImpl plugin, @NotNull ProxiedPlayer player) {
 		super(plugin, player);
@@ -111,7 +110,7 @@ private final @NotNull ProxiedPlayer player;
 
 	@Override
 	public void connect(@NotNull String server) {
-		this.player.connect(this.plugin.asPlugin().getProxy().getServerInfo(server));
+		this.player.connect(this.plugin.getProxy().getServerInfo(server));
 	}
 
 
@@ -174,6 +173,14 @@ private final @NotNull ProxiedPlayer player;
 	@Override
 	public Optional<ProxyServerConnection> getServer() {
 		return Optional.ofNullable(this.player.getServer()).map(srv -> new BungeeServerConnection(this.plugin, srv));
+	}
+
+
+	@Override
+	public int protocolId() {
+		return Optional.ofNullable(player.getPendingConnection())
+				.map(PendingConnection::getVersion)
+				.orElse(-1);
 	}
 	
 

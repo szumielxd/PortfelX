@@ -2,6 +2,7 @@ package me.szumielxd.portfel.api;
 
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +15,6 @@ import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.CommonServer;
 import me.szumielxd.portfel.api.objects.ComponentMapper;
-import me.szumielxd.portfel.common.loader.CommonLogger;
 
 public interface Portfel<C> {
 	
@@ -22,7 +22,6 @@ public interface Portfel<C> {
 	/**
 	 * Plugin prefix {@link Component}. Plain format: <i>§b§l[§5§lP§b§l]§r §3</i>.
 	 */
-	//protected final C prefix = MiniMessage.miniMessage().deserialize("<b><aqua>[<dark_purple>P</dark_purple>]</aqua></b><dark_aqua> ");
 	
 	/**
 	 * Plugin channel used for user-related messages. Returns <i>portfel:userdata</i>.
@@ -96,7 +95,7 @@ public interface Portfel<C> {
 	 * 
 	 * @return plugin's data folder
 	 */
-	public @NotNull Path getDataFolder();
+	public @NotNull Path getDataDirectory();
 	
 	/**
 	 * Get plugin's configuration.
@@ -117,7 +116,7 @@ public interface Portfel<C> {
 	 * 
 	 * @return plugin's logger
 	 */
-	public @NotNull CommonLogger getLogger();
+	public @NotNull Logger getLogger();
 	
 	/**
 	 * Log debug message in console.

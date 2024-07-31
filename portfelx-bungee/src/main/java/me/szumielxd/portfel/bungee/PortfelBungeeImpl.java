@@ -3,7 +3,6 @@ package me.szumielxd.portfel.bungee;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -18,16 +17,15 @@ import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.api.objects.ComponentMapper;
 import me.szumielxd.portfel.bungee.commands.BungeeCommandWrapper;
 import me.szumielxd.portfel.bungee.listeners.BungeeChannelListener;
 import me.szumielxd.portfel.bungee.listeners.BungeeUserListener;
 import me.szumielxd.portfel.bungee.managers.BungeeAccessManagerImpl;
+import me.szumielxd.portfel.bungee.objects.BungeeComponentMapper;
 import me.szumielxd.portfel.bungee.objects.BungeeProxy;
 import me.szumielxd.portfel.common.ConfigImpl;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.loader.CommonDependency;
-import me.szumielxd.portfel.common.loader.CommonLogger;
-import me.szumielxd.portfel.common.loader.LoadablePortfel;
+import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
@@ -51,40 +49,10 @@ import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
-public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
+public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseComponent[]> {
 	
 	
-	private final @NotNull PortfelBungeeBootstrap bootstrap;
 	
-	
-	private @Nullable BungeeProxy proxy;
-	
-	
-	public PortfelBungeeImpl(@NotNull PortfelBungeeBootstrap bootstrap) {
-		this.bootstrap = Objects.requireNonNull(bootstrap, "bootstrap cannot be null");
-	}
-	
-
-	public Plugin asPlugin() {
-		return this.bootstrap;
-	}
-
-
-	@Override
-	public void addToRuntime(CommonDependency... dependency) {
-		this.bootstrap.addToRuntime(dependency);
-	}
-	
-	
-	@Override
-	public @NotNull CommonProxy<BaseComponent[]> getCommonServer() {
-		return this.proxy;
-	}
-	
-	
-	private void registerCommand(@NotNull CommonCommand command) {
-		this.asPlugin().getProxy().getPluginManager().registerCommand(this.asPlugin(), new BungeeCommandWrapper(this, command));
-	}
 	
 	
 	
@@ -94,22 +62,23 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	
 	
-	private AccessManagerImpl accessManager;
+	private AccessManagerImpl<PortfelBungeeImpl, BaseComponent[]> accessManager;
 	private TaskManager taskManager;
 	private @Getter ConfigImpl configuration;
 	private ProxyUserManagerImpl userManager;
 	private ProxyTopManagerImpl topManager;
 	private OrdersManager ordersManager;
-	private PrizesManager prizesManager;
-	private TokenManager tokenManager;
+	private PrizesManager<BaseComponent[]> prizesManager;
+	private TokenManager<BaseComponent[]> tokenManager;
 	private @Getter @Setter AbstractDB database;
 	private @Getter @Setter AbstractTokenDB tokenDatabase;
 	private @Getter @Setter AbstractDBLogger transactionLogger;
 	private @Getter MainCommand command;
 	private @Getter MainTokenCommand tokenCommand;
 	private @Getter @Setter UUID proxyId;
-	
-	private ContextProvider<ProxiedPlayer> luckpermsContextProvider;
+	private ContextProvider<ProxiedPlayer, BaseComponent[]> luckpermsContextProvider;
+	private BungeeComponentMapper componentMapper = new BungeeComponentMapper();
+	private @Nullable BungeeProxy proxy;
 	
 	
 	@Override
@@ -127,21 +96,31 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.getLogger().info("Setup managers...");
 		this.userManager = new ProxyUserManagerImpl(this).init();
 		this.topManager = new ProxyTopManagerImpl(this).init();
-		this.tokenManager = new TokenManager(this).init();
+		this.tokenManager = new TokenManager<>(this).init();
 		this.getLogger().info("Registering listeners...");
-		this.asPlugin().getProxy().getPluginManager().registerListener(this.asPlugin(), new BungeeUserListener(this));
-		this.asPlugin().getProxy().getPluginManager().registerListener(this.asPlugin(), new BungeeChannelListener(this));
+		this.getProxy().getPluginManager().registerListener(this, new BungeeUserListener(this));
+		this.getProxy().getPluginManager().registerListener(this, new BungeeChannelListener(this));
 		this.getLogger().info("Registering commands...");
 		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
 		this.tokenCommand = new MainTokenCommand(this, this.configuration.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.configuration.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
-		this.asPlugin().getProxy().registerChannel(CHANNEL_SETUP);
-		this.asPlugin().getProxy().registerChannel(CHANNEL_USERS);
-		this.asPlugin().getProxy().registerChannel(CHANNEL_TRANSACTIONS);
+		this.getProxy().registerChannel(CHANNEL_SETUP);
+		this.getProxy().registerChannel(CHANNEL_USERS);
+		this.getProxy().registerChannel(CHANNEL_TRANSACTIONS);
 		
 		this.sendMotd();
 		
+	}
+	
+	@Override
+	public @NotNull CommonProxy<BaseComponent[]> getCommonServer() {
+		return this.proxy;
+	}
+	
+	
+	private void registerCommand(@NotNull CommonCommand command) {
+		this.getProxy().getPluginManager().registerCommand(this, new BungeeCommandWrapper(this, command));
 	}
 	
 	
@@ -149,10 +128,10 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.getLogger().info("Loading configuration...");
 		this.configuration = new ConfigImpl(this).init(Stream.of(ConfigKey.values(), ProxyConfigKey.values()).flatMap(Stream::of).toArray(AbstractKey[]::new));
 		this.getLogger().info("Setup locales...");
-		Lang.load(this.getDataFolder().resolve("languages"), this);
+		Lang.load(this.getDataDirectory().resolve("languages"), this);
 		this.ordersManager = new OrdersManager(this).init();
-		this.prizesManager = new PrizesManager(this).init();
-		if (this.asPlugin().getProxy().getPluginManager().getPlugin("LuckPerms") != null) {
+		this.prizesManager = new PrizesManager<>(this).init();
+		if (this.getProxy().getPluginManager().getPlugin("LuckPerms") != null) {
 			this.luckpermsContextProvider = new ContextProvider<>(this, ProxiedPlayer.class);
 		}
 	}
@@ -179,30 +158,30 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 			Field f = Class.forName("net.kyori.adventure.platform.bungeecord.BungeeAudiencesImpl").getDeclaredField("INSTANCES");
 			f.setAccessible(true);
 			Map<?, ?> instances = (Map<?, ?>) f.get(null);
-			instances.remove(this.asPlugin().getDescription().getName());
+			instances.remove(this.getDescription().getName());
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		this.getLogger().info("Unregistering commands");
-		this.asPlugin().getProxy().getPluginManager().unregisterCommands(this.asPlugin());
+		this.getProxy().getPluginManager().unregisterCommands(this);
 		this.getLogger().info("Unregistering listeners");
-		this.asPlugin().getProxy().getPluginManager().unregisterListeners(this.asPlugin());
+		this.getProxy().getPluginManager().unregisterListeners(this);
 		this.getLogger().info("Unregistering channels");
-		this.asPlugin().getProxy().unregisterChannel(CHANNEL_SETUP);
-		this.asPlugin().getProxy().unregisterChannel(CHANNEL_USERS);
-		this.asPlugin().getProxy().unregisterChannel(CHANNEL_TRANSACTIONS);
+		this.getProxy().unregisterChannel(CHANNEL_SETUP);
+		this.getProxy().unregisterChannel(CHANNEL_USERS);
+		this.getProxy().unregisterChannel(CHANNEL_TRANSACTIONS);
 		this.unload();
 		this.getLogger().info("Everything OK, miss you");
 		this.getLogger().info("Goodbye my friend...");
 	}
 	
 	
-	public @NotNull AccessManagerImpl getAccessManager() {
+	public @NotNull AccessManagerImpl<PortfelBungeeImpl, BaseComponent[]> getAccessManager() {
 		return this.accessManager;
 	}
 	
 	
-	public @NotNull TokenManager getTokenManager() {
+	public @NotNull TokenManager<BaseComponent[]> getTokenManager() {
 		return this.tokenManager;
 	}
 
@@ -227,25 +206,25 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	@Override
 	public @NotNull String getName() {
-		return this.asPlugin().getDescription().getName();
+		return this.getDescription().getName();
 	}
 	
 	
 	@Override
 	public @NotNull String getVersion() {
-		return this.asPlugin().getDescription().getVersion();
+		return this.getDescription().getVersion();
 	}
 	
 	
 	@Override
 	public @NotNull String getAuthor() {
-		return this.asPlugin().getDescription().getAuthor();
+		return this.getDescription().getAuthor();
 	}
 	
 	
 	@Override
 	public @NotNull String getDescriptionText() {
-		return this.asPlugin().getDescription().getDescription();
+		return this.getDescription().getDescription();
 	}
 	
 	
@@ -253,7 +232,7 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 		return this.ordersManager;
 	}
 	
-	public @NotNull PrizesManager getPrizesManager() {
+	public @NotNull PrizesManager<BaseComponent[]> getPrizesManager() {
 		return this.prizesManager;
 	}
 	
@@ -269,8 +248,8 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	private void sendMotd() {
 		this.getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
-		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.asPlugin().getDescription().getVersion()+"\u001b[0m");
-		this.getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on BungeeCord - " + this.asPlugin().getProxy().getName() + "\u001b[0m");
+		this.getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.getDescription().getVersion()+"\u001b[0m");
+		this.getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on BungeeCord - " + this.getProxy().getName() + "\u001b[0m");
 		this.getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
 		this.getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
 	}
@@ -279,16 +258,14 @@ public class PortfelBungeeImpl implements PortfelProxyImpl, LoadablePortfel {
 
 
 	@Override
-	public @NotNull Path getDataFolder() {
-		return this.asPlugin().getDataFolder().toPath();
+	public @NotNull Path getDataDirectory() {
+		return this.getDataFolder().toPath();
 	}
 
 
-
-
 	@Override
-	public @NotNull CommonLogger getLogger() {
-		return this.bootstrap.getCommonLogger();
+	public @NotNull ComponentMapper<BaseComponent[]> getComponentMapper() {
+		return this.componentMapper;
 	}
 	
 

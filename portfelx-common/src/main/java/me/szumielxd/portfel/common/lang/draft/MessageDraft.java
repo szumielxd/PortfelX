@@ -68,7 +68,7 @@ public abstract class MessageDraft {
 				.filter(CommonPlayer.class::isInstance)
 				.map(CommonPlayer.class::cast)
 				.map(CommonPlayer::protocolId);
-		sender.sendMessage(sender.getPlugin().getComponentMapper().kyoriToComponent(
+		sender.sendMessage(sender.getPlugin().getComponentMapper().kyori().kyoriToComponent(
 				base.toComponent(Lang.get(sender), ChatVersion.getCorrect(protocolId))));
 	}
 	

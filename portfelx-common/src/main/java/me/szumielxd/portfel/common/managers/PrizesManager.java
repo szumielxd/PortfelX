@@ -39,7 +39,7 @@ public class PrizesManager<C> {
 	
 	public PrizesManager(Portfel<C> plugin) {
 		this.plugin = plugin;
-		this.file = this.plugin.getDataFolder().resolve("token-prizes.yml");
+		this.file = this.plugin.getDataDirectory().resolve("token-prizes.yml");
 	}
 	
 	
@@ -59,10 +59,10 @@ public class PrizesManager<C> {
 		yaml.addDefaults(defaults);
 		try {
 			if (yaml.exists()) {
-				this.plugin.getLogger().info(String.format("Loading prizes from file `%s`", this.file.getFileName().toString()));
+				this.plugin.getLogger().info(() -> String.format("Loading prizes from file `%s`", this.file.getFileName().toString()));
 				yaml.load();
 			} else {
-				this.plugin.getLogger().info(String.format("Creating new prizes container as file `%s`", this.file.getFileName().toString()));
+				this.plugin.getLogger().info(() -> String.format("Creating new prizes container as file `%s`", this.file.getFileName().toString()));
 				yaml.setComment(defaultNothing.getCurrentPath(), 
 						"""  
 						This is the simplest example of creating new token-prize order.
@@ -189,7 +189,7 @@ public class PrizesManager<C> {
 				for (int i = 0; i <= match.groupCount(); i++) s = s.replace("$"+i, escapeJson(match.group(i)));
 				return s;
 			};
-			var mapper = plugin.getComponentMapper();
+			var mapper = plugin.getComponentMapper().kyori();
 			
 			// Broadcast
 			this.broadcast.stream()

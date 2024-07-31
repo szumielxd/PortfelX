@@ -11,17 +11,7 @@ public interface CommonSender<C> {
 	 * 
 	 * @param message message to send
 	 */
-	public default void sendMessage(@NotNull C message) {
-		sendMessage(message, false);
-	}
-	
-	/**
-	 * Send message to this sender.
-	 * 
-	 * @param message message to send
-	 * @param prefix whether send plugin prefix
-	 */
-	public void sendMessage(@NotNull C message, boolean prefix);
+	public void sendMessage(@NotNull C message);
 	
 	/**
 	 * Checks if this user has the specified permission node.
