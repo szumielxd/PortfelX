@@ -27,11 +27,12 @@ import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
+@SuppressWarnings("deprecation")
 public class MainPortfelGui implements AbstractPortfelGui {
 	
 	

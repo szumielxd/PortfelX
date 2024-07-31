@@ -55,7 +55,7 @@ import me.szumielxd.portfel.bukkit.objects.BukkitImaginaryUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.objects.TransactionImpl;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -76,22 +76,22 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	public ChannelManagerImpl(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_SETUP);
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS);
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_USERS);
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL);
-		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), BUNGEE_CHANNEL, this::onSetupValidator);
-		this.setup = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_SETUP, this::onSetupChannel);
-		this.transactions = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
-		this.users = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin.asPlugin(), Portfel.CHANNEL_USERS, this::onUsersChannel);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_SETUP);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_USERS);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, BUNGEE_CHANNEL);
+		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, BUNGEE_CHANNEL, this::onSetupValidator);
+		this.setup = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_SETUP, this::onSetupChannel);
+		this.transactions = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
+		this.users = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_USERS, this::onUsersChannel);
 	}
 	
 	
 	public void killManager() {
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.asPlugin(), BUNGEE_CHANNEL, this.bungee.getListener());
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.asPlugin(), Portfel.CHANNEL_SETUP, this.setup.getListener());
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, this.transactions.getListener());
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin.asPlugin(), Portfel.CHANNEL_USERS, this.users.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, BUNGEE_CHANNEL, this.bungee.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_SETUP, this.setup.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_TRANSACTIONS, this.transactions.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_USERS, this.users.getListener());
 	}
 	
 	
@@ -188,7 +188,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("Validate"); // channel
 		out.writeUTF(operationId.toString()); // operationId
-		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_SETUP, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_SETUP, out.toByteArray());
 		
 	}
 	
@@ -214,7 +214,7 @@ public class ChannelManagerImpl implements ChannelManager {
 			e.printStackTrace();
 		}
 		
-		player.sendPluginMessage(this.plugin.asPlugin(), channel, out.toByteArray());
+		player.sendPluginMessage(this.plugin, channel, out.toByteArray());
 	}
 	
 	
@@ -277,7 +277,9 @@ public class ChannelManagerImpl implements ChannelManager {
 				if (serverId.equals(this.plugin.getIdentifierManager().getComplementary(proxyId))) {
 					User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 					if (user != null && user.getRemoteId().equals(proxyId)) {
-						long executed = this.plugin.getPrizesManager().getOrders().values().stream().filter(o -> o.examine(user, order, token)).count();
+						long executed = this.plugin.getPrizesManager().getOrders().values().stream()
+								.filter(o -> o.examine(user, order, token))
+								.count();
 						this.plugin.getTaskManager().runTaskAsynchronously(() -> this.logTokenPrize(String.format("Handled token %s (%s) for %s(%s). Result: %d global, %d locale orders", token, order, user.getName(), String.valueOf(user.getUniqueId()), globalOrders, executed)));
 					}
 				}
@@ -447,7 +449,7 @@ public class ChannelManagerImpl implements ChannelManager {
 			out.writeUTF("ServerId");
 			out.writeUTF(serverId.toString());
 			out.writeUTF(this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
-			player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
+			player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
 		}
 	}
 	
@@ -455,7 +457,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void sendUserRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("User");
-		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
 	}
 	
 	
@@ -505,14 +507,14 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void sendTopRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("LightTop");
-		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
 	}
 	
 	
 	private void sendMinorTopRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("MinorTop");
-		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_USERS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
 	}
 	
 	
@@ -609,12 +611,12 @@ public class ChannelManagerImpl implements ChannelManager {
 			dout.writeUTF(this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME)); // server
 			dout.writeLong(transaction.getOrder().getPrice()); // value
 			dout.writeUTF(this.plugin.getName()); // plugin
-			dout.writeUTF(transaction.getOrder().getName()); // order
+			dout.writeUTF(transaction.getOrder().getOrderName()); // order
 			CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), this.plugin.getServerHashKey());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 	}
 	
 	
@@ -631,7 +633,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 	}
 	
 	
@@ -648,7 +650,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		player.sendPluginMessage(plugin.asPlugin(), Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 	}
 
 	
@@ -732,8 +734,8 @@ public class ChannelManagerImpl implements ChannelManager {
 			User user = this.plugin.getUserManager().getOrLoadUser(player.getUniqueId());
 			if (user == null) return null;
 			Transaction trans = new TransactionImpl(this.plugin, user, transactionId, order);
-			if (user instanceof BukkitOperableUser) {
-				if (((BukkitOperableUser)user).inTestmode()) {
+			if (user instanceof BukkitOperableUser operableUser) {
+				if (operableUser.inTestmode()) {
 					BukkitSender.wrap(plugin, player).sendTranslated(Portfel.PREFIX.append(LangKey.MAIN_WARNING.component(DARK_RED, new HashSet<>(Arrays.asList(TextDecoration.BOLD)), LangKey.TESTMODE_NOTIFICATION.component(Style.style(TextDecoration.BOLD.withState(false)).color(RED)))));
 					trans.finish(new TransactionResult(transactionId, TransactionStatus.OK, user.getBalance(), 0, null));
 					return trans;
@@ -770,7 +772,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	private void logTokenPrize(@NotNull String text) {
 		try {
-			Path f = this.plugin.getDataFolder().resolve("token-prize.log");
+			Path f = this.plugin.getDataDirectory().resolve("token-prize.log");
 			if (!Files.exists(f.getParent())) Files.createDirectories(f.getParent());
 			text = String.format("[%s] %s%n", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);
 			Files.write(f, Collections.singletonList(text), StandardOpenOption.APPEND);

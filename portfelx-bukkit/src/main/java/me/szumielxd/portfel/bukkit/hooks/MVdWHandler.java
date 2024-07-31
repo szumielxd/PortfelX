@@ -14,9 +14,10 @@ import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
+import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import net.kyori.adventure.translation.Translator;
 
 public class MVdWHandler {
@@ -148,23 +149,23 @@ public class MVdWHandler {
 		};
 		
 		// REGISTER
-		if(PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_balance", this.simpleBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_balance_*", this.extendedBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_balance_*", this.topBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_uuid_*", this.topUUID)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_top_player_*", this.topPlayer)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minorbalance", this.simpleMinorBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minorbalance_*", this.extendedMinorBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minortop_balance_*", this.minorTopBalance)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minortop_uuid_*", this.minorTopUUID)
-				&& PlaceholderAPI.registerPlaceholder(this.plugin.asPlugin(), "portfel_minortop_player_*", this.minorTopPlayer)) {
+		if(PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_balance", this.simpleBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_balance_*", this.extendedBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_top_balance_*", this.topBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_top_uuid_*", this.topUUID)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_top_player_*", this.topPlayer)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_minorbalance", this.simpleMinorBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_minorbalance_*", this.extendedMinorBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_minortop_balance_*", this.minorTopBalance)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_minortop_uuid_*", this.minorTopUUID)
+				&& PlaceholderAPI.registerPlaceholder(this.plugin, "portfel_minortop_player_*", this.minorTopPlayer)) {
 			this.plugin.getLogger().info("Hooked placeholders into MVdWPlaceholderAPI");
 		}
 	}
 	
 	
 	private String formatCurrency(OfflinePlayer player, long value) {
-		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((CommonPlayer)BukkitSender.wrap(this.plugin, player.getPlayer())).locale();
+		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((BukkitPlayer) BukkitSender.wrap(this.plugin, player.getPlayer())).locale();
 		return this.formatCurrency(locale, value);
 	}
 	
@@ -173,7 +174,7 @@ public class MVdWHandler {
 		NumberFormat format = NumberFormat.getInstance(locale);
 		format.setMinimumFractionDigits(2);
 		format.setMaximumFractionDigits(2);
-		return Lang.get(locale).text(LangKey.MAIN_CURRENCY_FORMAT, format.format(value).replace(' ', ' '));
+		return Lang.get(locale).text(LangKey.MAIN_CURRENCY_FORMAT, format.format(value).replace('\u00A0', ' '));
 	}
 	
 	

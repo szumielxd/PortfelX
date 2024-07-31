@@ -17,10 +17,11 @@ import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import net.kyori.adventure.text.Component;
 
+@SuppressWarnings("deprecation")
 public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 	
 	

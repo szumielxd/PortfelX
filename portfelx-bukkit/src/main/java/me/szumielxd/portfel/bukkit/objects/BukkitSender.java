@@ -7,15 +7,14 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
-import me.szumielxd.portfel.common.Lang;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.md_5.bungee.api.chat.BaseComponent;
 
 
-public class BukkitSender implements CommonSender {
+public class BukkitSender implements CommonSender<Component> {
 	
 	
 	protected final PortfelBukkitImpl plugin;
@@ -42,28 +41,6 @@ public class BukkitSender implements CommonSender {
 	 * 
 	 * @param message message to send
 	 */
-	@SuppressWarnings("deprecation")
-	public void sendMessage(@NotNull BaseComponent message) {
-		if (this.sender instanceof Player) ((Player) this.sender).spigot().sendMessage(message);
-		this.sender.sendMessage(BaseComponent.toLegacyText(message));
-	}
-	
-	/**
-	 * Send message to this sender.
-	 * 
-	 * @param message message to send
-	 */
-	@SuppressWarnings("deprecation")
-	public void sendMessage(@NotNull BaseComponent... message) {
-		if (this.sender instanceof Player) ((Player) this.sender).spigot().sendMessage(message);
-		this.sender.sendMessage(BaseComponent.toLegacyText(message));
-	}
-	
-	/**
-	 * Send message to this sender.
-	 * 
-	 * @param message message to send
-	 */
 	public void sendMessage(@NotNull Component message) {
 		Audience audience = this.sender instanceof Audience ? this.sender : this.plugin.adventure().sender(this.sender);
 		audience.sendMessage(message);
@@ -77,26 +54,6 @@ public class BukkitSender implements CommonSender {
 	public void sendMessage(@NotNull Component... message) {
 		Audience audience = this.sender instanceof Audience ? this.sender : this.plugin.adventure().sender(this.sender);
 		audience.sendMessage(Component.empty().children(Arrays.asList(message)));
-	}
-	
-	/**
-	 * Translate and send message to this sender.
-	 * 
-	 * @param message message to translate and send
-	 */
-	public void sendTranslated(@NotNull Component message) {
-		Audience audience = this.sender instanceof Audience ? this.sender : this.plugin.adventure().sender(this.sender);
-		audience.sendMessage(Lang.get(this).translateComponent(message));
-	}
-	
-	/**
-	 * Translate and send message to this sender.
-	 * 
-	 * @param message message to translate and send
-	 */
-	public void sendTranslated(@NotNull Component... message) {
-		Audience audience = this.sender instanceof Audience ? this.sender : this.plugin.adventure().sender(this.sender);
-		audience.sendMessage(Lang.get(this).translateComponent(Component.empty().children(Arrays.asList(message))));
 	}
 	
 	/**
@@ -148,6 +105,12 @@ public class BukkitSender implements CommonSender {
 	@Override
 	public boolean equals(Object obj) {
 		return this.sender.equals(obj);
+	}
+
+
+	@Override
+	public Portfel<Component> getPlugin() {
+		return this.plugin;
 	}
 	
 

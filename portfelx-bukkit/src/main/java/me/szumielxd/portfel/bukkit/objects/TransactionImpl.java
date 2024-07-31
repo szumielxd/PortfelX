@@ -110,28 +110,28 @@ public class TransactionImpl implements Transaction {
 		// replacements: %player% %playerId%
 		Pattern pattern = Pattern.compile("%((player(Id)?)|(order))%", Pattern.CASE_INSENSITIVE);
 		Function<MatchResult, String> replacer = match -> {
-			if (match.group().equalsIgnoreCase("%order%")) return this.order.getName();
+			if (match.group().equalsIgnoreCase("%order%")) return this.order.getOrderName();
 			if (match.group().equalsIgnoreCase("%player%")) return this.user.getName(); // %player%
 			return this.user.getUniqueId().toString(); // %playerId%
 		};
 		
 		// broadcast
 		Audience all = this.plugin.getServer() instanceof Audience ? this.plugin.getServer() : this.plugin.adventure().all();
-		this.getOrder().getBroadcast().forEach(msg -> all.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer)));
+		this.getOrder().getActions().broadcasts().forEach(msg -> all.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer)));
 		
 		// message
 		Audience player = Audience.class.isAssignableFrom(Player.class) ? Bukkit.getPlayer(user.getUniqueId()) : this.plugin.adventure().player(user.getUniqueId());
-		this.getOrder().getMessage().forEach(msg -> player.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer)));
+		this.getOrder().getActions().messages().forEach(msg -> player.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer)));
 		
 		// command
-		this.plugin.getTaskManager().runTask(() -> this.getOrder().getCommand().forEach(cmd -> {
+		this.plugin.getTaskManager().runTask(() -> this.getOrder().getActions().commands().forEach(cmd -> {
 			if (cmd.startsWith("/")) cmd = cmd.substring(1, cmd.length());
 			this.plugin.getServer().dispatchCommand(this.plugin.getServer().getConsoleSender(), MiscUtils.replaceAll(pattern.matcher(cmd), replacer));
 		}));
 		
 		OfflinePlayer target = Bukkit.getOfflinePlayer(user.getUniqueId());
 		String ip = target.isOnline()? target.getPlayer().getAddress().getAddress().getHostAddress() : "offline";
-		this.log(String.format("%s(%s) successfully bought `%s` for %s$. Old balance: %s$, new balance: %s$", user.getName(), ip, order.getName(), order.getPrice(), oldBalance, user.getBalance()));
+		this.log(String.format("%s(%s) successfully bought `%s` for %s$. Old balance: %s$, new balance: %s$", user.getName(), ip, order.getOrderName(), order.getPrice(), oldBalance, user.getBalance()));
 		
 		return true; 
 	}
@@ -139,7 +139,7 @@ public class TransactionImpl implements Transaction {
 	
 	private void log(@NotNull String text) {
 		Objects.requireNonNull(text, "text cannot be null");
-		Path f = this.plugin.getDataFolder().resolve("transactions.log");
+		Path f = this.plugin.getDataDirectory().resolve("transactions.log");
 		try {
 			if (!Files.exists(f.getParent())) Files.createDirectories(f.getParent());
 			text = String.format("[%s] %s", new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()), text);

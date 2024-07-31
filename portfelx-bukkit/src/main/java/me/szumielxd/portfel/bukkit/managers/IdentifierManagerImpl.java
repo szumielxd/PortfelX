@@ -32,7 +32,7 @@ public class IdentifierManagerImpl implements IdentifierManager {
 	
 	public IdentifierManagerImpl(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
-		this.file = this.plugin.getDataFolder().resolve("access.json");
+		this.file = this.plugin.getDataDirectory().resolve("access.json");
 	}
 	
 	
@@ -53,7 +53,7 @@ public class IdentifierManagerImpl implements IdentifierManager {
 				this.accessMap = GSON.fromJson(Files.newBufferedReader(this.file), JsonObject.class);
 				return this;
 			} catch (JsonSyntaxException | JsonIOException | IOException e) {
-				Path to = this.plugin.getDataFolder().resolve(file.getFileName() + ".broken");
+				Path to = this.plugin.getDataDirectory().resolve(file.getFileName() + ".broken");
 				try {
 					Files.move(this.file, to, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e1) {

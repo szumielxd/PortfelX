@@ -26,12 +26,13 @@ import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData;
+import me.szumielxd.portfel.bukkit.api.objects.OrderData.Availability;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.bukkit.utils.PlaceholderUtils;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
@@ -100,15 +101,18 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		OrderData order = this.orders.get(slot);
 		if (order != null) {
 			BukkitOperableUser user = (BukkitOperableUser) this.plugin.getUserManager().getUser(player.getUniqueId());
-			if (user != null && order.isAvailableToBuy(player) && !order.isDenied(player)) {
+			if (user != null && order.getConditions().checkAvailability(player) == Availability.AVAILABLE) {
 				long price = order.getPrice();
 				if (this.type.equals(ShopType.UPGRADE)) {
-					List<OrderData> orderList = orders.entrySet().stream().map(Entry::getValue).sorted((a,b) -> Integer.compare(a.getLevel(), b.getLevel())).collect(Collectors.toList());
+					List<OrderData> orderList = orders.entrySet().stream()
+							.map(Entry::getValue)
+							.sorted((a,b) -> Integer.compare(a.getLevel(), b.getLevel()))
+							.toList();
 					int index = orderList.indexOf(order);
 					if (index < 0) return;
-					for (int i = index-1; i >= 0; i--) {
+					for (int i = index - 1; i >= 0; i--) {
 						OrderData o = orderList.get(i);
-						if (!o.isAvailableToBuy(player) || o.isDenied(player)) break;
+						if (o.getConditions().checkAvailability(player) != Availability.DONE) break;
 						price += o.getPrice();
 					}
 				}

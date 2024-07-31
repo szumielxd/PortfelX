@@ -7,10 +7,10 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.commands.system.ReloadCommand;
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 
 public class SystemParentCommand extends ParentCommand {
 

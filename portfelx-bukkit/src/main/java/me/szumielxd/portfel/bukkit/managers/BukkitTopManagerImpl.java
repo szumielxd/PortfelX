@@ -15,26 +15,24 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.api.Portfel;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.objects.BukkitImaginaryUser;
 import me.szumielxd.portfel.common.managers.TopManagerImpl;
+import net.kyori.adventure.text.Component;
 
-public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopManager {
+@RequiredArgsConstructor
+public class BukkitTopManagerImpl extends TopManagerImpl<Component> implements BukkitTopManager {
 	
 	
-	private final PortfelBukkitImpl plugin;
-	private Map<UUID, List<TopEntry>> cachedTop;
-	private Map<UUID, List<TopEntry>> cachedMinorTop;
+	@Getter private final @NotNull PortfelBukkitImpl plugin;
+	private @NotNull Map<UUID, List<TopEntry>> cachedTop = new HashMap<>();
+	private @NotNull Map<UUID, List<TopEntry>> cachedMinorTop = new HashMap<>();
 	
-	
-	public BukkitTopManagerImpl(PortfelBukkitImpl plugin) {
-		this.cachedTop = new HashMap<>();
-		this.plugin = plugin;
-	}
 	
 	@Override
 	public @NotNull BukkitTopManagerImpl init() {
@@ -74,16 +72,6 @@ public class BukkitTopManagerImpl extends TopManagerImpl implements BukkitTopMan
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	/**
-	 * Get Portfel instance
-	 * 
-	 * @return plugin
-	 */
-	@Override
-	protected @NotNull Portfel getPlugin() {
-		return this.plugin;
 	}
 	
 	/**

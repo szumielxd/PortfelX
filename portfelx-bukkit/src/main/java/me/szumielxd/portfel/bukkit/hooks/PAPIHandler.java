@@ -17,9 +17,10 @@ import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
+import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import net.kyori.adventure.translation.Translator;
 
 public class PAPIHandler extends PlaceholderExpansion {
@@ -38,7 +39,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 		try {
 			if(this.register()) this.plugin.getLogger().info("Hooked placeholders into PlaceholderAPI");
 		} catch (Exception e) {
-			this.plugin.getLogger().warn("Cannot hook placeholders into PlaceholderAPI");
+			this.plugin.getLogger().warning("Cannot hook placeholders into PlaceholderAPI");
 			e.printStackTrace();
 		}
 		List<String> list = new LinkedList<>();
@@ -75,9 +76,10 @@ public class PAPIHandler extends PlaceholderExpansion {
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public String getAuthor() {
-		return String.join(", ", this.plugin.asPlugin().getDescription().getAuthors());
+		return String.join(", ", this.plugin.getDescription().getAuthors());
 	}
 
 	@Override
@@ -85,9 +87,10 @@ public class PAPIHandler extends PlaceholderExpansion {
 		return this.identifier;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public String getVersion() {
-		return this.plugin.asPlugin().getDescription().getVersion();
+		return this.plugin.getDescription().getVersion();
 	}
 	
 	@Override
@@ -225,7 +228,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 	
 	
 	private String formatCurrency(OfflinePlayer player, long value) {
-		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((CommonPlayer)BukkitSender.wrap(this.plugin, player.getPlayer())).locale();
+		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((BukkitPlayer)BukkitSender.wrap(this.plugin, player.getPlayer())).locale();
 		return this.formatCurrency(locale, value);
 	}
 	
@@ -239,7 +242,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 	
 	
 	private String formatMinorCurrency(OfflinePlayer player, long value) {
-		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((CommonPlayer)BukkitSender.wrap(this.plugin, player.getPlayer())).locale();
+		Locale locale = player.getPlayer() == null ? Locale.getDefault() : ((BukkitPlayer)BukkitSender.wrap(this.plugin, player.getPlayer())).locale();
 		return this.formatMinorCurrency(locale, value);
 	}
 	

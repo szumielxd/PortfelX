@@ -15,7 +15,7 @@ import net.kyori.adventure.text.Component;
 public class OrderData {
 	
 	
-	protected final @NotNull String orderName;
+	protected final @NotNull String name;
 	protected final int slot;
 	protected final int level;
 	protected final OrderDisplay display;
@@ -24,7 +24,7 @@ public class OrderData {
 	protected final OrderActions actions;
 	
 	public @NotNull OrderDataOnAir onAirWithPrice(long price) {
-		return new OrderDataOnAir(this.orderName, this.display.displayName(), price, this.actions);
+		return new OrderDataOnAir(this.name, this.display.displayName(), price, this.actions);
 	}
 	
 	@Getter

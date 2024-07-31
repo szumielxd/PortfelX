@@ -10,11 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Server;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
@@ -31,8 +29,7 @@ import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
-import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.api.objects.CommonServer;
+import me.szumielxd.portfel.api.objects.ComponentMapper;
 import me.szumielxd.portfel.bukkit.api.PortfelBukkit;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
@@ -50,21 +47,20 @@ import me.szumielxd.portfel.bukkit.managers.BukkitUserManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.ChannelManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.IdentifierManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.OrdersManager;
+import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.objects.BukkitServer;
 import me.szumielxd.portfel.common.ConfigImpl;
-import me.szumielxd.portfel.common.Lang;
-import me.szumielxd.portfel.common.loader.CommonLogger;
-import me.szumielxd.portfel.common.loader.LoadablePortfel;
+import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
+import net.kyori.adventure.text.Component;
 
-public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
+public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Component> {
 	
 	
-	private final @NotNull PortfelBukkitBootstrap bootstrap;
-	private @NotNull CommonServer server;
+	private @NotNull BukkitServer server;
 	
 	
 	private BukkitAudiences adventure;
@@ -73,30 +69,24 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	private IdentifierManager identifierManager;
 	private ChannelManagerImpl channelManager;
 	private OrdersManager ordersManager;
-	private PrizesManager prizesManager;
+	private PrizesManager<Component> prizesManager;
 	private BukkitUserManagerImpl userManager;
 	private BukkitTopManager topManager;
 	
 	private PAPIHandler papiHandler;
 	private MVdWHandler mvdwHandler;
-	private ContextProvider<Player> luckpermsContextProvider;
+	private ContextProvider<Player, Component> luckpermsContextProvider;
 	
 	private String serverHashKey;
 	
 	
-	public PortfelBukkitImpl(@NotNull PortfelBukkitBootstrap bootstrap) {
-		this.bootstrap = Objects.requireNonNull(bootstrap, "bootstrap cannot be null");
+	public PortfelBukkitImpl() {
 		this.server = new BukkitServer(this);
-	}
-	
-	
-	public JavaPlugin asPlugin() {
-		return this.bootstrap;
 	}
 
 
 	@Override
-	public @NotNull CommonServer getCommonServer() {
+	public @NotNull BukkitServer getCommonServer() {
 		return this.server;
 	}
 	
@@ -105,7 +95,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	public void onEnable() {
 		PortfelProvider.register(this);
 		try {
-			this.adventure = BukkitAudiences.create(this.asPlugin());
+			this.adventure = BukkitAudiences.create(this);
 		} catch (NoSuchFieldError e) {
 			// older kyori version, let my try to hook into paper native kyori support
 		}
@@ -122,8 +112,8 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		this.userManager = new BukkitUserManagerImpl(this).init();
 		this.topManager = new BukkitTopManagerImpl(this).init();
 		this.getLogger().info("Registering listeners...");
-		this.getServer().getPluginManager().registerEvents(new GuiListener(), this.asPlugin());
-		this.getServer().getPluginManager().registerEvents(new UserListener(this), this.asPlugin());
+		this.getServer().getPluginManager().registerEvents(new GuiListener(), this);
+		this.getServer().getPluginManager().registerEvents(new UserListener(this), this);
 		this.getLogger().info("Registering commands...");
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
@@ -156,10 +146,10 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		this.getLogger().info("Loading configuration...");
 		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(BukkitConfigKey.values()).toArray(AbstractKey[]::new)));
 		this.getLogger().info("Setup locales...");
-		Lang.load(this.getDataFolder().resolve("languages"), this);
+		Lang.load(getDataDirectory().resolve("languages"), this);
 		this.setupBukkitKey();
 		this.ordersManager = new OrdersManager(this).init();
-		this.prizesManager = new PrizesManager(this).init();
+		this.prizesManager = new PrizesManager<>(this).init();
 		if(this.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
 			this.taskManager.runTask(() -> this.papiHandler = new PAPIHandler(this));
 		}
@@ -176,6 +166,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onDisable() {
 		this.getLogger().info("Unloading managers");
@@ -189,7 +180,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 			Field f = Class.forName("net.kyori.adventure.platform.bukkit.BukkitAudiencesImpl").getDeclaredField("INSTANCES");
 			f.setAccessible(true);
 			Map<?, ?> instances = (Map<?, ?>) f.get(null);
-			instances.remove(this.asPlugin().getDescription().getName());
+			instances.remove(this.getDescription().getName());
 		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			// no kyori today :c
 		}
@@ -197,12 +188,12 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
 			commands.getCommands().stream().filter(PluginCommand.class::isInstance).map(PluginCommand.class::cast)
-					.filter(cmd -> this.asPlugin().equals(cmd.getPlugin())).forEach(cmd -> cmd.unregister(commands));
+					.filter(cmd -> this.equals(cmd.getPlugin())).forEach(cmd -> cmd.unregister(commands));
 		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
 		this.getLogger().info("Unregistering listeners");
-		HandlerList.unregisterAll(this.asPlugin());
+		HandlerList.unregisterAll(this);
 		
 		this.unload();
 		if (this.mvdwHandler != null) this.mvdwHandler.unregister();
@@ -273,7 +264,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		return this.ordersManager;
 	}
 	
-	public @NotNull PrizesManager getPrizesManager() {
+	public @NotNull PrizesManager<Component> getPrizesManager() {
 		return this.prizesManager;
 	}
 	
@@ -294,7 +285,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	 * @return current console sender
 	 */
 	@Override
-	public @NotNull CommonSender getConsole() {
+	public @NotNull BukkitSender getConsole() {
 		return this.getCommonServer().getConsole();
 	}
 	
@@ -315,15 +306,16 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		try {
 			Constructor<PluginCommand> constr = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
 			constr.setAccessible(true);
-			return constr.newInstance(name, this.asPlugin());
+			return constr.newInstance(name, this);
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	private void sendMotd() {
 		this.getServer().getLogger().info("    \u001b[35m┌───\u001b[35;1m┬───┐\u001b[0m");
-		this.getServer().getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.asPlugin().getDescription().getVersion()+"\u001b[0m");
+		this.getServer().getLogger().info("    \u001b[35m└┐┌┐\u001b[35;1m│┌─┐│     \u001b[36;1mPortfel \u001b[35mv"+this.getDescription().getVersion()+"\u001b[0m");
 		this.getServer().getLogger().info("     \u001b[35m│││\u001b[35;1m│└─┘│     \u001b[30;1mRunning on Bukkit - " + this.getServer().getName() + "\u001b[0m");
 		this.getServer().getLogger().info("    \u001b[35m┌┘└┘\u001b[35;1m│┌──┘\u001b[0m");
 		this.getServer().getLogger().info("    \u001b[35m└───\u001b[35;1m┴┘\u001b[0m");
@@ -331,14 +323,14 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 	
 	
 	private void setupBukkitKey() {
-		final Path f = this.getDataFolder().resolve("server-key.dat");
+		final Path f = getDataDirectory().resolve("server-key.dat");
 		if (Files.exists(f)) {
 			try {
 				this.serverHashKey = String.join("\n", Files.readAllLines(f));
 				return;
 			} catch (IllegalArgumentException | IOException e) {
 				e.printStackTrace();
-				Path to = this.getDataFolder().resolve(f.getFileName() + ".broken");
+				Path to = getDataDirectory().resolve(f.getFileName() + ".broken");
 				try {
 					Files.move(f, to, StandardCopyOption.REPLACE_EXISTING);
 				} catch (IOException e1) {
@@ -348,7 +340,7 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 		}
 		try {
 			if (!Files.exists(f.getParent())) Files.createDirectories(f.getParent());
-			this.serverHashKey = new RgxGen("[a-zA-Z0-9]{16}").generate();
+			this.serverHashKey = RgxGen.parse("[a-zA-Z0-9]{16}").generate();
 			Files.write(f, this.serverHashKey.getBytes(StandardCharsets.US_ASCII));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -357,26 +349,15 @@ public class PortfelBukkitImpl implements PortfelBukkit, LoadablePortfel {
 
 
 	@Override
-	public @NotNull Path getDataFolder() {
-		return this.bootstrap.getDataFolderPath();
+	public @NotNull ComponentMapper<Component> getComponentMapper() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 
 	@Override
-	public @NotNull String getName() {
-		return this.bootstrap.getName();
-	}
-
-
-	@Override
-	public @NotNull CommonLogger getLogger() {
-		return this.bootstrap.getCommonLogger();
-	}
-
-
-	@Override
-	public @NotNull Server getServer() {
-		return this.bootstrap.getServer();
+	public @NotNull Path getDataDirectory() {
+		return getDataFolder().toPath();
 	}
 	
 

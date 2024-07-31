@@ -3,6 +3,7 @@ package me.szumielxd.portfel.bukkit.objects;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
@@ -12,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
@@ -28,7 +30,7 @@ import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import net.kyori.adventure.translation.Translator;
 
-public class BukkitPlayer extends BukkitSender implements CommonPlayer {
+public class BukkitPlayer extends BukkitSender implements CommonPlayer<Component> {
 	
 	
 	private final Player player;
@@ -78,7 +80,7 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 		out.writeUTF("Connect");
 		out.writeUTF(this.getName());
 		out.writeUTF(server);
-		this.player.sendPluginMessage(this.plugin.asPlugin(), "bungeecord:main", out.toByteArray());
+		this.player.sendPluginMessage(this.plugin, "bungeecord:main", out.toByteArray());
 	}
 	
 	/**
@@ -182,6 +184,26 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer {
 	@Override
 	public int hashCode() {
 		return this.player.hashCode();
+	}
+
+
+	@Override
+	public int protocolId() {
+		return this.player.getProtocolVersion();
+	}
+
+
+	@Override
+	public void showTitle(@NotNull Component title, @NotNull Component subtitle, @Nullable TitleTiming times) {
+		if (player instanceof Audience) {
+			player.showTitle(Title.title(title, subtitle, times != null ? 
+					Times.times(times.fadeIn(), times.stay(), times.fadeOut())
+					: Times.times(
+							Duration.of(5, ChronoUnit.SECONDS),
+							Duration.of(5, ChronoUnit.SECONDS),
+							Duration.of(5, ChronoUnit.SECONDS))));
+		}
+		// TODO add bungee component suport
 	}
 
 }

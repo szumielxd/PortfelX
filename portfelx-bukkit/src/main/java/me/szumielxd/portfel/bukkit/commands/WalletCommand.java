@@ -20,7 +20,7 @@ import me.szumielxd.portfel.bukkit.gui.MainPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.OrderPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.PortfelGuiHolder;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
-import me.szumielxd.portfel.common.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 
 public class WalletCommand implements TabExecutor {
 

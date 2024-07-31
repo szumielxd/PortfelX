@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.UnaryOperator;
+import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.simpleyaml.configuration.ConfigurationSection;
 import org.simpleyaml.configuration.file.YamlFile;
+
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.objects.DoneCondition;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData;
@@ -43,7 +45,7 @@ public class OrdersManager {
 	
 	public OrdersManager(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
-		this.ordersFolder = this.plugin.getDataFolder().resolve("orders");
+		this.ordersFolder = this.plugin.getDataDirectory().resolve("orders");
 	}
 	
 	
@@ -60,7 +62,7 @@ public class OrdersManager {
 					this.load(path);
 					return 1;
 				}).sum();
-				this.plugin.getLogger().info("Loaded %d order files!", sum, this.ordersFolder);
+				this.plugin.getLogger().info(() -> "Loaded %d order files!".formatted(sum, this.ordersFolder));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -91,7 +93,7 @@ public class OrdersManager {
 	
 	
 	private void load(@NotNull Path file) {
-		this.plugin.getLogger().info("Loading order file `%s`...", file);
+		this.plugin.getLogger().info(() -> "Loading order file `%s`...".formatted(file));
 		YamlFile yml = new YamlFile(file.toFile());
 		try {
 			yml.load();
@@ -108,7 +110,7 @@ public class OrdersManager {
 			String id = fileName.substring(0, fileName.length()-4);
 			this.categories.put(id.toLowerCase(), new OrderPortfelGui(this.plugin, id, title, slot, rows, name, description, icon, type, orders));
 		} catch (NullPointerException | IOException e) {
-			this.plugin.getLogger().warn(e, "Cannot load orders category from file %s", file.getFileName());
+			this.plugin.getLogger().log(Level.WARNING, "Cannot load orders category from file %s".formatted(file.getFileName()), e);
 		}
 	}
 	
@@ -144,7 +146,7 @@ public class OrdersManager {
 						return new DoneConditionImpl(match.group(1).replace("\\" + sign, sign), match.group(3).replace("\\" + sign, sign), type);
 					}
 				}
-				this.plugin.getLogger().warn("Cannot parse done-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName());
+				this.plugin.getLogger().warning(() -> "Cannot parse done-condition `%s` for order `%s` in category `%s`".formatted(str, yml.getName(), yml.getRoot().getName()));
 				return null;
 			}).filter(Objects::nonNull).collect(Collectors.toList());
 			
@@ -157,16 +159,16 @@ public class OrdersManager {
 						return new DoneConditionImpl(match.group(1).replace("\\" + sign, sign), match.group(3).replace("\\" + sign, sign), type);
 					}
 				}
-				this.plugin.getLogger().warn("Cannot parse deny-condition `%s` for order `%s` in category `%s`", str, yml.getName(), yml.getRoot().getName());
+				this.plugin.getLogger().warning("Cannot parse deny-condition `%s` for order `%s` in category `%s`".formatted(str, yml.getName(), yml.getRoot().getName()));
 				return null;
 			}).filter(Objects::nonNull).collect(Collectors.toList());
 			
-			List<String> broadcast = yml.getStringList("broadcast").parallelStream().map(replacer).collect(Collectors.toList());
-			List<String> message = yml.getStringList("message").parallelStream().map(replacer).collect(Collectors.toList());
-			List<String> command = yml.getStringList("command").parallelStream().map(replacer).collect(Collectors.toList());
+			List<String> broadcast = yml.getStringList("broadcast").parallelStream().map(replacer).toList();
+			List<String> message = yml.getStringList("message").parallelStream().map(replacer).toList();
+			List<String> command = yml.getStringList("command").parallelStream().map(replacer).toList();
 			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, denyDescription, icon, iconBought, iconDenied, price, donePermission.isEmpty()? null : donePermission, doneConditions, denyConditions, broadcast, message, command);
 		} catch (NullPointerException e) {
-			this.plugin.getLogger().warn(e, "Cannot load order `%s` from category `%s`", yml.getName(), yml.getRoot().getName());
+			this.plugin.getLogger().log(Level.WARNING, "Cannot load order `%s` from category `%s`".formatted(yml.getName(), yml.getRoot().getName()), e);
 		}
 		return null;
 	}

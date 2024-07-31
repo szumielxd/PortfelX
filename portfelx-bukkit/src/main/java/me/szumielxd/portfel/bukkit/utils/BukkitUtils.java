@@ -107,12 +107,11 @@ public class BukkitUtils {
 		ItemStack item = new ItemStack(mat, amount); {
 			ItemMeta meta = item.getItemMeta();
 			if (glowing) {
-				item.addUnsafeEnchantment(Enchantment.LURE.getItemTarget().includes(item) ? Enchantment.PROTECTION_ENVIRONMENTAL : Enchantment.LURE, 1);
+				item.addUnsafeEnchantment(Enchantment.LURE.getItemTarget().includes(item) ? Enchantment.PROJECTILE_PROTECTION : Enchantment.LURE, 1);
 				meta = item.getItemMeta();
 				meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 			}
-			if (color != null && meta instanceof LeatherArmorMeta) {
-				LeatherArmorMeta leather = (LeatherArmorMeta) meta;
+			if (color != null && meta instanceof LeatherArmorMeta leather) {
 				leather.setColor(color);
 			}
 			if (skin != null && meta instanceof SkullMeta) {
@@ -169,12 +168,11 @@ public class BukkitUtils {
 		ItemStack item = new ItemStack(mat, amount, data); {
 			ItemMeta meta = item.getItemMeta();
 			if (glowing) {
-				item.addUnsafeEnchantment(Enchantment.LURE.getItemTarget().includes(item) ? Enchantment.PROTECTION_ENVIRONMENTAL : Enchantment.LURE, 1);
+				item.addUnsafeEnchantment(Enchantment.LURE.getItemTarget().includes(item) ? Enchantment.PROJECTILE_PROTECTION : Enchantment.LURE, 1);
 				meta = item.getItemMeta();
 				meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 			}
-			if (color != null && meta instanceof LeatherArmorMeta) {
-				LeatherArmorMeta leather = (LeatherArmorMeta) meta;
+			if (color != null && meta instanceof LeatherArmorMeta leather) {
 				leather.setColor(color);
 			}
 			if (skin != null && meta instanceof SkullMeta) {
