@@ -11,7 +11,6 @@ import com.google.gson.JsonElement;
 import me.szumielxd.legacyminiadventure.LegacyMiniadventure;
 import me.szumielxd.legacyminiadventure.VersionableObject;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 public interface ComponentMapper<C> {
@@ -31,10 +30,6 @@ public interface ComponentMapper<C> {
 	
 	public default @NotNull C empty() {
 		return plainText("");
-	}
-	
-	public default @NotNull C parseMiniMessage(@NotNull String message) {
-		return this.kyoriToComponent(MiniMessage.miniMessage().deserialize(message));
 	}
 	
 	public default @NotNull C kyoriToComponent(@NotNull Component component) {

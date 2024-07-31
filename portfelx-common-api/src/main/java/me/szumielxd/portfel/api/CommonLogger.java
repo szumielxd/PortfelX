@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.common.loader;
+package me.szumielxd.portfel.api;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
