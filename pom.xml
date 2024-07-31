@@ -549,12 +549,9 @@
 		<module>portfelx-proxy-api</module>
 		<module>portfelx-common</module>
 		<module>portfelx-bukkit</module>
-		<module>portfelx-bukkit-assembly</module>
 		<module>portfelx-proxy</module>
 		<module>portfelx-bungee</module>
-		<module>portfelx-bungee-assembly</module>
 		<module>portfelx-velocity</module>
-		<module>portfelx-velocity-assembly</module>
 		<module>portfelx-api</module>
 	</modules>
 </project>
