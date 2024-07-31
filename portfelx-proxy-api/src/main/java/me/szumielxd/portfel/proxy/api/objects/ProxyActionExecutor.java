@@ -23,7 +23,7 @@ public final class ProxyActionExecutor extends ActionExecutor {
 	 * @param player player to get data from
 	 * @return ActionExecutor based on given player
 	 */
-	public static @NotNull ProxyActionExecutor player(@NotNull ProxyPlayer player) {
+	public static @NotNull ProxyActionExecutor player(@NotNull ProxyPlayer<?> player) {
 		return new ProxyActionExecutor(player.getName(), player.getUniqueId());
 	}
 	
@@ -33,7 +33,7 @@ public final class ProxyActionExecutor extends ActionExecutor {
 	 * @param plugin plugin to get data from
 	 * @return ActionExecutor based on given plugin
 	 */
-	public static @NotNull ProxyActionExecutor plugin(@NotNull PortfelProxy plugin) {
+	public static @NotNull ProxyActionExecutor plugin(@NotNull PortfelProxy<?> plugin) {
 		return new ProxyActionExecutor(plugin.getName(), ActionExecutor.PLUGIN_UUID);
 	}
 	
@@ -61,9 +61,9 @@ public final class ProxyActionExecutor extends ActionExecutor {
 	 * 
 	 * @return ActionExecutor representation of console
 	 */
-	public static @NotNull ProxyActionExecutor sender(CommonSender sender) {
-		if (sender instanceof CommonPlayer) {
-			return new ProxyActionExecutor(sender.getName(), ((CommonPlayer)sender).getUniqueId());
+	public static @NotNull ProxyActionExecutor sender(CommonSender<?> sender) {
+		if (sender instanceof CommonPlayer<?> player) {
+			return new ProxyActionExecutor(sender.getName(), player.getUniqueId());
 		}
 		return new ProxyActionExecutor("Console", ActionExecutor.CONSOLE_UUID);
 	}
