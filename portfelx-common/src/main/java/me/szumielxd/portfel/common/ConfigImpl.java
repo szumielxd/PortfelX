@@ -23,7 +23,7 @@ public class ConfigImpl implements Config {
 	private final YamlFile yaml;
 	public ConfigImpl(@NotNull Portfel<?> plugin) {
 		this.plugin = plugin;
-		this.yaml = new YamlFile(this.plugin.getDataFolder().resolve("config.yml").toAbsolutePath().toFile());
+		this.yaml = new YamlFile(this.plugin.getDataDirectory().resolve("config.yml").toAbsolutePath().toFile());
 	}
 	
 	

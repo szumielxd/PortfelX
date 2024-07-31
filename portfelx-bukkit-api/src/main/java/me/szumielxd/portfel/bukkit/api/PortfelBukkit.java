@@ -9,7 +9,7 @@ import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.managers.IdentifierManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 
-public interface PortfelBukkit extends Portfel {
+public interface PortfelBukkit<C> extends Portfel<C> {
 	
 	
 	/**
