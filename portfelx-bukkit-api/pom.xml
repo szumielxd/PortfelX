@@ -12,13 +12,13 @@
 			<artifactId>portfelx-common-api</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>io.papermc.paper</groupId>
+			<artifactId>paper-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.kyori</groupId>
 			<artifactId>adventure-platform-bukkit</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.papermc.paper</groupId>
-			<artifactId>paper-api</artifactId>
 		</dependency>
 	</dependencies>
 </project>
