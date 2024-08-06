@@ -1,6 +1,7 @@
 package me.szumielxd.portfel.bukkit.utils;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -27,6 +28,7 @@ import com.google.gson.JsonSyntaxException;
 import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -57,6 +59,15 @@ public class PlaceholderUtils {
 		}
 		REPLACE_PAPI = replacePapi;
 		REPLACE_COLORED_PAPI = replaceColoredPapi;
+	}
+	
+	
+	public Map<String, MessageDraft> userPlaceholders(@NotNull User user) {
+		return Map.of(
+				"player", MessageDraft.plain(user.getName()),
+				"placerId", MessageDraft.plain(user.getUniqueId()),
+				"balance", MessageDraft.plain(user.getBalance()),
+				"minorBalance", MessageDraft.plain(user.getMinorBalance()));
 	}
 	
 	
@@ -106,7 +117,7 @@ public class PlaceholderUtils {
 	public static void replacePlaceholdersInJson(@NotNull User user, @NotNull JsonArray json) {
 		Objects.requireNonNull(user, "user cannot be null");
 		Objects.requireNonNull(json, "json cannot be null");
-		replacePlaceholdersInJson(json, Bukkit.getOfflinePlayer(user.getUniqueId()), (match) -> {
+		replacePlaceholdersInJson(json, Bukkit.getOfflinePlayer(user.getUniqueId()), match -> {
 			if (match.group().equals("%player%")) return user.getName();
 			if (match.group().equals("%playerIp%")) return user.getUniqueId().toString();
 			if (match.group().equals("%balance%")) return String.valueOf(user.getBalance());

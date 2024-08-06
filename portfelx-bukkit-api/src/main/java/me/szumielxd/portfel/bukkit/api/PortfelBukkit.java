@@ -7,7 +7,6 @@ import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.managers.IdentifierManager;
-import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 
 public interface PortfelBukkit<C> extends Portfel<C> {
 	
@@ -25,13 +24,6 @@ public interface PortfelBukkit<C> extends Portfel<C> {
 	 * @return identifier manager
 	 */
 	public @NotNull IdentifierManager getIdentifierManager();
-	
-	/**
-	 * Get Bukkit audience implementation.
-	 * 
-	 * @return audiences
-	 */
-	public @NotNull BukkitAudiences adventure();
 	
 	/**
 	 * Get bukkit server.

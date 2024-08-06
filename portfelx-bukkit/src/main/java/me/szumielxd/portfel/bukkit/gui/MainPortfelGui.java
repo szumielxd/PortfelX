@@ -1,14 +1,11 @@
 package me.szumielxd.portfel.bukkit.gui;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-import static net.kyori.adventure.text.format.TextDecoration.*;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -20,31 +17,39 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import com.google.common.collect.Range;
-import com.google.common.collect.Sets;
 
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
+import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
-import me.szumielxd.portfel.common.lang.Lang;
-import me.szumielxd.portfel.common.lang.Lang.LangKey;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.bukkit.utils.ComponentUtils;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import net.kyori.adventure.text.Component;
 
 @SuppressWarnings("deprecation")
 public class MainPortfelGui implements AbstractPortfelGui {
 	
-	
-	private static ItemStack BACKGROUND;
+	private static final Pattern NEWLINE_PATTERN = Pattern.compile("\\n");
+	private static final ItemStack BACKGROUND;
 	
 	
 	static {
-		try { BACKGROUND = new ItemStack(Material.valueOf("STAINED_GLASS_PANE"), 1, (byte)15); } catch (Exception e) { BACKGROUND = new ItemStack(Material.BLACK_STAINED_GLASS_PANE); }; {
-			ItemMeta meta = BACKGROUND.getItemMeta();
-			meta.setDisplayName("§0");
-			BACKGROUND.setItemMeta(meta);
+		Material legacyGlass = null;
+		try {
+			legacyGlass = Material.valueOf("STAINED_GLASS_PANE");
+		} catch (Exception e) {
+			// fallback to new material
 		}
+		if (legacyGlass != null) {
+			BACKGROUND = new ItemStack(legacyGlass, 1, (byte)15);
+		} else {
+			BACKGROUND = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
+		}
+		ItemMeta meta = BACKGROUND.getItemMeta();
+		meta.setDisplayName("§0");
+		BACKGROUND.setItemMeta(meta);
 	}
 	
 	
@@ -63,7 +68,10 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player) {
 		Objects.requireNonNull(user, "user cannot be null");
 		Objects.requireNonNull(player, "player cannot be null");
-		return Lang.get(BukkitSender.wrap(this.plugin, player)).translateComponent(LangKey.SHOP_TITLE.component(DARK_PURPLE, Sets.newHashSet(BOLD), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Sets.newHashSet(BOLD), Component.text(user.getBalance()))));
+		return BukkitLangKey.SHOP_TITLE
+				.draft(BukkitLangKey.MAIN_CURRENCY_FORMAT
+						.draft(user.getBalance()))
+				.buildComponent(BukkitSender.wrap(this.plugin, player));
 	}
 
 	@Override
@@ -87,17 +95,20 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	public void setup(@NotNull Player player, @NotNull Inventory inventory) {
 		ItemStack[] background = new ItemStack[inventory.getSize()];
 		Arrays.fill(background, BACKGROUND);
+		var wrapper = BukkitSender.wrap(plugin, player);
 		this.guis.forEach((i, s) -> {
-			ItemStack item = s.getIcon(); {
-				ItemMeta meta = item.getItemMeta();
-				BukkitUtils.setDisplayName(meta, MiscUtils.parseComponent(s.getDisplayName()));
-				List<Component> lore = new ArrayList<>();
-				lore.addAll(s.getDescription().stream().map(MiscUtils::parseComponent).map(l -> l.colorIfAbsent(GRAY)).collect(Collectors.toList()));
-				lore.add(Component.empty());
-				lore.add(Component.text("/" + this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME) + " " + s.getName(), AQUA));
-				BukkitUtils.setLore(meta, lore);
-				item.setItemMeta(meta);
-			}
+			ItemStack item = s.getIcon();
+			ItemMeta meta = item.getItemMeta();
+			BukkitUtils.setDisplayName(meta, s.getDisplayName().buildComponent(wrapper));
+			var lore = BukkitLangKey.SHOP_MAIN_LORE
+					.draft(
+							s.getDescription().stream()
+									.collect(MessageDraft.join(MessageDraft.newline())),
+							this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME),
+							s.getName())
+					.buildComponent(wrapper);
+			BukkitUtils.setLore(meta, List.of(ComponentUtils.split(lore, NEWLINE_PATTERN)));
+			item.setItemMeta(meta);
 			background[i] = item;
 		});
 		inventory.setContents(background);

@@ -9,20 +9,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
+import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.AbstractMap;
-import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -40,6 +38,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.enums.TransactionStatus;
 import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
@@ -47,19 +46,15 @@ import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
-import me.szumielxd.portfel.bukkit.api.managers.ChannelManager.BalanceUpdateResult;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction.TransactionResult;
+import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitImaginaryUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.objects.TransactionImpl;
-import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 public class ChannelManagerImpl implements ChannelManager {
 	
@@ -736,7 +731,9 @@ public class ChannelManagerImpl implements ChannelManager {
 			Transaction trans = new TransactionImpl(this.plugin, user, transactionId, order);
 			if (user instanceof BukkitOperableUser operableUser) {
 				if (operableUser.inTestmode()) {
-					BukkitSender.wrap(plugin, player).sendTranslated(Portfel.PREFIX.append(LangKey.MAIN_WARNING.component(DARK_RED, new HashSet<>(Arrays.asList(TextDecoration.BOLD)), LangKey.TESTMODE_NOTIFICATION.component(Style.style(TextDecoration.BOLD.withState(false)).color(RED)))));
+					BukkitLangKey.MAIN_WARNING
+							.draft(BukkitLangKey.TESTMODE_NOTIFICATION)
+							.send(BukkitSender.wrap(plugin, player), true);
 					trans.finish(new TransactionResult(transactionId, TransactionStatus.OK, user.getBalance(), 0, null));
 					return trans;
 				} else if (user instanceof BukkitImaginaryUser) {

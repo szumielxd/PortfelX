@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.logging.Level;
@@ -28,12 +29,16 @@ import org.simpleyaml.configuration.file.YamlFile;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.objects.DoneCondition;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData;
+import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderActions;
+import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderConditions;
+import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDisplay;
+import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderIcons;
 import me.szumielxd.portfel.bukkit.gui.OrderPortfelGui;
+import me.szumielxd.portfel.bukkit.gui.OrderPortfelGui.OrderGuiDisplay;
 import me.szumielxd.portfel.bukkit.gui.ShopType;
 import me.szumielxd.portfel.bukkit.objects.DoneConditionImpl;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
-import me.szumielxd.portfel.common.utils.MiscUtils;
-import net.kyori.adventure.text.Component;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 
 public class OrdersManager {
 	
@@ -108,7 +113,13 @@ public class OrdersManager {
 			List<OrderData> orders = section.getKeys(false).stream().filter(section::isConfigurationSection).map(section::getConfigurationSection).map(this::loadOrder).filter(Objects::nonNull).collect(Collectors.toList());
 			String fileName = file.getFileName().toString();
 			String id = fileName.substring(0, fileName.length()-4);
-			this.categories.put(id.toLowerCase(), new OrderPortfelGui(this.plugin, id, title, slot, rows, name, description, icon, type, orders));
+			this.categories.put(id.toLowerCase(), new OrderPortfelGui(this.plugin,id, slot, rows,
+					new OrderGuiDisplay(
+							MessageDraft.plain(title),
+							MessageDraft.plain(name),
+							description.stream().map(MessageDraft::plain).toList(),
+							icon),
+					type, orders));
 		} catch (NullPointerException | IOException e) {
 			this.plugin.getLogger().log(Level.WARNING, "Cannot load orders category from file %s".formatted(file.getFileName()), e);
 		}
@@ -129,11 +140,14 @@ public class OrdersManager {
 			int slot = Objects.requireNonNull((Integer)yml.get("slot", null), "slot must be set");
 			int level = yml.getInt("level", 0);
 			String name = replacer.apply(Objects.requireNonNull(yml.getString("name", null), "name must be set"));
-			List<Component> description = yml.getStringList("description").parallelStream().map(replacer).map(MiscUtils::parseComponent).collect(Collectors.toList());
-			List<Component> denyDescription = yml.getStringList("deny-description").parallelStream().map(replacer).map(MiscUtils::parseComponent).collect(Collectors.toList());
-			ItemStack icon = BukkitUtils.parseItem(replacer.apply(yml.getString("icon", ""))).orElse(new ItemStack(Material.STONE));
-			ItemStack iconBought = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-bought", ""))).orElse(icon);
-			ItemStack iconDenied = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-denied", ""))).orElse(icon);
+			List<String> description = yml.getStringList("description");
+			List<String> denyDescription = yml.getStringList("deny-description");
+			ItemStack icon = BukkitUtils.parseItem(replacer.apply(yml.getString("icon", "")))
+					.orElse(new ItemStack(Material.STONE));
+			ItemStack iconBought = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-bought", "")))
+					.orElse(icon);
+			ItemStack iconDenied = BukkitUtils.parseItem(replacer.apply(yml.getString("icon-denied", "")))
+					.orElse(icon);
 			int price = Objects.requireNonNull((Integer)yml.get("price", null), "price must be set");
 			String donePermission = replacer.apply(yml.getString("done-permission", ""));
 			
@@ -166,7 +180,11 @@ public class OrdersManager {
 			List<String> broadcast = yml.getStringList("broadcast").parallelStream().map(replacer).toList();
 			List<String> message = yml.getStringList("message").parallelStream().map(replacer).toList();
 			List<String> command = yml.getStringList("command").parallelStream().map(replacer).toList();
-			return new OrderData(yml.getName(), slot, level, MiscUtils.parseComponent(name), description, denyDescription, icon, iconBought, iconDenied, price, donePermission.isEmpty()? null : donePermission, doneConditions, denyConditions, broadcast, message, command);
+			return new OrderData(yml.getName(), slot, level,
+					new OrderDisplay(name, description, denyDescription, new OrderIcons(icon, iconBought, iconDenied)),
+					price,
+					new OrderConditions(Optional.of(donePermission).filter(s -> !s.isEmpty()), doneConditions, denyConditions),
+					new OrderActions(broadcast, message, command));
 		} catch (NullPointerException e) {
 			this.plugin.getLogger().log(Level.WARNING, "Cannot load order `%s` from category `%s`".formatted(yml.getName(), yml.getRoot().getName()), e);
 		}

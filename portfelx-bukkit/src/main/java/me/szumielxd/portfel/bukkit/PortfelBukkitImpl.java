@@ -9,10 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
@@ -37,7 +35,6 @@ import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.managers.IdentifierManager;
 import me.szumielxd.portfel.bukkit.commands.MainCommand;
 import me.szumielxd.portfel.bukkit.commands.WalletCommand;
-import me.szumielxd.portfel.bukkit.hooks.MVdWHandler;
 import me.szumielxd.portfel.bukkit.hooks.PAPIHandler;
 import me.szumielxd.portfel.bukkit.listeners.GuiListener;
 import me.szumielxd.portfel.bukkit.listeners.UserListener;
@@ -74,7 +71,6 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	private BukkitTopManager topManager;
 	
 	private PAPIHandler papiHandler;
-	private MVdWHandler mvdwHandler;
 	private ContextProvider<Player, Component> luckpermsContextProvider;
 	
 	private String serverHashKey;
@@ -102,10 +98,6 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 		this.taskManager = new BukkitTaskManagerImpl(this);
 		
 		this.load();
-		
-		if(Bukkit.getPluginManager().isPluginEnabled("MVdWPlaceholderAPI")) {
-			this.mvdwHandler = new MVdWHandler(this);
-		}
 		
 		this.getLogger().info("Setup managers...");
 		this.channelManager = new ChannelManagerImpl(this);
@@ -166,24 +158,16 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	}
 	
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onDisable() {
 		this.getLogger().info("Unloading managers");
 		if (this.userManager != null) this.userManager.killManager();
-		if (this.userManager != null) this.topManager.killManager();
-		if (this.userManager != null) this.taskManager.cancelAll();
+		if (this.topManager != null) this.topManager.killManager();
+		if (this.taskManager != null) this.taskManager.cancelAll();
 		this.getLogger().info("Unregistering channels");
-		if (this.userManager != null) this.channelManager.killManager();
+		if (this.channelManager != null) this.channelManager.killManager();
 		this.getLogger().info("Unhooking kyori adventure");
-		try {
-			Field f = Class.forName("net.kyori.adventure.platform.bukkit.BukkitAudiencesImpl").getDeclaredField("INSTANCES");
-			f.setAccessible(true);
-			Map<?, ?> instances = (Map<?, ?>) f.get(null);
-			instances.remove(this.getDescription().getName());
-		} catch (ClassNotFoundException | NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-			// no kyori today :c
-		}
+		this.adventure.close();
 		this.getLogger().info("Unregistering commands");
 		try {
 			SimpleCommandMap commands = this.getCommandMap();
@@ -196,7 +180,6 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 		HandlerList.unregisterAll(this);
 		
 		this.unload();
-		if (this.mvdwHandler != null) this.mvdwHandler.unregister();
 		this.getLogger().info("Everything OK, miss you");
 		this.getLogger().info("Goodbye my friend...");
 	}
@@ -273,7 +256,6 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	 * 
 	 * @return audiences
 	 */
-	@Override
 	public @NotNull BukkitAudiences adventure() {
 		if (this.adventure == null) throw new IllegalStateException("Cannot retrieve audience provider while plugin is not enabled");
 		return this.adventure;

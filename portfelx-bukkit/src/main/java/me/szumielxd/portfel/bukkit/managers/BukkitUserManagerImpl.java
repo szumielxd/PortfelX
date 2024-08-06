@@ -16,18 +16,19 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.api.Portfel;
+import lombok.Getter;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.objects.BukkitImaginaryUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.common.managers.UserManagerImpl;
+import net.kyori.adventure.text.Component;
 
-public class BukkitUserManagerImpl extends UserManagerImpl {
+public class BukkitUserManagerImpl extends UserManagerImpl<Component> {
 	
 	
-	private final PortfelBukkitImpl plugin;
+	@Getter private final PortfelBukkitImpl plugin;
 	private final Map<UUID, User> users;
 	
 	
@@ -42,19 +43,19 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 	 * 
 	 * @implNote Internal use only
 	 */
+	@Override
 	public @NotNull BukkitUserManagerImpl init() {
 		super.init();
 		((ChannelManagerImpl)this.plugin.getChannelManager()).setRegisterer(user -> {
 			if (user == null) return;
 			User main = this.users.get(user.getUniqueId());
-			if (main instanceof BukkitImaginaryUser) { // change user class to operable one
-				user.setTestmode(((BukkitImaginaryUser) main).inTestmode());
+			if (main instanceof BukkitImaginaryUser imaginaryUser) { // change user class to operable one
+				user.setTestmode(imaginaryUser.inTestmode());
 				this.users.put(user.getUniqueId(), user);
-			} else if (main instanceof BukkitOperableUser) { // update user status
-				BukkitOperableUser operable = (BukkitOperableUser) main;
-				operable.setPlainBalance(user.getBalance());
-				operable.setPlainDeniedInTop(user.isDeniedInTop());
-				operable.setOnline(this.plugin.getServer().getPlayer(user.getUniqueId()) != null);
+			} else if (main instanceof BukkitOperableUser operableUser) { // update user status
+				operableUser.setPlainBalance(user.getBalance());
+				operableUser.setPlainDeniedInTop(user.isDeniedInTop());
+				operableUser.setOnline(this.plugin.getServer().getPlayer(user.getUniqueId()) != null);
 			} else { // insert new user
 				this.users.put(user.getUniqueId(), user);
 			}
@@ -166,7 +167,7 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 			try {
 				mgr.requestPlayer(t);
 			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				// silence
+				Thread.currentThread().interrupt();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -181,16 +182,6 @@ public class BukkitUserManagerImpl extends UserManagerImpl {
 	@Override
 	protected @NotNull Collection<? extends User> getLoadedUsersOrigin() {
 		return this.users.values();
-	}
-
-	/**
-	 * Get plugin.
-	 * 
-	 * @return plugin
-	 */
-	@Override
-	protected @NotNull Portfel getPlugin() {
-		return this.plugin;
 	}
 
 }

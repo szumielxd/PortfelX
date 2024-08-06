@@ -1,10 +1,9 @@
 package me.szumielxd.portfel.bukkit.gui;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,42 +26,40 @@ import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.Availability;
+import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
+import me.szumielxd.portfel.bukkit.utils.ComponentUtils;
 import me.szumielxd.portfel.bukkit.utils.PlaceholderUtils;
-import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 public class OrderPortfelGui implements AbstractPortfelGui {
 	
 	
 	private final PortfelBukkitImpl plugin;
 	private final String name;
-	private final String title;
 	private final int slot;
 	private final int size;
-	private final String displayName;
-	private final List<String> description;
-	private final ItemStack icon;
+	private final @NotNull OrderGuiDisplay display;
 	private final ShopType type;
 	private final Map<Integer, OrderData> orders;
 	
 	
-	public OrderPortfelGui(@NotNull PortfelBukkitImpl plugin, @NotNull String name, @NotNull String title, int slot, int rows, @NotNull String displayName, @NotNull List<String> description, ItemStack icon, @NotNull ShopType type, @NotNull List<OrderData> orders) {
+	public OrderPortfelGui(@NotNull PortfelBukkitImpl plugin, @NotNull String name, int slot, int rows, @NotNull OrderGuiDisplay display, @NotNull ShopType type, @NotNull List<OrderData> orders) {
 		this.plugin = plugin;
 		this.name = name;
-		this.title = title;
 		this.slot = slot;
-		this.size = rows*9;
-		this.displayName = displayName;
-		this.description = Collections.unmodifiableList(description);
-		this.icon = icon;
+		this.size = rows * 9;
+		this.display = display;
 		this.type = type;
-		Range<Integer> range = Range.closed(0, this.getSize()-1);
-		this.orders = orders.stream().filter(o -> range.contains(o.getSlot())).collect(Collectors.toMap(o -> o.getSlot(), Function.identity(), (a,b) -> b));
+		Range<Integer> range = Range.closed(0, this.getSize() - 1);
+		this.orders = orders.stream()
+				.filter(o -> range.contains(o.getSlot()))
+				.collect(Collectors.toMap(OrderData::getSlot, Function.identity(), (a,b) -> b));
 	}
 	
 	
@@ -72,7 +69,9 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	
 	@Override
 	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player) {
-		return PlaceholderUtils.parseComponent(this.title, user, player);
+		return this.display.title()
+				.placeholders(PlaceholderUtils.userPlaceholders(user))
+				.buildComponent(BukkitSender.wrap(plugin, player));
 	}
 	
 	public int getSlot() {
@@ -84,16 +83,16 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		return this.size;
 	}
 	
-	public @NotNull String getDisplayName() {
-		return this.displayName;
+	public @NotNull MessageDraft getDisplayName() {
+		return this.display.displayName();
 	}
 	
-	public @NotNull List<String> getDescription() {
-		return this.description;
+	public @NotNull List<MessageDraft> getDescription() {
+		return Collections.unmodifiableList(this.display.description());
 	}
 	
 	public @NotNull ItemStack getIcon() {
-		return this.icon.clone();
+		return this.display.icon().clone();
 	}
 
 	@Override
@@ -106,7 +105,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 				if (this.type.equals(ShopType.UPGRADE)) {
 					List<OrderData> orderList = orders.entrySet().stream()
 							.map(Entry::getValue)
-							.sorted((a,b) -> Integer.compare(a.getLevel(), b.getLevel()))
+							.sorted(Comparator.comparingInt(OrderData::getLevel))
 							.toList();
 					int index = orderList.indexOf(order);
 					if (index < 0) return;
@@ -117,8 +116,10 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 					}
 				}
 				if (price > user.getBalance() && !user.inTestmode()) {
-					Optional<Sound> sound = Stream.of(Sound.values()).filter(s -> s.name().equals("ENTITY_VILLAGER_NO")||s.name().equals("VILLAGER_NO")).findAny();
-					if (sound.isPresent()) player.playSound(player.getLocation(), sound.get(), 2, 1);
+					Stream.of(Sound.values())
+							.filter(s -> s.name().equals("ENTITY_VILLAGER_NO")||s.name().equals("VILLAGER_NO"))
+							.findAny()
+							.ifPresent(sound -> player.playSound(player.getLocation(), sound, 2, 1));
 					return;
 				}
 				PortfelGuiHolder newHolder = new PortfelGuiHolder(this.plugin, new ConfirmOrderPortfelGui(this.plugin, order.onAirWithPrice(price)), user, player);
@@ -130,22 +131,16 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	@Override
 	public void setup(@NotNull Player player, @NotNull Inventory inventory) {
 		inventory.clear();
-		List<OrderData> orderList = orders.entrySet().stream().map(Entry::getValue).sorted((a,b) -> Integer.compare(a.getLevel(), b.getLevel())).collect(Collectors.toList());
-		Lang lang = Lang.get(BukkitSender.wrap(this.plugin, player));
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user == null) return;
-		if (this.type.equals(ShopType.NORMAL)) {
-			for (int i = 0; i < orderList.size(); i++) {
-				OrderData order = orderList.get(i);
-				inventory.setItem(order.getSlot(), this.buildNormalIcon(order, lang, player, user, order.isAvailableToBuy(player), order.isDenied(player)));
-			}
-		} else if (this.type.equals(ShopType.UPGRADE)) {
-			boolean available = true;
-			for (int i = orderList.size()-1; i >= 0; i--) {
-				OrderData order = orderList.get(i);
-				available = available && order.isAvailableToBuy(player);
-				inventory.setItem(order.getSlot(), this.buildUpgradeIcon(orderList, i, lang, player, user, available, order.isDenied(player)));
-			}
+		var ordersArray = orders.entrySet().stream()
+				.map(Entry::getValue)
+				.sorted(Comparator.comparingInt(OrderData::getLevel))
+				.toArray(OrderData[]::new);
+		
+		switch (this.type) {
+			case NORMAL -> buildNormalIcons(ordersArray, player, user, inventory);
+			case UPGRADE -> buildUpgradeIcons(ordersArray, player, user, inventory);
 		}
 		player.openInventory(inventory);
 	}
@@ -154,82 +149,129 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 		return this.type;
 	}
 	
-	private @NotNull ItemStack buildNormalIcon(final @NotNull OrderData order, final @NotNull Lang lang, final @NotNull Player player, final @NotNull User user, final boolean available, final boolean denied) {
-		this.plugin.debug("normalItem(%s) %s|%s available: %s, denied: %s", player.getName(), this.getName(), order.getName(), available, denied);
-		ItemStack item = (denied ? order.getIconDenied() : available ? order.getIcon() : order.getIconBought()).clone();
-		ItemMeta meta = item.getItemMeta();
-		BukkitUtils.setDisplayName(meta, PlaceholderUtils.replacePlaceholders(user, player, order.getDisplay()));
-		List<Component> lore = new ArrayList<>();
-		lore.add(LangKey.SHOP_ORDER_PRICE.component(GRAY, LangKey.MAIN_CURRENCY_FORMAT.component((order.getPrice() <= user.getBalance() ? GREEN : RED), Component.text(order.getPrice()))));
-		lore.add(Component.empty());
-		lore.add(LangKey.SHOP_ORDER_DESCRIPTION.component(GRAY));
-		Component indentation = Component.text("  ", AQUA);
-		order.getDescription().stream().map(s -> PlaceholderUtils.replacePlaceholders(user, player, s)).map(indentation::append).forEachOrdered(lore::add);
-		if (denied) {
-			lore.add(Component.empty());
-			order.getDenyDescription().stream().map(s -> PlaceholderUtils.replacePlaceholders(user, player, s)).map(indentation::append).forEachOrdered(lore::add);
-			lore.addAll(Arrays.asList(Component.empty(), LangKey.SHOP_ORDER_DENIED.component(RED)));
-		} else if (!available) {
-			lore.addAll(Arrays.asList(Component.empty(), LangKey.SHOP_ORDER_PURCHASED.component(GREEN)));
+	private void buildNormalIcons(@NotNull OrderData[] ordersArray, @NotNull Player player, @NotNull User user, @NotNull Inventory inventory) {
+		for (int i = ordersArray.length - 1; i >= 0; i--) {
+			OrderData order = ordersArray[i];
+			inventory.setItem(order.getSlot(), buildIcon(order, player, user, order.getConditions().checkAvailability(player), order.getPrice(), List.of()));
 		}
-		lore.addAll(Arrays.asList(Component.empty(), Component.empty(), LangKey.SHOP_ORDER_TERMS.component(GRAY)));
-		lore.add(indentation.append(Component.text(this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_TERMS_OF_SERVICE))));
-		lore.replaceAll(lang::translateComponent);
-		BukkitUtils.setLore(meta, lore);
+	}
+	
+	private void buildUpgradeIcons(@NotNull OrderData[] ordersArray, @NotNull Player player, @NotNull User user, @NotNull Inventory inventory) {
+		boolean purchased = false;
+		for (int i = ordersArray.length - 1; i >= 0; i--) {
+			OrderData order = ordersArray[i];
+			var availability = order.getConditions().checkAvailability(player);
+			purchased |= availability == Availability.DONE;
+			availability = availability == Availability.AVAILABLE && purchased ? Availability.DONE : availability;
+			var discounts = calculateDiscount(Arrays.copyOf(ordersArray, i), player);
+			var price = order.getPrice() + discounts.stream()
+					.filter(d -> !d.active())
+					.mapToLong(PriceDiscount::value)
+					.sum();
+			inventory.setItem(order.getSlot(), buildIcon(order, player, user, availability, price, discounts));
+		}
+	}
+	
+	private @NotNull ItemStack buildIcon(final @NotNull OrderData order, final @NotNull Player player, final @NotNull User user, @NotNull Availability availability, long price, @NotNull List<PriceDiscount> discounts) {
+		this.plugin.debug("normalItem(%s) %s|%s availability: %s", player.getName(), this.getName(), order.getName(), availability);
+		var wrapper = BukkitSender.wrap(plugin, player);
+		ItemStack item = switch (availability) {
+			case AVAILABLE -> order.getDisplay().icons().icon().clone();
+			case DONE -> order.getDisplay().icons().iconDone().clone();
+			case DENIED -> order.getDisplay().icons().iconDenied().clone();
+		};
+		ItemMeta meta = item.getItemMeta();
+		BukkitUtils.setDisplayName(meta, MessageDraft.minimessage(order.getDisplay().displayName())
+				.placeholders(PlaceholderUtils.userPlaceholders(user))
+				.buildComponent(wrapper));
+		
+		BukkitUtils.setLore(meta, List.of(ComponentUtils.splitByNewline(BukkitLangKey.SHOP_ORDER_LORE.draft(
+				buildPriceBlock(user, price, discounts),
+				buildDescriptionMessageLines(order),
+				buildDeniedDescriptionMessageLines(availability, order),
+				buildStatusMessageLine(availability),
+				BukkitLangKey.SHOP_ORDER_TOS_BLOCK
+						.draft(this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_TERMS_OF_SERVICE)))
+				.buildComponent(wrapper))));
+		
 		item.setItemMeta(meta);
 		return item;
 	}
 	
 	
-	private @NotNull ItemStack buildUpgradeIcon(final @NotNull List<OrderData> orders, final int orderIndex, final @NotNull Lang lang, final @NotNull Player player, final @NotNull User user, final boolean available, final boolean denied) {
-		this.plugin.debug("upgradeItem(%s) %s|%s available: %s, denied: %s", player.getName(), this.getName(), orders.get(orderIndex).getName(), available, denied);
-		OrderData order = orders.get(orderIndex);
-		ItemStack item = (denied ? order.getIconDenied() : available ? order.getIcon() : order.getIconBought()).clone();
-		ItemMeta meta = item.getItemMeta();
-		BukkitUtils.setDisplayName(meta, PlaceholderUtils.replacePlaceholders(user, player, order.getDisplay()));
-		
-		long fullPrice = order.getPrice();
-		long price = order.getPrice();
-		List<Component> discounts = new ArrayList<>(); {
-			boolean done = false;
-			Component prefix = Component.text(" ┗╸ ");
-			for (int i = orderIndex-1; i >= 0; i--) {
-				OrderData o = orders.get(i);
-				if (!o.isAvailableToBuy(player) || o.isDenied(player)) done = true;
-				if (!done) {
-					price += o.getPrice();
-					discounts.add(prefix.color(GRAY).append(Component.text(MiscUtils.firstToUpper(o.getName()), DARK_GRAY)).append(Component.text(" -" + o.getPrice(), DARK_AQUA)));
-				} else {
-					discounts.add(prefix.color(WHITE).append(Component.text(MiscUtils.firstToUpper(o.getName()), GRAY)).append(Component.text(" -" + o.getPrice(), AQUA)));
-				}
-				fullPrice += o.getPrice();
-				prefix = Component.text(" ┣╸ ");
+	private @NotNull MessageDraft buildStatusMessageLine(@NotNull Availability availability) {
+		return (switch (availability) {
+			case AVAILABLE -> BukkitLangKey.SHOP_ORDER_STATUS_AVAILABLE;
+			case DENIED -> BukkitLangKey.SHOP_ORDER_STATUS_DENIED;
+			case DONE -> BukkitLangKey.SHOP_ORDER_STATUS_PURCHASED;
+		}).draft();
+	}
+	
+	
+	private @NotNull MessageDraft buildDescriptionMessageLines(@NotNull OrderData order) {
+		return Optional.ofNullable(order.getDisplay().description())
+				.filter(l -> !l.isEmpty())
+				.map(desc -> BukkitLangKey.SHOP_ORDER_DENIEDDESCRIPTION_BLOCK
+						.draft(desc.stream()
+								.map(MessageDraft::minimessage)
+								.map(BukkitLangKey.SHOP_ORDER_DENIEDDESCRIPTION_LINEFORMAT::draft)
+								.collect(MessageDraft.join(MessageDraft.newline()))))
+				.orElse(MessageDraft.empty());
+	}
+	
+	
+	private @NotNull MessageDraft buildDeniedDescriptionMessageLines(@NotNull Availability availability, @NotNull OrderData order) {
+		return Optional.ofNullable(order.getDisplay().denyDescription())
+				.filter(l -> availability == Availability.DENIED && !l.isEmpty())
+				.map(desc -> BukkitLangKey.SHOP_ORDER_DENIEDDESCRIPTION_BLOCK
+						.draft(desc.stream()
+								.map(MessageDraft::minimessage)
+								.map(BukkitLangKey.SHOP_ORDER_DENIEDDESCRIPTION_LINEFORMAT::draft)
+								.collect(MessageDraft.join(MessageDraft.newline()))))
+				.orElse(MessageDraft.empty());
+	}
+	
+	
+	private @NotNull List<PriceDiscount> calculateDiscount(@NotNull OrderData[] discountOrders, @NotNull Player player) {
+		List<PriceDiscount> discounts = new LinkedList<>();
+		boolean active = false;
+		for (int i = discountOrders.length - 1; i >= 0; i--) {
+			active |= discountOrders[i].getConditions().checkAvailability(player) == Availability.DONE;
+			discounts.add(0, new PriceDiscount(discountOrders[i], discountOrders[i].getPrice(), active));
+		}
+		return discounts;
+	}
+	
+	private @NotNull MessageDraft buildPriceBlock(@NotNull User user, long price, @NotNull List<PriceDiscount> discounts) {
+		List<MessageDraft> discountDrafts = new LinkedList<>();
+		var iter = discounts.iterator();
+		while (iter.hasNext()) {
+			var discount = iter.next();
+			LangKey discountLang;
+			if (iter.hasNext()) {
+				discountLang = discount.active() ?
+						BukkitLangKey.SHOP_ORDER_PRICE_DISCOUNT_LINE_NORMAL_ACTIVE
+						: BukkitLangKey.SHOP_ORDER_PRICE_DISCOUNT_LINE_NORMAL_INACTIVE;
+			} else {
+				discountLang = discount.active() ?
+						BukkitLangKey.SHOP_ORDER_PRICE_DISCOUNT_LINE_LAST_ACTIVE
+						: BukkitLangKey.SHOP_ORDER_PRICE_DISCOUNT_LINE_LAST_INACTIVE;
 			}
-			Collections.reverse(discounts);
+			discountDrafts.add(discountLang.draft(
+					MiniMessage.miniMessage().stripTags(discount.source().getDisplay().displayName()),
+					discount.value()));
 		}
-		
-		List<Component> lore = new ArrayList<>();
-		lore.add(LangKey.SHOP_ORDER_PRICE.component(GRAY, LangKey.MAIN_CURRENCY_FORMAT.component((order.getPrice() <= price? GREEN : RED), Component.text(available ? price : fullPrice))));
-		if (available && !denied) lore.addAll(discounts);
-		lore.add(Component.empty());
-		lore.add(LangKey.SHOP_ORDER_DESCRIPTION.component(GRAY));
-		Component indentation = Component.text("  ", AQUA);
-		order.getDescription().stream().map(s -> PlaceholderUtils.replacePlaceholders(user, player, s)).map(indentation::append).forEachOrdered(lore::add);
-		if (denied) {
-			lore.add(Component.empty());
-			order.getDenyDescription().stream().map(s -> PlaceholderUtils.replacePlaceholders(user, player, s)).map(indentation::append).forEachOrdered(lore::add);
-			lore.addAll(Arrays.asList(Component.empty(), LangKey.SHOP_ORDER_DENIED.component(RED)));
-		} else if (!available) {
-			lore.addAll(Arrays.asList(Component.empty(), LangKey.SHOP_ORDER_PURCHASED.component(GREEN)));
-		}
-		lore.addAll(Arrays.asList(Component.empty(), Component.empty(), LangKey.SHOP_ORDER_TERMS.component(GRAY)));
-		lore.add(indentation.append(Component.text(this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_TERMS_OF_SERVICE))));
-		lore.replaceAll(lang::translateComponent);
-		BukkitUtils.setLore(meta, lore);
-		item.setItemMeta(meta);
-		return item;
+		return formatColoredPrice(user, price)
+				.append(discountDrafts.stream().collect(MessageDraft.join()));
 	}
 	
+	private @NotNull MessageDraft formatColoredPrice(@NotNull User user, long price) {
+		return (price < user.getBalance() ? BukkitLangKey.SHOP_ORDER_PRICE_NOTENOUGH : BukkitLangKey.SHOP_ORDER_PRICE_ENOUGH)
+				.draft(BukkitLangKey.MAIN_CURRENCY_FORMAT.draft(price));
+	}
 	
+	private record PriceDiscount(@NotNull OrderData source, long value, boolean active) {}
+	
+	public record OrderGuiDisplay(@NotNull MessageDraft title, @NotNull MessageDraft displayName, @NotNull List<MessageDraft> description, ItemStack icon) {}
 
 }

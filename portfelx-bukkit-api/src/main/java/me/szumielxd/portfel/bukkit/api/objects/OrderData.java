@@ -8,7 +8,6 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
 
 @Getter
 @AllArgsConstructor
@@ -33,15 +32,15 @@ public class OrderData {
 		
 		
 		protected final String orderName;
-		protected final Component displayName;
+		protected final String displayName;
 		protected final long price;
 		protected final OrderActions actions;
 		
 	}
 	
-	public record OrderDisplay(@NotNull Component displayName, @NotNull List<Component> description, @NotNull List<Component> denyDescription, @NotNull OrderIcons icons) {}
+	public record OrderDisplay(@NotNull String displayName, @NotNull List<String> description, @NotNull List<String> denyDescription, @NotNull OrderIcons icons) {}
 	
-	public record OrderIcons(@NotNull ItemStack icon, @NotNull ItemStack iconBought, @NotNull ItemStack iconDenied) {}
+	public record OrderIcons(@NotNull ItemStack icon, @NotNull ItemStack iconDone, @NotNull ItemStack iconDenied) {}
 	
 	public record OrderActions(@NotNull List<String> broadcasts, @NotNull List<String> messages, @NotNull List<String> commands) {}
 	

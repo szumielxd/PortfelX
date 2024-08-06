@@ -32,6 +32,7 @@ public class PortfelGuiHolder implements InventoryHolder {
 	}
 	
 	
+	@SuppressWarnings("deprecation")
 	public PortfelGuiHolder(@NotNull PortfelBukkitImpl plugin, @NotNull AbstractPortfelGui gui, @NotNull User user, @NotNull Player player) {
 		this.plugin = plugin;
 		this.gui = gui;

@@ -1,10 +1,6 @@
 package me.szumielxd.portfel.bukkit.commands;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -12,15 +8,15 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.gui.AbstractPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.MainPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.OrderPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.PortfelGuiHolder;
+import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
-import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 
 public class WalletCommand implements TabExecutor {
 
@@ -46,8 +42,9 @@ public class WalletCommand implements TabExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		var wrapper = BukkitSender.wrap(this.plugin, sender);
 		if (!(sender instanceof Player player)) {
-			BukkitSender.wrap(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_PLAYERS_ONLY.component(RED)));
+			MainLangKey.ERROR_COMMAND_PLAYERS_ONLY.draft().send(wrapper, true);
 			return true;
 		}
 		AbstractPortfelGui gui = null;
@@ -59,7 +56,7 @@ public class WalletCommand implements TabExecutor {
 		}
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user == null) {
-			BukkitSender.wrap(this.plugin, sender).sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_USER_NOT_LOADED.component(RED)));
+			BukkitLangKey.ERROR_COMMAND_USER_NOT_LOADED.draft().send(wrapper, true);
 			return true;
 		}
 		PortfelGuiHolder holder = new PortfelGuiHolder(this.plugin, gui, user, player);
