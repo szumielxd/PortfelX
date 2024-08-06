@@ -16,11 +16,6 @@
 			<artifactId>portfelx-proxy-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>portfelx-common-bootstrap</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>net.kyori</groupId>
 			<artifactId>adventure-api</artifactId>
 		</dependency>
@@ -36,14 +31,6 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-		<!--dependency>
-			<groupId>net.kyori</groupId>
-			<artifactId>adventure-platform-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.kyori</groupId>
-			<artifactId>adventure-text-serializer-gson</artifactId>
-		</dependency-->
 		<dependency>
 			<groupId>me.carleslc.Simple-YAML</groupId>
 			<artifactId>Simple-Yaml</artifactId>

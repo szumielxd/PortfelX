@@ -13,10 +13,6 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>portfelx-bungee-bootstrap</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-proxy</artifactId>
 		</dependency>
 		<dependency>
@@ -28,10 +24,10 @@
 			<artifactId>bungeecord-api</artifactId>
 		</dependency>
 		<dependency>
-				<groupId>com.google.code.gson</groupId>
-				<artifactId>gson</artifactId>
-				<scope>provided</scope>
-			</dependency>
+			<groupId>com.google.code.gson</groupId>
+			<artifactId>gson</artifactId>
+			<scope>provided</scope>
+		</dependency>
 	</dependencies>
 	
 	<!-- Build -->

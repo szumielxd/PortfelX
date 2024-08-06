@@ -13,10 +13,6 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>portfelx-bukkit-bootstrap</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-bukkit-api</artifactId>
 		</dependency>
 		<dependency>
@@ -38,6 +34,10 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>me.carleslc.Simple-YAML</groupId>
+			<artifactId>Simple-Yaml</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>me.clip</groupId>
