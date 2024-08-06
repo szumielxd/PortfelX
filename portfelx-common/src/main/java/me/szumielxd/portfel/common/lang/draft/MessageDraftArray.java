@@ -1,5 +1,8 @@
 package me.szumielxd.portfel.common.lang.draft;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -11,9 +14,9 @@ import net.kyori.adventure.text.ComponentLike;
 
 public class MessageDraftArray extends MessageDraft {
 
-	private final MessageDraft[] elements;
+	private final @NotNull MessageDraft[] elements;
 	
-	MessageDraftArray(MessageDraft... elements) {
+	MessageDraftArray(@NotNull MessageDraft... elements) {
 		this.elements = elements;
 	}
 	
@@ -23,6 +26,10 @@ public class MessageDraftArray extends MessageDraft {
 				.map(e -> e.toComponent(lang, chatVersion))
 				.map(ComponentLike::asComponent)
 				.collect(Component.toComponent());
+	}
+	
+	public @NotNull List<MessageDraft> elements() {
+		return Collections.unmodifiableList(Arrays.asList(elements));
 	}
 
 }

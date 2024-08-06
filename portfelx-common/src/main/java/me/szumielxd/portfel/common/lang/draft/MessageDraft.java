@@ -1,7 +1,15 @@
 package me.szumielxd.portfel.common.lang.draft;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
@@ -17,12 +25,26 @@ import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public abstract class MessageDraft {
 	
 	protected abstract @NotNull Component toComponent(@NotNull Lang lang, @NotNull ChatVersion chatVersion);
+	
+	protected final Component replaceClickAndInsertion(Component comp, Pattern pattern, Function<MatchResult, String> replacer) {
+		var click = comp.clickEvent();
+		if (click != null) {
+			comp = comp.clickEvent(ClickEvent.clickEvent(click.action(), pattern.matcher(click.value()).replaceAll(replacer)));
+		}
+		if (comp.insertion() != null) {
+			comp = comp.insertion(pattern.matcher(comp.insertion()).replaceAll(replacer));
+		}
+		return comp.children(comp.children().stream()
+				.map(c -> replaceClickAndInsertion(c, pattern, replacer))
+				.toList());
+	}
 	
 	public final @NotNull MessageDraft append(@NotNull MessageDraft message, boolean appendToLastChild) {
 		return new ComboMessageDraft(this, message, appendToLastChild);
@@ -50,26 +72,43 @@ public abstract class MessageDraft {
 		return new ParameterizedMessageDraft(this, parameters);
 	}
 	
+	public final @NotNull MessageDraft placeholders(Map<String, MessageDraft> replacements) {
+		return new PlaceholdersMessageDraft(this, replacements);
+	}
+	
+	public final @NotNull MessageDraft plainPlaceholders(Map<String, Object> replacements) {
+		return placeholders(replacements.entrySet().stream()
+				.collect(Collectors.toMap(Entry::getKey, e -> plain(e.getValue()))));
+	}
+	
 	public @NotNull JsonElement build(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
 		return GsonComponentSerializer.gson().serializeToTree(toComponent(lang, chatVersion));
+	}
+	
+	public <C> @NotNull C buildComponent(@NotNull CommonSender<C> sender) {
+		Optional<Integer> protocolId = Optional.of(sender)
+				.filter(CommonPlayer.class::isInstance)
+				.map(CommonPlayer.class::cast)
+				.map(CommonPlayer::protocolId);
+		return sender.getPlugin().getComponentMapper().kyori().kyoriToComponent(
+				toComponent(Lang.get(sender), ChatVersion.getCorrect(protocolId)));
 	}
 	
 	public @NotNull String buildPlain(@NotNull Lang lang) {
 		return PlainTextComponentSerializer.plainText().serialize(toComponent(lang, ChatVersion.NORMAL));
 	}
 	
-	public <C> void send(CommonSender<C> sender) {
+	public <C> void send(@NotNull CommonSender<C> sender) {
 		send(sender, false);
 	}
 	
-	public <C> void send(CommonSender<C> sender, boolean prefix) {
+	public <C> void send(@NotNull CommonSender<C> sender, boolean prefix) {
 		MessageDraft base = prefix ? MainLangKey.PREFIX.draft().append(this) : this;
-		Optional<Integer> protocolId = Optional.of(sender)
-				.filter(CommonPlayer.class::isInstance)
-				.map(CommonPlayer.class::cast)
-				.map(CommonPlayer::protocolId);
-		sender.sendMessage(sender.getPlugin().getComponentMapper().kyori().kyoriToComponent(
-				base.toComponent(Lang.get(sender), ChatVersion.getCorrect(protocolId))));
+		sender.sendMessage(base.buildComponent(sender));
+	}
+	
+	public <C> void sendPrefixed(@NotNull CommonSender<C> sender) {
+		send(sender, true);
 	}
 	
 	
@@ -83,18 +122,22 @@ public abstract class MessageDraft {
 	}
 	
 	public static @NotNull MessageDraft space() {
-		return plain(" ");
+		return PlainMessageDraft.SPACE;
 	}
 	
 	public static @NotNull MessageDraft newline() {
-		return plain("\n");
+		return PlainMessageDraft.NEWLINE;
 	}
 	
-	public static @NotNull MessageDraft array(@NotNull MessageDraft... elements) {
+	public static @NotNull MessageDraft empty() {
+		return PlainMessageDraft.EMPTY;
+	}
+	
+	public static @NotNull MessageDraftArray array(@NotNull MessageDraft... elements) {
 		return new MessageDraftArray(elements);
 	}
 	
-	public static @NotNull MessageDraft array(@NotNull Object... elements) {
+	public static @NotNull MessageDraftArray array(@NotNull Object... elements) {
 		return new MessageDraftArray(Stream.of(elements)
 				.map(MessageDraft::plain)
 				.toArray(MessageDraft[]::new));
@@ -104,6 +147,10 @@ public abstract class MessageDraft {
 		return join((MessageDraft) null);
 	}
 	
+	public static @NotNull Collector<MessageDraft, ?, MessageDraft> join(@Nullable Object separator) {
+		return join(plain(separator));
+	}
+	
 	public static @NotNull Collector<MessageDraft, ?, MessageDraft> join(@Nullable MessageDraft separator) {
 		return Collector.of(() -> new MessageDraftJoiner(separator),
 				MessageDraftJoiner::append,
@@ -111,15 +158,27 @@ public abstract class MessageDraft {
 				MessageDraftJoiner::build);
 	}
 	
-	public static @NotNull Collector<MessageDraft, ?, MessageDraft> join(@Nullable Object separator) {
-		return Collector.of(() -> new MessageDraftJoiner(plain(separator)),
-				MessageDraftJoiner::append,
-				(a, b) -> a.append(b.build()),
-				MessageDraftJoiner::build);
+	public static @NotNull Collector<MessageDraft, ?, MessageDraftArray> joinFlattened() {
+		return joinFlattened((MessageDraft) null);
 	}
 	
-	public static @NotNull MessageDraft lang(@NotNull LangKey key) {
+	public static @NotNull Collector<MessageDraft, ?, MessageDraftArray> joinFlattened(@Nullable Object separator) {
+		return joinFlattened(plain(separator));
+	}
+	
+	public static @NotNull Collector<MessageDraft, ?, MessageDraftArray> joinFlattened(@Nullable MessageDraft separator) {
+		return Collector.of(() -> new MessageDraftArrayJoiner(separator),
+				MessageDraftArrayJoiner::append,
+				(a, b) -> a.append(b.build()),
+				MessageDraftArrayJoiner::build);
+	}
+	
+	public static @NotNull LangMessageDraft lang(@NotNull LangKey key) {
 		return new LangMessageDraft(key);
+	}
+	
+	public static @NotNull MiniMessageDraft minimessage(@NotNull String text) {
+		return new MiniMessageDraft(text);
 	}
 	
 	
@@ -143,6 +202,31 @@ public abstract class MessageDraft {
 		
 		public @NotNull MessageDraft build() {
 			return base == null ? plain("") : base;
+		}
+		
+	}
+	
+	
+	@RequiredArgsConstructor
+	private static class MessageDraftArrayJoiner {
+		
+		private final @Nullable MessageDraft separator;
+		private final @NotNull List<MessageDraft> elements = new LinkedList<>();
+		
+		public @NotNull MessageDraftArrayJoiner append(@NotNull MessageDraft draft) {
+			elements.add(draft);
+			return this;
+		}
+		
+		public @NotNull MessageDraftArray build() {
+			if (separator != null) {
+				var iter = elements.listIterator(Math.min(1, elements.size()));
+				while (iter.hasNext()) {
+					iter.add(separator);
+					iter.next();
+				}
+			}
+			return new MessageDraftArray(elements.toArray(MessageDraft[]::new));
 		}
 		
 	}

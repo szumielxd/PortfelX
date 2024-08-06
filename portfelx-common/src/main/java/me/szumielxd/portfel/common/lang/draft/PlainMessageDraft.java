@@ -12,6 +12,10 @@ import net.kyori.adventure.text.ComponentLike;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class PlainMessageDraft extends MessageDraft {
+
+	static final MessageDraft EMPTY = new PlainMessageDraft("");
+	static final MessageDraft NEWLINE = new PlainMessageDraft("\n");
+	static final MessageDraft SPACE = new PlainMessageDraft(" ");
 	
 	private final @Nullable Object base;
 
