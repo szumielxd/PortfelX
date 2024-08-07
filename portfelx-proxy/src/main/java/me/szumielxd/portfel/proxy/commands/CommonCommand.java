@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.proxy.api.objects.ProxySender;
 
-public abstract class CommonCommand {
+public abstract class CommonCommand<C> {
 	
 	
 	private final @NotNull String name;
@@ -18,17 +18,17 @@ public abstract class CommonCommand {
 	private final @NotNull String[] aliases;
 	
 	
-	public CommonCommand(@NotNull String name, @Nullable String permission, @NotNull String... aliases) {
+	protected CommonCommand(@NotNull String name, @Nullable String permission, @NotNull String... aliases) {
 		this.name = Objects.requireNonNull(name, "name cannot be null");
 		this.permission = permission;
 		this.aliases = Arrays.copyOf(Objects.requireNonNull(aliases, "aliases cannot be null"), aliases.length);
 	}
 	
 	
-	public abstract void execute(@NotNull ProxySender sender, @NotNull String[] args);
+	public abstract void execute(@NotNull ProxySender<C> sender, @NotNull String[] args);
 	
 	
-	public @NotNull List<String> onTabComplete(@NotNull ProxySender sender, @NotNull String[] args) {
+	public @NotNull List<String> onTabComplete(@NotNull ProxySender<C> sender, @NotNull String[] args) {
 		return new ArrayList<>();
 	}
 	
