@@ -14,7 +14,7 @@ import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 
 @RequiredArgsConstructor
-public abstract class UserListener<T extends PortfelProxyImpl, C> {
+public abstract class UserListener<T extends PortfelProxyImpl<C>, C> {
 	
 	
 	@Getter private final @NotNull T plugin;

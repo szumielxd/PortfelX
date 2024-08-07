@@ -38,7 +38,7 @@ import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.PluginMessageTarget;
 
 @RequiredArgsConstructor
-public abstract class ChannelListener<T extends PortfelProxyImpl, C> {
+public abstract class ChannelListener<T extends PortfelProxyImpl<C>, C> {
 	
 	
 	@Getter(AccessLevel.PROTECTED) private final @NotNull T plugin;
