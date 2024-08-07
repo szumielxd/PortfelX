@@ -14,7 +14,7 @@ import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 public class ProxyOperableUser extends User {
 	
 	
-	private final @NotNull PortfelProxyImpl plugin;
+	private final @NotNull PortfelProxyImpl<?> plugin;
 	/**
 	 * Flag an object as changed since last update
 	 */
@@ -31,7 +31,7 @@ public class ProxyOperableUser extends User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public ProxyOperableUser(@NotNull PortfelProxyImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, long minorBalance) {
+	public ProxyOperableUser(@NotNull PortfelProxyImpl<?> plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, long minorBalance) {
 		super(uuid, name, online, deniedInTop, balance, minorBalance);
 		this.plugin = plugin;
 	}
