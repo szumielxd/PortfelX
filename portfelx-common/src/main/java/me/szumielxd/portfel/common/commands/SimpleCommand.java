@@ -118,7 +118,7 @@ public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 		return -1;
 	}
 	
-	private record ParsedArguments(Object[] staticArgs, Object[] flyingArgs) {
+	protected record ParsedArguments(Object[] staticArgs, Object[] flyingArgs) {
 		
 		
 		
