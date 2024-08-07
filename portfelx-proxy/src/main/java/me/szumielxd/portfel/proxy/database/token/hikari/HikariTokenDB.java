@@ -34,7 +34,7 @@ import me.szumielxd.portfel.proxy.objects.PrizeToken.ServerSelectorType;
 public abstract class HikariTokenDB implements AbstractTokenDB {
 	
 	
-	protected final PortfelProxyImpl plugin;
+	protected final PortfelProxyImpl<?> plugin;
 	protected HikariDataSource hikari;
 	
 	private boolean tablesChecked = false;
@@ -61,7 +61,7 @@ public abstract class HikariTokenDB implements AbstractTokenDB {
 	}
 	
 	
-	public HikariTokenDB(PortfelProxyImpl plugin) {
+	protected HikariTokenDB(PortfelProxyImpl<?> plugin) {
 		this.plugin = plugin;
 		Config cfg = this.plugin.getConfiguration();
 		

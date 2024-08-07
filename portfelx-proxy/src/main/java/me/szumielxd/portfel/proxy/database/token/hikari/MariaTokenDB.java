@@ -6,12 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 
 public class MariaTokenDB extends HikariTokenDB {
 
-	public MariaTokenDB(PortfelProxyImpl plugin) {
+	public MariaTokenDB(PortfelProxyImpl<?> plugin) {
 		super(plugin);
 	}
 	
@@ -44,7 +43,7 @@ public class MariaTokenDB extends HikariTokenDB {
 	protected void setupProperties(@NotNull HikariConfig config, @NotNull Map<String, String> properties) {
 		properties.putIfAbsent("socketTimeout", "30000");
 		properties.putIfAbsent("serverTimezone", "UTC");
-		properties.forEach((k,v) -> config.addDataSourceProperty(k, v));
+		properties.forEach(config::addDataSourceProperty);
 	}
 
 	/**
@@ -60,11 +59,6 @@ public class MariaTokenDB extends HikariTokenDB {
 	@Override
 	public void setupDatabase(@NotNull HikariConfig config, @NotNull String address, int port, @NotNull String database, @NotNull String user, @NotNull String password) {
 		String dataSource = "me.szumielxd.portfel.lib.org.mariadb.jdbc.MariaDbDataSource";
-		try {
-			Class.forName(dataSource);
-		} catch (ClassNotFoundException e) {
-			this.plugin.addToRuntime(CommonDependency.MARIADB);
-		}
 		config.setDataSourceClassName(dataSource);
 		config.addDataSourceProperty("serverName", address);
 		config.addDataSourceProperty("port", port);
