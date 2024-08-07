@@ -1,6 +1,5 @@
 package me.szumielxd.portfel.bukkit.commands;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -53,9 +54,11 @@ public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 
 	@Override
 	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		if (args.length == 0) args = new String[] { "" };
-		SimpleCommand<Component> cmd = this.childrens.get(args[0].toLowerCase());
-		if (cmd == null) cmd = this.childrens.get(HELP);
+		if (args.length == 0) {
+			args = new String[] { "" };
+		}
+		SimpleCommand<Component> cmd = Optional.ofNullable(this.childrens.get(args[0].toLowerCase()))
+				.orElseGet(() -> this.childrens.get(HELP));
 		if (!cmd.hasPermission(sender)) {
 			MainLangKey.ERROR_COMMAND_PERMISSION
 					.draft()
@@ -75,7 +78,7 @@ public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 		if (args.length == 1) {
 			String arg = args[0].toLowerCase();
 			return this.childrens.entrySet().stream()
-					.filter(e -> e.getValue().hasPermission(sender))
+					.filter(e -> e.getValue().canUse(sender))
 					.map(Entry::getKey)
 					.filter(s -> s.toLowerCase().startsWith(arg))
 					.toList();
@@ -85,7 +88,7 @@ public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 				return cmd.onTabComplete(sender, MiscUtils.mergeArrays(label, args[0]), MiscUtils.popArray(args));
 			}
 		}
-		return new ArrayList<>();
+		return List.of();
 	}
 
 	@Override
@@ -103,6 +106,7 @@ public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 		return MainLangKey.EMPTY;
 	}
 	
+	@Override
 	public @NotNull List<SimpleCommand<Component>> getChildrens() {
 		return this.childrens.values().stream()
 				.distinct()
