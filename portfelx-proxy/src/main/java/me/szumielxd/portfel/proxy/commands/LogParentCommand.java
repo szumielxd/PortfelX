@@ -1,34 +1,40 @@
 package me.szumielxd.portfel.proxy.commands;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.commands.log.ReadLogCommand;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
-public class LogParentCommand extends ParentCommand {
+public class LogParentCommand<C> extends ParentCommand<C> {
 
-	public LogParentCommand(@NotNull PortfelProxyImpl plugin, @NotNull AbstractCommand parent) {
+	public LogParentCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "log", "logs");
-		this.register(
-				new ReadLogCommand(plugin, this)
-		);
+		this.register(List.of(
+				new ReadLogCommand<>(plugin, this)
+		));
+	}
+	
+	@Override
+	public @NotNull List<CmdArg> getStaticArgs() {
+		return Collections.emptyList();
 	}
 
 	@Override
-	public @NotNull List<CmdArg> getArgs() {
-		return new ArrayList<>();
+	public @NotNull List<CmdArg> getFlyingArgs() {
+		return Collections.emptyList();
 	}
 
 	@Override
 	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_LOG_DESCRIPTION;
+		return ProxyLangKey.COMMAND_LOG_DESCRIPTION;
 	}
 	
 	
