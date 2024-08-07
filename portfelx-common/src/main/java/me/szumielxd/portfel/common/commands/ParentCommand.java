@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
@@ -73,29 +74,27 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> {
 
 	@Override
 	public @NotNull List<String> onTabComplete(@NotNull CommonSender<C> sender, @NotNull String[] label, @NotNull String[] args) {
-		List<CmdArg> subCmds = this.getAllArgs();
+		List<CmdArg> cmdArgs = this.getAllArgs();
 		String lastArg = args[args.length-1].toLowerCase();
-		if (subCmds.size() >= args.length) {
-			return subCmds.get(args.length-1).getTabCompletions(sender).stream()
+		if (cmdArgs.size() >= args.length) {
+			return cmdArgs.get(args.length-1).getTabCompletions(sender).stream()
 					.filter(s -> s.toLowerCase().startsWith(lastArg))
 					.toList();
-		} else if (args.length == subCmds.size() + 1) {
-			List<String> list = new ArrayList<>();
-			this.childrens.forEach((name, cmd) -> {
-				if (cmd.hasPermission(sender) && cmd.getAccess().canAccess(sender) && name.toLowerCase().startsWith(lastArg)) {
-					list.add(name);
-				}
-			});
-			list.sort(String.CASE_INSENSITIVE_ORDER);
-			return list;
+		} else if (args.length == cmdArgs.size() + 1) {
+			return this.childrens.entrySet().stream()
+					.filter(e -> e.getKey().toLowerCase().startsWith(lastArg))
+					.filter(e -> e.getValue().canUse(sender))
+					.map(Entry::getKey)
+					.sorted(String.CASE_INSENSITIVE_ORDER)
+					.toList();
 		} else {
-			String str = args[subCmds.size()];
+			String str = args[cmdArgs.size()];
 			SimpleCommand<C> cmd = this.childrens.get(str.toLowerCase());
-			if (cmd != null && cmd.hasPermission(sender) && cmd.getAccess().canAccess(sender)) {
-				return cmd.onTabComplete(sender, MiscUtils.mergeArrays(label, Arrays.copyOf(args, subCmds.size()+1)), MiscUtils.popArray(args, subCmds.size()+1));
+			if (cmd != null && cmd.canUse(sender)) {
+				return cmd.onTabComplete(sender, MiscUtils.mergeArrays(label, Arrays.copyOf(args, cmdArgs.size() + 1)), MiscUtils.popArray(args, cmdArgs.size() + 1));
 			}
 		}
-		return new ArrayList<>();
+		return List.of();
 	}
 	
 	public @NotNull Collection<SimpleCommand<C>> getChildrens() {
