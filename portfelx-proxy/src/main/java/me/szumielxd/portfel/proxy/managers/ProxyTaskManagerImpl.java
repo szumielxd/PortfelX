@@ -11,10 +11,10 @@ import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 public class ProxyTaskManagerImpl implements TaskManager {
 	
 	
-	private final PortfelProxyImpl plugin;
+	private final PortfelProxyImpl<?> plugin;
 	
 	
-	public ProxyTaskManagerImpl(PortfelProxyImpl plugin) {
+	public ProxyTaskManagerImpl(PortfelProxyImpl<?> plugin) {
 		this.plugin = plugin;
 	}
 	

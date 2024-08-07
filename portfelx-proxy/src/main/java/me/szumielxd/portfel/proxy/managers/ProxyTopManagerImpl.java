@@ -17,19 +17,14 @@ import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
 import me.szumielxd.portfel.proxy.api.managers.ProxyTopManager;
 
 @RequiredArgsConstructor
-public class ProxyTopManagerImpl extends TopManagerImpl implements ProxyTopManager {
+public class ProxyTopManagerImpl<C> extends TopManagerImpl<C> implements ProxyTopManager {
 	
 	/**
 	 * Portfel instance
 	 */
-	@Getter(AccessLevel.PROTECTED) @NonNull private final @NotNull PortfelProxyImpl plugin;
+	@Getter(AccessLevel.PROTECTED) @NonNull private final @NotNull PortfelProxyImpl<C> plugin;
 	private List<TopEntry> cachedTop = Collections.emptyList();
 	private List<TopEntry> cachedMinorTop = Collections.emptyList();
-	
-	@Override
-	public @NotNull ProxyTopManagerImpl init() {
-		return (ProxyTopManagerImpl) super.init();
-	}
 	
 	/**
 	 * Update top.

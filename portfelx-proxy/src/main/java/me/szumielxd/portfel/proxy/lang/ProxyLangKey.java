@@ -99,10 +99,10 @@ public enum ProxyLangKey implements LangKey {
 	COMMAND_ARGTYPES_GIFTTOKEN_DESCRIPTION("command.arg-types.gift-servers.description", "token used to obtain this gift, if not given, defaults to random string of 12 alphanumeric characters"),
 	
 	COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
-	COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT("command.system.registerserver.timeout", "Are you sure, you provided valid hashKey and server you want to register has up to date version of Portfel? He's not responding..."),
-	COMMAND_SYSTEM_REGISTERSERVER_ALREADY("command.system.registerserver.already", "Is there any intelligent reason to register already registered server? Pro Tip: Check ID {0}."),
-	COMMAND_SYSTEM_REGISTERSERVER_SUCCESS("command.system.registerserver.success", "You did it! You registered new portfel server with friendly name {0} and ID {1}!"),
-	COMMAND_SYSTEM_REGISTERSERVER_ERROR("command.system.registerserver.error", "This... This was very interesting. Server returned an unknown response."),
+	COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT("command.system.registerserver.timeout", "<red>Are you sure, you provided valid hashKey and server you want to register has up to date version of Portfel? He's not responding..."),
+	COMMAND_SYSTEM_REGISTERSERVER_ALREADY("command.system.registerserver.already", "Is there any intelligent reason to register already registered server? Pro Tip: Check ID <aqua><underlined>{o}</underlined></aqua>."),
+	COMMAND_SYSTEM_REGISTERSERVER_SUCCESS("command.system.registerserver.success", "<light_purple>You did it! You registered new portfel server with friendly name <aqua><underlined>{0}</underlined></aqua> and ID <aqua><underlined>{1}</underlined></aqua>!"),
+	COMMAND_SYSTEM_REGISTERSERVER_ERROR("command.system.registerserver.error", "<dark_red>This... This was very interesting. Server returned an unknown response."),
 	COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_NEEDED("command.system.registerserver.servername-needed", "We need a user friendly and memorable text for use as shorthand of server ID. Please provide id."),
 	COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY("command.system.registerserver.servername-already", "Did you remember this shorthand is already in use for another server?"),
 	//
@@ -207,12 +207,16 @@ public enum ProxyLangKey implements LangKey {
 	COMMAND_LISTGIFTCODES_INSERT("command.listgiftcodes.insert", "Click+Shift to insert unique ID on chat"),
 	COMMAND_LISTGIFTCODES_EXPIRATION("command.listgiftcodes.expiration", "Expiration: {0}"),
 	
+	COMMAND_VALUENAMES_SERVERID("command.value-names.server-id", "server ID"),
+	COMMAND_VALUENAMES_SERVERFRIENDLYNAME("command.value-names.server-friendly-name", "server friendly name"),
+	
 	TOKEN_CHECK_USAGE("token.check.usage", "Correct usage: /{0} <token>"),
-	TOKEN_CHECK_ALREADY("token.check.already", "Why are you spamming me? Wait for the result of previus check."),
-	TOKEN_CHECK_FULLPOOL("token.check.full-pool", "So many players to check, so few resources to do this. Please wait, the pool is full."),
+	TOKEN_CHECK_ALREADY("token.check.already", "<red>Why are you spamming me? Wait for the result of previus check."),
+	TOKEN_CHECK_FULLPOOL("token.check.full-pool", "<red>So many players to check, so few resources to do this. Please wait, the pool is full."),
 	TOKEN_CHECK_INVALID("token.check.invalid", "Probably you provided an inexistient token. Prove? It doesn't exist!"),
-	TOKEN_CHECK_SERVER_INVALID_REGISTERED("token.check.server.invalid.registered", "This game mode doesn't support tokens. Please try another game mode, or just throw it away..."),
-	TOKEN_CHECK_SERVER_INVALID_WHITELIST("token.check.server.invalid.whitelist", "This token doesn't like this game mode. But it should like: {0}"),
+	TOKEN_CHECK_SERVER_INVALID_REGISTERED("token.check.server.invalid.registered", "<red>This game mode doesn't support tokens. Please try another game mode, or just throw it away..."),
+	TOKEN_CHECK_SERVER_INVALID_WHITELIST("token.check.server.invalid.whitelist", "<red>This token doesn't like this game mode. But it should like: {0}"),
+	TOKEN_CHECK_SERVER_INVALID_WHITELIST_SERVER_FORMAT("token.check.server.invalid.whitelist.server-format", "<aqua>{0}"),
 	
 	LOG_PREFIX("log.prefix", "LOG"),
 	LOG_SUGGEST("log.suggest", "Click to insert displayname on chat"),
@@ -234,7 +238,7 @@ public enum ProxyLangKey implements LangKey {
 	MAIN_VALUE_ONLINE("main.value.online", "Online"),
 	MAIN_VALUE_OFFLINE("main.value.offline", "Offline"),
 	
-	MAIN_MESSAGE_INSERTION("main.message.insertion", "Click to insert the {0}."),
+	MAIN_MESSAGE_INSERTION("main.message.insertion", "<hover:show_text:\"<dark_aqua>» <aqua>Click to insert the {1}.\"><click:suggest_command:{0}><insert:{0}>{0}</insert></click></hover>"),
 	
 	;// END,
 	

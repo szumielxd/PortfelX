@@ -1,12 +1,5 @@
 package me.szumielxd.portfel.proxy.managers;
 
-import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
-import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-import static net.kyori.adventure.text.format.TextDecoration.UNDERLINED;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -22,7 +15,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.jetbrains.annotations.NotNull;
@@ -44,31 +36,28 @@ import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
-import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
 import me.szumielxd.portfel.proxy.api.objects.PluginMessageTarget;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
-public abstract class AccessManagerImpl<C> implements AccessManager {
+public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implements AccessManager {
 	
 	
 	private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	
 	
-	private final PortfelProxyImpl plugin;
+	@Getter private final P plugin;
 	private final Path file;
 	private JsonObject accessMap = null;
 	
 	
-	protected AccessManagerImpl(@NotNull PortfelProxyImpl plugin) {
+	protected AccessManagerImpl(@NotNull P plugin) {
 		this.plugin = plugin;
-		this.file = this.plugin.getDataFolder().resolve("access.json");
+		this.file = this.plugin.getDataDirectory().resolve("access.json");
 	}
 	
 	/**
@@ -76,7 +65,7 @@ public abstract class AccessManagerImpl<C> implements AccessManager {
 	 * 
 	 * @return this object
 	 */
-	public final AccessManagerImpl<C> init() {
+	public final AccessManagerImpl<P, C> init() {
 		this.preInit();
 		try {
 			if (!Files.exists(this.file.getParent())) Files.createDirectories(this.file.getParent());
@@ -246,9 +235,13 @@ public abstract class AccessManagerImpl<C> implements AccessManager {
 	 */
 	@Override
 	public final @Nullable List<String> getAllowedOrders(@NotNull UUID serverId) {
-		if (!this.canAccess(serverId)) return null;
-		JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
-		return StreamSupport.stream(obj.getAsJsonArray("orders").spliterator(), false).map(JsonElement::getAsString).collect(Collectors.toList());
+		if (this.canAccess(serverId)) {
+			JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
+			return StreamSupport.stream(obj.getAsJsonArray("orders").spliterator(), false)
+					.map(JsonElement::getAsString)
+					.toList();
+		}
+		return null;
 	}
 	
 	/**
@@ -309,11 +302,6 @@ public abstract class AccessManagerImpl<C> implements AccessManager {
 				|| Portfel.CHANNEL_USERS.equals(tag)
 				|| Portfel.CHANNEL_LEGACY_BUNGEE.equals(tag)
 				|| Portfel.CHANNEL_BUNGEE.equals(tag);
-	}
-	
-	
-	protected PortfelProxyImpl getPlugin() {
-		return this.plugin;
 	}
 	
 	
@@ -421,47 +409,32 @@ public abstract class AccessManagerImpl<C> implements AccessManager {
 					if ("Ok".equals(status)) {
 						UUID proxyId = UUID.fromString(din.readUTF());
 						UUID serverId = UUID.fromString(din.readUTF());
-						if (this.plugin.getProxyId().equals(proxyId)) {
-							if (holder.getServerId().equals(serverId)) {
-								if (this.register(holder.getServerId(), holder.getServerFriendyName(), holder.getHashKey())) {
-									String srvId = holder.getServerId().toString();
-									String srvName = holder.getServerFriendyName();
-									Component srvIdComp = Component.text(srvId, AQUA, UNDERLINED)
-											.clickEvent(ClickEvent.suggestCommand(srvId)).insertion(srvId)
-											.hoverEvent(Component.text("» ", DARK_AQUA).append(LangKey.MAIN_MESSAGE_INSERTION
-													.component(AQUA, Component.text("server ID"))
-											));
-									Component srvNameComp = Component.text(srvName, AQUA, UNDERLINED)
-											.clickEvent(ClickEvent.suggestCommand(srvName)).insertion(srvName)
-											.hoverEvent(Component.text("» ", DARK_AQUA).append(LangKey.MAIN_MESSAGE_INSERTION
-													.component(AQUA, Component.text("server friendly name"))
-											));
-									
-									holder.getSender().sendTranslated(MiscUtils.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SUCCESS
-											.component(LIGHT_PURPLE, srvNameComp, srvIdComp)));
-									return Optional.of(true);
-								}
-							}
+						if (this.plugin.getProxyId().equals(proxyId) && holder.getServerId().equals(serverId) && this.register(holder.getServerId(), holder.getServerFriendyName(), holder.getHashKey())) {
+							ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_SUCCESS.draft(
+									ProxyLangKey.MAIN_MESSAGE_INSERTION.draft(
+											holder.getServerFriendyName(),
+											ProxyLangKey.COMMAND_VALUENAMES_SERVERFRIENDLYNAME),
+									ProxyLangKey.MAIN_MESSAGE_INSERTION.draft(
+											holder.getServerId().toString(), 
+											ProxyLangKey.COMMAND_VALUENAMES_SERVERID))
+									.sendPrefixed(target);
+							return Optional.of(true);
 						}
 					} else if ("Set".equals(status)) {
 						UUID proxyId = UUID.fromString(din.readUTF());
 						UUID serverId = UUID.fromString(din.readUTF());
-						if (this.plugin.getProxyId().equals(proxyId)) {
-							if (this.canAccess(serverId)) {
-								String srvId = serverId.toString();
-								Component srvIdComp = Component.text(srvId, AQUA, UNDERLINED)
-										.clickEvent(ClickEvent.suggestCommand(srvId)).insertion(srvId)
-										.hoverEvent(Component.text("» ", DARK_AQUA).append(LangKey.MAIN_MESSAGE_INSERTION
-												.component(AQUA, Component.text("server ID"))
-										));
-								
-								holder.getSender().sendTranslated(MiscUtils.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ALREADY
-										.component(RED, srvIdComp)));
-								return Optional.of(true);
-							}
+						if (this.plugin.getProxyId().equals(proxyId) && this.canAccess(serverId)) {
+							ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_ALREADY
+									.draft(ProxyLangKey.MAIN_MESSAGE_INSERTION
+											.draft(serverId.toString(), 
+													ProxyLangKey.COMMAND_VALUENAMES_SERVERID))
+									.sendPrefixed(target);
+							return Optional.of(true);
 						}
 					}
-					holder.getSender().sendTranslated(MiscUtils.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_ERROR.component(DARK_RED)));
+					ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_ERROR
+							.draft()
+							.sendPrefixed(target);
 					return Optional.of(true);
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -489,7 +462,9 @@ public abstract class AccessManagerImpl<C> implements AccessManager {
 			this.hashKey = hashKey;
 			this.task = plugin.getTaskManager().runTaskLater(() -> {
 				this.done();
-				this.sender.sendTranslated(MiscUtils.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT.component(RED)));
+				ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT
+						.draft()
+						.sendPrefixed(sender);
 			}, 1, TimeUnit.SECONDS);
 		}
 		

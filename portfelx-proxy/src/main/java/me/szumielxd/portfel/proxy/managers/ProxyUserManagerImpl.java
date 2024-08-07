@@ -12,29 +12,29 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.managers.UserManagerImpl;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
+import me.szumielxd.portfel.proxy.api.PortfelProxy;
 import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 
-public class ProxyUserManagerImpl extends UserManagerImpl {
+public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 
 	
-	private final PortfelProxyImpl plugin;
+	private final PortfelProxyImpl<C> plugin;
 	private final Map<UUID, ProxyOperableUser> users;
 	private @Nullable ExecutedTask usersSaveTask;
 	
 	
-	public ProxyUserManagerImpl(PortfelProxyImpl plugin) {
+	public ProxyUserManagerImpl(PortfelProxyImpl<C> plugin) {
 		this.plugin = plugin;
 		this.users = new HashMap<>();
 	}
 	
 	// TODO: loadOrCreate for array of UUIDs
 	@Override
-	public ProxyUserManagerImpl init() {
+	public ProxyUserManagerImpl<C> init() {
 		super.init();
 		//this.plugin.getCommonServer().getPlayers().stream().map(ProxyPlayer::getUniqueId).toArray(UUID[]::new);
 		//this.plugin.getDatabase();
@@ -182,7 +182,7 @@ public class ProxyUserManagerImpl extends UserManagerImpl {
 	 * @return plugin
 	 */
 	@Override
-	protected @NotNull Portfel getPlugin() {
+	protected @NotNull PortfelProxy<C> getPlugin() {
 		return this.plugin;
 	}
 
