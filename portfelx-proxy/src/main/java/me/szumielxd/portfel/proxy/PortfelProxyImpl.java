@@ -10,7 +10,6 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
-import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.proxy.api.PortfelProxy;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
@@ -31,8 +30,6 @@ import me.szumielxd.portfel.proxy.managers.TokenManager;
 
 public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 	
-	public void addToRuntime(CommonDependency... dependency);
-	
 	public @NotNull String getName();
 	
 	public @NotNull String getVersion();
@@ -50,7 +47,7 @@ public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 
 	public void setTokenDatabase(@NotNull AbstractTokenDB database);
 	
-	public @NotNull AccessManagerImpl<C> getAccessManager();
+	public @NotNull AccessManagerImpl<? extends PortfelProxyImpl<C>, C> getAccessManager();
 	
 	
 	public @NotNull TokenManager<C> getTokenManager();
@@ -69,7 +66,7 @@ public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 	
 	public @NotNull OrdersManager getOrdersManager();
 	
-	public @NotNull PrizesManager getPrizesManager();
+	public @NotNull PrizesManager<C> getPrizesManager();
 	
 	/**
 	 * Get database-oriented transaction logger.
@@ -92,7 +89,7 @@ public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 	public void setProxyId(UUID proxyId);
 	
 	public default void setupProxyId() {
-		final Path file = this.getDataFolder().resolve("server-id.dat");
+		final Path file = this.getDataDirectory().resolve("server-id.dat");
 		if (Files.exists(file)) {
 			try {
 				this.setProxyId(UUID.fromString(String.join("\n", Files.readAllLines(file))));
@@ -119,9 +116,9 @@ public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 	
 	public default void setupDatabases() {
 		String dbType = this.getConfiguration().getString(ProxyConfigKey.DATABASE_TYPE).toLowerCase();
-		if ("mariadb".equals(dbType)) this.setDatabase(new MariaDB(this));
-		else if ("mysql".equals(dbType)) this.setDatabase(new MysqlDB(this));
-		else this.setDatabase(new H2DB(this));
+		if ("mariadb".equals(dbType)) this.setDatabase(new MariaDB<>(this));
+		else if ("mysql".equals(dbType)) this.setDatabase(new MysqlDB<>(this));
+		else this.setDatabase(new H2DB<>(this));
 		this.getLogger().info("Establishing connection with database...");
 		this.getDatabase().setup();
 		//
@@ -131,7 +128,7 @@ public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 		else this.setTokenDatabase(new H2TokenDB(this));
 		this.getLogger().info("Establishing connection with tokens database...");
 		this.getTokenDatabase().setup();
-		this.setTransactionLogger(new HikariDBLogger(this).init());
+		this.setTransactionLogger(new HikariDBLogger<>(this).init());
 	}
 	
 
