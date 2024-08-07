@@ -168,9 +168,8 @@ public enum ProxyLangKey implements LangKey {
 	COMMAND_LOG_DESCRIPTION("command.log.description", "Log management main command."),
 	//
 	COMMAND_LOG_READ_DESCRIPTION("command.log.read.description", "Read logs."),
-	COMMAND_LOG_READ_HEADER("command.log.read.header", "Showing last activities"),
-	COMMAND_LOG_READ_PAGE("command.log.read.page", "page {0} of {1}"),
-	COMMAND_LOG_READ_TIME_AGO("command.log.read.time-ago", "{0} ago"),
+	COMMAND_LOG_READ_HEADER("command.log.read.header", "<dark_purple>Showing last activities <gray>(page <white>{0}</white> of <white>{1}</white>)"),
+	COMMAND_LOG_READ_LINE1("command.log.read.line1", "<light_purple>#{0} <dark_gray>(<gray>{1} ago</gray>) {2}"),
 	//
 	COMMAND_GIFTCODE_DESCRIPTION("command.giftcode.description", "Giftcode management main command."),
 	//
@@ -189,14 +188,14 @@ public enum ProxyLangKey implements LangKey {
 	COMMAND_GIFTCODE_INFO_INSERT("command.giftcode.info.intop", "Click+Shift to insert above text on chat"),
 	//
 	COMMAND_DELETEGIFTCODE_DESCRIPTION("command.deletegiftcode.description", "Delete giftcode."),
-	COMMAND_DELETEGIFTCODE_SUCCESS("command.deletegiftcode.success", "Removed giftcode for {0}."),
-	COMMAND_DELETEGIFTCODE_FAIL("command.deletegiftcode.fail", "Cannot delete giftcode for {0}."),
+	COMMAND_DELETEGIFTCODE_SUCCESS("command.deletegiftcode.success", "<green>Removed giftcode for <aqua>{0}</aqua>."),
+	COMMAND_DELETEGIFTCODE_FAIL("command.deletegiftcode.fail", "<red>Cannot delete giftcode for <aqua>{0}</aqua>."),
 	//
 	COMMAND_CREATEGIFTCODE_DESCRIPTION("command.creategiftcode.description", "Create giftcode."),
-	COMMAND_CREATEGIFTCODE_SUCCESS("command.creategiftcode.success", "Created giftcode {0} for order {1} on {2} with expiration {3}."),
-	COMMAND_CREATEGIFTCODE_FAIL("command.creategiftcode.fail", "Cannot create giftcode for {0}."),
-	COMMAND_CREATEGIFTCODE_ALREADY("command.creategiftcode.already", "Gift code for {0} token already exists in database."),
-	COMMAND_CREATEGIFTCODE_PAST("command.creategiftcode.past", "You're time traveller? The expiration date cannot be earlier than now."),
+	COMMAND_CREATEGIFTCODE_SUCCESS("command.creategiftcode.success", "<green>Created giftcode <aqua>{0}</aqua> for order <aqua>{1}</aqua> on <aqua>{2}</aqua> with expiration <aqua>{3}</aqua>."),
+	COMMAND_CREATEGIFTCODE_FAIL("command.creategiftcode.fail", "<red>Cannot create giftcode for <aqua>{0}</aqua>."),
+	COMMAND_CREATEGIFTCODE_ALREADY("command.creategiftcode.already", "<red>Gift code for <aqua>{0}</aqua> token already exists in database."),
+	COMMAND_CREATEGIFTCODE_PAST("command.creategiftcode.past", "<red>You're time traveller? The expiration date cannot be earlier than now."),
 	//
 	COMMAND_LISTGIFTCODES_DESCRIPTION("command.listgiftcodes.description", "List giftcodes."),
 	COMMAND_LISTGIFTCODES_HEADER("command.listgiftcodes.header", "Showing giftcodes"),
@@ -210,7 +209,7 @@ public enum ProxyLangKey implements LangKey {
 	COMMAND_VALUENAMES_SERVERID("command.value-names.server-id", "server ID"),
 	COMMAND_VALUENAMES_SERVERFRIENDLYNAME("command.value-names.server-friendly-name", "server friendly name"),
 	
-	TOKEN_CHECK_USAGE("token.check.usage", "Correct usage: /{0} <token>"),
+	TOKEN_CHECK_USAGE("token.check.usage", "<red>Correct usage: /{0} <token>"),
 	TOKEN_CHECK_ALREADY("token.check.already", "<red>Why are you spamming me? Wait for the result of previus check."),
 	TOKEN_CHECK_FULLPOOL("token.check.full-pool", "<red>So many players to check, so few resources to do this. Please wait, the pool is full."),
 	TOKEN_CHECK_INVALID("token.check.invalid", "Probably you provided an inexistient token. Prove? It doesn't exist!"),
