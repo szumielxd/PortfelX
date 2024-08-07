@@ -14,6 +14,7 @@ import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.text.Component;
 
 public class TestmodeCommand extends SimpleCommand<Component> {
@@ -37,7 +38,7 @@ public class TestmodeCommand extends SimpleCommand<Component> {
 		} catch (Exception e) {
 			// empty catch
 		}
-		BukkitLangKey.ERROR_COMMAND_USER_NOT_LOADED
+		MainLangKey.ERROR_COMMAND_USER_NOT_LOADED
 				.draft()
 				.send(sender, true);
 	}

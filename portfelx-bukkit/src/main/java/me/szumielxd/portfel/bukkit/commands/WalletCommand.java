@@ -14,7 +14,6 @@ import me.szumielxd.portfel.bukkit.gui.AbstractPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.MainPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.OrderPortfelGui;
 import me.szumielxd.portfel.bukkit.gui.PortfelGuiHolder;
-import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 
@@ -56,7 +55,7 @@ public class WalletCommand implements TabExecutor {
 		}
 		User user = this.plugin.getUserManager().getUser(player.getUniqueId());
 		if (user == null) {
-			BukkitLangKey.ERROR_COMMAND_USER_NOT_LOADED.draft().send(wrapper, true);
+			MainLangKey.ERROR_COMMAND_USER_NOT_LOADED.draft().send(wrapper, true);
 			return true;
 		}
 		PortfelGuiHolder holder = new PortfelGuiHolder(this.plugin, gui, user, player);

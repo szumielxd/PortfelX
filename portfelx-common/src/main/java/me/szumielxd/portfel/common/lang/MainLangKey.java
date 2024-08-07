@@ -8,6 +8,8 @@ import me.szumielxd.portfel.common.lang.Lang.LangKey;
 @Getter
 public enum MainLangKey implements LangKey {
 	
+	ERROR_COMMAND_EXECUTION("error.command-execution", "<dark_red>No way! An error occured while attempting to perform this command! See console for any usefull information."),
+	ERROR_COMMAND_USER_NOT_LOADED("error.user-not-loaded", "<red>Sorry, but your data is not loaded. Are you a ghost?!"),
 	ERROR_COMMAND_PERMISSION("error.command-permission", "<red>No! You can't just run this command, you need the access!"),
 	ERROR_COMMAND_CONSOLE_ONLY("error.command-console-only", "<red>You can do many things, but you must be a console to execute this command!"),
 	ERROR_COMMAND_PLAYERS_ONLY("error.command-players-only", "<red>You're just only a console! This command requires something more... a PLAYER..."),

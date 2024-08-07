@@ -8,10 +8,6 @@ import me.szumielxd.portfel.common.lang.Lang.LangKey;
 @Getter
 public enum BukkitLangKey implements LangKey {
 	
-	ERROR_COMMAND_EXECUTION("error.command-execution", "No way! An error occured while attempting to perform this command! See console for any usefull information."),
-	ERROR_COMMAND_USER_NOT_LOADED("error.user-not-loaded", "<red>Sorry, but your data is not loaded. Are you a ghost?!"),
-	
-	//
 	COMMAND_TESTMODE_DESCRIPTION("command.testmode.decription", "Toggle your test-mode state. When toggled on, allows you to purchase orders without charge. Disabled on disconnect."),
 	COMMAND_TESTMODE_EXECUTE("command.testmode.execute", "<light_purple>You've toggled <aqua>{0}</aqua> portfel test-mode."),
 	//
