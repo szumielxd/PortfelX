@@ -33,6 +33,12 @@ public enum MainLangKey implements LangKey {
 	COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.execution", "<dark_gray>» <gray>Click to execute this command"),
 	COMMAND_SUBCOMMANDS_INSERT("command.subcommands.insertion", "<dark_gray>» <gray>Click+Shift to insert this command"),
 	
+	COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
+	COMMAND_SYSTEM_RELOAD_DESCRIPTION("command.system.reload.description", "Reload partially plugin's configuration."),
+	COMMAND_SYSTEM_RELOAD_EXECUTE("command.system.reload.execute", "<gray>Reloading plugin..."),
+	COMMAND_SYSTEM_RELOAD_SUCCESS("command.system.reload.success", "<green>Successfully reloaded <aqua>{0} {1}."),
+	COMMAND_SYSTEM_RELOAD_ERROR("command.system.reload.success", "<hover:show_text:<red>{0}><dark_red>An error occured while attempting to reload this plugin. Hover this text or see console for more informations."),
+	
 	COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
 	
 	MAIN_VALUE_TIME_SECONDS("main.value.time.seconds", "{0}s"),

@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
-import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.text.Component;
 
 public class ReloadCommand extends SimpleCommand<Component> {
@@ -26,7 +26,7 @@ public class ReloadCommand extends SimpleCommand<Component> {
 	@Override
 	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		PortfelBukkitImpl plugin = (PortfelBukkitImpl) this.getPlugin();
-		BukkitLangKey.COMMAND_SYSTEM_RELOAD_EXECUTE
+		MainLangKey.COMMAND_SYSTEM_RELOAD_EXECUTE
 				.draft()
 				.send(sender, true);
 		try {
@@ -35,12 +35,12 @@ public class ReloadCommand extends SimpleCommand<Component> {
 		} catch (Throwable e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			BukkitLangKey.COMMAND_SYSTEM_RELOAD_ERROR
+			MainLangKey.COMMAND_SYSTEM_RELOAD_ERROR
 					.draft(sw.toString())
 					.send(sender, true);
 			return;
 		}
-		BukkitLangKey.COMMAND_SYSTEM_RELOAD_SUCCESS
+		MainLangKey.COMMAND_SYSTEM_RELOAD_SUCCESS
 				.draft(plugin.getName(), plugin.getDescription().getVersion())
 				.send(sender, true);
 	}
@@ -57,7 +57,7 @@ public class ReloadCommand extends SimpleCommand<Component> {
 
 	@Override
 	public @NotNull LangKey getDescription() {
-		return BukkitLangKey.COMMAND_SYSTEM_RELOAD_DESCRIPTION;
+		return MainLangKey.COMMAND_SYSTEM_RELOAD_DESCRIPTION;
 	}
 
 }

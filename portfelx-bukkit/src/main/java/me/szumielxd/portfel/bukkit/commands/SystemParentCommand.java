@@ -7,11 +7,11 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.commands.system.ReloadCommand;
-import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.text.Component;
 
 public class SystemParentCommand extends ParentCommand<Component> {
@@ -34,7 +34,7 @@ public class SystemParentCommand extends ParentCommand<Component> {
 
 	@Override
 	public @NotNull LangKey getDescription() {
-		return BukkitLangKey.COMMAND_SYSTEM_DESCRIPTION;
+		return MainLangKey.COMMAND_SYSTEM_DESCRIPTION;
 	}
 	
 	

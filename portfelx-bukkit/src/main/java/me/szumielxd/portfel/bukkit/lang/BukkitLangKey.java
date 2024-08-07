@@ -11,13 +11,6 @@ public enum BukkitLangKey implements LangKey {
 	COMMAND_TESTMODE_DESCRIPTION("command.testmode.decription", "Toggle your test-mode state. When toggled on, allows you to purchase orders without charge. Disabled on disconnect."),
 	COMMAND_TESTMODE_EXECUTE("command.testmode.execute", "<light_purple>You've toggled <aqua>{0}</aqua> portfel test-mode."),
 	//
-	COMMAND_SYSTEM_DESCRIPTION("command.system.description", "All portfel setup related commands."),
-	//
-	COMMAND_SYSTEM_RELOAD_DESCRIPTION("command.system.reload.description", "Reload partially plugin's configuration."),
-	COMMAND_SYSTEM_RELOAD_EXECUTE("command.system.reload.execute", "<gray>Reloading plugin..."),
-	COMMAND_SYSTEM_RELOAD_SUCCESS("command.system.reload.success", "<green>Successfully reloaded <aqua>{0} {1}."),
-	COMMAND_SYSTEM_RELOAD_ERROR("command.system.reload.success", "<hover:show_text:<red>{0}><dark_red>An error occured while attempting to reload this plugin. Hover this text or see console for more informations."),
-	//
 	SHOP_TITLE("shop.title", "<bold><dark_purple>Wallet (<aqua>{0}</aqua>)"),
 
 	SHOP_MAIN_LORE("shop.main.lore", "<gray>{0}\\n\\n<aqua>/{1} {2}"),
