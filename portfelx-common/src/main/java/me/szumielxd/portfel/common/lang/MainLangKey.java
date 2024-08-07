@@ -21,11 +21,17 @@ public enum MainLangKey implements LangKey {
 	COMMAND_USAGE_ARGUMENT_OPTIONAL("command.usage.argument.optional", "[{0}<{1}>]"),
 	COMMAND_USAGE_ARGUMENT_MANDATORY("command.usage.argument.mandatory", "{0}<{1}>"),
 
+	COMMAND_MAIN_RUNNING("command.main.running", "<dark_purple>Running <light_purple>{0}</light_purple>."),
+	COMMAND_MAIN_USE("command.main.use", "<dark_aqua>Use <aqua><hover:show_text:{1}><click:run_command:{0}><insert:{0}>{0}</insert><click></hover></aqua> to view available commands."),
+	COMMAND_MAIN_SUBCOMMANDS_LINE("command.main.subcommands.line", "<light_purple>> <hover:show_text:{2}><click:run_command:{0}><insert:{0}><aqua>{0}{1]"),
+	
 	COMMAND_SUBCOMMANDS_TITLE("command.subcommands.title", "<light_purple>{0} Sub Commands: <gray>(/{1}...)"),
 	COMMAND_SUBCOMMANDS_LINE_WITHARGS("command.subcommands.line.with-args", "<hover:show_text:{2}><insert:{3}><click:run_command:{3}><light_purple><bold>> </bold><aqua>{0} <darg_purple>-</dark_purple> {1}"),
 	COMMAND_SUBCOMMANDS_LINE_WITHOUTARGS("command.subcommands.line.without-args", "<hover:show_text:{1}><insert:{2}><click:run_command:{2}><light_purple><bold>> </bold><aqua>{0}"),
 	COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.execution", "<dark_gray>» <gray>Click to execute this command"),
 	COMMAND_SUBCOMMANDS_INSERT("command.subcommands.insertion", "<dark_gray>» <gray>Click+Shift to insert this command"),
+	
+	COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
 	
 	MAIN_VALUE_TIME_SECONDS("main.value.time.seconds", "{0}s"),
 	MAIN_VALUE_TIME_MINUTES("main.value.time.minutes", "{0}m"),

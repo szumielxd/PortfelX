@@ -14,11 +14,12 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 
-public abstract class ParentCommand<C> extends SimpleCommand<C> {
+public abstract class ParentCommand<C> extends SimpleCommand<C> implements ParentLikeCommand<C> {
 
 	
 	private HashMap<String, SimpleCommand<C>> childrens;
@@ -97,6 +98,7 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> {
 		return List.of();
 	}
 	
+	@Override
 	public @NotNull Collection<SimpleCommand<C>> getChildrens() {
 		return this.childrens.values().stream()
 				.distinct()

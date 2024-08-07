@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -19,15 +17,16 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.commands.common.HelpCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 
-public class MainCommand implements AbstractCommand<Component>, TabExecutor {
+public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 
 	private final PortfelBukkitImpl plugin;
 	private final PluginCommand command;
@@ -39,7 +38,7 @@ public class MainCommand implements AbstractCommand<Component>, TabExecutor {
 		this.plugin = plugin;
 		this.command = command;
 		this.register(List.of(
-				new HelpCommand(plugin, this, HELP),
+				new HelpCommand<>(plugin, this, HELP),
 				new TestmodeCommand(plugin, this, "testmode"),
 				new SystemParentCommand(plugin, this)));
 	}
@@ -107,7 +106,7 @@ public class MainCommand implements AbstractCommand<Component>, TabExecutor {
 	public @NotNull List<SimpleCommand<Component>> getChildrens() {
 		return this.childrens.values().stream()
 				.distinct()
-				.collect(Collectors.toList());
+				.toList();
 	}
 
 

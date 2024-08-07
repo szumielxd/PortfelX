@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.bukkit.commands;
+package me.szumielxd.portfel.common.commands.common;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -7,37 +7,36 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
-import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.common.commands.CmdArg;
+import me.szumielxd.portfel.common.commands.ParentCommand;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
-import net.kyori.adventure.text.Component;
 
-public class HelpCommand extends SimpleCommand<Component> {
+public class HelpCommand<C> extends SimpleCommand<C> {
 	
 
-	public HelpCommand(@NotNull PortfelBukkitImpl plugin, @NotNull MainCommand parent, @NotNull String name, @NotNull String... aliases) {
+	public HelpCommand(@NotNull Portfel<C> plugin, @NotNull ParentLikeCommand<C> parent, @NotNull String name, @NotNull String... aliases) {
 		super(plugin, parent, name, aliases);
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		
 		String[] shortLabel = Arrays.copyOf(label, label.length-1);
-		PortfelBukkitImpl pl = (PortfelBukkitImpl) this.getPlugin();
-		BukkitLangKey.COMMAND_MAIN_RUNNING
+		Portfel<C> pl = this.getPlugin();
+		MainLangKey.COMMAND_MAIN_RUNNING
 				.draft(pl.toString())
 				.sendPrefixed(sender);
 		if (!label[shortLabel.length].equals("")) {
-			MainCommand parent = (MainCommand) this.getParent();
+			ParentCommand<C> parent = (ParentCommand<C>) this.getParent();
 			parent.getChildrens().stream()
 					.sorted(Comparator.comparing(SimpleCommand::getName, String.CASE_INSENSITIVE_ORDER))
 					.forEachOrdered(
-							cmd -> BukkitLangKey.COMMAND_MAIN_SUBCOMMANDS_LINE
+							cmd -> MainLangKey.COMMAND_MAIN_SUBCOMMANDS_LINE
 									.draft(
 											"/" + String.join(" ", shortLabel) + " " + cmd.getName(),
 											cmd.getAllArgs().stream()
@@ -51,7 +50,7 @@ public class HelpCommand extends SimpleCommand<Component> {
 											)
 									.send(sender));
 		} else {
-			BukkitLangKey.COMMAND_MAIN_USE
+			MainLangKey.COMMAND_MAIN_USE
 					.draft(
 							"/" + String.join(" ", shortLabel) + " help",
 							MessageDraft.array(
@@ -74,7 +73,7 @@ public class HelpCommand extends SimpleCommand<Component> {
 
 	@Override
 	public @NotNull LangKey getDescription() {
-		return BukkitLangKey.COMMAND_HELP_DESCRIPTION;
+		return MainLangKey.COMMAND_HELP_DESCRIPTION;
 	}
 
 	

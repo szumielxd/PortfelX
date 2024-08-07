@@ -102,7 +102,6 @@ public enum BukkitLangKey implements LangKey {
 	COMMAND_ARGTYPES_GIFTTOKEN_DESCRIPTION("command.arg-types.gift-servers.description", "token used to obtain this gift, if not given, defaults to random string of 12 alphanumeric characters"),
 	
 	
-	COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
 	//
 	COMMAND_TESTMODE_DESCRIPTION("command.testmode.decription", "Toggle your test-mode state. When toggled on, allows you to purchase orders without charge. Disabled on disconnect."),
 	COMMAND_TESTMODE_EXECUTE("command.testmode.execute", "<light_purple>You've toggled <aqua>{0}</aqua> portfel test-mode."),
@@ -222,11 +221,6 @@ public enum BukkitLangKey implements LangKey {
 	COMMAND_LISTGIFTCODES_SUGGEST("command.listgiftcodes.suggest", "Click to insert displayname on chat"),
 	COMMAND_LISTGIFTCODES_INSERT("command.listgiftcodes.insert", "Click+Shift to insert unique ID on chat"),
 	COMMAND_LISTGIFTCODES_EXPIRATION("command.listgiftcodes.expiration", "Expiration: {0}"),
-	
-	COMMAND_MAIN_RUNNING("command.main.running", "<dark_purple>Running <light_purple>{0}</light_purple>."),
-	COMMAND_MAIN_USE("command.main.use", "<dark_aqua>Use <aqua><hover:show_text:{1}><click:run_command:{0}><insert:{0}>{0}</insert><click></hover></aqua> to view available commands."),
-	
-	COMMAND_MAIN_SUBCOMMANDS_LINE("command.main.subcommands.line", "<light_purple>> <hover:show_text:{2}><click:run_command:{0}><insert:{0}><aqua>{0}{1]"),
 	
 	TOKEN_CHECK_USAGE("token.check.usage", "Correct usage: /{0} <token>"),
 	TOKEN_CHECK_ALREADY("token.check.already", "Why are you spamming me? Wait for the result of previus check."),
