@@ -1,7 +1,5 @@
 package me.szumielxd.portfel.proxy.database;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -11,10 +9,12 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.proxy.objects.PrizeToken;
-import net.kyori.adventure.text.format.TextColor;
 
 public interface AbstractDBLogger {
 	
@@ -93,30 +93,17 @@ public interface AbstractDBLogger {
 	public @NotNull List<LogEntry> getLogs(@Nullable String[] targets, @Nullable String[] executors, @Nullable String[] servers, @Nullable String[] orders, @Nullable ActionType[] actions, @Nullable NumericCondition[] valueConditions, @Nullable NumericCondition[] balanceConditions) throws Exception;
 	
 	
-	public static enum ActionType {
-		ADD("+%s", GREEN),
-		SET("%s", GOLD),
-		REMOVE("-%s", RED),
-		TOKEN("", WHITE);
+	@RequiredArgsConstructor
+	public enum ActionType {
+		ADD("<green>+{0}"),
+		SET("<gold>{0}"),
+		REMOVE("<red>-{0}"),
+		TOKEN("");
 		
-		private final TextColor color;
-		private final String formattedPrefix;
+		@Getter private final @NotNull String format;
 		
-		private ActionType(@NotNull String formattedPrefix, @NotNull TextColor color) {
-			this.color = color;
-			this.formattedPrefix = formattedPrefix;
-		}
-		
-		public TextColor getColor() {
-			return this.color;
-		}
-		
-		public String getFormat() {
-			return this.formattedPrefix;
-		}
-		
-		public String format(String val) {
-			return String.format(this.formattedPrefix, val);
+		public MessageDraft draft(long val) {
+			return MessageDraft.minimessage(this.format.formatted(val));
 		}
 		
 		public static @Nullable ActionType parse(@NotNull String text) {
@@ -278,7 +265,9 @@ public interface AbstractDBLogger {
 					String[] vals = text.split("-", 2);
 					try {
 						return Optional.of(new NumericCondition("BETWEEN ? AND ?", Long.parseLong(vals[0]), Long.parseLong(vals[1])));
-					} catch (NumberFormatException ex) {}
+					} catch (NumberFormatException ex) {
+						// ignore
+					}
 				}
 				return Optional.empty();
 			}
