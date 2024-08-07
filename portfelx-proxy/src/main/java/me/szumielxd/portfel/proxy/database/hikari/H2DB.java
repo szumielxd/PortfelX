@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 
 public class H2DB<C> extends HikariDB<C> {
@@ -42,6 +41,7 @@ public class H2DB<C> extends HikariDB<C> {
 	 * @param query to process
 	 * @return given query with applied mappings
 	 */
+	@Override
 	protected @NotNull String mapQuery(@NotNull String query) {
 		Objects.requireNonNull(query, "query cannot be null");
 		for (Map.Entry<Pattern, String> entry : mapping.entrySet()) {
@@ -94,13 +94,8 @@ public class H2DB<C> extends HikariDB<C> {
 	 */
 	@Override
 	public void setupDatabase(@NotNull HikariConfig config, @NotNull String address, int port, @NotNull String database, @NotNull String user, @NotNull String password) {
-		Path file = this.plugin.getDataFolder().resolve(this.plugin.getName().toLowerCase() + "-h2").toAbsolutePath();
+		Path file = this.plugin.getDataDirectory().resolve(this.plugin.getName().toLowerCase() + "-h2").toAbsolutePath();
 		String dataSource = "me.szumielxd.portfel.lib.org.h2.jdbcx.JdbcDataSource";
-		try {
-			Class.forName(dataSource);
-		} catch (ClassNotFoundException e) {
-			this.plugin.addToRuntime(CommonDependency.H2);
-		}
 		config.setDataSourceClassName(dataSource);
 		config.addDataSourceProperty("URL", "jdbc:h2:" + file + ";IGNORECASE=TRUE");
 		config.setUsername(user);

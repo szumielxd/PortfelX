@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 
 import com.zaxxer.hikari.HikariConfig;
 
-import me.szumielxd.portfel.common.loader.CommonDependency;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 
 public class MysqlDB<C> extends HikariDB<C> {
@@ -56,7 +55,7 @@ public class MysqlDB<C> extends HikariDB<C> {
 		properties.putIfAbsent("alwaysSendSetIsolation", "false");
 		properties.putIfAbsent("cacheCallableStmts", "true");
 		properties.putIfAbsent("serverTimezone", "UTC");
-		properties.forEach((k,v) -> config.addDataSourceProperty(k, v));
+		properties.forEach(config::addDataSourceProperty);
 	}
 
 	/**
@@ -72,11 +71,6 @@ public class MysqlDB<C> extends HikariDB<C> {
 	@Override
 	public void setupDatabase(@NotNull HikariConfig config, @NotNull String address, int port, @NotNull String database, @NotNull String user, @NotNull String password) {
 		String driver = "me.szumielxd.portfel.lib.com.mysql.cj.jdbc.Driver";
-		try {
-			Class.forName(driver);
-		} catch (ClassNotFoundException e) {
-			this.plugin.addToRuntime(CommonDependency.MYSQL);
-		}
 		config.setDriverClassName(driver);
 		config.setJdbcUrl("jdbc:mysql://" + address + ":" + port + "/" + database);
 		config.setUsername(user);
