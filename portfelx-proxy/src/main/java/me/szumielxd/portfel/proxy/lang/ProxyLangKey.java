@@ -218,12 +218,12 @@ public enum ProxyLangKey implements LangKey {
 	TOKEN_CHECK_SERVER_INVALID_WHITELIST("token.check.server.invalid.whitelist", "<red>This token doesn't like this game mode. But it should like: {0}"),
 	TOKEN_CHECK_SERVER_INVALID_WHITELIST_SERVER_FORMAT("token.check.server.invalid.whitelist.server-format", "<aqua>{0}"),
 	
-	LOG_PREFIX("log.prefix", "LOG"),
-	LOG_SUGGEST("log.suggest", "Click to insert displayname on chat"),
-	LOG_INSERT("log.insert", "Click+Shift to insert unique ID on chat"),
-	LOG_VALUE_ACTION("log.value.action", "Action: {0}"),
-	LOG_VALUE_OLD_BALANCE("log.value.old-balance", "Old balance: {0}"),
-	LOG_VALUE_DATE("log.value.date", "Date: {0}"),
+	LOG_PREFIX("log.prefix", "<dark_aqua>LOG "),
+	LOG_MESSAGE_LINE1("log.message.line1", "<gray>> <dark_gray>(<green>{0}</green>) [<aqua>{1}</aqua>]"),
+	LOG_MESSAGE_LINE2("log.message.line2", "<gray>> <white>{0} {1}"),
+	LOG_USER_INTERACTIVE("log.user.interactive", "<hover:show_text:\"<aqua>{2}\n<dark_gray>» <gray>Click to insert displayname on chat</gray>\n» <gray>Click+Shift to insert unique ID on chat\"><click:suggest_command:{1}><insert:{2}>{0}"),
+	LOG_ACTION_AMOUNT("log.action.amount", "<hover:show_text:\"{0}\n<gray>Action: <aqua>{1}</aqua>\nOld balance: <aqua>{2}\">{0}"),
+	LOG_ACTION_NAME("log.action.name", "<white><hover:show_text:\"<white>{0}<gray>Date: <aqua>{1}\">{0}"),
 	
 	MAIN_VALUENAME_DESCRIPTION("main.value-name.description", "Description:"),
 	MAIN_VALUENAME_ALIASES("main.value-name.aliases", "Aliases:"),
@@ -238,7 +238,7 @@ public enum ProxyLangKey implements LangKey {
 	MAIN_VALUE_ONLINE("main.value.online", "Online"),
 	MAIN_VALUE_OFFLINE("main.value.offline", "Offline"),
 	
-	MAIN_MESSAGE_INSERTION("main.message.insertion", "<hover:show_text:\"<dark_aqua>» <aqua>Click to insert the {1}.\"><click:suggest_command:{0}><insert:{0}>{0}</insert></click></hover>"),
+	MAIN_MESSAGE_INSERTION("main.message.insertion", "<hover:show_text:\"<dark_aqua>» <aqua>Click to insert {1} on chat.\"><click:suggest_command:{0}><insert:{0}>{0}</insert></click></hover>"),
 	
 	;// END,
 	
