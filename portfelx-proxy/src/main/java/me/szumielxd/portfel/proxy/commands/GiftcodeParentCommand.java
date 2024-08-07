@@ -1,36 +1,33 @@
 package me.szumielxd.portfel.proxy.commands;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.common.Lang.LangKey;
+import lombok.Getter;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.commands.giftcode.GiftcodeInfoCommand;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
-public class GiftcodeParentCommand extends ParentCommand {
+public class GiftcodeParentCommand<C> extends ParentCommand<C> {
 	
-	public List<CmdArg> args = Arrays.asList(CommonArgs.TOKEN);
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of(CommonArgs.TOKEN);
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
 
-	public GiftcodeParentCommand(@NotNull PortfelProxyImpl plugin, @NotNull AbstractCommand parent) {
+	public GiftcodeParentCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "giftcode", "gift", "code", "token");
-		this.register(
-				new GiftcodeInfoCommand(plugin, this)
-		);
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getArgs() {
-		return this.args;
+		this.register(List.of(
+				new GiftcodeInfoCommand<>(plugin, this)
+		));
 	}
 
 	@Override
 	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_SYSTEM_DESCRIPTION;
+		return ProxyLangKey.COMMAND_GIFTCODE_DESCRIPTION;
 	}
 	
 	

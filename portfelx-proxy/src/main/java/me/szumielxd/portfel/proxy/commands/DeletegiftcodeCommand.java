@@ -1,56 +1,47 @@
 package me.szumielxd.portfel.proxy.commands;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.api.Portfel;
+import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 import me.szumielxd.portfel.proxy.objects.PrizeToken;
-import net.kyori.adventure.text.Component;
 
-public class DeletegiftcodeCommand extends SimpleCommand {
+public class DeletegiftcodeCommand<C> extends SimpleCommand<C> {
 	
-	public final List<CmdArg> args = Arrays.asList(CommonArgs.TOKEN);
+	@Getter private final List<CmdArg> staticArgs = List.of(CommonArgs.TOKEN);
+	@Getter private final List<CmdArg> flyingArgs = List.of();
 
-	public DeletegiftcodeCommand(@NotNull PortfelProxyImpl plugin, @NotNull AbstractCommand parent) {
+	public DeletegiftcodeCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "deletegiftcode", "deletegift", "deletecode");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		Object[] parsed = this.validateArgs(sender, args);
-		if (parsed == null) return;
-		PortfelProxyImpl pl = (PortfelProxyImpl)this.getPlugin();
-		PrizeToken token = (PrizeToken)parsed[0];
-		try {
-			if (pl.getTokenManager().deleteToken(token.getToken()).get()) {
-				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_DELETEGIFTCODE_SUCCESS.component(GREEN, Component.text(token.getToken(), AQUA))));
-				return;
-			}
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_DELETEGIFTCODE_FAIL.component(RED, Component.text(token.getToken(), AQUA))));
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getArgs() {
-		return this.args;
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+		this.parseArguments(sender, args).ifPresent(parsed -> {
+			PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>) this.getPlugin();
+			PrizeToken token = (PrizeToken)parsed.staticArgs()[0];
+			pl.getTokenManager().deleteToken(token.getToken()).thenAccept(res -> {
+				if (res.booleanValue()) {
+					ProxyLangKey.COMMAND_DELETEGIFTCODE_SUCCESS.draft(token.getToken())
+							.sendPrefixed(sender);
+				} else {
+					ProxyLangKey.COMMAND_DELETEGIFTCODE_FAIL.draft(token.getToken())
+							.sendPrefixed(sender);
+				}
+			});
+		});
 	}
 
 	@Override
 	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_DELETEGIFTCODE_DESCRIPTION;
+		return ProxyLangKey.COMMAND_DELETEGIFTCODE_DESCRIPTION;
 	}
 
 }
