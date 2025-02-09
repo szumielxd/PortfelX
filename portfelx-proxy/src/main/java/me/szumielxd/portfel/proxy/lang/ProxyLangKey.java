@@ -198,13 +198,21 @@ public enum ProxyLangKey implements LangKey {
 	COMMAND_CREATEGIFTCODE_PAST("command.creategiftcode.past", "<red>You're time traveller? The expiration date cannot be earlier than now."),
 	//
 	COMMAND_LISTGIFTCODES_DESCRIPTION("command.listgiftcodes.description", "List giftcodes."),
-	COMMAND_LISTGIFTCODES_HEADER("command.listgiftcodes.header", "Showing giftcodes"),
-	COMMAND_LISTGIFTCODES_PAGE("command.listgiftcodes.page", "page {0} of {1}"),
-	COMMAND_LISTGIFTCODES_LIFETIME("command.listgiftcodes.lifetime", "lifetime"),
+	COMMAND_LISTGIFTCODES_HEADER("command.listgiftcodes.header", "<dark_purple>Showing giftcodes <gray>(page <white>{0}</white> of <white>{1}</white>)"),
+	COMMAND_LISTGIFTCODES_ENTRY_FIRSTLINE("command.listgiftcodes.entry.first-line", "<hover:show_text:\\\"{0}\\\"><insert:{1}><light_purple>{1} <dark_gray>(<gray>{2}</gray>) ({3}) [{4}]"), // id, time_ago, executor, expiration_indicator
+	COMMAND_LISTGIFTCODES_ENTRY_SECONDLINE("command.listgiftcodes.entry.second-line", "<hover:show_text:\"{0}\"><insert:{1}><gray>> <white>{1} {2}"), // order, servers
+	COMMAND_LISTGIFTCODES_LIFETIME("command.listgiftcodes.lifetime", "<red>lifetime"),
+	COMMAND_LISTGIFTCODES_ENDTIME("command.listgiftcodes.end-time", "<aqua>✝ {0}"),
 	COMMAND_LISTGIFTCODES_TIME_AGO("command.listgiftcodes.time-ago", "{0} ago"),
-	COMMAND_LISTGIFTCODES_SUGGEST("command.listgiftcodes.suggest", "Click to insert displayname on chat"),
-	COMMAND_LISTGIFTCODES_INSERT("command.listgiftcodes.insert", "Click+Shift to insert unique ID on chat"),
-	COMMAND_LISTGIFTCODES_EXPIRATION("command.listgiftcodes.expiration", "Expiration: {0}"),
+	COMMAND_LISTGIFTCODES_EXPIRATION("command.listgiftcodes.expiration", "<gray>Expiration: {0}"),
+	COMMAND_LISTGIFTCODES_EXPIRATION_EXPIRABLE("command.listgiftcodes.expiration.expirable", "<aqua>E"),
+	COMMAND_LISTGIFTCODES_EXPIRATION_EXPIRED("command.listgiftcodes.expiration.expired", "<gray>✝"),
+	COMMAND_LISTGIFTCODES_EXPIRATION_LIFETIME("command.listgiftcodes.expiration.lifetime", "<gold>L"),
+	COMMAND_LISTGIFTCODES_SERVERSELECTOR_ANY("command.listgiftcodes.server-selector.any", "<aqua>ANY"),
+	COMMAND_LISTGIFTCODES_SERVERSELECTOR_REGISTERED("command.listgiftcodes.server-selector.registered", "<aqua>REGISTERED"),
+	COMMAND_LISTGIFTCODES_SERVERSELECTOR_WHITELIST("command.listgiftcodes.server-selector.whitelist", "<aqua>WHITELIST <dark_gray>[{0}]"),
+	COMMAND_LISTGIFTCODES_SERVERSELECTOR_WHITELIST_ENTRY("command.listgiftcodes.server-selector.whitelist.entry", "<gold>{0}"),
+	COMMAND_LISTGIFTCODES_USER("command.listgiftcodes.user", "<hover:show_text:\"<aqua>{1}\n<dark_gray>» <gray>Click to insert displayname on chat</gray>\n» <gray>Click+Shift to insert unique ID on chat\">click:suggest_command:{0}><insert:{1}><green>{0}"),
 	
 	COMMAND_VALUENAMES_SERVERID("command.value-names.server-id", "server ID"),
 	COMMAND_VALUENAMES_SERVERFRIENDLYNAME("command.value-names.server-friendly-name", "server friendly name"),

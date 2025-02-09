@@ -8,25 +8,25 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
-public class UserInfoCommand extends SimpleCommand {
+public class UserInfoCommand<C> extends SimpleCommand<C> {
 
-	public UserInfoCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+	public UserInfoCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "info", "information", "informations", "get", "about");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		User user = (User) parsedArgs[0];
 		Component header = Portfel.PREFIX.append(Component.text("> ", LIGHT_PURPLE, BOLD)).append(LangKey.COMMAND_USER_INFO_HEADER.component(DARK_PURPLE,
 				this.prepareInteractive(Component.text(user.getName(), WHITE), label, user.getName())));

@@ -9,43 +9,43 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 
-public class RegisterServerCommand extends SimpleCommand {
+public class RegisterServerCommand<C> extends SimpleCommand<C> {
 	
 	public final List<CmdArg> args;
 
-	public RegisterServerCommand(@NotNull PortfelProxyImpl plugin, @NotNull AbstractCommand parent) {
+	public RegisterServerCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "registerserver", "createserver");
 		this.args = Arrays.asList(
 				// serverName
-				new CmdArg(LangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY, LangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>()),
+				new CmdArg<>(LangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY, LangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>()),
 				// hashKey
-				new CmdArg(LangKey.COMMAND_ARGTYPES_HASHKEY_DISPLAY, LangKey.COMMAND_ARGTYPES_HASHKEY_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>())
+				new CmdArg<>(LangKey.COMMAND_ARGTYPES_HASHKEY_DISPLAY, LangKey.COMMAND_ARGTYPES_HASHKEY_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>())
 		);
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed == null) return;
-		PortfelProxyImpl pl = (PortfelProxyImpl)this.getPlugin();
+		PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>)this.getPlugin();
 		AccessManager access = pl.getAccessManager();
 		if (access.getServerByName(args[0]) != null) {
 			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY.component(RED)));
 			return;
 		}
-		pl.getAccessManager().pendingRegistration((ProxyPlayer) sender, args[0], args[1]);
+		pl.getAccessManager().pendingRegistration((ProxyPlayer<C>) sender, args[0], args[1]);
 	}
 
 	@Override
-	public @NotNull List<CmdArg> getArgs() {
+	public @NotNull List<CmdArg<C>> getArgs() {
 		return this.args;
 	}
 

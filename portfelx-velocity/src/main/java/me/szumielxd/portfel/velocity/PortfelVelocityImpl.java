@@ -18,6 +18,7 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.szumielxd.portfel.api.CommonLogger;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
 import me.szumielxd.portfel.api.configuration.Config;
@@ -26,9 +27,8 @@ import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.ConfigImpl;
-import me.szumielxd.portfel.common.Lang;
+import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.loader.CommonDependency;
-import me.szumielxd.portfel.common.loader.CommonLogger;
 import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;

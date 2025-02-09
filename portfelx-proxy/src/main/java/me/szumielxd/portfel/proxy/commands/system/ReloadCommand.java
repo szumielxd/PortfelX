@@ -9,25 +9,25 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
-public class ReloadCommand extends SimpleCommand {
+public class ReloadCommand<C> extends SimpleCommand<C> {
 
-	public ReloadCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+	public ReloadCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "reload", "rl");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		PortfelProxyImpl plugin = (PortfelProxyImpl) this.getPlugin();
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+		PortfelProxyImpl<C> plugin = (PortfelProxyImpl<C>) this.getPlugin();
 		sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_RELOAD_EXECUTE.component(GRAY)));
 		try {
 			plugin.unload();
@@ -42,7 +42,7 @@ public class ReloadCommand extends SimpleCommand {
 	}
 
 	@Override
-	public @NotNull List<CmdArg> getArgs() {
+	public @NotNull List<CmdArg<C>> getArgs() {
 		return this.emptyArgList;
 	}
 

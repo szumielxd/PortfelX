@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
-import me.szumielxd.portfel.common.Lang;
+import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.proxy.api.objects.ProxySender;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import net.kyori.adventure.identity.Identity;

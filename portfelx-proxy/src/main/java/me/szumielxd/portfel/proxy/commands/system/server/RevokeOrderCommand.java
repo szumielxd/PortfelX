@@ -12,37 +12,37 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
 import me.szumielxd.portfel.proxy.commands.CommonArgs;
 import net.kyori.adventure.text.Component;
 
-public class RevokeOrderCommand extends SimpleCommand {
+public class RevokeOrderCommand<C> extends SimpleCommand<C> {
 	
-	private final List<CmdArg> args = Arrays.asList(
-			new CmdArg(LangKey.COMMAND_ARGTYPES_ORDER_DISPLAY, LangKey.COMMAND_ARGTYPES_ORDER_DESCRIPTION, LangKey.EMPTY, s -> s.toLowerCase(), (s, label) -> {
+	private final List<CmdArg<C>> args = Arrays.asList(
+			new CmdArg<>(LangKey.COMMAND_ARGTYPES_ORDER_DISPLAY, LangKey.COMMAND_ARGTYPES_ORDER_DESCRIPTION, LangKey.EMPTY, s -> s.toLowerCase(), (s, label) -> {
 				UUID server = (UUID) CommonArgs.SERVER.parseArg(label[3]);
 				if (server == null) return new ArrayList<>();
-				return ((PortfelProxyImpl)this.getPlugin()).getAccessManager().getAllowedOrders(server);
+				return ((PortfelProxyImpl<C>)this.getPlugin()).getAccessManager().getAllowedOrders(server);
 			})
 	);
 
-	public RevokeOrderCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+	public RevokeOrderCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "revoke");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed != null) {
 			String order = (String) parsed[0];
 			UUID server = (UUID) parsedArgs[0];
-			AccessManager access = ((PortfelProxyImpl)this.getPlugin()).getAccessManager();
+			AccessManager access = ((PortfelProxyImpl<C>)this.getPlugin()).getAccessManager();
 			if (!access.canAccess(server, order)) {
 				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_SERVER_REVOKE_ALREADY.component(RED)));
 				return;
@@ -57,7 +57,7 @@ public class RevokeOrderCommand extends SimpleCommand {
 	}
 
 	@Override
-	public @NotNull List<CmdArg> getArgs() {
+	public @NotNull List<CmdArg<C>> getArgs() {
 		return this.args;
 	}
 

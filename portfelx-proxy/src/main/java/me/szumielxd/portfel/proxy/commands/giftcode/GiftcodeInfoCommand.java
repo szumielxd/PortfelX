@@ -5,6 +5,7 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -12,26 +13,27 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 import me.szumielxd.portfel.proxy.objects.PrizeToken;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
-public class GiftcodeInfoCommand extends SimpleCommand {
+public class GiftcodeInfoCommand<C> extends SimpleCommand<C> {
 
-	public GiftcodeInfoCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+	public GiftcodeInfoCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "info", "information", "informations", "get", "about");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
 		PrizeToken token = (PrizeToken) parsedArgs[0];
 		Component header = Portfel.PREFIX.append(Component.text("> ", LIGHT_PURPLE, BOLD)).append(LangKey.COMMAND_GIFTCODE_INFO_HEADER.component(DARK_PURPLE,
@@ -64,13 +66,8 @@ public class GiftcodeInfoCommand extends SimpleCommand {
 	}
 
 	@Override
-	public @NotNull List<CmdArg> getArgs() {
-		return this.emptyArgList;
-	}
-
-	@Override
 	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_USER_INFO_DESCRIPTION;
+		return ProxyLangKey.COMMAND_GIFTCODE_INFO_DESCRIPTION;
 	}
 	
 	private @NotNull Component prepareInteractive(@NotNull Component comp, @NotNull String[] label, @NotNull String text) {
@@ -78,6 +75,16 @@ public class GiftcodeInfoCommand extends SimpleCommand {
 				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_SUGGEST.component(GRAY))
 				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_INSERT.component(GRAY)))
 				.clickEvent(ClickEvent.suggestCommand("/" + String.join(" ", Arrays.copyOf(label, 2)) + " " + text)).insertion(text);
+	}
+
+	@Override
+	public @NotNull List<CmdArg> getStaticArgs() {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public @NotNull List<CmdArg> getFlyingArgs() {
+		return Collections.emptyList();
 	}
 
 }

@@ -10,30 +10,30 @@ import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
 import me.szumielxd.portfel.proxy.commands.CommonArgs;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 
-public class UnregisterServerCommand extends SimpleCommand {
+public class UnregisterServerCommand<C> extends SimpleCommand<C> {
 	
-	public final List<CmdArg> args;
+	public final List<CmdArg<C>> args;
 
-	public UnregisterServerCommand(@NotNull PortfelProxyImpl plugin, @NotNull AbstractCommand parent) {
+	public UnregisterServerCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "unregisterserver", "deleteserver");
 		this.args = Arrays.asList(CommonArgs.SERVER);
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed == null) return;
-		PortfelProxyImpl pl = (PortfelProxyImpl)this.getPlugin();
+		PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>)this.getPlugin();
 		AccessManager access = pl.getAccessManager();
 		UUID serverId = (UUID) parsed[0];
 		access.unregister(serverId);
@@ -56,7 +56,7 @@ public class UnregisterServerCommand extends SimpleCommand {
 	}
 
 	@Override
-	public @NotNull List<CmdArg> getArgs() {
+	public @NotNull List<CmdArg<C>> getArgs() {
 		return this.args;
 	}
 

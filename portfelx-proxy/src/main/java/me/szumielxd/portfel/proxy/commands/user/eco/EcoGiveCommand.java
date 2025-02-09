@@ -12,26 +12,26 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.api.objects.ProxyActionExecutor;
 import me.szumielxd.portfel.proxy.commands.CommonArgs;
 import net.kyori.adventure.text.Component;
 
-public class EcoGiveCommand extends SimpleCommand {
+public class EcoGiveCommand<C> extends SimpleCommand<C> {
 	
 	
 	private final List<CmdArg> args = Arrays.asList(CommonArgs.ECO_AMOUNT, CommonArgs.REASON);
 	
 
-	public EcoGiveCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+	public EcoGiveCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "give", "add");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
 		Object[] parsed = this.validateArgs(sender, args);
 		if (parsed != null) {
 			Long amount = (Long) parsed[0];

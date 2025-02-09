@@ -5,17 +5,17 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.Portfel;
-import me.szumielxd.portfel.common.Lang.LangKey;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.commands.user.eco.EcoGiveCommand;
 import me.szumielxd.portfel.proxy.commands.user.eco.EcoSetCommand;
 import me.szumielxd.portfel.proxy.commands.user.eco.EcoTakeCommand;
 
-public class EcoParentCommand extends ParentCommand {
+public class EcoParentCommand<C> extends ParentCommand<C> {
 
-	public EcoParentCommand(@NotNull Portfel plugin, @NotNull AbstractCommand parent) {
+	public EcoParentCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "eco", "economy", "bal", "balance");
 		this.register(
 				new EcoGiveCommand(plugin, this),

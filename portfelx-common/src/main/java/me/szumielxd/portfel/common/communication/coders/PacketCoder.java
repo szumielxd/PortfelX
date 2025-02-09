@@ -36,7 +36,7 @@ public class PacketCoder {
 	
 	
 	@SuppressWarnings("unchecked")
-	public <T extends MessagePacket> Optional<T> decode(@NotNull ByteArrayDataInput in, @NotNull Class<T> messageClass) {
+	public static <T extends MessagePacket> Optional<T> decode(@NotNull ByteArrayDataInput in, @NotNull Class<T> messageClass) {
 		IdentifiedMessage msgMeta = messageClass.getAnnotation(IdentifiedMessage.class);
 		if (msgMeta == null) {
 			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
@@ -45,7 +45,7 @@ public class PacketCoder {
 				.map(c -> (T) c.decode(in));
 	}
 	
-	protected static void encode(@NotNull ByteArrayDataOutput out, @NotNull MessagePacket message) {
+	public static void encode(@NotNull ByteArrayDataOutput out, @NotNull MessagePacket message) {
 		IdentifiedMessage msgMeta = message.getClass().getAnnotation(IdentifiedMessage.class);
 		if (msgMeta == null) {
 			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
