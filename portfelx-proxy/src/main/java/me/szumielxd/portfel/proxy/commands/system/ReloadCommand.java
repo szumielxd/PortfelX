@@ -1,61 +1,55 @@
 package me.szumielxd.portfel.proxy.commands.system;
 
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 
 public class ReloadCommand<C> extends SimpleCommand<C> {
+	
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = MainLangKey.COMMAND_SYSTEM_RELOAD_DESCRIPTION;
+	
 
 	public ReloadCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "reload", "rl");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
 		PortfelProxyImpl<C> plugin = (PortfelProxyImpl<C>) this.getPlugin();
-		sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_RELOAD_EXECUTE.component(GRAY)));
+		MainLangKey.COMMAND_SYSTEM_RELOAD_EXECUTE
+				.draft()
+				.sendPrefixed(sender);
 		try {
 			plugin.unload();
 			plugin.load();
 		} catch (Throwable e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_RELOAD_ERROR.component(DARK_RED)).hoverEvent(Component.text(sw.toString(), RED)));
+			getPlugin().getLogger().log(Level.SEVERE, "Ann error occurred while executing top info command", e);
+			MainLangKey.COMMAND_SYSTEM_RELOAD_ERROR
+					.draft(sw.toString())
+					.sendPrefixed(sender);
 			return;
 		}
-		sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_RELOAD_SUCCESS.component(GREEN, Component.text(plugin.getName()+" "+plugin.getVersion(), AQUA))));
-	}
-
-	@Override
-	public @NotNull List<CmdArg<C>> getArgs() {
-		return this.emptyArgList;
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_SYSTEM_RELOAD_DESCRIPTION;
-	}
-	
-	private @NotNull Component prepareInteractive(@NotNull Component comp, @NotNull String[] label, @NotNull String text) {
-		return comp.hoverEvent(Component.text(text, AQUA)
-				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_SUGGEST.component(GRAY))
-				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_INSERT.component(GRAY)))
-				.clickEvent(ClickEvent.suggestCommand("/" + String.join(" ", Arrays.copyOf(label, 2)) + " " + text)).insertion(text);
+		MainLangKey.COMMAND_SYSTEM_RELOAD_SUCCESS
+				.draft(plugin.getName(), plugin.getVersion())
+				.sendPrefixed(sender);
 	}
 
 }

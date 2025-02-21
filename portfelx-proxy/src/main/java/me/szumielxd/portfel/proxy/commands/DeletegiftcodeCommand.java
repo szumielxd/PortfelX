@@ -1,6 +1,7 @@
 package me.szumielxd.portfel.proxy.commands;
 
 import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
@@ -17,16 +18,19 @@ public class DeletegiftcodeCommand<C> extends SimpleCommand<C> {
 	
 	@Getter private final List<CmdArg> staticArgs = List.of(CommonArgs.TOKEN);
 	@Getter private final List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_DELETEGIFTCODE_DESCRIPTION;
+	
 
 	public DeletegiftcodeCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "deletegiftcode", "deletegift", "deletecode");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		this.parseArguments(sender, args).ifPresent(parsed -> {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		this.parseArguments(sender, parsedContext.argsLeft()).ifPresent(newParsedContext -> {
+			var parsed = newParsedContext.parsedArgs();
 			PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>) this.getPlugin();
-			PrizeToken token = (PrizeToken)parsed.staticArgs()[0];
+			PrizeToken token = (PrizeToken) parsed.staticArgs()[0];
 			pl.getTokenManager().deleteToken(token.getToken()).thenAccept(res -> {
 				if (res.booleanValue()) {
 					ProxyLangKey.COMMAND_DELETEGIFTCODE_SUCCESS.draft(token.getToken())
@@ -37,11 +41,6 @@ public class DeletegiftcodeCommand<C> extends SimpleCommand<C> {
 				}
 			});
 		});
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return ProxyLangKey.COMMAND_DELETEGIFTCODE_DESCRIPTION;
 	}
 
 }

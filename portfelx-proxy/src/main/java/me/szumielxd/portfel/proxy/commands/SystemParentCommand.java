@@ -1,10 +1,10 @@
 package me.szumielxd.portfel.proxy.commands;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;
@@ -17,6 +17,12 @@ import me.szumielxd.portfel.proxy.commands.system.ServerParentCommand;
 import me.szumielxd.portfel.proxy.commands.system.UnregisterServerCommand;
 
 public class SystemParentCommand<C> extends ParentCommand<C> {
+	
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = MainLangKey.COMMAND_SYSTEM_DESCRIPTION;
+	
 
 	public SystemParentCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "system", "sys");
@@ -26,21 +32,6 @@ public class SystemParentCommand<C> extends ParentCommand<C> {
 				new ServerParentCommand<>(plugin, this),
 				new ReloadCommand<>(plugin, this)
 		));
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getStaticArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getFlyingArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return MainLangKey.COMMAND_SYSTEM_DESCRIPTION;
 	}
 
 }

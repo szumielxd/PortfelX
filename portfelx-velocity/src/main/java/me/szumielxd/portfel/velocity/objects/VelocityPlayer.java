@@ -1,7 +1,5 @@
 package me.szumielxd.portfel.velocity.objects;
 
-import java.time.Duration;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -9,7 +7,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,10 +21,6 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
-import net.kyori.adventure.bossbar.BossBar;
-import net.kyori.adventure.bossbar.BossBar.Color;
-import net.kyori.adventure.bossbar.BossBar.Flag;
-import net.kyori.adventure.bossbar.BossBar.Overlay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
@@ -40,11 +34,9 @@ import net.luckperms.api.node.NodeType;
 import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryOptions;
 
-public class VelocityPlayer extends VelocitySender implements ProxyPlayer {
+public class VelocityPlayer extends VelocitySender implements ProxyPlayer<Component> {
 
-	
 	private final @NotNull Player player;
-	
 	
 	public VelocityPlayer(@NotNull PortfelVelocityImpl plugin, @NotNull Player player) {
 		super(plugin, player);
@@ -67,7 +59,12 @@ public class VelocityPlayer extends VelocitySender implements ProxyPlayer {
 			User user = api.getUserManager().getUser(this.player.getUniqueId());
 			ContextManager cm = api.getContextManager();
 			QueryOptions queryOptions = cm.getQueryOptions(user).orElse(cm.getStaticQueryOptions());
-			user.getNodes(NodeType.INHERITANCE).stream().map(NodeType.INHERITANCE::cast).filter(n -> n.getContexts().isSatisfiedBy(queryOptions.context())).map(InheritanceNode::getGroupName).map(this::convertGroupDisplayName).forEachOrdered(groups::add);
+			user.getNodes(NodeType.INHERITANCE).stream()
+					.map(NodeType.INHERITANCE::cast)
+					.filter(n -> n.getContexts().isSatisfiedBy(queryOptions.context()))
+					.map(InheritanceNode::getGroupName)
+					.map(this::convertGroupDisplayName)
+					.forEachOrdered(groups::add);
 		} catch(Exception e) {}
 		return Collections.unmodifiableCollection(groups);
 	}
@@ -114,7 +111,9 @@ public class VelocityPlayer extends VelocitySender implements ProxyPlayer {
 
 	@Override
 	public void connect(@NotNull String server) {
-		this.plugin.getProxy().getServer(server).map(player::createConnectionRequest).ifPresent(ConnectionRequestBuilder::fireAndForget);
+		this.plugin.getProxy().getServer(server)
+				.map(player::createConnectionRequest)
+				.ifPresent(ConnectionRequestBuilder::fireAndForget);
 	}
 
 
@@ -126,7 +125,10 @@ public class VelocityPlayer extends VelocitySender implements ProxyPlayer {
 
 	@Override
 	public @NotNull String getWorldName() {
-		return this.player.getCurrentServer().map(ServerConnection::getServerInfo).map(ServerInfo::getName).orElse("");
+		return this.player.getCurrentServer()
+				.map(ServerConnection::getServerInfo)
+				.map(ServerInfo::getName)
+				.orElse("");
 	}
 
 
@@ -149,22 +151,20 @@ public class VelocityPlayer extends VelocitySender implements ProxyPlayer {
 
 
 	@Override
-	public void showTitle(@NotNull Component title, @NotNull Component subtitle, @Nullable Times times) {
-		this.player.showTitle(Title.title(title, subtitle, times));
-	}
-
-
-	@Override
-	public void showBossBar(@NotNull Component name, @NotNull Duration time, float progress, @NotNull Color color, @NotNull Overlay overlay, @NotNull Flag... flags) {
-		final BossBar bar = BossBar.bossBar(name, progress, color, overlay, new HashSet<>(Arrays.asList(flags)));
-		this.player.showBossBar(bar);
-		this.plugin.getCommonServer().getScheduler().runTaskLater(() -> this.player.hideBossBar(bar), time.toMillis(), TimeUnit.MILLISECONDS);
+	public void showTitle(@NotNull Component title, @NotNull Component subtitle, @Nullable TitleTiming times) {
+		Times timesComp = null;
+		if (times != null) {
+			timesComp = Times.times(times.fadeIn(), times.stay(), times.fadeOut());
+		}
+		this.player.showTitle(Title.title(title, subtitle, timesComp));
 	}
 
 
 	@Override
 	public void sendPluginMessage(@NotNull String tag, @NotNull byte[] message) {
-		this.player.sendPluginMessage(tag.indexOf(':') >= 0 ? MinecraftChannelIdentifier.from(tag) : new LegacyChannelIdentifier(tag), message);
+		this.player.sendPluginMessage(tag.indexOf(':') >= 0 ?
+				MinecraftChannelIdentifier.from(tag)
+				: new LegacyChannelIdentifier(tag), message);
 	}
 
 
@@ -177,6 +177,12 @@ public class VelocityPlayer extends VelocitySender implements ProxyPlayer {
 	@Override
 	public Optional<ProxyServerConnection> getServer() {
 		return this.player.getCurrentServer().map(srv -> new VelocityServerConnection(this.plugin, srv));
+	}
+
+
+	@Override
+	public int protocolId() {
+		return this.player.getProtocolVersion().getProtocol();
 	}
 
 }

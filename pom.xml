@@ -39,7 +39,7 @@
 		</repository>
 		<repository>
 			<id>papermc</id>
-			<url>https://papermc.io/repo/repository/maven-public/</url>
+			<url>https://repo.papermc.io/repository/maven-public/</url>
 		</repository>
 		<repository>
 			<id>sonatype-oss-snapshots</id>
@@ -53,10 +53,6 @@
 		<repository>
 			<id>placeholderapi</id>
 			<url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-		</repository>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
 		</repository>
 		<repository>
 			<id>viaversion-repo</id>
@@ -282,9 +278,9 @@
 			</dependency>
 			
 			<dependency>
-				<groupId>me.carleslc.Simple-YAML</groupId>
+				<groupId>com.github.Carleslc.Simple-YAML</groupId>
 				<artifactId>Simple-Yaml</artifactId>
-				<version>1.8</version>
+				<version>1.8.4</version>
 				<scope>provided</scope>
 			</dependency>
 			

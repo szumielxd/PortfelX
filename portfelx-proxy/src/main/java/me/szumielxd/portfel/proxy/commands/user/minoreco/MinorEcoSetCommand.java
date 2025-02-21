@@ -1,11 +1,10 @@
 package me.szumielxd.portfel.proxy.commands.user.minoreco;
 
-import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
-import java.util.Arrays;
 import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
@@ -13,39 +12,34 @@ import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.proxy.commands.CommonArgs;
-import net.kyori.adventure.text.Component;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
 public class MinorEcoSetCommand<C> extends SimpleCommand<C> {
 	
 	
-	private final List<CmdArg<C>> args = Arrays.asList(CommonArgs.ECO_AMOUNT);
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of(CommonArgs.ECO_AMOUNT);
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_USER_MINORECO_SET_DESCRIPTION;
 	
-
+	
 	public MinorEcoSetCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "set");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		Object[] parsed = this.validateArgs(sender, args);
-		if (parsed != null) {
-			Long amount = (Long) parsed[0];
-			User user = (User) parsedArgs[0];
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		this.parseArguments(sender, parsedContext).ifPresent(parsed -> {
+			Long amount = (Long) parsed.parsedArgs().staticArgs()[0];
+			User user = (User) parsedContext.parsedArgs().staticArgs()[0];
 			user.setMinorBalance(amount);
-			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_USER_MINORECO_SET_SUCCESS.component(LIGHT_PURPLE,
-					Component.text(user.getName(), AQUA), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Component.text(amount)))));
-		}
-	}
-
-	@Override
-	public @NotNull List<CmdArg<C>> getArgs() {
-		return this.args;
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_USER_MINORECO_SET_DESCRIPTION;
+			ProxyLangKey.COMMAND_USER_MINORECO_SET_SUCCESS
+					.draft(
+							user.getName(),
+							MainLangKey.MAIN_MINORCURRENCY_FORMAT.draft(amount))
+					.sendPrefixed(sender);
+		});
 	}
 
 }

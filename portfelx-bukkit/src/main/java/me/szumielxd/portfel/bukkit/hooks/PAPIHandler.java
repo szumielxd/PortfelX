@@ -16,11 +16,11 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
-import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.translation.Translator;
 
 public class PAPIHandler extends PlaceholderExpansion {
@@ -237,7 +237,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 		NumberFormat format = NumberFormat.getInstance(locale);
 		format.setMinimumFractionDigits(2);
 		format.setMaximumFractionDigits(2);
-		return BukkitLangKey.MAIN_CURRENCY_FORMAT
+		return MainLangKey.MAIN_CURRENCY_FORMAT
 				.draft(format.format(value).replace('\u00A0', ' '))
 				.buildPlain(Lang.get(locale));
 	}
@@ -253,7 +253,7 @@ public class PAPIHandler extends PlaceholderExpansion {
 		NumberFormat format = NumberFormat.getInstance(locale);
 		format.setMinimumFractionDigits(2);
 		format.setMaximumFractionDigits(2);
-		return BukkitLangKey.MAIN_MINORCURRENCY_FORMAT
+		return MainLangKey.MAIN_MINORCURRENCY_FORMAT
 				.draft(format.format(value).replace('\u00A0', ' '))
 				.buildPlain(Lang.get(locale));
 	}

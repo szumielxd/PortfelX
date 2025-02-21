@@ -104,66 +104,70 @@ public enum ProxyLangKey implements LangKey {
 	COMMAND_SYSTEM_REGISTERSERVER_SUCCESS("command.system.registerserver.success", "<light_purple>You did it! You registered new portfel server with friendly name <aqua><underlined>{0}</underlined></aqua> and ID <aqua><underlined>{1}</underlined></aqua>!"),
 	COMMAND_SYSTEM_REGISTERSERVER_ERROR("command.system.registerserver.error", "<dark_red>This... This was very interesting. Server returned an unknown response."),
 	COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_NEEDED("command.system.registerserver.servername-needed", "We need a user friendly and memorable text for use as shorthand of server ID. Please provide id."),
-	COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY("command.system.registerserver.servername-already", "Did you remember this shorthand is already in use for another server?"),
+	COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY("command.system.registerserver.servername-already", "<red>Did you remember this shorthand is already in use for another server?"),
 	//
 	COMMAND_SYSTEM_UNREGISTERSERVER_DESCRIPTION("command.system.unregisterserver.description", "Unregister given server."),
-	COMMAND_SYSTEM_UNREGISTERSERVER_SUCCESS("command.system.unregisterserver.success", "Successfully unregistered server with friendly name {0} and ID {1}."),
+	COMMAND_SYSTEM_UNREGISTERSERVER_SUCCESS("command.system.unregisterserver.success", "<light_purple>Successfully unregistered server with friendly name <light_purple>{0}</light_purple> and ID <light_purple>{1}</light_purple>."),
+	//
+	COMMAND_SYSTEM_SERVER_DESCRIPTION("command.system.server.description", "Server management main command."),
 	//
 	COMMAND_SYSTEM_SERVER_GRANT_DESCRIPTION("command.system.server.grant.description", "Grant selected server access to specified globar order."),
-	COMMAND_SYSTEM_SERVER_GRANT_SUCCESS("command.system.server.grant.success", "Successfully granted {0} access to {1} global order."),
-	COMMAND_SYSTEM_SERVER_GRANT_ALREADY("command.system.server.grant.already", "The same global order cannot be granted twice for the same server."),
+	COMMAND_SYSTEM_SERVER_GRANT_SUCCESS("command.system.server.grant.success", "<light_purple>Successfully granted <aqua>{0}</aqua> access to <aqua>{1}</aqua> global order."),
+	COMMAND_SYSTEM_SERVER_GRANT_ALREADY("command.system.server.grant.already", "<red>The same global order cannot be granted twice for the same server."),
 	//
 	COMMAND_SYSTEM_SERVER_REVOKE_DESCRIPTION("command.system.server.revoke.description", "Revoke selected server access to specified globar order."),
-	COMMAND_SYSTEM_SERVER_REVOKE_SUCCESS("command.system.server.revoke.success", "Successfully revoked {0} access to {1} global order."),
-	COMMAND_SYSTEM_SERVER_REVOKE_ALREADY("command.system.server.revoke.already", "To revoke an global order, you must first grant it."),
+	COMMAND_SYSTEM_SERVER_REVOKE_SUCCESS("command.system.server.revoke.success", "<light_purple>Successfully revoked <aqua>{0}</aqua> access to <aqua>{1}</aqua> global order."),
+	COMMAND_SYSTEM_SERVER_REVOKE_ALREADY("command.system.server.revoke.already", "<red>To revoke an global order, you must first grant it."),
 	//
 	COMMAND_USER_DESCRIPTION("command.user.description", "User management main command."),
 	//
 	COMMAND_USER_INFO_DESCRIPTION("command.user.info.description", "Get extended info about user."),
-	COMMAND_USER_INFO_HEADER("command.user.info.header", "User Info: {0}"),
-	COMMAND_USER_INFO_UUID("command.user.info.uuid", "UUID: {0}"),
-	COMMAND_USER_INFO_UUIDTYPE("command.user.info.uuidtype", "(type: {0})"),
-	COMMAND_USER_INFO_STATUS("command.user.info.status", "Status: {0}"),
-	COMMAND_USER_INFO_USERDATA("command.user.info.userdata", "Userdata:"),
-	COMMAND_USER_INFO_BALANCE("command.user.info.balance", "Balance: {0}"),
-	COMMAND_USER_INFO_MINORBALANCE("command.user.info.minorbalance", "Minor balance: {0}"),
-	COMMAND_USER_INFO_INTOP("command.user.info.intop", "Can be in Top: {0}"),
-	COMMAND_USER_INFO_SUGGEST("command.user.info.suggest", "Click to suggest command on chat"),
-	COMMAND_USER_INFO_INSERT("command.user.info.insert", "Click+Shift to insert above text on chat"),
+	COMMAND_USER_INFO_HEADER("command.user.info.header", "<light_purple><bold>> </bold><dark_purple>User Info: {0}"),
+	COMMAND_USER_INFO_UUID("command.user.info.uuid", "<white>- <light_purple>UUID: {0}"),
+	COMMAND_USER_INFO_UUIDTYPE("command.user.info.uuidtype", "<gray>   (type: {0})"),
+	COMMAND_USER_INFO_STATUS("command.user.info.status", "<white>- <dark_purple>Status: {0}"),
+	COMMAND_USER_INFO_USERDATA("command.user.info.userdata", "<white>- <dark_purple>Userdata:"),
+	COMMAND_USER_INFO_BALANCE("command.user.info.balance", "   <command:suggest_command:/{1}><hover:show_text:\\\"Click to insert balance command\\\"><dark_purple>Balance: <aqua>{0}"),
+	COMMAND_USER_INFO_MINORBALANCE("command.user.info.minorbalance", "   <command:suggest_command:/{1}><hover:show_text:\\\"Click to insert minor balance command\\\"><dark_purple>Minor balance: <aqua>{0}"),
+	COMMAND_USER_INFO_INTOP("command.user.info.intop", "   <dark_purple>Can be in Top: {0}"),
+	COMMAND_USER_INFO_VALUE("command.user.info.value", "<click:suggest_command:/{1} {0}><insert:{0}><hover:show_text:\\\"{2}\\\"><white>{0}"),
+	COMMAND_USER_INFO_VALUEHOVER("command.user.info.value-hover", "<dark_gray>» <gray>Click to suggest command on chat</gray>\\n» Click+Shift to insert above text on chat"),
 	//
 	COMMAND_USER_ECO_DESCRIPTION("command.user.eco.description", "Manage user's economy."),
 	//
 	COMMAND_USER_ECO_SET_DESCRIPTION("command.user.eco.set.description", "Set user's balance to given amount."),
-	COMMAND_USER_ECO_SET_SUCCESS("command.user.eco.set.success", "Set {1} as {0}'s balance."),
+	COMMAND_USER_ECO_SET_SUCCESS("command.user.eco.set.success", "<light_purple>Set <aqua>{1}</aqua> as <aqua>{0}</aqua>'s balance."),
 	//
 	COMMAND_USER_ECO_GIVE_DESCRIPTION("command.user.eco.give.description", "Add given amount to user's balance."),
-	COMMAND_USER_ECO_GIVE_SUCCESS("command.user.eco.give.success", "Add {1} to {0}'s balance."),
+	COMMAND_USER_ECO_GIVE_SUCCESS("command.user.eco.give.success", "<light_purple>Add <aqua>{1}</aqua> to <aqua>{0}</aqua>'s balance."),
 	//
 	COMMAND_USER_ECO_TAKE_DESCRIPTION("command.user.eco.take.description", "Remove given amount from user's balance."),
-	COMMAND_USER_ECO_TAKE_SUCCESS("command.user.eco.take.success", "Remove {1} from {0}'s balance."),
-	COMMAND_USER_ECO_TAKE_SMALLER("command.user.eco.take.smaller", "User balance cannot be smaller than 0."),
+	COMMAND_USER_ECO_TAKE_SUCCESS("command.user.eco.take.success", "<light_purple>Remove <aqua>{1}</aqua> from <aqua>{0}</aqua>'s balance."),
+	COMMAND_USER_ECO_TAKE_SMALLER("command.user.eco.take.smaller", "<red>User balance cannot be smaller than 0."),
 	//
 	COMMAND_USER_MINORECO_DESCRIPTION("command.user.minoreco.description", "Manage user's minor economy."),
 	//
 	COMMAND_USER_MINORECO_SET_DESCRIPTION("command.user.minoreco.set.description", "Set user's minor balance to given amount."),
-	COMMAND_USER_MINORECO_SET_SUCCESS("command.user.minoreco.set.success", "Set {1} as {0}'s minor balance."),
+	COMMAND_USER_MINORECO_SET_SUCCESS("command.user.minoreco.set.success", "<light_purple>Set <aqua>{1}</aqua> as <aqua>{0}</aqua>'s minor balance."),
 	//
 	COMMAND_USER_MINORECO_GIVE_DESCRIPTION("command.user.minoreco.give.description", "Add given amount to user's minor balance."),
-	COMMAND_USER_MINORECO_GIVE_SUCCESS("command.user.minoreco.give.success", "Add {1} to {0}'s minor balance."),
+	COMMAND_USER_MINORECO_GIVE_SUCCESS("command.user.minoreco.give.success", "<light_purple>Add <aqua>{1}</aqua> to <aqua>{0}</aqua>'s minor balance."),
 	//
 	COMMAND_USER_MINORECO_TAKE_DESCRIPTION("command.user.minoreco.take.description", "Remove given amount from user's minor balance."),
-	COMMAND_USER_MINORECO_TAKE_SUCCESS("command.user.minoreco.take.success", "Remove {1} from {0}'s minor balance."),
-	COMMAND_USER_MINORECO_TAKE_SMALLER("command.user.minoreco.take.smaller", "User minor balance cannot be smaller than 0."),
+	COMMAND_USER_MINORECO_TAKE_SUCCESS("command.user.minoreco.take.success", "<light_purple>Remove <aqua>{1}</aqua> from <aqua>{0}</aqua>'s minor balance."),
+	COMMAND_USER_MINORECO_TAKE_SMALLER("command.user.minoreco.take.smaller", "<red>User minor balance cannot be smaller than 0."),
 	//
 	COMMAND_USER_TOP_DESCRIPTION("command.user.top.description", "Manage user's top position."),
 	//
 	COMMAND_USER_TOP_INFO_DESCRIPTION("command.user.top.info.description", "Get info about user's top."),
-	COMMAND_USER_TOP_INFO_INTOP("command.user.top.info.intop", "{0}'s allowed in Top status:"),
-	COMMAND_USER_TOP_INFO_POSITION("command.user.top.info.position", "{0}'s position:"),
+	COMMAND_USER_TOP_INFO_INTOP("command.user.top.info.intop", "<dark_purple>{0}'s allowed in Top status:"),
+	COMMAND_USER_TOP_INFO_INTOPVALUE("command.user.top.info.intop-value", "<light_purple>-> {0}"),
+	COMMAND_USER_TOP_INFO_POSITION("command.user.top.info.position", "<dark_purple>{0}'s position:"),
+	COMMAND_USER_TOP_INFO_POSITIONVALUE("command.user.top.info.position-value", "<light_purple>-> <aqua>{0}"),
 	//
 	COMMAND_USER_TOP_SET_DESCRIPTION("command.user.top.set.description", "Set wheter this user should by available in top."),
-	COMMAND_USER_TOP_SET_SUCCESS("command.user.top.set.success", "Set {0}'s in top visibility to {1}."),
-	COMMAND_USER_TOP_SET_ALREADY("command.user.top.set.already", "{0}'s in top visibility is already set to {1}."),
+	COMMAND_USER_TOP_SET_SUCCESS("command.user.top.set.success", "<light_purple>Set <aqua>{0}</aqua>'s in top visibility to <aqua>{1}</aqua>."),
+	COMMAND_USER_TOP_SET_ALREADY("command.user.top.set.already", "<red><dark_red>{0}</dark_red>'s in top visibility is already set to <dark_red>{1}</dark_red>."),
 	//
 	COMMAND_LOG_DESCRIPTION("command.log.description", "Log management main command."),
 	//
@@ -173,19 +177,36 @@ public enum ProxyLangKey implements LangKey {
 	//
 	COMMAND_GIFTCODE_DESCRIPTION("command.giftcode.description", "Giftcode management main command."),
 	//
+	
+	ACOMMAND_USER_INFO_HEADER("command.user.info.header", "<light_purple><bold>> </bold><dark_purple>User Info: {0}"),
+	ACOMMAND_USER_INFO_UUID("command.user.info.uuid", "<white>- <light_purple>UUID: {0}"),
+	ACOMMAND_USER_INFO_UUIDTYPE("command.user.info.uuidtype", "<gray>   (type: {0})"),
+	ACOMMAND_USER_INFO_STATUS("command.user.info.status", "<white>- <dark_purple>Status: {0}"),
+	ACOMMAND_USER_INFO_USERDATA("command.user.info.userdata", "<white>- <dark_purple>Userdata:"),
+	ACOMMAND_USER_INFO_BALANCE("command.user.info.balance", "   <command:suggest_command:/{1}><hover:show_text:\\\"Click to insert balance command\\\"><dark_purple>Balance: <aqua>{0}"),
+	ACOMMAND_USER_INFO_MINORBALANCE("command.user.info.minorbalance", "   <command:suggest_command:/{1}><hover:show_text:\\\"Click to insert minor balance command\\\"><dark_purple>Minor balance: <aqua>{0}"),
+	ACOMMAND_USER_INFO_INTOP("command.user.info.intop", "   <dark_purple>Can be in Top: {0}"),
+	ACOMMAND_USER_INFO_VALUE("command.user.info.value", "<click:suggest_command:/{1} {0}><insert:{0}><hover:show_text:\\\"{2}\\\"><white>{0}"),
+	ACOMMAND_USER_INFO_VALUEHOVER("command.user.info.value-hover", "<dark_gray>» <gray>Click to suggest command on chat</gray>\\n» Click+Shift to insert above text on chat"),
+	
+	
+	//
 	COMMAND_GIFTCODE_INFO_DESCRIPTION("command.giftcode.info.description", "Get extended info about giftcode."),
-	COMMAND_GIFTCODE_INFO_HEADER("command.giftcode.info.header", "Giftcode Info: {0}"),
-	COMMAND_GIFTCODE_INFO_CREATOR("command.giftcode.info.creator", "Creator: {0}"),
-	COMMAND_GIFTCODE_INFO_UUID("command.giftcode.info.uuid", "UUID: {0}"),
-	COMMAND_GIFTCODE_INFO_ORDER("command.giftcode.info.order", "Order: {0}"),
-	COMMAND_GIFTCODE_INFO_ACCESSIBILITY("command.giftcode.info.accessibility", "Accessibility:"),
-	COMMAND_GIFTCODE_INFO_ACCESSTYPE("command.giftcode.info.access-type", "Type: {0}"),
-	COMMAND_GIFTCODE_INFO_ACCESSLIST("command.giftcode.info.access-list", "Allowed: {0}"),
-	COMMAND_GIFTCODE_INFO_DATES("command.giftcode.info.dates", "Dates:"),
-	COMMAND_GIFTCODE_INFO_CREATION("command.giftcode.info.creation", "Created: {0}"),
-	COMMAND_GIFTCODE_INFO_EXPIRATION("command.giftcode.info.expiration", "Expires: {0}"),
+	COMMAND_GIFTCODE_INFO_HEADER("command.giftcode.info.header", "<light_purple><bold>> </bold><dark_purple>Giftcode Info: {0}"),
+	COMMAND_GIFTCODE_INFO_CREATOR("command.giftcode.info.creator", "<white>- <light_purple>Creator: {0}"),
+	COMMAND_GIFTCODE_INFO_UUID("command.giftcode.info.uuid", "   <dark_purple>UUID: {0}"),
+	COMMAND_GIFTCODE_INFO_ORDER("command.giftcode.info.order", "<white>- <dark_purple>Order: <aqua>{0}"),
+	COMMAND_GIFTCODE_INFO_ACCESSIBILITY("command.giftcode.info.accessibility", "<white>- <light_purple>Accessibility:"),
+	COMMAND_GIFTCODE_INFO_ACCESSTYPE("command.giftcode.info.access-type", "   <dark_purple>Type: <aqua>{0}"),
+	COMMAND_GIFTCODE_INFO_ACCESSLIST("command.giftcode.info.access-list", "   <dark_purple>Allowed: <gray>{0}"),
+	COMMAND_GIFTCODE_INFO_ACCESSLIST_FORMAT("command.giftcode.info.access-list.format", "<aqua>{0}"),
+	COMMAND_GIFTCODE_INFO_DATES("command.giftcode.info.dates", "<white>- <light_purple>Dates:"),
+	COMMAND_GIFTCODE_INFO_CREATION("command.giftcode.info.creation", "   <dark_purple>Created: <aqua>{0}"),
+	COMMAND_GIFTCODE_INFO_EXPIRATION("command.giftcode.info.expiration", "   <dark_purple>Expires: <aqua>{0}"),
 	COMMAND_GIFTCODE_INFO_SUGGEST("command.giftcode.info.suggest", "Click to suggest command on chat"),
 	COMMAND_GIFTCODE_INFO_INSERT("command.giftcode.info.intop", "Click+Shift to insert above text on chat"),
+	COMMAND_GIFTCODE_INFO_VALUE("command.giftcode.info.value", "<click:suggest_command:/{1} {0}><insert:{0}><hover:show_text:\\\"{2}\\\"><white>{0}"),
+	COMMAND_GIFTCODE_INFO_VALUEHOVER("command.giftcode.info.value-hover", "<dark_gray>» <gray>Click to suggest command on chat</gray>\\n» Click+Shift to insert above text on chat"),
 	//
 	COMMAND_DELETEGIFTCODE_DESCRIPTION("command.deletegiftcode.description", "Delete giftcode."),
 	COMMAND_DELETEGIFTCODE_SUCCESS("command.deletegiftcode.success", "<green>Removed giftcode for <aqua>{0}</aqua>."),
@@ -232,18 +253,17 @@ public enum ProxyLangKey implements LangKey {
 	LOG_ACTION_AMOUNT("log.action.amount", "<hover:show_text:\"{0}\n<gray>Action: <aqua>{1}</aqua>\nOld balance: <aqua>{2}\">{0}"),
 	LOG_ACTION_NAME("log.action.name", "<white><hover:show_text:\"<white>{0}<gray>Date: <aqua>{1}\">{0}"),
 	
+	SERVER_FIELD_FRIENDLYNAME("server.field.friendly-name", "server friendly name"),
+	SERVER_FIELD_ID("server.field.id", "server ID"),
+	
 	MAIN_VALUENAME_DESCRIPTION("main.value-name.description", "Description:"),
 	MAIN_VALUENAME_ALIASES("main.value-name.aliases", "Aliases:"),
 	MAIN_VALUENAME_ENABLED("main.value-name.enabled", "Enabled:"),
 	MAIN_VALUENAME_AUTHORS("main.value-name.aliases", "Authors:"),
 	MAIN_VALUENAME_PERMISSION("main.value-name.permission", "Permission:"),
 	
-	MAIN_VALUE_TRUE("main.value.true", "true"),
-	MAIN_VALUE_FALSE("main.value.false", "false"),
 	MAIN_VALUE_YES("main.value.yes", "yes"),
 	MAIN_VALUE_NO("main.value.no", "no"),
-	MAIN_VALUE_ONLINE("main.value.online", "Online"),
-	MAIN_VALUE_OFFLINE("main.value.offline", "Offline"),
 	
 	MAIN_MESSAGE_INSERTION("main.message.insertion", "<hover:show_text:\"<dark_aqua>» <aqua>Click to insert {1} on chat.\"><click:suggest_command:{0}><insert:{0}>{0}</insert></click></hover>"),
 	

@@ -8,9 +8,11 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
@@ -41,36 +43,15 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> implements Paren
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		final List<CmdArg> cmdArgs = this.getAllArgs();
-		int offset = 0;
-		Object[] newParsedArgs = new Object[0];
-		if (args.length > offset) {
-			for (CmdArg arg : cmdArgs) {
-				Object obj = arg.parseArg(args[offset]);
-				if (obj != null) {
-					offset++;
-				} else if (!arg.isOptional()) {
-					arg.getArgError(MessageDraft.plain(args[offset])).send(sender, true);
-					return;
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		this.parseArguments(sender, parsedContext.argsLeft()).ifPresent(newParsedContext -> {
+			getChildren(newParsedContext.argLeft(0)).ifPresentOrElse(cmd -> {
+				if (cmd.validateCanUse(sender)) {
+					
+					cmd.onCommand(sender, parsedContext.chain(newParsedContext).skipArgsLeft(1));
 				}
-				newParsedArgs = MiscUtils.mergeArrays(newParsedArgs, obj);
-			}
-		}
-		if (args.length > offset) {
-			SimpleCommand<C> cmd = this.childrens.get(args[offset].toLowerCase());
-			if (cmd != null) {
-				if (!cmd.hasPermission(sender)) {
-					MainLangKey.ERROR_COMMAND_PERMISSION.draft().send(sender, true);
-				} else if (!cmd.getAccess().canAccess(sender)) {
-					cmd.getAccess().getAccessMessage().draft().send(sender, true);
-				} else {
-					cmd.onCommand(sender, MiscUtils.mergeArrays(parsedArgs, newParsedArgs), MiscUtils.mergeArrays(label, Arrays.copyOf(args, ++offset)), MiscUtils.popArray(args, offset));
-				}
-				return;
-			}
-		}
-		sendHelpMessage(sender, label, cmdArgs, args);		
+			}, () -> sendHelpMessage(sender, parsedContext));	
+		});		
 	}
 
 	@Override
@@ -105,13 +86,23 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> implements Paren
 				.toList();
 	}
 	
-	private void sendHelpMessage(@NotNull CommonSender<C> sender, String[] label, List<CmdArg> cmdArgs, String[] args) {
-		List<String> suggestCmd = new ArrayList<>(Arrays.asList(label.clone()));
+	@Override
+	public @NotNull Optional<SimpleCommand<C>> getChildren(@Nullable String name) {
+		if (name == null) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(this.childrens.get(name.toLowerCase()));
+	}
+	
+	private void sendHelpMessage(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		String[] label = parsedContext.label();
+		String[] args = parsedContext.argsLeft();
+		List<String> suggestCmd = new ArrayList<>(Arrays.asList(label));
 		var fullLabel = suggestCmd.stream()
 				.map(MessageDraft::plain)
 				.collect(Collectors.toCollection(LinkedList::new));
 		int offset = 0;
-		for (CmdArg arg : cmdArgs) {
+		for (CmdArg arg : getAllArgs()) {
 			if (offset < args.length) {
 				if (arg.isValid(args[offset])) {
 					suggestCmd.add(args[offset]);

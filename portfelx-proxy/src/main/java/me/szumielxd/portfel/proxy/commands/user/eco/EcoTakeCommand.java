@@ -1,15 +1,12 @@
 package me.szumielxd.portfel.proxy.commands.user.eco;
 
-import static net.kyori.adventure.text.format.NamedTextColor.AQUA;
-import static net.kyori.adventure.text.format.NamedTextColor.DARK_RED;
-import static net.kyori.adventure.text.format.NamedTextColor.LIGHT_PURPLE;
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+
 import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
@@ -17,14 +14,17 @@ import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.proxy.api.objects.ProxyActionExecutor;
 import me.szumielxd.portfel.proxy.commands.CommonArgs;
-import net.kyori.adventure.text.Component;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
 public class EcoTakeCommand<C> extends SimpleCommand<C> {
 	
 	
-	private final List<CmdArg> args = Arrays.asList(CommonArgs.ECO_AMOUNT, CommonArgs.REASON);
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of(CommonArgs.ECO_AMOUNT, CommonArgs.REASON);
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_USER_ECO_TAKE_DESCRIPTION;
 	
 
 	public EcoTakeCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
@@ -32,38 +32,33 @@ public class EcoTakeCommand<C> extends SimpleCommand<C> {
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		Object[] parsed = this.validateArgs(sender, args);
-		if (parsed != null) {
-			Long amount = (Long) parsed[0];
-			String reason = (String) parsed[1];
-			User user = (User) parsedArgs[0];
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		parseArguments(sender, parsedContext).ifPresent(parsed -> {
+			Long amount = (Long) parsed.parsedStaticArg(0);
+			String reason = (String) parsed.parsedStaticArg(1);
+			User user = (User) parsedContext.parsedStaticArg(0);
 			if (user.getBalance() < amount) {
-				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_USER_ECO_TAKE_SMALLER.component(RED)));
+				ProxyLangKey.COMMAND_USER_ECO_TAKE_SMALLER.draft()
+						.sendPrefixed(sender);
 				return;
 			}
 			CompletableFuture<Exception> future = user.takeBalance(amount, ProxyActionExecutor.sender(sender), "Proxy", reason);
 			try {
 				Exception ex = future.get();
-				if (ex != null) throw ex;
-				sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_USER_ECO_TAKE_SUCCESS.component(LIGHT_PURPLE,
-						Component.text(user.getName(), AQUA), LangKey.MAIN_CURRENCY_FORMAT.component(AQUA, Component.text(amount)))));
-				
+				if (ex != null) {
+					throw ex;
+				}
+				ProxyLangKey.COMMAND_USER_ECO_TAKE_SUCCESS
+						.draft(
+								user.getName(),
+								MainLangKey.MAIN_CURRENCY_FORMAT.draft(amount))
+						.sendPrefixed(sender);
 			} catch (Exception e) {
-				sender.sendTranslated(Portfel.PREFIX.append(LangKey.ERROR_COMMAND_EXECUTION.component(DARK_RED)));
-				e.printStackTrace();
+				MainLangKey.ERROR_COMMAND_EXECUTION.draft()
+						.sendPrefixed(sender);
+				getPlugin().getLogger().log(Level.SEVERE, "Ann error occurred while executing top info command", e);
 			}
-		}
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getArgs() {
-		return this.args;
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_USER_ECO_TAKE_DESCRIPTION;
+		});
 	}
 
 }

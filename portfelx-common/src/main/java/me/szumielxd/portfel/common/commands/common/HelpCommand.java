@@ -24,9 +24,9 @@ public class HelpCommand<C> extends SimpleCommand<C> {
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		
-		String[] shortLabel = Arrays.copyOf(label, label.length-1);
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		String[] label = parsedContext.label();
+		String[] shortLabel = Arrays.copyOf(label, label.length - 1);
 		Portfel<C> pl = this.getPlugin();
 		MainLangKey.COMMAND_MAIN_RUNNING
 				.draft(pl.toString())

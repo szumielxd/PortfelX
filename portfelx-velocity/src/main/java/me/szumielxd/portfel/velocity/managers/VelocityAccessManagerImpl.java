@@ -10,17 +10,17 @@ import com.velocitypowered.api.event.connection.PluginMessageEvent.ForwardResult
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 
-import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import me.szumielxd.portfel.proxy.managers.AccessManagerImpl;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import me.szumielxd.portfel.velocity.objects.VelocityPlayer;
 import me.szumielxd.portfel.velocity.objects.VelocityServerConnection;
+import net.kyori.adventure.text.Component;
 
-public class VelocityAccessManagerImpl extends AccessManagerImpl {
+public class VelocityAccessManagerImpl extends AccessManagerImpl<PortfelVelocityImpl, Component> {
 
-	public VelocityAccessManagerImpl(@NotNull PortfelProxyImpl plugin) {
+	public VelocityAccessManagerImpl(@NotNull PortfelVelocityImpl plugin) {
 		super(plugin);
 	}
 
@@ -30,9 +30,8 @@ public class VelocityAccessManagerImpl extends AccessManagerImpl {
 
 	@Override
 	protected void postInit() {
-		PortfelVelocityImpl portfel = (PortfelVelocityImpl) this.getPlugin();
 		this.getPlugin().debug("[%s] postInit call", "VelocityAccessManagerImpl");
-		portfel.getProxy().getEventManager().register(portfel.asPlugin(), this);
+		getPlugin().getProxy().getEventManager().register(getPlugin(), this);
 	}
 	
 	
@@ -45,7 +44,7 @@ public class VelocityAccessManagerImpl extends AccessManagerImpl {
 				ServerConnection server = (ServerConnection) event.getSource();
 				Player player = (Player) event.getTarget();
 				ProxyServerConnection sender = new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), server);
-				ProxyPlayer target = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), player);
+				ProxyPlayer<Component> target = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), player);
 				Optional<Boolean> result = this.onPluginMessage(sender, target, tag, event.getData());
 				if (result.isPresent()) {
 					event.setResult(result.get() ? ForwardResult.handled() : ForwardResult.forward());

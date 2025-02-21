@@ -2,7 +2,6 @@ package me.szumielxd.portfel.bukkit.commands;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,7 +13,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabExecutor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
@@ -29,10 +30,16 @@ import net.kyori.adventure.text.Component;
 
 public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 
-	private final PortfelBukkitImpl plugin;
-	private final PluginCommand command;
-	private Map<String, SimpleCommand<Component>> childrens = new HashMap<>();
-	private static final String HELP = "help";
+	private static final @NotNull String HELP = "help";
+	
+	private final @NotNull PortfelBukkitImpl plugin;
+	private final @NotNull PluginCommand command;
+	private final @NotNull Map<String, SimpleCommand<Component>> childrens = new HashMap<>();
+	
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = MainLangKey.EMPTY;
 	
 	
 	public MainCommand(@NotNull PortfelBukkitImpl plugin, @NotNull PluginCommand command) {
@@ -53,24 +60,11 @@ public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 	
 
 	@Override
-	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		if (args.length == 0) {
-			args = new String[] { "" };
+	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull ParsedCommandContext parsedContext) {
+		var cmd = getChildren(parsedContext.argLeft(0)).orElseGet(() -> this.childrens.get(HELP));
+		if (cmd.validateCanUse(sender)) {	
+			cmd.onCommand(sender, parsedContext.skipArgsLeft(1));
 		}
-		SimpleCommand<Component> cmd = Optional.ofNullable(this.childrens.get(args[0].toLowerCase()))
-				.orElseGet(() -> this.childrens.get(HELP));
-		if (!cmd.hasPermission(sender)) {
-			MainLangKey.ERROR_COMMAND_PERMISSION
-					.draft()
-					.send(sender, true);
-			return;
-		} else if (!cmd.getAccess().canAccess(sender)) {
-			cmd.getAccess().getAccessMessage()
-					.draft()
-					.send(sender, true);
-			return;
-		}
-		cmd.onCommand(sender, parsedArgs, MiscUtils.mergeArrays(label, args[0]), MiscUtils.popArray(args));
 	}
 
 	@Override
@@ -90,27 +84,20 @@ public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 		}
 		return List.of();
 	}
-
-	@Override
-	public @NotNull List<CmdArg> getStaticArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getFlyingArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return MainLangKey.EMPTY;
-	}
 	
 	@Override
 	public @NotNull List<SimpleCommand<Component>> getChildrens() {
 		return this.childrens.values().stream()
 				.distinct()
 				.toList();
+	}
+
+	@Override
+	public @NotNull Optional<SimpleCommand<Component>> getChildren(@Nullable String name) {
+		if (name == null) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(this.childrens.get(name.toLowerCase()));
 	}
 
 
@@ -121,7 +108,9 @@ public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		this.plugin.getTaskManager().runTaskAsynchronously(() -> this.onCommand(BukkitSender.wrap(this.plugin, sender), new Object[0], new String[] {label}, args));
+		this.plugin.getTaskManager()
+				.runTaskAsynchronously(
+						() -> this.onCommand(BukkitSender.wrap(this.plugin, sender), ParsedCommandContext.initial(label, args)));
 		return true;
 	}
 

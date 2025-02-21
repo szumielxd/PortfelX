@@ -61,7 +61,12 @@ public class BungeePlayer extends BungeeSender implements ProxyPlayer<BaseCompon
 			User user = api.getUserManager().getUser(this.player.getUniqueId());
 			ContextManager cm = api.getContextManager();
 			QueryOptions queryOptions = cm.getQueryOptions(user).orElse(cm.getStaticQueryOptions());
-			user.getNodes(NodeType.INHERITANCE).stream().map(NodeType.INHERITANCE::cast).filter(n -> n.getContexts().isSatisfiedBy(queryOptions.context())).map(InheritanceNode::getGroupName).map(this::convertGroupDisplayName).forEachOrdered(groups::add);
+			user.getNodes(NodeType.INHERITANCE).stream()
+					.map(NodeType.INHERITANCE::cast)
+					.filter(n -> n.getContexts().isSatisfiedBy(queryOptions.context()))
+					.map(InheritanceNode::getGroupName)
+					.map(this::convertGroupDisplayName)
+					.forEachOrdered(groups::add);
 		} catch(Exception e) {
 			// ignore
 		}

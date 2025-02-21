@@ -16,8 +16,9 @@ import me.szumielxd.portfel.proxy.listeners.ChannelListener;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import me.szumielxd.portfel.velocity.objects.VelocityPlayer;
 import me.szumielxd.portfel.velocity.objects.VelocityServerConnection;
+import net.kyori.adventure.text.Component;
 
-public class VelocityChannelListener extends ChannelListener {
+public class VelocityChannelListener extends ChannelListener<PortfelVelocityImpl, Component> {
 
 	public VelocityChannelListener(@NotNull PortfelVelocityImpl plugin) {
 		super(plugin);

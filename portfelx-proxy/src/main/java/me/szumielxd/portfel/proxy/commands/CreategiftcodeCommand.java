@@ -50,20 +50,23 @@ public class CreategiftcodeCommand<C> extends SimpleCommand<C> {
 			// token
 			new CmdArg(ProxyLangKey.COMMAND_ARGTYPES_GIFTTOKEN_DISPLAY, ProxyLangKey.COMMAND_ARGTYPES_GIFTTOKEN_DESCRIPTION, null, s -> s, s -> List.of())
 	);
-	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();	
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_CREATEGIFTCODE_DESCRIPTION;
+	
 
 	public CreategiftcodeCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "creategiftcode", "creategift", "createcode");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		this.parseArguments(sender, args).ifPresent(parsed -> {
-			PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>)this.getPlugin();
-			String order = (String)parsed.staticArgs()[0];
-			long expiration = (long)parsed.staticArgs()[1];
-			String servers = (String)parsed.staticArgs()[2];
-			String token = Optional.ofNullable((String)parsed.staticArgs()[3])
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		this.parseArguments(sender, parsedContext.argsLeft()).ifPresent(newParsedContext -> {
+			var parsed = newParsedContext.parsedArgs();
+			PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>) this.getPlugin();
+			String order = (String) parsed.staticArgs()[0];
+			long expiration = (long) parsed.staticArgs()[1];
+			String servers = (String) parsed.staticArgs()[2];
+			String token = Optional.ofNullable((String) parsed.staticArgs()[3])
 					.orElseGet(TOKEN_GENERATOR::generate);
 			if (expiration <= System.currentTimeMillis()) {
 				ProxyLangKey.COMMAND_CREATEGIFTCODE_PAST.draft()
@@ -85,11 +88,6 @@ public class CreategiftcodeCommand<C> extends SimpleCommand<C> {
 						.sendPrefixed(sender);
 			}
 		});
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return ProxyLangKey.COMMAND_CREATEGIFTCODE_DESCRIPTION;
 	}
 
 }

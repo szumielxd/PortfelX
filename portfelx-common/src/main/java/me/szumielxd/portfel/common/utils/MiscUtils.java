@@ -71,12 +71,9 @@ public class MiscUtils {
 	 * @param toAppend array to append
 	 * @return copy of array containing all merged elements
 	 */
-	public static <T> @NotNull T[] mergeArrays(@NotNull T[] array, @Nullable T[] toAppend) {
-		if (toAppend == null) return Arrays.copyOf(array, array.length+1);
-		T[] newArray = Arrays.copyOf(array, array.length+toAppend.length);
-		for (int i = 0; i < toAppend.length; i++) {
-			newArray[i+array.length] = toAppend[i];
-		}
+	public static <T> @NotNull T[] mergeArrays(@NotNull T[] array, @NotNull T[] toAppend) {
+		T[] newArray = Arrays.copyOf(array, array.length + toAppend.length);
+		System.arraycopy(toAppend, 0, newArray, array.length, toAppend.length);
 		return newArray;
 	}
 	
@@ -98,6 +95,9 @@ public class MiscUtils {
 	 * @return new modified array
 	 */
 	public static <T> @NotNull T[] popArray(@NotNull T[] array, int amount) {
+		if (amount > array.length) {
+			amount = array.length;
+		}
 		return Arrays.copyOfRange(array, amount, array.length);
 	}
 	

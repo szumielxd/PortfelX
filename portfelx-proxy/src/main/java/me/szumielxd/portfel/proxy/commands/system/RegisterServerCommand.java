@@ -1,13 +1,10 @@
 package me.szumielxd.portfel.proxy.commands.system;
 
-import static net.kyori.adventure.text.format.NamedTextColor.RED;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.api.Portfel;
+import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
@@ -16,47 +13,42 @@ import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
 public class RegisterServerCommand<C> extends SimpleCommand<C> {
 	
-	public final List<CmdArg> args;
-
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of(
+			// serverName
+			new CmdArg(ProxyLangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY,
+					ProxyLangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION,
+					null, s -> s, s -> List.of()),
+			// hashKey
+			new CmdArg(ProxyLangKey.COMMAND_ARGTYPES_HASHKEY_DISPLAY,
+					ProxyLangKey.COMMAND_ARGTYPES_HASHKEY_DESCRIPTION,
+					null, s -> s, s -> List.of()));
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION;
+	@Getter private final @NotNull CommandAccess access = CommandAccess.PLAYERS;
+	
+	
 	public RegisterServerCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "registerserver", "createserver");
-		this.args = Arrays.asList(
-				// serverName
-				new CmdArg<>(LangKey.COMMAND_ARGTYPES_SERVERNAME_DISPLAY, LangKey.COMMAND_ARGTYPES_SERVERNAME_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>()),
-				// hashKey
-				new CmdArg<>(LangKey.COMMAND_ARGTYPES_HASHKEY_DISPLAY, LangKey.COMMAND_ARGTYPES_HASHKEY_DESCRIPTION, LangKey.EMPTY, s -> s, s -> new ArrayList<>())
-		);
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		Object[] parsed = this.validateArgs(sender, args);
-		if (parsed == null) return;
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
 		PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>)this.getPlugin();
 		AccessManager access = pl.getAccessManager();
-		if (access.getServerByName(args[0]) != null) {
-			sender.sendTranslated(Portfel.PREFIX.append(LangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY.component(RED)));
-			return;
+		String serverName = parsedContext.argLeft(0);
+		String serverHashKey = parsedContext.argLeft(1);
+		if (access.getServerByName(serverName) != null) {
+			ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY
+					.draft()
+					.sendPrefixed(sender);
+		} else {
+			pl.getAccessManager().pendingRegistration((ProxyPlayer<C>) sender, serverName, serverHashKey);
 		}
-		pl.getAccessManager().pendingRegistration((ProxyPlayer<C>) sender, args[0], args[1]);
-	}
-
-	@Override
-	public @NotNull List<CmdArg<C>> getArgs() {
-		return this.args;
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION;
-	}
-	
-	@Override
-	public @NotNull CommandAccess getAccess() {
-		return CommandAccess.PLAYERS;
 	}
 
 }

@@ -33,12 +33,16 @@ public class BungeeProxy implements CommonProxy<BaseComponent[]> {
 
 	@Override
 	public @Nullable BungeePlayer getPlayer(@NotNull UUID uuid) {
-		return Optional.ofNullable(this.plugin.getProxy().getPlayer(uuid)).map(p -> new BungeePlayer(this.plugin, p)).orElse(null);
+		return Optional.ofNullable(this.plugin.getProxy().getPlayer(uuid))
+				.map(p -> new BungeePlayer(this.plugin, p))
+				.orElse(null);
 	}
 
 	@Override
 	public @Nullable BungeePlayer getPlayer(@NotNull String name) {
-		return Optional.ofNullable(this.plugin.getProxy().getPlayer(name)).map(p -> new BungeePlayer(this.plugin, p)).orElse(null);
+		return Optional.ofNullable(this.plugin.getProxy().getPlayer(name))
+				.map(p -> new BungeePlayer(this.plugin, p))
+				.orElse(null);
 	}
 
 	@Override
@@ -59,12 +63,16 @@ public class BungeeProxy implements CommonProxy<BaseComponent[]> {
 	
 	@Override
 	public @NotNull Map<String, BungeeServer> getServers() {
-		return this.plugin.getProxy().getServers().values().parallelStream().collect(Collectors.toMap(s -> s.getName(), s -> new BungeeServer(this.plugin, s)));
+		return this.plugin.getProxy().getServers().values().parallelStream()
+				.collect(Collectors.toMap(
+						s -> s.getName(),
+						s -> new BungeeServer(this.plugin, s)));
 	}
 	
 	@Override
 	public @NotNull Optional<ProxyServer<BaseComponent[]>> getServer(@NotNull String serverName) {
-		return Optional.ofNullable(this.plugin.getProxy().getServerInfo(serverName)).map(s -> new BungeeServer(this.plugin, s));
+		return Optional.ofNullable(this.plugin.getProxy().getServerInfo(serverName))
+				.map(s -> new BungeeServer(this.plugin, s));
 	}
 	
 	@Override

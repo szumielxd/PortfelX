@@ -20,7 +20,9 @@ public class UserParentCommand<C> extends ParentCommand<C> {
 	
 	
 	@Getter private final List<CmdArg> staticArgs = List.of(CommonArgs.USER);
-	@Getter private final List<CmdArg> flyingArgs = List.of();
+	@Getter private final List<CmdArg> flyingArgs = List.of();	
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_USER_DESCRIPTION;
+	
 	
 
 	public UserParentCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
@@ -31,11 +33,6 @@ public class UserParentCommand<C> extends ParentCommand<C> {
 				new MinorEcoParentCommand<>(plugin, this),
 				new TopParentCommand<>(plugin, this)
 		));
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return ProxyLangKey.COMMAND_USER_DESCRIPTION;
 	}
 
 }

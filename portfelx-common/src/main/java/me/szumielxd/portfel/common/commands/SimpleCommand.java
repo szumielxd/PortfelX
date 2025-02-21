@@ -59,11 +59,17 @@ public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 		return this.emptyList;
 	}
 	
-	protected Optional<ParsedArguments> parseArguments(CommonSender<C> sender, String... args) {
+	protected @NotNull Optional<ParsedCommandContext> parseArguments(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext currentContext) {
+		return parseArguments(sender, currentContext.argsLeft());
+	}
+	
+	protected @NotNull Optional<ParsedCommandContext> parseArguments(@NotNull CommonSender<C> sender, @NotNull String... args) {
 		CmdArg[] flyingArgs = this.getFlyingArgs().toArray(CmdArg[]::new);
 		CmdArg[] staticArgs = this.getStaticArgs().toArray(CmdArg[]::new);
 		Object[] flyingParsedArgs = new Object[flyingArgs.length];
 		Object[] staticParsedArgs = new Object[staticArgs.length];
+		List<String> label = new LinkedList<>();
+		List<String> argsLeft = new LinkedList<>();
 		int staticArgIndex = 0;
 		for (var arg : args) {
 			int flyingArgIndex = matchFlyingArg(flyingArgs, arg);
@@ -71,13 +77,23 @@ public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 				if (flyingParsedArgs[flyingArgIndex] == null) {
 					flyingParsedArgs[flyingArgIndex] = flyingArgs[flyingArgIndex].parseArg(arg);
 				}
+				if (flyingParsedArgs[flyingArgIndex] == null) {
+					argsLeft.add(arg);
+				}
 			} else if (staticArgIndex < staticArgs.length) {
 				staticParsedArgs[staticArgIndex] = staticArgs[staticArgIndex].parseArg(arg);
-				if (staticParsedArgs[staticArgIndex] == null && !staticArgs[staticArgIndex].isOptional()) {
-					staticArgs[staticArgIndex].getArgError(arg).send(sender, true);
-					return Optional.empty();
+				if (staticParsedArgs[staticArgIndex] == null) {
+					if (!staticArgs[staticArgIndex].isOptional()) {
+						staticArgs[staticArgIndex].getArgError(arg).sendPrefixed(sender);
+						return Optional.empty();
+					}
+					argsLeft.add(arg);
+				} else {
+					label.add(arg);
 				}
 				staticArgIndex++;
+			} else {
+				argsLeft.add(arg);
 			}
 		}
 		for (int i = staticArgIndex; i < staticArgs.length; i++) {
@@ -86,10 +102,15 @@ public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 				return Optional.empty();
 			}
 		}
-		return Optional.of(new ParsedArguments(staticParsedArgs, flyingParsedArgs));
+		return Optional.of(new ParsedCommandContext(
+				new ParsedArguments(
+						staticParsedArgs,
+						flyingParsedArgs),
+				argsLeft.toArray(String[]::new),
+				label.toArray(String[]::new)));
 	}
 	
-	protected void sendCommandUsage(CommonSender<C> sender) {
+	protected void sendCommandUsage(@NotNull CommonSender<C> sender) {
 		var aliases = getAliases();
 		var args = getAllArgs();
 		MainLangKey.COMMAND_USAGE_TITLE.draft(getName()).send(sender, true);
@@ -108,7 +129,7 @@ public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 		}
 	}
 	
-	private int matchFlyingArg(CmdArg[] flyingArgs, String rawArgument) {
+	private int matchFlyingArg(@NotNull CmdArg[] flyingArgs, @NotNull String rawArgument) {
 		String arg = rawArgument.toLowerCase();
 		for (int i = 0; i < flyingArgs.length; i++) {
 			if (arg.equals(flyingArgs[i].getPrefix())) {
@@ -116,12 +137,6 @@ public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 			}
 		}
 		return -1;
-	}
-	
-	protected record ParsedArguments(Object[] staticArgs, Object[] flyingArgs) {
-		
-		
-		
 	}
 
 }

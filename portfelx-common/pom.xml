@@ -12,7 +12,7 @@
 			<artifactId>portfelx-common-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>me.carleslc.Simple-YAML</groupId>
+			<groupId>com.github.Carleslc.Simple-YAML</groupId>
 			<artifactId>Simple-Yaml</artifactId>
 		</dependency>
 		<dependency>

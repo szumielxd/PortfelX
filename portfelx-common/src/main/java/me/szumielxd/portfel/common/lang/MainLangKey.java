@@ -47,6 +47,17 @@ public enum MainLangKey implements LangKey {
 	MAIN_VALUE_TIME_DAYS("main.value.time.days", "{0}d"),
 	MAIN_VALUE_TIME_YEARS("main.value.time.years", "{0}y"),
 	
+	MAIN_CURRENCY_FORMAT("main.currrency.format", "${0}"),
+	MAIN_MINORCURRENCY_FORMAT("main.minor-currrency.format", "⧉{0}"),
+	MAIN_VALUE_ON("main.value.on", "on"),
+	MAIN_VALUE_OFF("main.value.off", "off"),
+	MAIN_VALUE_TRUE("main.value.true", "<green>true"),
+	MAIN_VALUE_FALSE("main.value.false", "<red>false"),
+	MAIN_VALUE_ONLINE("main.value.online", "<green>Online"),
+	MAIN_VALUE_OFFLINE("main.value.offline", "<red>Offline"),
+	MAIN_VALUE_UUID_ONLINE("main.value.uuid.online", "<green>Online"),
+	MAIN_VALUE_UUID_OFFLINE("main.value.uuid.offline", "<dark_gray>Offline"),
+	
 	// UNMODIFIABLE
 	EMPTY("empty", "", false),
 	PREFIX("prefix", "<b><aqua>[<dark_purple>P</dark_purple>]</aqua></b><dark_aqua> ", false),

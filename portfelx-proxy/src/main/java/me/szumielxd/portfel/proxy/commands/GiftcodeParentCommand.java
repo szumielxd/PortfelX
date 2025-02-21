@@ -17,6 +17,8 @@ public class GiftcodeParentCommand<C> extends ParentCommand<C> {
 	
 	@Getter private final @NotNull List<CmdArg> staticArgs = List.of(CommonArgs.TOKEN);
 	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_GIFTCODE_DESCRIPTION;
+	
 
 	public GiftcodeParentCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "giftcode", "gift", "code", "token");
@@ -24,12 +26,5 @@ public class GiftcodeParentCommand<C> extends ParentCommand<C> {
 				new GiftcodeInfoCommand<>(plugin, this)
 		));
 	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return ProxyLangKey.COMMAND_GIFTCODE_DESCRIPTION;
-	}
-	
-	
 
 }

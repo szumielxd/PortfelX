@@ -25,6 +25,7 @@ import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.bukkit.utils.ComponentUtils;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import net.kyori.adventure.text.Component;
 
@@ -69,7 +70,7 @@ public class MainPortfelGui implements AbstractPortfelGui {
 		Objects.requireNonNull(user, "user cannot be null");
 		Objects.requireNonNull(player, "player cannot be null");
 		return BukkitLangKey.SHOP_TITLE
-				.draft(BukkitLangKey.MAIN_CURRENCY_FORMAT
+				.draft(MainLangKey.MAIN_CURRENCY_FORMAT
 						.draft(user.getBalance()))
 				.buildComponent(BukkitSender.wrap(this.plugin, player));
 	}

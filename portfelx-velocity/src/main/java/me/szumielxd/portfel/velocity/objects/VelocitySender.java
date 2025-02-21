@@ -1,76 +1,37 @@
 package me.szumielxd.portfel.velocity.objects;
 
-import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 
-import me.szumielxd.portfel.common.lang.Lang;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import me.szumielxd.portfel.proxy.api.objects.ProxySender;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
-public class VelocitySender implements ProxySender {
+@AllArgsConstructor
+public class VelocitySender implements ProxySender<Component> {
 	
 	
-	protected final @NotNull PortfelVelocityImpl plugin;
+	@Getter protected final @NotNull PortfelVelocityImpl plugin;
 	private final @NotNull CommandSource sender;
-	
-	
-	public VelocitySender(@NotNull PortfelVelocityImpl plugin, @NotNull CommandSource sender) {
-		this.plugin = Objects.requireNonNull(plugin, "plugin cannot be null");
-		this.sender = Objects.requireNonNull(sender, "sender cannot be null");
-	}
-	
-
-	@Override
-	public void sendMessage(@NotNull String message) {
-		this.sender.sendMessage(LegacyComponentSerializer.legacySection().deserialize(message));
-	}
 
 	@Override
 	public void sendMessage(@NotNull Component message) {
-		this.sender.sendMessage(message);
-		
+		this.sender.sendMessage(message);	
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
-	public void sendMessage(@NotNull Component... message) {
-		this.sender.sendMessage(Component.empty().children(Arrays.asList(message)));
-	}
-	
-	@Override
-	public void sendMessage(@NotNull Identity source, @NotNull Component message) {
-		this.sender.sendMessage(source, message);
-	}
-	
-	@Override
-	public void sendMessage(@NotNull Identity source, @NotNull Component... message) {
-		this.sender.sendMessage(source, Component.empty().children(Arrays.asList(message)));
-	}
-	
-	/**
-	 * Translate and send message to this sender.
-	 * 
-	 * @param message message to translate and send
-	 */
-	public void sendTranslated(@NotNull Component message) {
-		Component comp = Lang.get(this).translateComponent(message);
-		this.sender.sendMessage(comp);
-	}
-	
-	/**
-	 * Translate and send message to this sender.
-	 * 
-	 * @param message message to translate and send
-	 */
-	public void sendTranslated(@NotNull Component... message) {
-		this.sender.sendMessage(Lang.get(this).translateComponent(Component.empty().children(Arrays.asList(message))));
+	public void sendMessage(@Nullable UUID source, @NotNull Component message) {
+		this.sender.sendMessage(Identity.identity(source), message);
 	}
 	
 	@Override

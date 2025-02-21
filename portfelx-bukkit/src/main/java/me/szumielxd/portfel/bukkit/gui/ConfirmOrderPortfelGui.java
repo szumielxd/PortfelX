@@ -16,6 +16,7 @@ import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.text.Component;
 
 @SuppressWarnings("deprecation")
@@ -58,7 +59,7 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 		Objects.requireNonNull(user, "user cannot be null");
 		Objects.requireNonNull(player, "player cannot be null");	
 		return BukkitLangKey.SHOP_CONFIRM_TITLE
-				.draft(BukkitLangKey.MAIN_CURRENCY_FORMAT
+				.draft(MainLangKey.MAIN_CURRENCY_FORMAT
 						.draft(this.order.getPrice()))
 						.buildComponent(BukkitSender.wrap(this.plugin, player));
 	}

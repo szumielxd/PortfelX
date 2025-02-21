@@ -1,6 +1,5 @@
 package me.szumielxd.portfel.proxy.commands;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +28,7 @@ public abstract class CommonCommand<C> {
 	
 	
 	public @NotNull List<String> onTabComplete(@NotNull ProxySender<C> sender, @NotNull String[] args) {
-		return new ArrayList<>();
+		return List.of();
 	}
 	
 	

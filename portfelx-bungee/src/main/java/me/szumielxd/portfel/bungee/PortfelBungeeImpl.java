@@ -31,7 +31,6 @@ import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
 import me.szumielxd.portfel.proxy.api.managers.ProxyTopManager;
-import me.szumielxd.portfel.proxy.api.objects.CommonProxy;
 import me.szumielxd.portfel.proxy.commands.CommonArgs;
 import me.szumielxd.portfel.proxy.commands.CommonCommand;
 import me.szumielxd.portfel.proxy.commands.MainCommand;
@@ -65,20 +64,20 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 	private AccessManagerImpl<PortfelBungeeImpl, BaseComponent[]> accessManager;
 	private TaskManager taskManager;
 	private @Getter ConfigImpl configuration;
-	private ProxyUserManagerImpl userManager;
-	private ProxyTopManagerImpl topManager;
+	private ProxyUserManagerImpl<BaseComponent[]> userManager;
+	private ProxyTopManagerImpl<BaseComponent[]> topManager;
 	private OrdersManager ordersManager;
 	private PrizesManager<BaseComponent[]> prizesManager;
 	private TokenManager<BaseComponent[]> tokenManager;
 	private @Getter @Setter AbstractDB database;
 	private @Getter @Setter AbstractTokenDB tokenDatabase;
 	private @Getter @Setter AbstractDBLogger transactionLogger;
-	private @Getter MainCommand command;
-	private @Getter MainTokenCommand tokenCommand;
+	private @Getter MainCommand<BaseComponent[]> command;
+	private @Getter MainTokenCommand<BaseComponent[]> tokenCommand;
 	private @Getter @Setter UUID proxyId;
 	private ContextProvider<ProxiedPlayer, BaseComponent[]> luckpermsContextProvider;
 	private BungeeComponentMapper componentMapper = new BungeeComponentMapper();
-	private @Nullable BungeeProxy proxy;
+	private @Getter @Nullable BungeeProxy commonServer = new BungeeProxy(this);
 	
 	
 	@Override
@@ -87,22 +86,21 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 		CommonArgs.init(this);
 		this.setupProxyId();
 		this.load();
-		this.proxy = new BungeeProxy(this);
 		this.taskManager = new ProxyTaskManagerImpl(this);
 		this.accessManager = new BungeeAccessManagerImpl(this).init();
 		//
 		this.setupDatabases();
 		
 		this.getLogger().info("Setup managers...");
-		this.userManager = new ProxyUserManagerImpl(this).init();
-		this.topManager = new ProxyTopManagerImpl(this).init();
+		this.userManager = new ProxyUserManagerImpl<>(this).init();
+		this.topManager = new ProxyTopManagerImpl<>(this).init();
 		this.tokenManager = new TokenManager<>(this).init();
 		this.getLogger().info("Registering listeners...");
 		this.getProxy().getPluginManager().registerListener(this, new BungeeUserListener(this));
 		this.getProxy().getPluginManager().registerListener(this, new BungeeChannelListener(this));
 		this.getLogger().info("Registering commands...");
-		this.command = new MainCommand(this, "dpb", "portfel.command", "devportfelbungee");
-		this.tokenCommand = new MainTokenCommand(this, this.configuration.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.configuration.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
+		this.command = new MainCommand<>(this, "dpb", "portfel.command", "devportfelbungee");
+		this.tokenCommand = new MainTokenCommand<>(this, this.configuration.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.configuration.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
 		this.getProxy().registerChannel(CHANNEL_SETUP);
@@ -113,20 +111,17 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 		
 	}
 	
-	@Override
-	public @NotNull CommonProxy<BaseComponent[]> getCommonServer() {
-		return this.proxy;
-	}
 	
-	
-	private void registerCommand(@NotNull CommonCommand command) {
+	private void registerCommand(@NotNull CommonCommand<BaseComponent[]> command) {
 		this.getProxy().getPluginManager().registerCommand(this, new BungeeCommandWrapper(this, command));
 	}
 	
 	
 	public void load() {
 		this.getLogger().info("Loading configuration...");
-		this.configuration = new ConfigImpl(this).init(Stream.of(ConfigKey.values(), ProxyConfigKey.values()).flatMap(Stream::of).toArray(AbstractKey[]::new));
+		this.configuration = new ConfigImpl(this).init(Stream.of(ConfigKey.values(), ProxyConfigKey.values())
+				.flatMap(Stream::of)
+				.toArray(AbstractKey[]::new));
 		this.getLogger().info("Setup locales...");
 		Lang.load(this.getDataDirectory().resolve("languages"), this);
 		this.ordersManager = new OrdersManager(this).init();
@@ -139,7 +134,9 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 	
 	public void unload() {
 		this.getLogger().info("Unregistering external hooks");
-		if(this.luckpermsContextProvider != null) this.luckpermsContextProvider.unregisterAll();
+		if (this.luckpermsContextProvider != null) {
+			this.luckpermsContextProvider.unregisterAll();
+		}
 	}
 	
 	

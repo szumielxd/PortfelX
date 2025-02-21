@@ -1,24 +1,24 @@
 package me.szumielxd.portfel.velocity;
 
 import java.nio.file.Path;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.command.CommandMeta;
-import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.szumielxd.portfel.api.CommonLogger;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
 import me.szumielxd.portfel.api.configuration.Config;
@@ -26,17 +26,15 @@ import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
 import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.api.objects.ComponentMapper;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.lang.Lang;
-import me.szumielxd.portfel.common.loader.CommonDependency;
-import me.szumielxd.portfel.common.loader.LoadablePortfel;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
 import me.szumielxd.portfel.proxy.api.managers.ProxyTopManager;
-import me.szumielxd.portfel.proxy.api.objects.CommonProxy;
 import me.szumielxd.portfel.proxy.commands.CommonArgs;
 import me.szumielxd.portfel.proxy.commands.CommonCommand;
 import me.szumielxd.portfel.proxy.commands.MainCommand;
@@ -54,69 +52,26 @@ import me.szumielxd.portfel.velocity.commands.VelocityCommandWrapper;
 import me.szumielxd.portfel.velocity.listeners.VelocityChannelListener;
 import me.szumielxd.portfel.velocity.listeners.VelocityUserListener;
 import me.szumielxd.portfel.velocity.managers.VelocityAccessManagerImpl;
+import me.szumielxd.portfel.velocity.objects.VelocityComponentMapper;
 import me.szumielxd.portfel.velocity.objects.VelocityProxy;
+import net.kyori.adventure.text.Component;
 
-public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
+@Plugin(id = "myfirstplugin", name = "My First Plugin", version = "0.1.0-SNAPSHOT",
+url = "https://example.org", description = "I did it!", authors = {"Me"})
+public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 	
 	
-	private final @NotNull PortfelVelocityBootstrap bootstrap;
+	private final @Getter @NotNull ProxyServer proxy;
+	private final @NotNull Logger logger;
+	private final @Getter @NotNull Path dataDirectory;
 	
 	
-	private @Nullable VelocityProxy proxy;
-	
-	
-	public PortfelVelocityImpl(PortfelVelocityBootstrap bootstrap) {
-		this.bootstrap = Objects.requireNonNull(bootstrap, "bootstrap cannot be null");
+	@Inject
+	public PortfelVelocityImpl(ProxyServer proxy, Logger logger, @DataDirectory Path dataDirectory) {
+		this.proxy = proxy;
+		this.logger = logger;
+		this.dataDirectory = dataDirectory;
 	}
-	
-	
-	public Object asPlugin() {
-		return this.bootstrap;
-	}
-	
-	
-	@Override
-	public void addToRuntime(CommonDependency... dependency) {
-		this.bootstrap.addToRuntime(dependency);
-	}
-	
-	
-	@Subscribe
-	public void onProxyInitialization(ProxyInitializeEvent event) {
-	    this.onEnable();
-	}
-	
-	
-	@Override
-	public @NotNull CommonLogger getLogger() {
-		return this.bootstrap.getCommonLogger();
-	}
-	
-	
-	@Override
-	public @NotNull Path getDataFolder() {
-		return this.bootstrap.getDataFolderPath();
-	}
-	
-	
-	public @NotNull ProxyServer getProxy() {
-		return this.bootstrap.getProxy();
-	}
-
-
-	@Override
-	public @NotNull CommonProxy getCommonServer() {
-		return this.proxy;
-	}
-	
-	
-	private void registerCommand(@NotNull CommonCommand command) {
-		CommandManager mgr = this.getProxy().getCommandManager();
-		CommandMeta meta = mgr.metaBuilder(command.getName()).aliases(command.getAliases()).build();
-		mgr.register(meta, new VelocityCommandWrapper(this, command));
-	}
-	
-	
 	
 	
 	/////////////////////////////////////////////////////////////////////////////////////////////////
@@ -124,28 +79,29 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	
 	
-	private AccessManagerImpl accessManager;
+	private AccessManagerImpl<PortfelVelocityImpl, Component> accessManager;
 	private TaskManager taskManager;
 	private ConfigImpl config;
-	private ProxyUserManagerImpl userManager;
-	private ProxyTopManagerImpl topManager;
+	private ProxyUserManagerImpl<Component> userManager;
+	private ProxyTopManagerImpl<Component> topManager;
 	private OrdersManager ordersManager;
-	private PrizesManager prizesManager;
-	private TokenManager tokenManager;
+	private PrizesManager<Component> prizesManager;
+	private TokenManager<Component> tokenManager;
 	private @Getter @Setter AbstractDB database;
 	private @Getter @Setter AbstractTokenDB tokenDatabase;
 	private @Getter @Setter AbstractDBLogger transactionLogger;
-	private @Getter MainCommand command;
-	private @Getter MainTokenCommand tokenCommand;
+	private @Getter MainCommand<Component> command;
+	private @Getter MainTokenCommand<Component> tokenCommand;
 	private @Getter @Setter UUID proxyId;
 	
-	private ContextProvider<Player> luckpermsContextProvider;
+	private ContextProvider<Player, Component> luckpermsContextProvider;
+	private VelocityComponentMapper componentMapper = new VelocityComponentMapper();
+	private @Getter @Nullable VelocityProxy commonServer = new VelocityProxy(this);
 	
 	
 	@Override
 	public void onEnable() {
 		PortfelProvider.register(this);
-		this.proxy = new VelocityProxy(this);
 		CommonArgs.init(this);
 		this.setupProxyId();
 		this.load();
@@ -155,15 +111,15 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.setupDatabases();
 		
 		this.getLogger().info("Setup managers...");
-		this.userManager = new ProxyUserManagerImpl(this).init();
-		this.topManager = new ProxyTopManagerImpl(this).init();
-		this.tokenManager = new TokenManager(this).init();
+		this.userManager = new ProxyUserManagerImpl<>(this).init();
+		this.topManager = new ProxyTopManagerImpl<>(this).init();
+		this.tokenManager = new TokenManager<>(this).init();
 		this.getLogger().info("Registering listeners...");
-		this.getProxy().getEventManager().register(this.asPlugin(), new VelocityUserListener(this));
-		this.getProxy().getEventManager().register(this.asPlugin(), new VelocityChannelListener(this));
+		this.getProxy().getEventManager().register(this, new VelocityUserListener(this));
+		this.getProxy().getEventManager().register(this, new VelocityChannelListener(this));
 		this.getLogger().info("Registering commands...");
-		this.command = new MainCommand(this, "dpv", "portfel.command", "devportfelvelocity");
-		this.tokenCommand = new MainTokenCommand(this, this.config.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.config.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
+		this.command = new MainCommand<>(this, "dpv", "portfel.command", "devportfelvelocity");
+		this.tokenCommand = new MainTokenCommand<>(this, this.config.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.config.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
 		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_SETUP));
@@ -176,13 +132,20 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	}
 	
 	
+	private void registerCommand(@NotNull CommonCommand<Component> command) {
+		CommandManager mgr = this.getProxy().getCommandManager();
+		CommandMeta meta = mgr.metaBuilder(command.getName()).aliases(command.getAliases()).build();
+		mgr.register(meta, new VelocityCommandWrapper(this, command));
+	}
+	
+	
 	public void load() {
 		this.getLogger().info("Loading configuration...");
 		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(ProxyConfigKey.values()).toArray(AbstractKey[]::new)));
 		this.getLogger().info("Setup locales...");
-		Lang.load(this.getDataFolder().resolve("languages"), this);
+		Lang.load(this.getDataDirectory().resolve("languages"), this);
 		this.ordersManager = new OrdersManager(this).init();
-		this.prizesManager = new PrizesManager(this).init();
+		this.prizesManager = new PrizesManager<>(this).init();
 		if (this.getProxy().getPluginManager().getPlugin("LuckPerms").isPresent()) {
 			this.luckpermsContextProvider = new ContextProvider<>(this, Player.class);
 		}
@@ -206,7 +169,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		this.tokenDatabase.shutdown();
 		this.taskManager.cancelAll();
 		this.getLogger().info("Unregistering listeners");
-		this.getProxy().getEventManager().unregisterListeners(this.asPlugin());
+		this.getProxy().getEventManager().unregisterListeners(this);
 		this.getLogger().info("Unregistering channels");
 		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_SETUP));
 		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_USERS));
@@ -217,12 +180,12 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	}
 	
 	
-	public @NotNull AccessManagerImpl getAccessManager() {
+	public @NotNull AccessManagerImpl<PortfelVelocityImpl, Component> getAccessManager() {
 		return this.accessManager;
 	}
 	
 	
-	public @NotNull TokenManager getTokenManager() {
+	public @NotNull TokenManager<Component> getTokenManager() {
 		return this.tokenManager;
 	}
 
@@ -247,25 +210,25 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	
 	@Override
 	public @NotNull String getName() {
-		return this.bootstrap.getName();
+		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getName().orElse("");
 	}
 	
 	
 	@Override
 	public @NotNull String getVersion() {
-		return this.getProxy().getPluginManager().ensurePluginContainer(this.asPlugin()).getDescription().getVersion().orElse("");
+		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getVersion().orElse("");
 	}
 	
 	
 	@Override
 	public @NotNull String getAuthor() {
-		return String.join(", ", this.getProxy().getPluginManager().ensurePluginContainer(this.asPlugin()).getDescription().getAuthors());
+		return String.join(", ", this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getAuthors());
 	}
 	
 	
 	@Override
 	public @NotNull String getDescriptionText() {
-		return this.getProxy().getPluginManager().ensurePluginContainer(this.asPlugin()).getDescription().getDescription().orElse("");
+		return this.getProxy().getPluginManager().ensurePluginContainer(this).getDescription().getDescription().orElse("");
 	}
 	
 	
@@ -273,8 +236,14 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 		return this.ordersManager;
 	}
 	
-	public @NotNull PrizesManager getPrizesManager() {
+	public @NotNull PrizesManager<Component> getPrizesManager() {
 		return this.prizesManager;
+	}
+
+
+	@Override
+	public @NotNull CommonSender<Component> getConsole() {
+		return this.getCommonServer().getConsole();
 	}
 	
 	
@@ -291,11 +260,16 @@ public class PortfelVelocityImpl implements PortfelProxyImpl, LoadablePortfel {
 	public @NotNull Config getConfiguration() {
 		return this.config;
 	}
+	
+	@Override
+	public @NotNull ComponentMapper<Component> getComponentMapper() {
+		return this.componentMapper;
+	}
 
 
 	@Override
-	public @NotNull CommonSender getConsole() {
-		return this.getCommonServer().getConsole();
+	public java.util.logging.@NotNull Logger getLogger() {
+		return (java.util.logging.@NotNull Logger) this.logger;
 	}
 	
 

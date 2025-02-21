@@ -46,11 +46,7 @@ public enum BukkitLangKey implements LangKey {
 	
 	TESTMODE_NOTIFICATION("testmode.notification", "<red>You're in test-mode, all your transactions are completed without taking charge. Remember to disable test-mode after all done."),
 	
-	MAIN_CURRENCY_FORMAT("main.currrency.format", "${0}"),
-	MAIN_MINORCURRENCY_FORMAT("main.minor-currrency.format", "⧉{0}"),
 	MAIN_WARNING("main.warning", "<dark_red><bold>WARNING: </bold>{0}"),
-	MAIN_VALUE_ON("main.value.on", "on"),
-	MAIN_VALUE_OFF("main.value.off", "off"),
 	
 	;// END,
 	

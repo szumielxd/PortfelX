@@ -38,11 +38,11 @@ public class ListgiftcodesCommand<C> extends SimpleCommand<C> {
 	
 	private final DateFormat expirationFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
+	
 	@Getter private final @NotNull List<CmdArg> staticArgs = List.of(
 			CommonArgs.PAGENUMBER,
 			CommonArgs.PAGESIZE
 	);
-	
 	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of(
 			new CmdArg(true, "servers=", ProxyLangKey.COMMAND_ARGTYPES_TOKENSERVER_DISPLAY, ProxyLangKey.COMMAND_ARGTYPES_TOKENSERVER_DESCRIPTION, null, str -> str.split(","), (s, arr) -> Arrays.asList(arr[arr.length-1]+",")),
 			new CmdArg(true, "orders=", ProxyLangKey.COMMAND_ARGTYPES_TOKENORDER_DISPLAY, ProxyLangKey.COMMAND_ARGTYPES_TOKENORDER_DESCRIPTION, null, str -> str.split(","), (s, arr) -> Arrays.asList(arr[arr.length-1]+",")),
@@ -99,7 +99,9 @@ public class ListgiftcodesCommand<C> extends SimpleCommand<C> {
 				list.replaceAll(prefix::concat);
 				return list;
 			})
-	);
+	);	
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_LISTGIFTCODES_DESCRIPTION;
+	
 	
 
 	public ListgiftcodesCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
@@ -107,16 +109,17 @@ public class ListgiftcodesCommand<C> extends SimpleCommand<C> {
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		this.parseArguments(sender, args).ifPresent(parsed -> {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		this.parseArguments(sender, parsedContext.argsLeft()).ifPresent(newParsedContext -> {
 			try {
-				List<PrizeToken> tokens = ((PortfelProxyImpl<C>)this.getPlugin()).getTokenDatabase()
+				var parsed = newParsedContext.parsedArgs();
+				List<PrizeToken> tokens = ((PortfelProxyImpl<C>) this.getPlugin()).getTokenDatabase()
 						.getTokens(
-								(String[])parsed.flyingArgs()[0],
-								(String[])parsed.flyingArgs()[1],
-								(String[])parsed.flyingArgs()[2],
-								(DateCondition[])parsed.flyingArgs()[3],
-								(DateCondition[])parsed.flyingArgs()[4]);
+								(String[]) parsed.flyingArgs()[0],
+								(String[]) parsed.flyingArgs()[1],
+								(String[]) parsed.flyingArgs()[2],
+								(DateCondition[]) parsed.flyingArgs()[3],
+								(DateCondition[]) parsed.flyingArgs()[4]);
 				
 				int size = Optional.ofNullable((int) parsed.staticArgs()[1]).orElse(5);
 				int maxPage = (int) Math.ceil(tokens.size() / (double) size);
@@ -139,11 +142,6 @@ public class ListgiftcodesCommand<C> extends SimpleCommand<C> {
 				e.printStackTrace();
 			}
 		});
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return ProxyLangKey.COMMAND_LISTGIFTCODES_DESCRIPTION;
 	}
 	
 	

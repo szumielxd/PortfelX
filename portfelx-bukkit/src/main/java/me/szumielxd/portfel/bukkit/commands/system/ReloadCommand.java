@@ -2,11 +2,12 @@ package me.szumielxd.portfel.bukkit.commands.system;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.common.commands.AbstractCommand;
@@ -17,6 +18,12 @@ import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.text.Component;
 
 public class ReloadCommand extends SimpleCommand<Component> {
+	
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = MainLangKey.COMMAND_SYSTEM_RELOAD_DESCRIPTION;
+	
 
 	public ReloadCommand(@NotNull PortfelBukkitImpl plugin, @NotNull AbstractCommand<Component> parent) {
 		super(plugin, parent, "reload", "rl");
@@ -24,7 +31,7 @@ public class ReloadCommand extends SimpleCommand<Component> {
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull ParsedCommandContext parsedContext) {
 		PortfelBukkitImpl plugin = (PortfelBukkitImpl) this.getPlugin();
 		MainLangKey.COMMAND_SYSTEM_RELOAD_EXECUTE
 				.draft()
@@ -35,6 +42,7 @@ public class ReloadCommand extends SimpleCommand<Component> {
 		} catch (Throwable e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
+			getPlugin().getLogger().log(Level.SEVERE, "Ann error occurred while executing top info command", e);
 			MainLangKey.COMMAND_SYSTEM_RELOAD_ERROR
 					.draft(sw.toString())
 					.send(sender, true);
@@ -43,21 +51,6 @@ public class ReloadCommand extends SimpleCommand<Component> {
 		MainLangKey.COMMAND_SYSTEM_RELOAD_SUCCESS
 				.draft(plugin.getName(), plugin.getDescription().getVersion())
 				.send(sender, true);
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getStaticArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getFlyingArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return MainLangKey.COMMAND_SYSTEM_RELOAD_DESCRIPTION;
 	}
 
 }

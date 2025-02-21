@@ -1,10 +1,10 @@
 package me.szumielxd.portfel.bukkit.commands;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
@@ -19,19 +19,25 @@ import net.kyori.adventure.text.Component;
 
 public class TestmodeCommand extends SimpleCommand<Component> {
 	
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = BukkitLangKey.COMMAND_TESTMODE_DESCRIPTION;
+	@Getter private final @NotNull CommandAccess access = CommandAccess.PLAYERS;
+	
 
 	public TestmodeCommand(@NotNull PortfelBukkitImpl plugin, @NotNull MainCommand parent, @NotNull String name, @NotNull String... aliases) {
 		super(plugin, parent, name, aliases);
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull ParsedCommandContext parsedContext) {
 		
 		try {
 			User user = this.getPlugin().getUserManager().getOrCreateUser(((CommonPlayer<Component>) sender).getUniqueId());
 			if (user instanceof BukkitOperableUser operableUser) {
 				BukkitLangKey.COMMAND_TESTMODE_EXECUTE
-						.draft(operableUser.toggleTestMode() ? BukkitLangKey.MAIN_VALUE_ON : BukkitLangKey.MAIN_VALUE_OFF)
+						.draft(operableUser.toggleTestMode() ? MainLangKey.MAIN_VALUE_ON : MainLangKey.MAIN_VALUE_OFF)
 						.send(sender, true);
 				return;
 			}
@@ -41,26 +47,6 @@ public class TestmodeCommand extends SimpleCommand<Component> {
 		MainLangKey.ERROR_COMMAND_USER_NOT_LOADED
 				.draft()
 				.send(sender, true);
-	}
-	
-	@Override
-	public @NotNull CommandAccess getAccess() {
-		return CommandAccess.PLAYERS;
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getStaticArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getFlyingArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return BukkitLangKey.COMMAND_TESTMODE_DESCRIPTION;
 	}
 
 	

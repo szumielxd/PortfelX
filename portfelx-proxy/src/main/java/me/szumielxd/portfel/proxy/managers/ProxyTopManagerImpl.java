@@ -27,6 +27,17 @@ public class ProxyTopManagerImpl<C> extends TopManagerImpl<C> implements ProxyTo
 	private List<TopEntry> cachedMinorTop = Collections.emptyList();
 	
 	/**
+	 * Initialize TopManager
+	 * 
+	 * @implNote Internal use only
+	 */
+	@Override
+	public @NotNull ProxyTopManagerImpl<C> init() {
+		super.init();
+		return this;
+	}
+	
+	/**
 	 * Update top.
 	 */
 	@Override

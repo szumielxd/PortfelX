@@ -33,6 +33,7 @@ import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.bukkit.utils.ComponentUtils;
 import me.szumielxd.portfel.bukkit.utils.PlaceholderUtils;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -267,7 +268,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	
 	private @NotNull MessageDraft formatColoredPrice(@NotNull User user, long price) {
 		return (price < user.getBalance() ? BukkitLangKey.SHOP_ORDER_PRICE_NOTENOUGH : BukkitLangKey.SHOP_ORDER_PRICE_ENOUGH)
-				.draft(BukkitLangKey.MAIN_CURRENCY_FORMAT.draft(price));
+				.draft(MainLangKey.MAIN_CURRENCY_FORMAT.draft(price));
 	}
 	
 	private record PriceDiscount(@NotNull OrderData source, long value, boolean active) {}

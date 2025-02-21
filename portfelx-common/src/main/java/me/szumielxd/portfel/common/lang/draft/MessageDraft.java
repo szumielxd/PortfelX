@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
@@ -24,6 +25,7 @@ import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
+import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -81,6 +83,10 @@ public abstract class MessageDraft {
 				.collect(Collectors.toMap(Entry::getKey, e -> plain(e.getValue()))));
 	}
 	
+	public final @NotNull MessageDraft prefixed() {
+		return MainLangKey.PREFIX.draft().append(this);
+	}
+	
 	public @NotNull JsonElement build(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
 		return GsonComponentSerializer.gson().serializeToTree(toComponent(lang, chatVersion));
 	}
@@ -103,12 +109,15 @@ public abstract class MessageDraft {
 	}
 	
 	public <C> void send(@NotNull CommonSender<C> sender, boolean prefix) {
-		MessageDraft base = prefix ? MainLangKey.PREFIX.draft().append(this) : this;
-		sender.sendMessage(base.buildComponent(sender));
+		if (prefix) {
+			sendPrefixed(sender);
+		} else {
+			send(sender);
+		}
 	}
 	
 	public <C> void sendPrefixed(@NotNull CommonSender<C> sender) {
-		send(sender, true);
+		this.prefixed().send(sender);
 	}
 	
 	
@@ -131,6 +140,21 @@ public abstract class MessageDraft {
 	
 	public static @NotNull MessageDraft empty() {
 		return PlainMessageDraft.EMPTY;
+	}
+	
+	public static @NotNull MessageDraft trueFalse(boolean val) {
+		return val ? MainLangKey.MAIN_VALUE_TRUE.draft()
+				: MainLangKey.MAIN_VALUE_FALSE.draft();
+	}
+	
+	public static @NotNull MessageDraft onlineStatus(boolean online) {
+		return online ? MainLangKey.MAIN_VALUE_ONLINE.draft()
+				: MainLangKey.MAIN_VALUE_OFFLINE.draft();
+	}
+	
+	public static @NotNull MessageDraft uuidType(@Nullable UUID uuid) {
+		return MiscUtils.isOnlineModeUUID(uuid) ? MainLangKey.MAIN_VALUE_UUID_ONLINE.draft()
+				: MainLangKey.MAIN_VALUE_UUID_OFFLINE.draft();
 	}
 	
 	public static @NotNull MessageDraftArray array(@NotNull MessageDraft... elements) {

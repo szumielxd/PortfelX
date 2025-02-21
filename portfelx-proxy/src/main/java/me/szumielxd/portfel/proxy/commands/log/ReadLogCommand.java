@@ -4,6 +4,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,14 +36,14 @@ import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
 public class ReadLogCommand<C> extends SimpleCommand<C> {
 	
-	private List<String> signs = Arrays.asList("!", "<", ">");
-	private Pattern numCond = Pattern.compile("\\d+");
-	private Pattern extNumCond = Pattern.compile("[<>!]?\\d+(-\\d+)?");
+	private static final List<String> SIGNS = List.of("!", "<", ">");
+	private static final Pattern NUMERIC_PATTERN = Pattern.compile("\\d+");
+	private static final Pattern EXTENDED_NUMERIC_PATTERN = Pattern.compile("[<>!]?\\d+(-\\d+)?");
 	
-	@Getter private List<CmdArg> staticArgs = List.of(
+	@Getter private final List<CmdArg> staticArgs = List.of(
 				CommonArgs.PAGENUMBER
 			);
-	@Getter private List<CmdArg> flyingArgs = List.of(
+	@Getter private final List<CmdArg> flyingArgs = List.of(
 			CommonArgs.PAGESIZE,
 			new CmdArg(true, "targets=", ProxyLangKey.COMMAND_ARGTYPES_LOGTARGET_DISPLAY, ProxyLangKey.COMMAND_ARGTYPES_LOGTARGET_DESCRIPTION, null, str -> str.split(","), (s, arr) -> {
 				String arg = arr[arr.length-1];
@@ -104,10 +105,10 @@ public class ReadLogCommand<C> extends SimpleCommand<C> {
 				arg = elements[elements.length-1];
 				if (!prefix.isEmpty()) prefix += ",";
 				List<String> list = new ArrayList<>();
-				if (arg.isEmpty()) list.addAll(this.signs);
+				if (arg.isEmpty()) list.addAll(SIGNS);
 				list.addAll(CommonArgs.NUMBERS_LIST);
-				if (this.numCond.matcher(arg).matches()) list.add("-");
-				if (this.extNumCond.matcher(arg).matches()) list.add(",");
+				if (NUMERIC_PATTERN.matcher(arg).matches()) list.add("-");
+				if (EXTENDED_NUMERIC_PATTERN.matcher(arg).matches()) list.add(",");
 				list.replaceAll(prefix::concat);
 				return list;
 			}),
@@ -119,15 +120,17 @@ public class ReadLogCommand<C> extends SimpleCommand<C> {
 				prefix += String.join(",", prefixes);
 				arg = elements[elements.length-1];
 				if (!prefix.isEmpty()) prefix += ",";
-				List<String> list = new ArrayList<>();
-				if (arg.isEmpty()) list.addAll(this.signs);
+				List<String> list = new LinkedList<>();
+				if (arg.isEmpty()) list.addAll(SIGNS);
 				list.addAll(CommonArgs.NUMBERS_LIST);
-				if (this.numCond.matcher(arg).matches()) list.add("-");
-				if (this.extNumCond.matcher(arg).matches()) list.add(",");
+				if (NUMERIC_PATTERN.matcher(arg).matches()) list.add("-");
+				if (EXTENDED_NUMERIC_PATTERN.matcher(arg).matches()) list.add(",");
 				list.replaceAll(prefix::concat);
 				return list;
 			})
 	);
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_LOG_READ_DESCRIPTION;
+	
 	
 
 	public ReadLogCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
@@ -135,18 +138,19 @@ public class ReadLogCommand<C> extends SimpleCommand<C> {
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		this.parseArguments(sender, args).ifPresent(parsed -> {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		this.parseArguments(sender, parsedContext.argsLeft()).ifPresent(newParsedContext -> {
 			try {
+				var parsed = newParsedContext.parsedArgs();
 				List<LogEntry> logs = ((PortfelProxyImpl<C>)this.getPlugin()).getTransactionLogger()
 						.getLogs(
-								(String[])parsed.flyingArgs()[1],
-								(String[])parsed.flyingArgs()[2],
-								(String[])parsed.flyingArgs()[3],
-								(String[])parsed.flyingArgs()[4],
-								(ActionType[])parsed.flyingArgs()[5],
-								(NumericCondition[])parsed.flyingArgs()[6],
-								(NumericCondition[])parsed.flyingArgs()[7]);
+								(String[]) parsed.flyingArgs()[1],
+								(String[]) parsed.flyingArgs()[2],
+								(String[]) parsed.flyingArgs()[3],
+								(String[]) parsed.flyingArgs()[4],
+								(ActionType[]) parsed.flyingArgs()[5],
+								(NumericCondition[]) parsed.flyingArgs()[6],
+								(NumericCondition[]) parsed.flyingArgs()[7]);
 				
 				int size = Optional.ofNullable((int) parsed.flyingArgs()[0]).orElse(5);
 				int maxPage = (int) Math.ceil(logs.size() / (double) size);
@@ -187,11 +191,6 @@ public class ReadLogCommand<C> extends SimpleCommand<C> {
 				e.printStackTrace();
 			}
 		});
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return ProxyLangKey.COMMAND_LOG_READ_DESCRIPTION;
 	}
 	
 	

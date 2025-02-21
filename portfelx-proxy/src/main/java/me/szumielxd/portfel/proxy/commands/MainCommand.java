@@ -2,7 +2,6 @@ package me.szumielxd.portfel.proxy.commands;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,9 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
@@ -25,9 +26,15 @@ import me.szumielxd.portfel.proxy.api.objects.ProxySender;
 public class MainCommand<C> extends CommonCommand<C> implements ParentLikeCommand<C> {
 
 	
-	private final PortfelProxyImpl<C> plugin;
-	private Map<String, SimpleCommand<C>> childrens = new HashMap<>();
-	private static final String HELP = "help";
+	private static final @NotNull String HELP = "help";
+	
+	private final @NotNull PortfelProxyImpl<C> plugin;
+	private final @NotNull Map<String, SimpleCommand<C>> childrens = new HashMap<>();
+	
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = MainLangKey.EMPTY;
 	
 	
 	public MainCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull String name, @NotNull String permission, @NotNull String... aliases) {
@@ -54,24 +61,11 @@ public class MainCommand<C> extends CommonCommand<C> implements ParentLikeComman
 	
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		if (args.length == 0) {
-			args = new String[] { "" };
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		var cmd = getChildren(parsedContext.argLeft(0)).orElseGet(() -> this.childrens.get(HELP));
+		if (cmd.validateCanUse(sender)) {	
+			cmd.onCommand(sender, parsedContext.skipArgsLeft(1));
 		}
-		SimpleCommand<C> cmd = Optional.ofNullable(this.childrens.get(args[0].toLowerCase()))
-				.orElseGet(() -> this.childrens.get(HELP));
-		if (!cmd.hasPermission(sender)) {
-			MainLangKey.ERROR_COMMAND_PERMISSION
-					.draft()
-					.send(sender, true);
-			return;
-		} else if (!cmd.getAccess().canAccess(sender)) {
-			cmd.getAccess().getAccessMessage()
-					.draft()
-					.send(sender, true);
-			return;
-		}
-		cmd.onCommand(sender, parsedArgs, MiscUtils.mergeArrays(label, args[0]), MiscUtils.popArray(args));
 	}
 
 	@Override
@@ -91,26 +85,12 @@ public class MainCommand<C> extends CommonCommand<C> implements ParentLikeComman
 		}
 		return List.of();
 	}
-	
-	@Override
-	public @NotNull List<CmdArg> getStaticArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getFlyingArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return MainLangKey.EMPTY;
-	}
 
 	@Override
 	public void execute(@NotNull ProxySender<C> sender, @NotNull String[] args) {
-		this.plugin.getTaskManager().runTaskAsynchronously(
-				() -> this.onCommand(sender, new Object[0], new String[] {this.getName()}, args));
+		this.plugin.getTaskManager()
+				.runTaskAsynchronously(
+						() -> this.onCommand(sender, ParsedCommandContext.initial(getName(), args)));
 	}
 	
 	@Override
@@ -118,6 +98,14 @@ public class MainCommand<C> extends CommonCommand<C> implements ParentLikeComman
 		return this.childrens.values().stream()
 				.distinct()
 				.toList();
+	}
+
+	@Override
+	public @NotNull Optional<SimpleCommand<C>> getChildren(@Nullable String name) {
+		if (name == null) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(this.childrens.get(name.toLowerCase()));
 	}
 
 

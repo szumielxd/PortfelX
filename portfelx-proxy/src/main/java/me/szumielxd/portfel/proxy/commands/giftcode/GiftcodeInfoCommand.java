@@ -1,18 +1,15 @@
 package me.szumielxd.portfel.proxy.commands.giftcode;
 
-import static net.kyori.adventure.text.format.TextDecoration.*;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.CommonSender;
@@ -20,71 +17,68 @@ import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 import me.szumielxd.portfel.proxy.objects.PrizeToken;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 
 public class GiftcodeInfoCommand<C> extends SimpleCommand<C> {
+	
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_GIFTCODE_INFO_DESCRIPTION;
+	
 
 	public GiftcodeInfoCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "info", "information", "informations", "get", "about");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-		PrizeToken token = (PrizeToken) parsedArgs[0];
-		Component header = Portfel.PREFIX.append(Component.text("> ", LIGHT_PURPLE, BOLD)).append(LangKey.COMMAND_GIFTCODE_INFO_HEADER.component(DARK_PURPLE,
-				this.prepareInteractive(Component.text(token.getToken(), WHITE), label, token.getToken())));
-		
-		String[] labelUser = new String[] { label[0], "user" };
+		PrizeToken token = (PrizeToken) parsedContext.parsedStaticArg(0);
+		String[] label = parsedContext.label();
+		String commandPrefix = String.join(" ", Arrays.copyOf(label, 2)) + " ";
+		String commandUserPrefix = label[0] + " user";
 		UUID creatorId = token.getCreator().getUniqueId();
-		boolean creatorIsPlayer = !(creatorId.equals(ActionExecutor.CONSOLE_UUID) || creatorId.equals(ActionExecutor.PLUGIN_UUID));
-		String id = !creatorIsPlayer? "null" : creatorId.toString();
+		boolean creatorIsNotPlayer = creatorId.equals(ActionExecutor.CONSOLE_UUID) || creatorId.equals(ActionExecutor.PLUGIN_UUID);
+		String id = creatorIsNotPlayer ? "null" : creatorId.toString();
 		
-		Component creator = Portfel.PREFIX.append(Component.text("- ", WHITE)).append(LangKey.COMMAND_GIFTCODE_INFO_CREATOR.component(LIGHT_PURPLE,
-				this.prepareInteractive(Component.text(token.getCreator().getDisplayName(), WHITE), labelUser, token.getCreator().getDisplayName())));
-		Component uuid = Portfel.PREFIX.append(Component.text("   ", WHITE)).append(LangKey.COMMAND_GIFTCODE_INFO_UUID.component(DARK_PURPLE,
-				this.prepareInteractive(Component.text(id, WHITE), labelUser, id)));
+		var header = ProxyLangKey.COMMAND_USER_INFO_HEADER
+				.draft(interactiveValue(token.getToken(), commandPrefix));
+		var creator = ProxyLangKey.COMMAND_GIFTCODE_INFO_CREATOR
+				.draft(interactiveValue(token.getCreator().getDisplayName(), commandUserPrefix));
+		var uuid = ProxyLangKey.COMMAND_GIFTCODE_INFO_UUID
+				.draft(interactiveValue(id, commandUserPrefix));
+		var order = ProxyLangKey.COMMAND_GIFTCODE_INFO_ORDER
+				.draft(token.getOrder());
+		var accessibility = ProxyLangKey.COMMAND_GIFTCODE_INFO_ACCESSIBILITY
+				.draft();
+		var accessType = ProxyLangKey.COMMAND_GIFTCODE_INFO_ACCESSTYPE
+				.draft(MiscUtils.firstToUpper(token.getSelectorType().name(), true));
+		var accessList = ProxyLangKey.COMMAND_GIFTCODE_INFO_ACCESSLIST
+				.draft(token.getServerNames().stream()
+						.map(ProxyLangKey.COMMAND_GIFTCODE_INFO_ACCESSLIST_FORMAT::draft)
+						.collect(MessageDraft.join(", ")));
+		var dates = ProxyLangKey.COMMAND_GIFTCODE_INFO_DATES
+				.draft();
+		var creation = ProxyLangKey.COMMAND_GIFTCODE_INFO_CREATION
+				.draft(dateFormat.format(token.getCreationDate()));
+		var expiration = ProxyLangKey.COMMAND_GIFTCODE_INFO_EXPIRATION
+				.draft(token.getExpiration() != -1 ?
+						dateFormat.format(new Date(token.getExpiration()))
+						: ProxyLangKey.COMMAND_LISTGIFTCODES_LIFETIME);
 		
-		Component order = Portfel.PREFIX.append(Component.text("- ", WHITE)).append(LangKey.COMMAND_GIFTCODE_INFO_ORDER.component(DARK_PURPLE, Component.text(token.getOrder(), AQUA)));
-		
-		Component accessibility = Portfel.PREFIX.append(Component.text("- ", WHITE)).append(LangKey.COMMAND_GIFTCODE_INFO_ACCESSIBILITY.component(LIGHT_PURPLE));
-		Component accessType = Portfel.PREFIX.append(Component.text("   ")).append(LangKey.COMMAND_GIFTCODE_INFO_ACCESSTYPE.component(DARK_PURPLE,
-				Component.text(MiscUtils.firstToUpper(token.getSelectorType().name(), true), AQUA)));
-		Component accessList = Portfel.PREFIX.append(Component.text("   ", WHITE)).append(LangKey.COMMAND_GIFTCODE_INFO_ACCESSLIST.component(DARK_PURPLE,
-				MiscUtils.join(Component.text(", ",  GRAY), token.getServerNames().stream().map(s -> Component.text(s, AQUA)).collect(Collectors.toList()))));
-		
-		Component dates = Portfel.PREFIX.append(Component.text("- ", WHITE)).append(LangKey.COMMAND_GIFTCODE_INFO_DATES.component(LIGHT_PURPLE));
-		Component creation = Portfel.PREFIX.append(Component.text("   ")).append(LangKey.COMMAND_GIFTCODE_INFO_CREATION.component(DARK_PURPLE,
-				Component.text(dateFormat.format(token.getCreationDate()), AQUA)));
-		Component expiration = Portfel.PREFIX.append(Component.text("   ", WHITE)).append(LangKey.COMMAND_GIFTCODE_INFO_EXPIRATION.component(DARK_PURPLE,
-				token.getExpiration() == -1 ? LangKey.COMMAND_LISTGIFTCODES_LIFETIME.component(AQUA) : Component.text(dateFormat.format(new Date(token.getExpiration())), AQUA)));
-		sender.sendTranslated(MiscUtils.join(Component.newline(), header, creator, uuid, order, accessibility, accessType, accessList, dates, creation, expiration));
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return ProxyLangKey.COMMAND_GIFTCODE_INFO_DESCRIPTION;
+		Stream.of(header, creator, uuid, order, accessibility, accessType, accessList, dates, creation, expiration)
+				.map(MessageDraft::prefixed)
+				.collect(MessageDraft.join(MessageDraft.newline()))
+				.send(sender);
 	}
 	
-	private @NotNull Component prepareInteractive(@NotNull Component comp, @NotNull String[] label, @NotNull String text) {
-		return comp.hoverEvent(Component.text(text, AQUA)
-				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_SUGGEST.component(GRAY))
-				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_INSERT.component(GRAY)))
-				.clickEvent(ClickEvent.suggestCommand("/" + String.join(" ", Arrays.copyOf(label, 2)) + " " + text)).insertion(text);
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getStaticArgs() {
-		return Collections.emptyList();
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getFlyingArgs() {
-		return Collections.emptyList();
+	private @NotNull MessageDraft interactiveValue(@NotNull String value, @NotNull String commandPrefix) {
+		return ProxyLangKey.COMMAND_GIFTCODE_INFO_VALUE
+				.draft(value, commandPrefix, ProxyLangKey.COMMAND_GIFTCODE_INFO_VALUEHOVER);
 	}
 
 }

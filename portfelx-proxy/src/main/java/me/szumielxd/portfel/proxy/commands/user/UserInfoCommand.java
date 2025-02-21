@@ -1,13 +1,12 @@
 package me.szumielxd.portfel.proxy.commands.user;
 
-import static net.kyori.adventure.text.format.TextDecoration.*;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
-
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
+import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
@@ -15,53 +14,54 @@ import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
-import me.szumielxd.portfel.common.utils.MiscUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
 public class UserInfoCommand<C> extends SimpleCommand<C> {
+	
+	
+	@Getter private final @NotNull List<CmdArg> staticArgs = List.of();
+	@Getter private final @NotNull List<CmdArg> flyingArgs = List.of();
+	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_USER_INFO_DESCRIPTION;
+	
 
 	public UserInfoCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
 		super(plugin, parent, "info", "information", "informations", "get", "about");
 	}
 
 	@Override
-	public void onCommand(@NotNull CommonSender<C> sender, @NotNull Object[] parsedArgs, @NotNull String[] label, @NotNull String[] args) {
-		User user = (User) parsedArgs[0];
-		Component header = Portfel.PREFIX.append(Component.text("> ", LIGHT_PURPLE, BOLD)).append(LangKey.COMMAND_USER_INFO_HEADER.component(DARK_PURPLE,
-				this.prepareInteractive(Component.text(user.getName(), WHITE), label, user.getName())));
+	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
+		User user = (User) parsedContext.parsedArgs().staticArgs()[0];
+		String[] label = parsedContext.label();
+		String commandPrefix = String.join(" ", Arrays.copyOf(label, 2)) + " ";
+		String parentCommand = String.join(" ", Arrays.copyOf(label, label.length - 1)) + " ";
 		String id = user.getUniqueId() != null? user.getUniqueId().toString() : "null";
-		Component idType = MiscUtils.isOnlineModeUUID(user.getUniqueId()) ? LangKey.MAIN_VALUE_ONLINE.component(GREEN) : LangKey.MAIN_VALUE_OFFLINE.component(DARK_GRAY);
-		Component uuid = Portfel.PREFIX.append(Component.text("- ", WHITE)).append(LangKey.COMMAND_USER_INFO_UUID.component(LIGHT_PURPLE,
-				this.prepareInteractive(Component.text(id, WHITE), label, id)));
-		Component uuidType = Portfel.PREFIX.append(Component.text("   ")).append(LangKey.COMMAND_USER_INFO_UUIDTYPE.component(GRAY, idType));
-		Component status = Portfel.PREFIX.append(Component.text("- ", WHITE)).append(LangKey.COMMAND_USER_INFO_STATUS.component(DARK_PURPLE,
-				user.isOnline()? LangKey.MAIN_VALUE_ONLINE.component(GREEN) : LangKey.MAIN_VALUE_OFFLINE.component(RED)));
-		Component userdata = Portfel.PREFIX.append(Component.text("- ", WHITE)).append(LangKey.COMMAND_USER_INFO_USERDATA.component(LIGHT_PURPLE));
-		Component balance = Portfel.PREFIX.append(Component.text("   ")).append(MiscUtils.bindCommand(LangKey.COMMAND_USER_INFO_BALANCE.component(DARK_PURPLE,
-				Component.text(user.getBalance(), AQUA)), "/" + String.join(" ", Arrays.copyOf(label, label.length-1)) + " eco"));
-		Component minorBalance = Portfel.PREFIX.append(Component.text("   ")).append(MiscUtils.bindCommand(LangKey.COMMAND_USER_INFO_MINORBALANCE.component(DARK_PURPLE,
-				Component.text(user.getMinorBalance(), AQUA)), "/" + String.join(" ", Arrays.copyOf(label, label.length-1)) + " meco"));
-		Component inTop = Portfel.PREFIX.append(Component.text("   ", WHITE)).append(LangKey.COMMAND_USER_INFO_INTOP.component(DARK_PURPLE,
-				user.isDeniedInTop()? LangKey.MAIN_VALUE_FALSE.component(RED) : LangKey.MAIN_VALUE_TRUE.component(GREEN)));
-		sender.sendTranslated(MiscUtils.join(Component.newline(), header, uuid, uuidType, status, userdata, balance, minorBalance, inTop));
-	}
-
-	@Override
-	public @NotNull List<CmdArg> getArgs() {
-		return this.emptyArgList;
-	}
-
-	@Override
-	public @NotNull LangKey getDescription() {
-		return LangKey.COMMAND_USER_INFO_DESCRIPTION;
+		MessageDraft header = ProxyLangKey.COMMAND_USER_INFO_HEADER
+				.draft(interactiveValue(user.getName(), commandPrefix));
+		MessageDraft uuid = ProxyLangKey.COMMAND_USER_INFO_UUID
+				.draft(interactiveValue(id, commandPrefix));
+		MessageDraft uuidType = ProxyLangKey.COMMAND_USER_INFO_UUIDTYPE
+				.draft(MessageDraft.uuidType(user.getUniqueId()));
+		MessageDraft status = ProxyLangKey.COMMAND_USER_INFO_STATUS
+				.draft(MessageDraft.onlineStatus(user.isOnline()));
+		MessageDraft userdata = ProxyLangKey.COMMAND_USER_INFO_USERDATA
+				.draft();
+		MessageDraft balance = ProxyLangKey.COMMAND_USER_INFO_BALANCE
+				.draft(user.getBalance(), parentCommand + "eco");
+		MessageDraft minorBalance = ProxyLangKey.COMMAND_USER_INFO_MINORBALANCE
+				.draft(user.getBalance(), parentCommand + "meco");
+		MessageDraft inTop = ProxyLangKey.COMMAND_USER_INFO_INTOP
+				.draft(MessageDraft.trueFalse(!user.isDeniedInTop()));
+		
+		Stream.of(header, uuid, uuidType, status, userdata, balance, minorBalance, inTop)
+				.map(MessageDraft::prefixed)
+				.collect(MessageDraft.join(MessageDraft.newline()))
+				.send(sender);
 	}
 	
-	private @NotNull Component prepareInteractive(@NotNull Component comp, @NotNull String[] label, @NotNull String text) {
-		return comp.hoverEvent(Component.text(text, AQUA)
-				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_SUGGEST.component(GRAY))
-				.append(Component.newline()).append(Component.text("» ", DARK_GRAY)).append(LangKey.COMMAND_USER_INFO_INSERT.component(GRAY)))
-				.clickEvent(ClickEvent.suggestCommand("/" + String.join(" ", Arrays.copyOf(label, 2)) + " " + text)).insertion(text);
+	private @NotNull MessageDraft interactiveValue(@NotNull String value, @NotNull String commandPrefix) {
+		return ProxyLangKey.COMMAND_USER_INFO_VALUE
+				.draft(value, commandPrefix, ProxyLangKey.COMMAND_USER_INFO_VALUEHOVER);
 	}
 
 }
