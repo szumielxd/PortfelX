@@ -59,10 +59,10 @@ public class OrdersManager {
 		yaml.addDefaults(defaults);
 		try {
 			if (yaml.exists()) {
-				this.plugin.getLogger().info(() -> "Loading orders from file `%s`".formatted(this.file.getName()));
+				this.plugin.logger().info("Loading orders from file `%s`", this.file.getName());
 				yaml.load();
 			} else {
-				this.plugin.getLogger().info(() -> "Creating new orders container as file `%s`".formatted(this.file.getName()));
+				this.plugin.logger().info("Creating new orders container as file `%s`", this.file.getName());
 				yaml.setComment(defaultNothing.getCurrentPath(), 
 						"""
 						This is the simplest example of creating new global order.

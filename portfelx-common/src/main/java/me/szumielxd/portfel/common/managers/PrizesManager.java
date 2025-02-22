@@ -59,10 +59,10 @@ public class PrizesManager<C> {
 		yaml.addDefaults(defaults);
 		try {
 			if (yaml.exists()) {
-				this.plugin.getLogger().info(() -> String.format("Loading prizes from file `%s`", this.file.getFileName().toString()));
+				this.plugin.logger().info("Loading prizes from file `%s`", this.file.getFileName().toString());
 				yaml.load();
 			} else {
-				this.plugin.getLogger().info(() -> String.format("Creating new prizes container as file `%s`", this.file.getFileName().toString()));
+				this.plugin.logger().info("Creating new prizes container as file `%s`", this.file.getFileName().toString());
 				yaml.setComment(defaultNothing.getCurrentPath(), 
 						"""  
 						This is the simplest example of creating new token-prize order.

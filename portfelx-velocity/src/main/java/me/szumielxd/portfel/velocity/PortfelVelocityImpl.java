@@ -19,12 +19,12 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 
 import lombok.Getter;
 import lombok.Setter;
+import me.szumielxd.portfel.api.CommonLogger;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
 import me.szumielxd.portfel.api.configuration.Config;
 import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
-import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.ComponentMapper;
 import me.szumielxd.portfel.common.ConfigImpl;
@@ -62,7 +62,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 	
 	
 	private final @Getter @NotNull ProxyServer proxy;
-	private final @NotNull Logger logger;
+	private final @Getter @NotNull Logger logger;
 	private final @Getter @NotNull Path dataDirectory;
 	
 	
@@ -71,6 +71,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 		this.proxy = proxy;
 		this.logger = logger;
 		this.dataDirectory = dataDirectory;
+		this.commonLogger = new VelocityLogger(logger);
 	}
 	
 	
@@ -97,6 +98,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 	private ContextProvider<Player, Component> luckpermsContextProvider;
 	private VelocityComponentMapper componentMapper = new VelocityComponentMapper();
 	private @Getter @Nullable VelocityProxy commonServer = new VelocityProxy(this);
+	private final @NotNull CommonLogger commonLogger;
 	
 	
 	@Override
@@ -191,7 +193,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 
 
 	@Override
-	public @NotNull UserManager getUserManager() {
+	public @NotNull ProxyUserManagerImpl<Component> getUserManager() {
 		return this.userManager;
 	}
 	
@@ -268,8 +270,8 @@ public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 
 
 	@Override
-	public java.util.logging.@NotNull Logger getLogger() {
-		return (java.util.logging.@NotNull Logger) this.logger;
+	public @NotNull CommonLogger logger() {
+		return this.commonLogger;
 	}
 	
 

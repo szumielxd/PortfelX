@@ -11,11 +11,12 @@ import org.jetbrains.annotations.Nullable;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
+import me.szumielxd.portfel.api.CommonLogger;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
 import me.szumielxd.portfel.api.configuration.ConfigKey;
 import me.szumielxd.portfel.api.managers.TaskManager;
-import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.ComponentMapper;
 import me.szumielxd.portfel.bungee.commands.BungeeCommandWrapper;
@@ -78,6 +79,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 	private ContextProvider<ProxiedPlayer, BaseComponent[]> luckpermsContextProvider;
 	private BungeeComponentMapper componentMapper = new BungeeComponentMapper();
 	private @Getter @Nullable BungeeProxy commonServer = new BungeeProxy(this);
+	private final @Accessors(fluent = true) @Getter @NotNull CommonLogger logger = new BungeeLogger(getLogger());
 	
 	
 	@Override
@@ -184,7 +186,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 
 
 	@Override
-	public @NotNull UserManager getUserManager() {
+	public @NotNull ProxyUserManagerImpl<BaseComponent[]> getUserManager() {
 		return this.userManager;
 	}
 	

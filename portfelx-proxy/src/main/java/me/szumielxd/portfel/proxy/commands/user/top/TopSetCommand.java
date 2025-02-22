@@ -2,7 +2,6 @@ package me.szumielxd.portfel.proxy.commands.user.top;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +52,7 @@ public class TopSetCommand<C> extends SimpleCommand<C> {
 			} catch (Exception e) {
 				MainLangKey.ERROR_COMMAND_EXECUTION.draft()
 						.sendPrefixed(sender);
-				getPlugin().getLogger().log(Level.SEVERE, "Ann error occurred while executing top info command", e);
+				getPlugin().logger().severe(e, "Ann error occurred while executing top info command");
 			}
 		});
 	}

@@ -2,7 +2,6 @@ package me.szumielxd.portfel.api;
 
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.logging.Logger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -116,7 +115,7 @@ public interface Portfel<C> {
 	 * 
 	 * @return plugin's logger
 	 */
-	public @NotNull Logger getLogger();
+	public @NotNull CommonLogger logger();
 	
 	/**
 	 * Log debug message in console.
@@ -126,7 +125,7 @@ public interface Portfel<C> {
 	 */
 	public default void debug(@NotNull String message, @Nullable Object... args) {
 		Objects.requireNonNull(message, "message cannot be null");
-		if (this.getConfiguration().getBoolean(ConfigKey.MAIN_DEBUG)) this.getLogger().info("DEBUG: " + String.format(message, args));
+		if (this.getConfiguration().getBoolean(ConfigKey.MAIN_DEBUG)) this.logger().info("DEBUG: " + String.format(message, args));
 	}
 	
 

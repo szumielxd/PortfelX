@@ -3,7 +3,6 @@ package me.szumielxd.portfel.bukkit.commands.system;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -42,7 +41,7 @@ public class ReloadCommand extends SimpleCommand<Component> {
 		} catch (Throwable e) {
 			StringWriter sw = new StringWriter();
 			e.printStackTrace(new PrintWriter(sw));
-			getPlugin().getLogger().log(Level.SEVERE, "Ann error occurred while executing top info command", e);
+			getPlugin().logger().severe(e, "Ann error occurred while executing top info command");
 			MainLangKey.COMMAND_SYSTEM_RELOAD_ERROR
 					.draft(sw.toString())
 					.send(sender, true);

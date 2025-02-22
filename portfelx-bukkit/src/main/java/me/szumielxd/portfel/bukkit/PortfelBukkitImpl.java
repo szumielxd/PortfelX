@@ -21,6 +21,9 @@ import org.jetbrains.annotations.NotNull;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
 
+import lombok.Getter;
+import lombok.experimental.Accessors;
+import me.szumielxd.portfel.api.CommonLogger;
 import me.szumielxd.portfel.api.PortfelProvider;
 import me.szumielxd.portfel.api.configuration.AbstractKey;
 import me.szumielxd.portfel.api.configuration.Config;
@@ -72,6 +75,8 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	
 	private PAPIHandler papiHandler;
 	private ContextProvider<Player, Component> luckpermsContextProvider;
+	
+	private final @Accessors(fluent = true) @Getter @NotNull CommonLogger logger = new BukkitLogger(getLogger());
 	
 	private String serverHashKey;
 	

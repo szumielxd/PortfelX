@@ -43,6 +43,7 @@ public interface CommonLogger {
 	/**
 	 * Log throwable and message at the WARN level according to the specified format and arguments.
 	 * 
+	 * @param throwable the source for stack traces
 	 * @param format the format string
 	 * @param args the arguments
 	 */
@@ -64,6 +65,16 @@ public interface CommonLogger {
 	 * @param args the arguments
 	 */
 	public void severe(@NotNull String format, @Nullable Object... args);
+	
+	
+	/**
+	 * Log throwable and message at the SEVERE level according to the specified format and arguments.
+	 * 
+	 * @param throwable the source for stack traces
+	 * @param format the format string
+	 * @param args the arguments
+	 */
+	public void severe(@NotNull Throwable throwable, @NotNull String format, @Nullable Object... args);
 	
 
 }
