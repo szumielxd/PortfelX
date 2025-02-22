@@ -20,7 +20,7 @@ public abstract class UserListener<T extends PortfelProxyImpl<C>, C> {
 	@Getter private final @NotNull T plugin;
 
 	
-	protected void onConnect(@NotNull ProxyPlayer<C> player, @NotNull ProxyServerConnection server) {
+	protected void onConnect(@NotNull ProxyPlayer<C> player, @NotNull ProxyServerConnection<C> server) {
 		this.plugin.debug("UserListener::onConnect(%s, %s)", player, server);
 		this.plugin.getTaskManager().runTaskAsynchronously(() -> {
 			try {
