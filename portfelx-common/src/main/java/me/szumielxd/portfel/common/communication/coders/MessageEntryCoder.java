@@ -26,6 +26,7 @@ public abstract class MessageEntryCoder<T> {
 	
 	protected final Class<? extends T> targetClass;
 
+	protected static final MessageEntryCoderCreator<Boolean> BOOLEAN = new MessageEntryCoderCreator<>(ByteArrayDataInput::readBoolean, ByteArrayDataOutput::writeBoolean, List.of(Boolean.class, boolean.class)::contains);
 	protected static final MessageEntryCoderCreator<Integer> INTEGER = new MessageEntryCoderCreator<>(ByteArrayDataInput::readInt, ByteArrayDataOutput::writeInt, List.of(Integer.class, int.class, Long.class, long.class, Number.class)::contains);
 	protected static final MessageEntryCoderCreator<Long> LONG = new MessageEntryCoderCreator<>(ByteArrayDataInput::readLong, ByteArrayDataOutput::writeLong, List.of(Long.class, long.class, Number.class)::contains);
 	protected static final MessageEntryCoderCreator<String> UTF = new MessageEntryCoderCreator<>(ByteArrayDataInput::readUTF, ByteArrayDataOutput::writeUTF, cl -> String.class.equals(cl) || cl.isEnum());
@@ -54,6 +55,10 @@ public abstract class MessageEntryCoder<T> {
 			MessageEntryCoder::decodeObject,
 			MessageEntryCoder::encodeObject,
 			MessageEntryCoder::validateObject);
+	protected static final MessageEntryCoderCreator<Enum<?>> ENUM = new MessageEntryCoderCreator<>(
+			MessageEntryCoder::decodeEnum,
+			MessageEntryCoder::encodeEnum,
+			Class::isEnum);
 	
 	
 	public abstract @NotNull T decode(@NotNull ByteArrayDataInput in);
@@ -66,6 +71,24 @@ public abstract class MessageEntryCoder<T> {
 	
 	private static byte asciiToByte(char b) {
 		return (byte)(b - 128);
+	}
+	
+	private static <T extends Enum<?>> T decodeEnum(@NotNull ByteArrayDataInput in, Class<T> clazz) {
+		try {
+			String name = ASCII.decoder.apply(in, String.class).toUpperCase();
+			for (var e : clazz.getEnumConstants()) {
+				if (name.equals(e.name().toUpperCase())) {
+					return e;
+				}
+			}
+			throw new IllegalArgumentException("Invalid enum entry name: `%s`".formatted(name));
+		} catch (IllegalArgumentException | SecurityException e) {
+			throw new RuntimeException("Could not decode enum for class `%s`:".formatted(clazz), e);
+		}
+	}
+	
+	private static <T extends Enum<?>> void encodeEnum(@NotNull ByteArrayDataOutput out, T e) {
+		ASCII.encoder.accept(out, e.name());
 	}
 	
 	private static boolean validateObject(@NotNull Class<?> clazz) {
@@ -113,9 +136,9 @@ public abstract class MessageEntryCoder<T> {
 	private static Object readFieldValue(@NotNull ByteArrayDataInput in, @NotNull MessageEntryCoder<?> coder, Class<?> clazz) {
 		if (clazz.isArray()) {
 			int size = in.readInt();
-			Object arr = Array.newInstance(clazz.arrayType(), size);
+			Object arr = Array.newInstance(clazz.componentType(), size);
 			for (int i = 0; i < size; i++) {
-				Array.set(arr, i, readFieldValue(in, coder, clazz.arrayType()));
+				Array.set(arr, i, readFieldValue(in, coder, clazz.componentType()));
 			}
 			return arr;
 		} else {
@@ -141,7 +164,7 @@ public abstract class MessageEntryCoder<T> {
 		if (entryMeta != null) {
 			var entryType = field.getType();
 			while (entryType.isArray()) {
-				entryType = entryType.arrayType();
+				entryType = entryType.getComponentType();
 			}
 			if (!entryMeta.value().isApplicable(entryType)) {
 				throw new IllegalArgumentException("Cannot apply `%s` to field of type `%s`".formatted(entryMeta.value().name(), field.getType()));

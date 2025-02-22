@@ -8,12 +8,14 @@ import me.szumielxd.portfel.common.communication.coders.MessageEntryCoder.Messag
 
 public enum MessageEntryCoders {
 
+	BOOLEAN(MessageEntryCoder.BOOLEAN),
 	INTEGER(MessageEntryCoder.INTEGER),
 	LONG(MessageEntryCoder.LONG),
 	ASCII(MessageEntryCoder.ASCII),
 	UTF(MessageEntryCoder.UTF),
 	UUID(MessageEntryCoder.UUID),
-	OBJECT(MessageEntryCoder.OBJECT_FETCHER);
+	OBJECT(MessageEntryCoder.OBJECT_FETCHER),
+	ENUM(MessageEntryCoder.ENUM);
 	
 	private final @NotNull MessageEntryCoderCreator<?> coderCreator;
 	
