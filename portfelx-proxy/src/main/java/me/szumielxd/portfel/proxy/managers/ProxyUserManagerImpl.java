@@ -1,6 +1,5 @@
 package me.szumielxd.portfel.proxy.managers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,7 +60,7 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	 * @return user if is loaded, otherwise null
 	 */
 	@Override
-	public @Nullable User getUser(@NotNull UUID uuid) {
+	public @Nullable ProxyOperableUser getUser(@NotNull UUID uuid) {
 		this.validate();
 		return this.users.get(uuid);
 	}
@@ -73,7 +72,7 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	 * @return user if is loaded, otherwise null
 	 */
 	@Override
-	public @Nullable User getUser(@NotNull String username) {
+	public @Nullable ProxyOperableUser getUser(@NotNull String username) {
 		this.validate();
 		return this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
 	}
@@ -87,7 +86,7 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @Nullable User getOrLoadUser(@NotNull UUID uuid) throws Exception {
+	public @Nullable ProxyOperableUser getOrLoadUser(@NotNull UUID uuid) throws Exception {
 		this.validate();
 		ProxyOperableUser user = this.users.get(uuid);
 		if (user != null) return user;
@@ -105,7 +104,7 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @Nullable User getOrLoadUser(@NotNull String username) throws Exception {
+	public @Nullable ProxyOperableUser getOrLoadUser(@NotNull String username) throws Exception {
 		this.validate();
 		ProxyOperableUser user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
 		if (user != null) return user;
@@ -123,7 +122,7 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @NotNull User getOrCreateUser(@NotNull UUID uuid) throws Exception {
+	public @NotNull ProxyOperableUser getOrCreateUser(@NotNull UUID uuid) throws Exception {
 		this.validate();
 		ProxyOperableUser user = this.users.get(uuid);
 		if (user != null) return user;
@@ -140,7 +139,7 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	@Override
 	public @NotNull Collection<User> getLoadedUsers() {
 		this.validate();
-		return Collections.unmodifiableCollection(new ArrayList<>(this.users.values()));
+		return Collections.unmodifiableCollection(this.users.values());
 	}
 	
 	/**
@@ -172,7 +171,7 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	 * @return original list of users
 	 */
 	@Override
-	protected @NotNull Collection<? extends User> getLoadedUsersOrigin() {
+	protected @NotNull Collection<? extends ProxyOperableUser> getLoadedUsersOrigin() {
 		return this.users.values();
 	}
 

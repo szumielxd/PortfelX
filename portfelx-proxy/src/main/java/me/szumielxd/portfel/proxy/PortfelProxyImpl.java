@@ -9,7 +9,6 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.managers.TaskManager;
-import me.szumielxd.portfel.api.managers.UserManager;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.proxy.api.PortfelProxy;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
@@ -26,6 +25,7 @@ import me.szumielxd.portfel.proxy.database.token.hikari.MariaTokenDB;
 import me.szumielxd.portfel.proxy.database.token.hikari.MysqlTokenDB;
 import me.szumielxd.portfel.proxy.managers.AccessManagerImpl;
 import me.szumielxd.portfel.proxy.managers.OrdersManager;
+import me.szumielxd.portfel.proxy.managers.ProxyUserManagerImpl;
 import me.szumielxd.portfel.proxy.managers.TokenManager;
 
 public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
@@ -54,7 +54,7 @@ public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 
 
 	@Override
-	public @NotNull UserManager getUserManager();
+	public @NotNull ProxyUserManagerImpl<C> getUserManager();
 	
 	
 	@Override
@@ -119,14 +119,14 @@ public interface PortfelProxyImpl<C> extends PortfelProxy<C> {
 		if ("mariadb".equals(dbType)) this.setDatabase(new MariaDB<>(this));
 		else if ("mysql".equals(dbType)) this.setDatabase(new MysqlDB<>(this));
 		else this.setDatabase(new H2DB<>(this));
-		this.getLogger().info("Establishing connection with database...");
+		this.logger().info("Establishing connection with database...");
 		this.getDatabase().setup();
 		//
 		String tokenDbType = this.getConfiguration().getString(ProxyConfigKey.TOKEN_DATABASE_TYPE).toLowerCase();
 		if ("mariadb".equals(tokenDbType)) this.setTokenDatabase(new MariaTokenDB(this));
 		else if ("mysql".equals(tokenDbType)) this.setTokenDatabase(new MysqlTokenDB(this));
 		else this.setTokenDatabase(new H2TokenDB(this));
-		this.getLogger().info("Establishing connection with tokens database...");
+		this.logger().info("Establishing connection with tokens database...");
 		this.getTokenDatabase().setup();
 		this.setTransactionLogger(new HikariDBLogger<>(this).init());
 	}
