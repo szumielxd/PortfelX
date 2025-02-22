@@ -68,7 +68,9 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	public final AccessManagerImpl<P, C> init() {
 		this.preInit();
 		try {
-			if (!Files.exists(this.file.getParent())) Files.createDirectories(this.file.getParent());
+			if (!Files.exists(this.file.getParent())) {
+				Files.createDirectories(this.file.getParent());
+			}
 			if (!Files.exists(this.file)) {
 				Files.createFile(this.file);
 				this.accessMap = new JsonObject();
@@ -104,12 +106,12 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	@Override
 	public final boolean canAccess(@NotNull UUID serverId) {
-		if (this.accessMap == null) throw new IllegalStateException("AccessManager is not initialized");
+		validateAccessMap();
 		return this.accessMap.has(serverId.toString());
 	}
 	
 	/**
-	 * Check if server can trigger given order.
+	 * Check if server is registered and can trigger given order.
 	 * 
 	 * @param serverId identifier of server
 	 * @param order name of order (case-insensitive)
@@ -117,8 +119,9 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	@Override
 	public final boolean canAccess(@NotNull UUID serverId, String order) {
-		if (this.accessMap == null) throw new IllegalStateException("AccessManager is not initialized");
-		if (!this.accessMap.has(serverId.toString())) return false;
+		if (!canAccess(serverId)) {
+			return false;
+		}
 		JsonObject server = this.accessMap.getAsJsonObject(serverId.toString());
 		JsonArray orders = server.get("orders").getAsJsonArray();
 		return orders.contains(new JsonPrimitive(order.toLowerCase()));
@@ -132,7 +135,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	@Override
 	public final @Nullable UUID getServerByName(@NotNull String serverName) {
-		if (this.accessMap == null) throw new IllegalStateException("AccessManager is not initialized");
+		validateAccessMap();
 		return this.accessMap.entrySet().stream()
 				.filter(e -> serverName.equalsIgnoreCase(e.getValue().getAsJsonObject().get("display").getAsString()))
 				.map(Entry::getKey).map(UUID::fromString).findAny().orElse(null);
@@ -146,7 +149,9 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	@Override
 	public final @Nullable String getHashKey(@NotNull UUID serverId) {
-		if (!this.canAccess(serverId)) return null;
+		if (!this.canAccess(serverId)) {
+			return null;
+		}
 		JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
 		return obj.get("hashKey").getAsString();
 	}
@@ -161,8 +166,9 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	@Override
 	public final boolean register(@NotNull UUID serverId, @NotNull String serverName, @NotNull String hashKey) {
-		if (this.accessMap == null) throw new IllegalStateException("AccessManager is not initialized");
-		if (this.accessMap.has(serverId.toString())) return false;
+		if (this.canAccess(serverId)) {
+			return false;
+		}
 		JsonObject server = new JsonObject();
 		server.addProperty("display", serverName.toLowerCase());
 		server.add("orders", new JsonArray());
@@ -180,8 +186,9 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	@Override
 	public final boolean unregister(@NotNull UUID serverId) {
-		if (this.accessMap == null) throw new IllegalStateException("AccessManager is not initialized");
-		if (!this.accessMap.has(serverId.toString())) return false;
+		if (!canAccess(serverId)) {
+			return false;
+		}
 		this.accessMap.remove(serverId.toString());
 		this.save();
 		return true;
@@ -196,12 +203,15 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	@Override
 	public final boolean giveAccess(@NotNull UUID serverId, @NotNull String order) {
-		if (this.accessMap == null) throw new IllegalStateException("AccessManager is not initialized");
-		if (!this.accessMap.has(serverId.toString())) return false;
+		if (!canAccess(serverId)) {
+			return false;
+		}
 		JsonObject server = this.accessMap.getAsJsonObject(serverId.toString());
 		JsonArray orders = server.get("orders").getAsJsonArray();
 		JsonPrimitive val = new JsonPrimitive(order.toLowerCase());
-		if (orders.contains(val)) return false;
+		if (orders.contains(val)) {
+			return false;
+		}
 		orders.add(val);
 		this.save();
 		return true;
@@ -216,8 +226,9 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	@Override
 	public final boolean takeAccess(@NotNull UUID serverId, @NotNull String order) {
-		if (this.accessMap == null) throw new IllegalStateException("AccessManager is not initialized");
-		if (!this.accessMap.has(serverId.toString())) return false;
+		if (!canAccess(serverId)) {
+			return false;
+		}
 		JsonObject server = this.accessMap.getAsJsonObject(serverId.toString());
 		JsonArray orders = server.get("orders").getAsJsonArray();
 		JsonPrimitive val = new JsonPrimitive(order.toLowerCase());
@@ -271,7 +282,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	
 	public final void pendingRegistration(ProxyPlayer<C> player, String serverName, String hashKey) {
 		if (player != null) {
-			Optional<ProxyServerConnection> srv = player.getServer();
+			Optional<ProxyServerConnection<C>> srv = player.getServer();
 			if (srv.isPresent()) {
 				UUID serverId = UUID.randomUUID();
 				UUID operationId = UUID.randomUUID();
@@ -330,7 +341,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	
 	// BungeeCord
 	// ForwardToPlayer
-	private Optional<Boolean> onRegistrationValidCheck(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private Optional<Boolean> onRegistrationValidCheck(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		this.plugin.debug("[%s] onRegistrationValidCheck", "AccessManagerImpl");
 		in.readUTF(); // username
 		String channel = in.readUTF(); // custom channel
@@ -363,7 +374,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	}
 	
 	
-	private Optional<Boolean> onNonBungeeRegistrationValidCheck(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private Optional<Boolean> onNonBungeeRegistrationValidCheck(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		this.plugin.debug("[%s] onNonBungeeRegistrationValidCheck", "AccessManagerImpl");
 		UUID uuid = UUID.fromString(in.readUTF()); // actionId to validate
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
@@ -387,7 +398,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	
 	// Setup
 	// Register
-	private Optional<Boolean> onRegistrationCallback(@NotNull ProxyServerConnection sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private Optional<Boolean> onRegistrationCallback(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
 		this.plugin.debug("[%s] onRegistrationCallback", "AccessManagerImpl");
 		UUID operationId = null;
 		try {
@@ -442,6 +453,12 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 			}
 		}
 		return Optional.of(true);
+	}
+	
+	private void validateAccessMap() {
+		if (this.accessMap == null) {
+			throw new IllegalStateException("AccessManager is not initialized");
+		}
 	}
 	
 	
