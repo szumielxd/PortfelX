@@ -11,8 +11,9 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
+import net.kyori.adventure.text.Component;
 
-public class VelocityServerConnection implements ProxyServerConnection {
+public class VelocityServerConnection implements ProxyServerConnection<Component> {
 	
 	
 	private final @NotNull PortfelVelocityImpl plugin;
@@ -31,7 +32,7 @@ public class VelocityServerConnection implements ProxyServerConnection {
 	}
 
 	@Override
-	public @NotNull ProxyServer getServer() {
+	public @NotNull ProxyServer<Component> getServer() {
 		return new VelocityServer(this.plugin, this.server.getServer());
 	}
 	

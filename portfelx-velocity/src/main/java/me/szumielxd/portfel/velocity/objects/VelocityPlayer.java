@@ -175,7 +175,7 @@ public class VelocityPlayer extends VelocitySender implements ProxyPlayer<Compon
 
 
 	@Override
-	public Optional<ProxyServerConnection> getServer() {
+	public Optional<ProxyServerConnection<Component>> getServer() {
 		return this.player.getCurrentServer().map(srv -> new VelocityServerConnection(this.plugin, srv));
 	}
 

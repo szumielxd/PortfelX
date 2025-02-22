@@ -40,6 +40,6 @@ public interface ProxyPlayer<C> extends CommonPlayer<C>, ProxySender<C>, PluginM
 	 * 
 	 * @return An Optional containing player's actual server, or empty Optional if player isn't actually connected to any server
 	 */
-	public Optional<ProxyServerConnection> getServer();
+	public Optional<ProxyServerConnection<C>> getServer();
 
 }

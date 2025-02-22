@@ -17,8 +17,9 @@ import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import me.szumielxd.portfel.velocity.objects.VelocityPlayer;
 import me.szumielxd.portfel.velocity.objects.VelocityServerConnection;
+import net.kyori.adventure.text.Component;
 
-public class VelocityUserListener extends UserListener {
+public class VelocityUserListener extends UserListener<PortfelVelocityImpl, Component> {
 	
 	
 	public VelocityUserListener(@NotNull PortfelVelocityImpl plugin) {
@@ -30,7 +31,7 @@ public class VelocityUserListener extends UserListener {
 	public void onServerConnect(ServerPostConnectEvent event) {
 		Optional<ServerConnection> srv = event.getPlayer().getCurrentServer();
 		String previousServer = Optional.ofNullable(event.getPreviousServer()).map(s -> s.getServerInfo().getName()).orElse(null);
-		ProxyPlayer player = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), event.getPlayer());
+		ProxyPlayer<Component> player = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), event.getPlayer());
 		this.getPlugin().debug("[%s] Connect: (%s) %s -> %s", "VelocityUserListener", event.getPlayer().getUsername(), previousServer, srv.orElse(null));
 		if (srv.isPresent()) {
 			this.onConnect(player, new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), srv.get()));

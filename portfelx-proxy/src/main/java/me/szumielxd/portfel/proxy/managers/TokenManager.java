@@ -179,7 +179,7 @@ public class TokenManager<C> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		Optional<ProxyServerConnection> srv = player.getServer();
+		Optional<ProxyServerConnection<C>> srv = player.getServer();
 		if (srv.isPresent()) srv.get().sendPluginMessage(Portfel.CHANNEL_TRANSACTIONS, out.toByteArray());
 	}
 	

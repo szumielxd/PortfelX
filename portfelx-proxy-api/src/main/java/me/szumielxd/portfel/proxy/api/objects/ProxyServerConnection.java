@@ -2,10 +2,10 @@ package me.szumielxd.portfel.proxy.api.objects;
 
 import org.jetbrains.annotations.NotNull;
 
-public interface ProxyServerConnection extends PluginMessageTarget {
+public interface ProxyServerConnection<C> extends PluginMessageTarget {
 	
 	
-	public @NotNull ProxyServer getServer();
+	public @NotNull ProxyServer<C> getServer();
 	
 
 }

@@ -10,7 +10,7 @@ import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.connection.Server;
 
-public class BungeeServerConnection implements ProxyServerConnection {
+public class BungeeServerConnection implements ProxyServerConnection<BaseComponent[]> {
 	
 	
 	private final @NotNull PortfelBungeeImpl plugin;

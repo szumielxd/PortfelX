@@ -8,6 +8,7 @@ import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.bungee.objects.BungeeSender;
 import me.szumielxd.portfel.proxy.commands.CommonCommand;
 import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
 
@@ -15,10 +16,10 @@ public class BungeeCommandWrapper extends Command implements TabExecutor {
 	
 	
 	private final @NotNull PortfelBungeeImpl plugin;
-	private final @NotNull CommonCommand command;
+	private final @NotNull CommonCommand<BaseComponent[]> command;
 	
 
-	public BungeeCommandWrapper(@NotNull PortfelBungeeImpl plugin, @NotNull CommonCommand command) {
+	public BungeeCommandWrapper(@NotNull PortfelBungeeImpl plugin, @NotNull CommonCommand<BaseComponent[]> command) {
 		super(command.getName(), command.getPermission(), command.getAliases());
 		this.plugin = Objects.requireNonNull(plugin, "plugin cannot be null");
 		this.command = Objects.requireNonNull(command, "command cannot be null");

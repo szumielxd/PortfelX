@@ -176,7 +176,7 @@ public class BungeePlayer extends BungeeSender implements ProxyPlayer<BaseCompon
 
 
 	@Override
-	public Optional<ProxyServerConnection> getServer() {
+	public Optional<ProxyServerConnection<BaseComponent[]>> getServer() {
 		return Optional.ofNullable(this.player.getServer()).map(srv -> new BungeeServerConnection(this.plugin, srv));
 	}
 

@@ -37,7 +37,7 @@ public class BungeeAccessManagerImpl extends AccessManagerImpl<PortfelBungeeImpl
 	public void onPluginMessageChannel(PluginMessageEvent event) {
 		String tag = event.getTag();
 		if (this.isListendChannel(tag) && event.getSender() instanceof Server server && event.getReceiver() instanceof ProxiedPlayer player) {
-			ProxyServerConnection sender = new BungeeServerConnection(getPlugin(), server);
+			ProxyServerConnection<BaseComponent[]> sender = new BungeeServerConnection(getPlugin(), server);
 			BungeePlayer target = new BungeePlayer(getPlugin(), player);
 			Optional<Boolean> result = this.onPluginMessage(sender, target, tag, event.getData());
 			if (result.isPresent()) {

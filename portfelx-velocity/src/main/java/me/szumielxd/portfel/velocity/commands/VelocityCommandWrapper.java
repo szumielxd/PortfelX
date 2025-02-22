@@ -10,15 +10,16 @@ import com.velocitypowered.api.command.SimpleCommand;
 import me.szumielxd.portfel.proxy.commands.CommonCommand;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import me.szumielxd.portfel.velocity.objects.VelocitySender;
+import net.kyori.adventure.text.Component;
 
 public class VelocityCommandWrapper implements SimpleCommand {
 	
 	
 	private final @NotNull PortfelVelocityImpl plugin;
-	private final @NotNull CommonCommand command;
+	private final @NotNull CommonCommand<Component> command;
 	
 	
-	public VelocityCommandWrapper(@NotNull PortfelVelocityImpl plugin, @NotNull CommonCommand command) {
+	public VelocityCommandWrapper(@NotNull PortfelVelocityImpl plugin, @NotNull CommonCommand<Component> command) {
 		this.plugin = Objects.requireNonNull(plugin, "plugin cannot be null");
 		this.command = Objects.requireNonNull(command, "command cannot be null");
 	}

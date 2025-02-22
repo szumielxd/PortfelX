@@ -43,7 +43,7 @@ public class VelocityAccessManagerImpl extends AccessManagerImpl<PortfelVelocity
 			if (event.getSource() instanceof ServerConnection && event.getTarget() instanceof Player) {
 				ServerConnection server = (ServerConnection) event.getSource();
 				Player player = (Player) event.getTarget();
-				ProxyServerConnection sender = new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), server);
+				ProxyServerConnection<Component> sender = new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), server);
 				ProxyPlayer<Component> target = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), player);
 				Optional<Boolean> result = this.onPluginMessage(sender, target, tag, event.getData());
 				if (result.isPresent()) {

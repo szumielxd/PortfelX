@@ -33,8 +33,8 @@ public class VelocityChannelListener extends ChannelListener<PortfelVelocityImpl
 			if (event.getSource() instanceof ServerConnection && event.getTarget() instanceof Player) {
 				ServerConnection server = (ServerConnection) event.getSource();
 				Player player = (Player) event.getTarget();
-				ProxyServerConnection sender = new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), server);
-				ProxyPlayer target = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), player);
+				ProxyServerConnection<Component> sender = new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), server);
+				ProxyPlayer<Component> target = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), player);
 				Optional<Boolean> result = this.onPluginMessage(sender, target, tag, event.getData());
 				if (result.isPresent()) {
 					event.setResult(result.get() ? ForwardResult.handled() : ForwardResult.forward());
