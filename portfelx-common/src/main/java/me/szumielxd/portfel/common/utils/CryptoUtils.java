@@ -116,11 +116,11 @@ public class CryptoUtils {
 	 * @param key key used for encoding
 	 * @param passes amount of operation passes
 	 * @return ready to read decoded array
-	 * @throws IllegalArgumentException when the array cannot be properly decoded using given key
+	 * @throws DecryptionException when the array cannot be properly decoded using given key
 	 */
-	public static byte[] fullDecode(byte[] bytes, String key, int passes) throws IllegalArgumentException {
+	public static byte[] fullDecode(byte[] bytes, String key, int passes) throws DecryptionException {
 		bytes = decode(bytes, key, passes);
-		if (bytes.length < 4 || bytes[0] != 0x00 || bytes[1] != 0x00 || bytes[2] != 0x00 || bytes[3] != 0x00) throw new IllegalArgumentException("This isn't valid byte array or key");
+		if (bytes.length < 4 || bytes[0] != 0x00 || bytes[1] != 0x00 || bytes[2] != 0x00 || bytes[3] != 0x00) throw new DecryptionException("This isn't valid byte array or key");
 		return Arrays.copyOfRange(bytes, 4, bytes.length);
 	}
 	
@@ -130,9 +130,9 @@ public class CryptoUtils {
 	 * @param bytes bytes to full decode
 	 * @param key key used for encoding
 	 * @return ready to read decoded array
-	 * @throws IllegalArgumentException when the array cannot be properly decoded using given key
+	 * @throws DecryptionException when the array cannot be properly decoded using given key
 	 */
-	public static byte[] fullDecode(byte[] bytes, String key) throws IllegalArgumentException {
+	public static byte[] fullDecode(byte[] bytes, String key) throws DecryptionException {
 		return fullDecode(bytes, key, PASSES_COUNT);
 	}
 	
@@ -169,9 +169,9 @@ public class CryptoUtils {
 	 * @param key key used for encoding
 	 * @param passes amount of operation passes
 	 * @return ready to read decoded array
-	 * @throws IllegalArgumentException when the array cannot be properly decoded using given key
+	 * @throws DecryptionException when the array cannot be properly decoded using given key
 	 */
-	public static byte[] decodeBytesFromInput(ByteArrayDataInput in, String key, int passes) throws IllegalArgumentException {
+	public static byte[] decodeBytesFromInput(ByteArrayDataInput in, String key, int passes) throws DecryptionException {
 		byte[] bytes = new byte[in.readShort()];
 		in.readFully(bytes);
 		bytes = fullDecode(bytes, key, passes);
@@ -184,10 +184,21 @@ public class CryptoUtils {
 	 * @param in input to get bytes from
 	 * @param key key used for encoding
 	 * @return ready to read decoded array
-	 * @throws IllegalArgumentException when the array cannot be properly decoded using given key
+	 * @throws DecryptionException when the array cannot be properly decoded using given key
 	 */
-	public static byte[] decodeBytesFromInput(ByteArrayDataInput in, String key) throws IllegalArgumentException {
+	public static byte[] decodeBytesFromInput(ByteArrayDataInput in, String key) throws DecryptionException {
 		return decodeBytesFromInput(in, key, PASSES_COUNT);
+	}
+	
+	
+	public static class DecryptionException extends IllegalArgumentException {
+
+		public DecryptionException(String string) {
+			super(string);
+		}
+
+		private static final long serialVersionUID = -1693054154064001868L;
+		
 	}
 	
 
