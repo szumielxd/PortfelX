@@ -3,6 +3,8 @@ package me.szumielxd.portfel.common.communication.coders;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -59,6 +61,10 @@ public abstract class MessageEntryCoder<T> {
 			MessageEntryCoder::decodeEnum,
 			MessageEntryCoder::encodeEnum,
 			Class::isEnum);
+	protected static final MessageEntryCoderCreator<EncryptedObject<?>> CRYPTO = new MessageEntryCoderCreator<>(
+			MessageEntryCoder::decodeCrypto,
+			MessageEntryCoder::encodeCrypto,
+			MessageEntryCoder::validateCrypto);
 	
 	
 	public abstract @NotNull T decode(@NotNull ByteArrayDataInput in);
@@ -73,7 +79,9 @@ public abstract class MessageEntryCoder<T> {
 		return (byte)(b - 128);
 	}
 	
-	private static <T extends Enum<?>> T decodeEnum(@NotNull ByteArrayDataInput in, Class<T> clazz) {
+	@SuppressWarnings("unchecked")
+	private static <T extends Enum<?>> T decodeEnum(@NotNull ByteArrayDataInput in, Type type) {
+		Class<T> clazz = (Class<T>) type;
 		try {
 			String name = ASCII.decoder.apply(in, String.class).toUpperCase();
 			for (var e : clazz.getEnumConstants()) {
@@ -91,6 +99,28 @@ public abstract class MessageEntryCoder<T> {
 		ASCII.encoder.accept(out, e.name());
 	}
 	
+	private static boolean validateCrypto(@NotNull Class<?> clazz) {
+		try {
+			clazz.getConstructor();
+			return Stream.of(clazz.getDeclaredFields())
+					.map(MessageEntryCoder::checkIfApplicable)
+					.allMatch(Optional::isPresent);
+		} catch (NoSuchMethodException | SecurityException e1) {
+			return false;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static <T> EncryptedObject<T> decodeCrypto(@NotNull ByteArrayDataInput in, Type type) {
+		var paramType = (ParameterizedType) type;
+		var genericType = (Class<T>) paramType.getActualTypeArguments()[0];
+		return EncryptedObject.readFromBytes(in, genericType);
+	}
+	
+	private static <T> void encodeCrypto(@NotNull ByteArrayDataOutput out, EncryptedObject<T> e) {
+		e.writeBytes(out);
+	}
+	
 	private static boolean validateObject(@NotNull Class<?> clazz) {
 		try {
 			clazz.getConstructor();
@@ -102,14 +132,16 @@ public abstract class MessageEntryCoder<T> {
 		}
 	}
 	
-	private static <T> T decodeObject(@NotNull ByteArrayDataInput in, Class<? extends T> clazz) {
+	@SuppressWarnings("unchecked")
+	private static <T> T decodeObject(@NotNull ByteArrayDataInput in, Type type) {
+		Class<? extends T> clazz = (Class<? extends T>) type;
 		try {
 			T obj = clazz.getDeclaredConstructor().newInstance();
 			for (var field : clazz.getDeclaredFields()) {
 				var entryMeta = checkIfApplicable(field);
 				if (entryMeta.isPresent()) {
 					field.setAccessible(true);
-					field.set(obj, readFieldValue(in, entryMeta.get(), field.getType()));
+					field.set(obj, readFieldValue(in, entryMeta.get(), field.getGenericType()));
 					
 				}
 			}
@@ -133,8 +165,8 @@ public abstract class MessageEntryCoder<T> {
 		}
 	}
 	
-	private static Object readFieldValue(@NotNull ByteArrayDataInput in, @NotNull MessageEntryCoder<?> coder, Class<?> clazz) {
-		if (clazz.isArray()) {
+	private static Object readFieldValue(@NotNull ByteArrayDataInput in, @NotNull MessageEntryCoder<?> coder, Type type) {
+		if (type instanceof Class<?> clazz && clazz.isArray()) {
 			int size = in.readInt();
 			Object arr = Array.newInstance(clazz.componentType(), size);
 			for (int i = 0; i < size; i++) {
@@ -177,7 +209,7 @@ public abstract class MessageEntryCoder<T> {
 	@RequiredArgsConstructor
 	protected static class MessageEntryCoderCreator<T> {
 		
-		private final @NotNull BiFunction<@NotNull ByteArrayDataInput, Class<? extends T>, @NotNull T> decoder;
+		private final @NotNull BiFunction<@NotNull ByteArrayDataInput, Type, @NotNull T> decoder;
 		private final @NotNull BiConsumer<@NotNull ByteArrayDataOutput, @NotNull T> encoder;
 		private final @NotNull Predicate<Class<?>> typeValidator;
 		

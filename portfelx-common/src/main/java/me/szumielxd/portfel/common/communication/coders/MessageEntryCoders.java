@@ -15,7 +15,8 @@ public enum MessageEntryCoders {
 	UTF(MessageEntryCoder.UTF),
 	UUID(MessageEntryCoder.UUID),
 	OBJECT(MessageEntryCoder.OBJECT_FETCHER),
-	ENUM(MessageEntryCoder.ENUM);
+	ENUM(MessageEntryCoder.ENUM),
+	CRYPTO(MessageEntryCoder.CRYPTO);
 	
 	private final @NotNull MessageEntryCoderCreator<?> coderCreator;
 	

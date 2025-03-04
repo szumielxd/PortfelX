@@ -8,35 +8,17 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 
+import lombok.experimental.UtilityClass;
+
+
+@UtilityClass
 public class PacketCoder {
 	
 	
-	public PacketCoder() {
-		/*try {
-			Map<String, Class<? extends MessagePacket>> messages = new HashMap<>();
-			ClassLoader loader = getClass().getClassLoader();
-			ClassPath.from(loader).getTopLevelClasses(getClass().getPackageName() + ".messages")
-					.stream()
-					.map(ClassInfo::load)
-					.filter(clazz -> !Modifier.isAbstract(clazz.getModifiers()))
-					.filter(MessagePacket.class::isAssignableFrom)
-					.filter(clazz -> clazz.isAnnotationPresent(IdentifiedMessage.class))
-					.forEach(clazz -> {
-							IdentifiedMessage msg = clazz.getAnnotation(IdentifiedMessage.class);
-							if (messages.containsKey(msg.value())) {
-								throw new IllegalStateException("Cannot register packet message %s, because subchannel with name `%s` is already used".formatted(clazz, msg.value()));
-							}
-							messages.put(msg.value(), clazz.asSubclass(MessagePacket.class));
-					});
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}*/
-	}
-	
-	
 	@SuppressWarnings("unchecked")
-	public static <T extends MessagePacket> Optional<T> decode(@NotNull ByteArrayDataInput in, @NotNull Class<T> messageClass) {
+	public <T extends MessagePacket> Optional<T> decode(@NotNull ByteArrayDataInput in, @NotNull Class<T> messageClass) {
 		IdentifiedMessage msgMeta = messageClass.getAnnotation(IdentifiedMessage.class);
 		if (msgMeta == null) {
 			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
@@ -45,7 +27,7 @@ public class PacketCoder {
 				.map(c -> (T) c.decode(in));
 	}
 	
-	public static void encode(@NotNull ByteArrayDataOutput out, @NotNull MessagePacket message) {
+	public void encode(@NotNull ByteArrayDataOutput out, @NotNull MessagePacket message) {
 		IdentifiedMessage msgMeta = message.getClass().getAnnotation(IdentifiedMessage.class);
 		if (msgMeta == null) {
 			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
@@ -54,8 +36,19 @@ public class PacketCoder {
 				.ifPresent(c -> c.encode(out, message));
 	}
 	
+	public byte[] encodePacket(@NotNull MessagePacket message) {
+		IdentifiedMessage msgMeta = message.getClass().getAnnotation(IdentifiedMessage.class);
+		if (msgMeta == null) {
+			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
+		}
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF(msgMeta.value());
+		encode(out, message);
+		return out.toByteArray();
+	}
 	
-	private static @Nullable MessageEntry checkIfApplicable(@NotNull Field field) {
+	
+	private @Nullable MessageEntry checkIfApplicable(@NotNull Field field) {
 		var entryMeta = field.getAnnotation(MessageEntry.class);
 		if (entryMeta != null) {
 			var entryType = field.getType();

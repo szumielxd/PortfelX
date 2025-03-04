@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.common.communication.coders.messages;
+package me.szumielxd.portfel.common.communication.coders.messages.info;
 
 import org.jetbrains.annotations.NotNull;
 
