@@ -7,6 +7,7 @@ public enum TransactionStatus {
 	
 	OK("Ok"),
 	ERROR("Error"),
+	NOT_LOADED("NotLoaded"),
 	;
 	
 	
