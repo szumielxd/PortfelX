@@ -24,7 +24,7 @@ public interface AccessManager {
 	 * @param order name of order (case-insensitive)
 	 * @return true if server can access this order, otherwise false
 	 */
-	public boolean canAccess(@NotNull UUID serverId, String order);
+	public boolean canAccess(@NotNull UUID serverId, @NotNull String order);
 	
 	/**
 	 * Get serverId by short-name.
@@ -91,6 +91,13 @@ public interface AccessManager {
 	 * 
 	 * @return map of server names and IDs
 	 */
-	public Map<UUID, String> getServerNames();
+	public @NotNull Map<UUID, String> getServerNames();
+	
+	/**
+	 * Get display name of given server.
+	 * 
+	 * @return string display name
+	 */
+	public @Nullable String getServerName(@NotNull UUID serverId);
 
 }

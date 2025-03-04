@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.jetbrains.annotations.NotNull;
@@ -72,9 +74,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 				Files.createDirectories(this.file.getParent());
 			}
 			if (!Files.exists(this.file)) {
-				Files.createFile(this.file);
-				this.accessMap = new JsonObject();
-				Files.write(this.file, GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));
+				save();
 				return this;
 			}
 		} catch (JsonSyntaxException | JsonIOException | IOException e) {
@@ -85,8 +85,8 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 			}
 			e.printStackTrace();
 		}
-		try {
-			this.accessMap = GSON.fromJson(Files.newBufferedReader(this.file), JsonObject.class);
+		try (var br = Files.newBufferedReader(this.file)) {
+			this.accessMap = GSON.fromJson(br, JsonObject.class);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -118,7 +118,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 * @return true if server can access this order, otherwise false
 	 */
 	@Override
-	public final boolean canAccess(@NotNull UUID serverId, String order) {
+	public final boolean canAccess(@NotNull UUID serverId, @NotNull String order) {
 		if (!canAccess(serverId)) {
 			return false;
 		}
@@ -261,10 +261,25 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 * @return map of server names and IDs
 	 */
 	@Override
-	public final Map<UUID, String> getServerNames() {
-		Map<UUID, String> serverNames = new HashMap<>();
-		this.accessMap.entrySet().forEach(e -> serverNames.put(UUID.fromString(e.getKey()), e.getValue().getAsJsonObject().get("display").getAsString()));
-		return serverNames;
+	public final @NotNull Map<UUID, String> getServerNames() {
+		return this.accessMap.entrySet().stream()
+				.collect(Collectors.toMap(
+						e -> UUID.fromString(e.getKey()),
+						e -> e.getValue().getAsJsonObject().get("display").getAsString()));
+	}
+	
+	/**
+	 * Get display name of given server.
+	 * 
+	 * @return string display name
+	 */
+	@Override
+	public final @Nullable String getServerName(@NotNull UUID serverId) {
+		if (this.canAccess(serverId)) {
+			JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
+			return obj.get("display").getAsString();
+		}
+		return null;
 	}
 	
 	/**
@@ -272,8 +287,12 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 */
 	private final void save() {
 		try {
-			if (!Files.exists(this.file.getParent())) Files.createDirectories(this.file.getParent());
-			Files.write(this.file, GSON.toJson(this.accessMap).getBytes(StandardCharsets.UTF_8));
+			if (!Files.exists(this.file.getParent())) {
+				Files.createDirectories(this.file.getParent());
+			}
+			try (var bw = Files.newBufferedWriter(file, StandardCharsets.UTF_8, StandardOpenOption.CREATE)) {
+				GSON.toJson(accessMap, bw);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
