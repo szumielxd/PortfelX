@@ -1,7 +1,6 @@
 package me.szumielxd.portfel.proxy.commands.user.eco;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -36,22 +35,19 @@ public class EcoSetCommand<C> extends SimpleCommand<C> {
 			Long amount = (Long) parsed.parsedStaticArg(0);
 			String reason = (String) parsed.parsedStaticArg(1);
 			User user = (User) parsedContext.parsedStaticArg(0);
-			CompletableFuture<Exception> future = user.setBalance(amount, ProxyActionExecutor.sender(sender), "Proxy", reason);
-			try {
-				Exception ex = future.get();
-				if (ex != null) {
-					throw ex;
+			user.setBalance(amount, ProxyActionExecutor.sender(sender), "Proxy", reason).whenComplete((res, ex) -> {
+				if (ex == null) {
+					ProxyLangKey.COMMAND_USER_ECO_SET_SUCCESS
+							.draft(
+									user.getName(),
+									MainLangKey.MAIN_CURRENCY_FORMAT.draft(amount))
+							.sendPrefixed(sender);
+				} else {
+					MainLangKey.ERROR_COMMAND_EXECUTION.draft()
+							.sendPrefixed(sender);
+					getPlugin().logger().severe(ex, "An error occurred while executing eco set command");
 				}
-				ProxyLangKey.COMMAND_USER_ECO_SET_SUCCESS
-						.draft(
-								user.getName(),
-								MainLangKey.MAIN_CURRENCY_FORMAT.draft(amount))
-						.sendPrefixed(sender);
-			} catch (Exception e) {
-				MainLangKey.ERROR_COMMAND_EXECUTION.draft()
-						.sendPrefixed(sender);
-				getPlugin().logger().severe(e, "Ann error occurred while executing eco set command");
-			}
+			});
 		});
 	}
 

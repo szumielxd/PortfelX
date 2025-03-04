@@ -1,7 +1,6 @@
 package me.szumielxd.portfel.proxy.commands.user.eco;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -41,22 +40,19 @@ public class EcoTakeCommand<C> extends SimpleCommand<C> {
 						.sendPrefixed(sender);
 				return;
 			}
-			CompletableFuture<Exception> future = user.takeBalance(amount, ProxyActionExecutor.sender(sender), "Proxy", reason);
-			try {
-				Exception ex = future.get();
-				if (ex != null) {
-					throw ex;
+			user.takeBalance(amount, ProxyActionExecutor.sender(sender), "Proxy", reason).whenComplete((res, ex) -> {
+				if (ex == null) {
+					ProxyLangKey.COMMAND_USER_ECO_TAKE_SUCCESS
+							.draft(
+									user.getName(),
+									MainLangKey.MAIN_CURRENCY_FORMAT.draft(amount))
+							.sendPrefixed(sender);
+				} else {
+					MainLangKey.ERROR_COMMAND_EXECUTION.draft()
+							.sendPrefixed(sender);
+					getPlugin().logger().severe(ex, "An error occurred while executing eco take command");
 				}
-				ProxyLangKey.COMMAND_USER_ECO_TAKE_SUCCESS
-						.draft(
-								user.getName(),
-								MainLangKey.MAIN_CURRENCY_FORMAT.draft(amount))
-						.sendPrefixed(sender);
-			} catch (Exception e) {
-				MainLangKey.ERROR_COMMAND_EXECUTION.draft()
-						.sendPrefixed(sender);
-				getPlugin().logger().severe(e, "Ann error occurred while executing eco take command");
-			}
+			});
 		});
 	}
 

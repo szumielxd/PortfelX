@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import lombok.Getter;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.common.utils.ExceptionalRunnable;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 
 public class ProxyOperableUser extends User {
@@ -47,18 +48,15 @@ public class ProxyOperableUser extends User {
 	 * @throws IllegalArgumentException when given amount is smaller than 0
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (this.balance < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDatabase().updateUsers(this);
-				this.plugin.getTransactionLogger().logBalanceAdd(this, executor, server, orderName, amount);
-				this.plugin.getDatabase().addBalance(this, amount);
-			} catch (Exception e) {
-				return e;
+	public @NotNull CompletableFuture<Void> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+		return ExceptionalRunnable.runAsync(() -> {
+			if (this.balance < 0) {
+				throw new IllegalArgumentException("amount cannot be lower than 0");
 			}
+			this.plugin.getDatabase().updateUsers(this);
+			this.plugin.getTransactionLogger().logBalanceAdd(this, executor, server, orderName, amount);
+			this.plugin.getDatabase().addBalance(this, amount);
 			super.addBalance(amount, executor, server, orderName);
-			return null;
 		});
 	}
 	
@@ -73,19 +71,18 @@ public class ProxyOperableUser extends User {
 	 * @throws IllegalArgumentException when given amount is smaller than 0
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> takeBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (amount < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
-		if (this.balance - amount < 0) throw new IllegalArgumentException("balance cannot be lower than 0");
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDatabase().updateUsers(this);
-				this.plugin.getTransactionLogger().logBalanceTake(this, executor, server, orderName, amount);
-				this.plugin.getDatabase().takeBalance(this, amount);
-			} catch (Exception e) {
-				return e;
+	public @NotNull CompletableFuture<Void> takeBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+		return ExceptionalRunnable.runAsync(() -> {
+			if (amount < 0) {
+				throw new IllegalArgumentException("amount cannot be lower than 0");
 			}
+			if (this.balance - amount < 0) {
+				throw new IllegalArgumentException("balance cannot be lower than 0");
+			}
+			this.plugin.getDatabase().updateUsers(this);
+			this.plugin.getTransactionLogger().logBalanceTake(this, executor, server, orderName, amount);
+			this.plugin.getDatabase().takeBalance(this, amount);
 			super.takeBalance(amount, executor, server, orderName);
-			return null;
 		});
 	}
 	
@@ -100,18 +97,15 @@ public class ProxyOperableUser extends User {
 	 * @throws IllegalArgumentException when newBalance is smaller than 0
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> setBalance(long newBalance, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (newBalance < 0) throw new IllegalArgumentException("newBalance cannot be lower than 0");
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDatabase().updateUsers(this);
-				this.plugin.getTransactionLogger().logBalanceSet(this, executor, server, orderName, newBalance);
-				this.plugin.getDatabase().setBalance(this, newBalance);
-			} catch (Exception e) {
-				return e;
+	public @NotNull CompletableFuture<Void> setBalance(long newBalance, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+		return ExceptionalRunnable.runAsync(() -> {
+			if (newBalance < 0) {
+				throw new IllegalArgumentException("newBalance cannot be lower than 0");
 			}
+			this.plugin.getDatabase().updateUsers(this);
+			this.plugin.getTransactionLogger().logBalanceSet(this, executor, server, orderName, newBalance);
+			this.plugin.getDatabase().setBalance(this, newBalance);
 			super.setBalance(newBalance, executor, server, orderName);
-			return null;
 		});
 	}
 	
@@ -178,10 +172,10 @@ public class ProxyOperableUser extends User {
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
 	@Override
-	public @NotNull CompletableFuture<Boolean> giveMinorBalance(long amount) {
+	public @NotNull CompletableFuture<Void> giveMinorBalance(long amount) {
 		this.minorBalance += amount;
 		this.minorBalanceChanged = true;
-		return CompletableFuture.completedFuture(true);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	/**
@@ -191,11 +185,13 @@ public class ProxyOperableUser extends User {
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
 	@Override
-	public @NotNull CompletableFuture<Boolean> takeMinorBalance(long amount) {
-		if (this.minorBalance < amount) throw new IllegalArgumentException("`amount` cannot be bigger than minor balance");
+	public @NotNull CompletableFuture<Void> takeMinorBalance(long amount) {
+		if (this.minorBalance < amount) {
+			return CompletableFuture.failedFuture(new IllegalArgumentException("`amount` cannot be bigger than minor balance"));
+		}
 		this.minorBalance -= amount;
 		this.minorBalanceChanged = true;
-		return CompletableFuture.completedFuture(true);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	/**
@@ -205,10 +201,10 @@ public class ProxyOperableUser extends User {
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
 	@Override
-	public @NotNull CompletableFuture<Boolean> setMinorBalance(long amount) {
+	public @NotNull CompletableFuture<Void> setMinorBalance(long amount) {
 		this.minorBalance = amount;
 		this.minorBalanceChanged = true;
-		return CompletableFuture.completedFuture(true);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	/**
@@ -218,15 +214,10 @@ public class ProxyOperableUser extends User {
 	 * @return A future that will be completed with possible error that occurred during changing inTop flag
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> setDeniedInTop(boolean inTop) {
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDatabase().setDeniedInTop(this, inTop);
-				super.setDeniedInTop(inTop);
-				return null;
-			} catch (Exception e) {
-				return e;
-			}
+	public @NotNull CompletableFuture<Void> setDeniedInTop(boolean inTop) {
+		return ExceptionalRunnable.runAsync(() -> {
+			this.plugin.getDatabase().setDeniedInTop(this, inTop);
+			super.setDeniedInTop(inTop);
 		});
 	}
 
@@ -236,15 +227,10 @@ public class ProxyOperableUser extends User {
 	 * @return A future that will be completed with possible error that occurred during update
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> update() {
+	public @NotNull CompletableFuture<Void> update() {
 		this.bumpLastUpdate();
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				this.plugin.getDatabase().updateUsers(this);
-				return null;
-			} catch (Exception e) {
-				return e;
-			}
+		return ExceptionalRunnable.runAsync(() -> {
+			this.plugin.getDatabase().updateUsers(this);
 		});
 	}
 	

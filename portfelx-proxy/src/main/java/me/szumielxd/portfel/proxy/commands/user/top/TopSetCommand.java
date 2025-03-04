@@ -1,7 +1,6 @@
 package me.szumielxd.portfel.proxy.commands.user.top;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -39,20 +38,18 @@ public class TopSetCommand<C> extends SimpleCommand<C> {
 						.draft(user.getName(), allowed)
 						.sendPrefixed(sender);
 				return;
-			}
-			CompletableFuture<Exception> future = user.setDeniedInTop(!allowed);
-			try {
-				Exception ex = future.get();
-				if (ex != null) {
-					throw ex;
-				}
-				ProxyLangKey.COMMAND_USER_TOP_SET_SUCCESS
-						.draft(user.getName(), allowed)
-						.sendPrefixed(sender);
-			} catch (Exception e) {
-				MainLangKey.ERROR_COMMAND_EXECUTION.draft()
-						.sendPrefixed(sender);
-				getPlugin().logger().severe(e, "Ann error occurred while executing top info command");
+			} else {
+				user.setDeniedInTop(!allowed).whenComplete((res, ex) -> {
+					if (ex == null) {
+						ProxyLangKey.COMMAND_USER_TOP_SET_SUCCESS
+								.draft(user.getName(), allowed)
+								.sendPrefixed(sender);
+					} else {
+						MainLangKey.ERROR_COMMAND_EXECUTION.draft()
+								.sendPrefixed(sender);
+						getPlugin().logger().severe(ex, "An error occurred while executing top info command");
+					}
+				});
 			}
 		});
 	}

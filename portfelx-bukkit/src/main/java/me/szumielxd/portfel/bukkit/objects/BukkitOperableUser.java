@@ -10,6 +10,7 @@ import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager.BalanceUpdateResult;
+import me.szumielxd.portfel.common.utils.ExceptionalRunnable;
 
 public class BukkitOperableUser extends User {
 	
@@ -46,7 +47,7 @@ public class BukkitOperableUser extends User {
 	 * @throws IllegalArgumentException when given amount is smaller than 0
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+	public @NotNull CompletableFuture<Void> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
 		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
 	}
 	
@@ -62,7 +63,7 @@ public class BukkitOperableUser extends User {
 	 * @throws IllegalArgumentException when given amount is smaller than 0
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> takeBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+	public @NotNull CompletableFuture<Void> takeBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
 		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
 	}
 	
@@ -78,7 +79,7 @@ public class BukkitOperableUser extends User {
 	 * @throws IllegalArgumentException when newBalance is smaller than 0
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> setBalance(long newBalance, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+	public @NotNull CompletableFuture<Void> setBalance(long newBalance, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
 		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
 	}
 	
@@ -168,16 +169,11 @@ public class BukkitOperableUser extends User {
 	 * @param amount amount of balance to give
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
-	public @NotNull CompletableFuture<Boolean> giveMinorBalance(long amount) {
-		return CompletableFuture.supplyAsync(() -> {
+	public @NotNull CompletableFuture<Void> giveMinorBalance(long amount) {
+		return ExceptionalRunnable.runAsync(() -> {
 			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
-			try {
-				BalanceUpdateResult result = this.plugin.getChannelManager().requestGiveMinorBalance(player, amount);
-				this.minorBalance = result.getNewBalance();
-				return result.isSuccess();
-			} catch (Exception e) {
-				return false;	
-			}
+			BalanceUpdateResult result = this.plugin.getChannelManager().requestGiveMinorBalance(player, amount);
+			this.minorBalance = result.getNewBalance();
 		});
 	}
 	
@@ -187,17 +183,14 @@ public class BukkitOperableUser extends User {
 	 * @param amount amount of balance to take
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
-	public @NotNull CompletableFuture<Boolean> takeMinorBalance(long amount) {
-		if (this.minorBalance < amount) throw new IllegalArgumentException("`amount` cannot be smaller than user's current minor balance");
-		return CompletableFuture.supplyAsync(() -> {
-			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
-			try {
-				BalanceUpdateResult result = this.plugin.getChannelManager().requestTakeMinorBalance(player, amount);
-				this.minorBalance = result.getNewBalance();
-				return result.isSuccess();
-			} catch (Exception e) {
-				return false;	
+	public @NotNull CompletableFuture<Void> takeMinorBalance(long amount) {
+		return ExceptionalRunnable.runAsync(() -> {
+			if (this.minorBalance < amount) {
+				throw new IllegalArgumentException("`amount` cannot be smaller than user's current minor balance");
 			}
+			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
+			BalanceUpdateResult result = this.plugin.getChannelManager().requestTakeMinorBalance(player, amount);
+			this.minorBalance = result.getNewBalance();
 		});
 	}
 	
@@ -207,8 +200,8 @@ public class BukkitOperableUser extends User {
 	 * @param amount amount of balance to set
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
-	public @NotNull CompletableFuture<Boolean> setMinorBalance(long amount) {
-		return CompletableFuture.completedFuture(false); // client instance cannot set minor balance
+	public @NotNull CompletableFuture<Void> setMinorBalance(long amount) {
+		throw new UnsupportedOperationException("Client instance cannot set minor balance");
 	}
 	
 	/**
@@ -219,7 +212,7 @@ public class BukkitOperableUser extends User {
 	 * @return A future that will be completed with possible error that occurred during changing inTop flag
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> setDeniedInTop(boolean inTop) {
+	public @NotNull CompletableFuture<Void> setDeniedInTop(boolean inTop) {
 		throw new UnsupportedOperationException("Bukkit instance cannot modify user's top by itself.");
 	}
 
@@ -229,16 +222,11 @@ public class BukkitOperableUser extends User {
 	 * @return A future that will be completed with possible error that occurred during update
 	 */
 	@Override
-	public @NotNull CompletableFuture<Exception> update() {
+	public @NotNull CompletableFuture<Void> update() {
 		this.bumpLastUpdate();
-		return CompletableFuture.supplyAsync(() -> {
-			try {
-				Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
-				this.plugin.getChannelManager().requestPlayer(player);
-				return null;
-			} catch (Exception e) {
-				return e;
-			}
+		return ExceptionalRunnable.runAsync(() -> {
+			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
+			this.plugin.getChannelManager().requestPlayer(player);
 		});
 	}
 

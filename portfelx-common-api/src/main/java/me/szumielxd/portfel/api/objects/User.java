@@ -48,13 +48,14 @@ public abstract class User {
 	 * @param server server where action was triggered
 	 * @param orderName description of this action
 	 * @return A future that will be completed with possible error that occurred during balance change
-	 * @throws IllegalArgumentException when given amount is smaller than 0
 	 */
-	public @NotNull CompletableFuture<Exception> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (balance < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
+	public @NotNull CompletableFuture<Void> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+		if (amount < 0) {
+			return CompletableFuture.failedFuture(new IllegalArgumentException("amount cannot be lower than 0"));
+		}
 		this.balance += amount;
 		this.bumpLastUpdate();
-		return CompletableFuture.completedFuture((Exception)null);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	/**
@@ -65,14 +66,17 @@ public abstract class User {
 	 * @param server server where action was triggered
 	 * @param orderName description of this action
 	 * @return A future that will be completed with possible error that occurred during balance change
-	 * @throws IllegalArgumentException when given amount is smaller than 0
 	 */
-	public @NotNull CompletableFuture<Exception> takeBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (amount < 0) throw new IllegalArgumentException("amount cannot be lower than 0");
-		if (this.balance - amount < 0) throw new IllegalArgumentException("balance cannot be lower than 0");
+	public @NotNull CompletableFuture<Void> takeBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+		if (amount < 0) {
+			return CompletableFuture.failedFuture(new IllegalArgumentException("amount cannot be lower than 0"));
+		}
+		if (this.balance - amount < 0) {
+			return CompletableFuture.failedFuture(new IllegalArgumentException("balance cannot be lower than 0"));
+		}
 		this.balance -= amount;
 		this.bumpLastUpdate();
-		return CompletableFuture.completedFuture((Exception)null);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	/**
@@ -83,13 +87,14 @@ public abstract class User {
 	 * @param server server where action was triggered
 	 * @param orderName description of this action
 	 * @return A future that will be completed with possible error that occurred during balance change
-	 * @throws IllegalArgumentException when newBalance is smaller than 0
 	 */
-	public @NotNull CompletableFuture<Exception> setBalance(long newBalance, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		if (newBalance < 0) throw new IllegalArgumentException("newBalance cannot be lower than 0");
+	public @NotNull CompletableFuture<Void> setBalance(long newBalance, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
+		if (newBalance < 0) {
+			return CompletableFuture.failedFuture(new IllegalArgumentException("newBalance cannot be lower than 0"));
+		}
 		this.balance = newBalance;
 		this.bumpLastUpdate();
-		return CompletableFuture.completedFuture((Exception)null);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	/**
@@ -177,25 +182,25 @@ public abstract class User {
 	 * Give minor balance to user.
 	 * 
 	 * @param amount amount of balance to give
-	 * @return A future that will be completed with true if succeeded, otherwise false
+	 * @return A future that will be completed with possible error that occurred during balance change
 	 */
-	public abstract @NotNull CompletableFuture<Boolean> giveMinorBalance(long amount);
+	public abstract @NotNull CompletableFuture<Void> giveMinorBalance(long amount);
 	
 	/**
 	 * Take minor balance from user.
 	 * 
 	 * @param amount amount of balance to take
-	 * @return A future that will be completed with true if succeeded, otherwise false
+	 * @return A future that will be completed with possible error that occurred during balance change
 	 */
-	public abstract @NotNull CompletableFuture<Boolean> takeMinorBalance(long amount);
+	public abstract @NotNull CompletableFuture<Void> takeMinorBalance(long amount);
 	
 	/**
 	 * Set minor balance of user.
 	 * 
 	 * @param amount amount of balance to set
-	 * @return A future that will be completed with true if succeeded, otherwise false
+	 * @return A future that will be completed with possible error that occurred during balance change
 	 */
-	public abstract @NotNull CompletableFuture<Boolean> setMinorBalance(long amount);
+	public abstract @NotNull CompletableFuture<Void> setMinorBalance(long amount);
 	
 	/**
 	 * Set whether user should be visible in top balance.
@@ -203,10 +208,10 @@ public abstract class User {
 	 * @param inTop set to true to allow this user in top
 	 * @return A future that will be completed with possible error that occurred during changing inTop flag
 	 */
-	public @NotNull CompletableFuture<Exception> setDeniedInTop(boolean deniedInTop) {
+	public @NotNull CompletableFuture<Void> setDeniedInTop(boolean deniedInTop) {
 		this.deniedInTop = deniedInTop;
 		this.bumpLastUpdate();
-		return CompletableFuture.completedFuture((Exception)null);
+		return CompletableFuture.completedFuture(null);
 	}
 	
 	/**
@@ -214,7 +219,7 @@ public abstract class User {
 	 * 
 	 * @return A future that will be completed with possible error that occurred during update
 	 */
-	public abstract @NotNull CompletableFuture<Exception> update();
+	public abstract @NotNull CompletableFuture<Void> update();
 	
 	protected void bumpLastUpdate() {
 		this.lastUpdated = System.currentTimeMillis();
