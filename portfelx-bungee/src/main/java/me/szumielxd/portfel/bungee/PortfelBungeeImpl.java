@@ -106,7 +106,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
 		this.getProxy().registerChannel(CHANNEL_SETUP);
-		this.getProxy().registerChannel(CHANNEL_USERS);
+		this.getProxy().registerChannel(CHANNEL_INFO);
 		this.getProxy().registerChannel(CHANNEL_TRANSACTIONS);
 		
 		this.sendMotd();
@@ -167,7 +167,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 		this.getProxy().getPluginManager().unregisterListeners(this);
 		this.getLogger().info("Unregistering channels");
 		this.getProxy().unregisterChannel(CHANNEL_SETUP);
-		this.getProxy().unregisterChannel(CHANNEL_USERS);
+		this.getProxy().unregisterChannel(CHANNEL_INFO);
 		this.getProxy().unregisterChannel(CHANNEL_TRANSACTIONS);
 		this.unload();
 		this.getLogger().info("Everything OK, miss you");

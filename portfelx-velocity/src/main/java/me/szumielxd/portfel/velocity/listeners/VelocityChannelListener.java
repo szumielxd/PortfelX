@@ -12,13 +12,13 @@ import com.velocitypowered.api.proxy.ServerConnection;
 
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
-import me.szumielxd.portfel.proxy.listeners.ChannelListener;
+import me.szumielxd.portfel.proxy.listeners.ChannelsListener;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import me.szumielxd.portfel.velocity.objects.VelocityPlayer;
 import me.szumielxd.portfel.velocity.objects.VelocityServerConnection;
 import net.kyori.adventure.text.Component;
 
-public class VelocityChannelListener extends ChannelListener<PortfelVelocityImpl, Component> {
+public class VelocityChannelListener extends ChannelsListener<PortfelVelocityImpl, Component> {
 
 	public VelocityChannelListener(@NotNull PortfelVelocityImpl plugin) {
 		super(plugin);
@@ -29,17 +29,11 @@ public class VelocityChannelListener extends ChannelListener<PortfelVelocityImpl
 	public void onPluginMessageChannel(PluginMessageEvent event) {
 		String tag = event.getIdentifier().getId();
 		this.getPlugin().debug("[%s] Message: %s", "VelocityChannelListener", tag);
-		if (this.isListendChannel(tag)) {
-			if (event.getSource() instanceof ServerConnection && event.getTarget() instanceof Player) {
-				ServerConnection server = (ServerConnection) event.getSource();
-				Player player = (Player) event.getTarget();
-				ProxyServerConnection<Component> sender = new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), server);
-				ProxyPlayer<Component> target = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), player);
-				Optional<Boolean> result = this.onPluginMessage(sender, target, tag, event.getData());
-				if (result.isPresent()) {
-					event.setResult(result.get() ? ForwardResult.handled() : ForwardResult.forward());
-				}
-			}
+		if (this.isListendChannel(tag) && event.getSource() instanceof ServerConnection server && event.getTarget() instanceof Player player) {
+			ProxyServerConnection<Component> sender = new VelocityServerConnection(this.getPlugin(), server);
+			ProxyPlayer<Component> target = new VelocityPlayer(this.getPlugin(), player);
+			Optional<Boolean> result = this.onPluginMessage(sender, target, tag, event.getData());
+			result.ifPresent(res -> event.setResult(res.booleanValue() ? ForwardResult.handled() : ForwardResult.forward()));
 		}
 	}
 	

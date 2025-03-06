@@ -10,10 +10,8 @@ import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ServerConnection;
 
-import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.listeners.UserListener;
-import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 import me.szumielxd.portfel.velocity.PortfelVelocityImpl;
 import me.szumielxd.portfel.velocity.objects.VelocityPlayer;
 import me.szumielxd.portfel.velocity.objects.VelocityServerConnection;
@@ -31,22 +29,22 @@ public class VelocityUserListener extends UserListener<PortfelVelocityImpl, Comp
 	public void onServerConnect(ServerPostConnectEvent event) {
 		Optional<ServerConnection> srv = event.getPlayer().getCurrentServer();
 		String previousServer = Optional.ofNullable(event.getPreviousServer()).map(s -> s.getServerInfo().getName()).orElse(null);
-		ProxyPlayer<Component> player = new VelocityPlayer((PortfelVelocityImpl) this.getPlugin(), event.getPlayer());
-		this.getPlugin().debug("[%s] Connect: (%s) %s -> %s", "VelocityUserListener", event.getPlayer().getUsername(), previousServer, srv.orElse(null));
+		ProxyPlayer<Component> player = new VelocityPlayer(getPlugin(), event.getPlayer());
+		getPlugin().debug("[%s] Connect: (%s) %s -> %s", "VelocityUserListener", event.getPlayer().getUsername(), previousServer, srv.orElse(null));
 		if (srv.isPresent()) {
-			this.onConnect(player, new VelocityServerConnection((PortfelVelocityImpl) this.getPlugin(), srv.get()));
+			onConnect(player, new VelocityServerConnection(getPlugin(), srv.get()));
 		}
 	}
 	
 	
 	@Subscribe
 	public void onDisconnect(DisconnectEvent event) {
-		this.getPlugin().debug("[%s] Disconnect: %s", "VelocityUserListener", event.getPlayer().getUsername());
+		getPlugin().debug("[%s] Disconnect: %s", "VelocityUserListener", event.getPlayer().getUsername());
 		Player player = event.getPlayer();
 		try {
-			User user = this.getPlugin().getUserManager().getUser(player.getUniqueId());
+			var user = getPlugin().getUserManager().getUser(player.getUniqueId());
 			if (user != null) {
-				((ProxyOperableUser)user).setOnline(false);
+				user.setOnline(false);
 			}
 		} catch (Exception e) {	
 			e.printStackTrace();

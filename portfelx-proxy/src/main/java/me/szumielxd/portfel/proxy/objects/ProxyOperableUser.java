@@ -7,10 +7,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import lombok.Getter;
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.common.communication.coders.messages.common.UserIdentifier;
+import me.szumielxd.portfel.common.communication.coders.messages.info.UserInfoMessage;
 import me.szumielxd.portfel.common.utils.ExceptionalRunnable;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
+import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 
 public class ProxyOperableUser extends User {
 	
@@ -249,6 +253,21 @@ public class ProxyOperableUser extends User {
 	 */
 	public void setUnchanged() {
 		this.minorBalanceChanged = false;
+	}
+	
+	public void sendInfoPacket(ProxyServerConnection<?> server) {
+		server.sendPluginMessage(Portfel.CHANNEL_INFO, buildInfoPacket().toBytePacket());
+	}
+	
+	public @NotNull UserInfoMessage buildInfoPacket() {
+		return new UserInfoMessage(
+				plugin.getProxyId(),
+				new UserIdentifier(
+						getUniqueId(),
+						getName()),
+				getBalance(),
+				getMinorBalance(),
+				isDeniedInTop());
 	}
 
 }

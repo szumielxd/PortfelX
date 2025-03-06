@@ -25,7 +25,7 @@ public interface Portfel<C> {
 	/**
 	 * Plugin channel used for user-related messages. Returns <i>portfel:userdata</i>.
 	 */
-	public static final String CHANNEL_USERS = "portfel:userdata";
+	public static final String CHANNEL_INFO = "portfel:data";
 	
 	/**
 	 * Plugin channel used for setup-related messages. Returns <i>portfel:setup</i>.
@@ -37,15 +37,7 @@ public interface Portfel<C> {
 	 */
 	public static final String CHANNEL_TRANSACTIONS = "portfel:transactions";
 	
-	/**
-	 * Official BungeeCord plugin channel. Returns <i>bungeecord:main</i>.
-	 */
-	public static final String CHANNEL_BUNGEE = "bungeecord:main";
-	
-	/**
-	 * Official legacy BungeeCord plugin channel. Returns <i>BungeeCord</i>.
-	 */
-	public static final String CHANNEL_LEGACY_BUNGEE = "BungeeCord";
+	public static final String CHANNEL_BUNGEE = "dummy";
 	
 	/**
 	 * Get proxy server.

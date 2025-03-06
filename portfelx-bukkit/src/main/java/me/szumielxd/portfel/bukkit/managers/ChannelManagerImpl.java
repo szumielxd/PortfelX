@@ -66,19 +66,19 @@ public class ChannelManagerImpl implements ChannelManager {
 	private final @NotNull PluginMessageListenerRegistration setup;
 	private final @NotNull PluginMessageListenerRegistration transactions;
 	private final @NotNull PluginMessageListenerRegistration users;
-	private static final @NotNull String BUNGEE_CHANNEL = Portfel.CHANNEL_LEGACY_BUNGEE;
+	private static final @NotNull String BUNGEE_CHANNEL = Portfel.CHANNEL_BUNGEE;
 	
 	
 	public ChannelManagerImpl(@NotNull PortfelBukkitImpl plugin) {
 		this.plugin = plugin;
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_SETUP);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS);
-		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_USERS);
+		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, Portfel.CHANNEL_INFO);
 		this.plugin.getServer().getMessenger().registerOutgoingPluginChannel(plugin, BUNGEE_CHANNEL);
 		this.bungee = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, BUNGEE_CHANNEL, this::onSetupValidator);
 		this.setup = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_SETUP, this::onSetupChannel);
 		this.transactions = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_TRANSACTIONS, this::onTransactionsChannel);
-		this.users = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_USERS, this::onUsersChannel);
+		this.users = this.plugin.getServer().getMessenger().registerIncomingPluginChannel(plugin, Portfel.CHANNEL_INFO, this::onUsersChannel);
 	}
 	
 	
@@ -86,7 +86,7 @@ public class ChannelManagerImpl implements ChannelManager {
 		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, BUNGEE_CHANNEL, this.bungee.getListener());
 		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_SETUP, this.setup.getListener());
 		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_TRANSACTIONS, this.transactions.getListener());
-		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_USERS, this.users.getListener());
+		this.plugin.getServer().getMessenger().unregisterIncomingPluginChannel(this.plugin, Portfel.CHANNEL_INFO, this.users.getListener());
 	}
 	
 	
@@ -338,7 +338,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	
 	
 	private void onUsersChannel(@NotNull String channel, @NotNull Player player, byte[] message) {
-		if (!Portfel.CHANNEL_USERS.equals(channel)) return;
+		if (!Portfel.CHANNEL_INFO.equals(channel)) return;
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF(); // subchannel
 		
@@ -444,7 +444,7 @@ public class ChannelManagerImpl implements ChannelManager {
 			out.writeUTF("ServerId");
 			out.writeUTF(serverId.toString());
 			out.writeUTF(this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
-			player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
+			player.sendPluginMessage(plugin, Portfel.CHANNEL_INFO, out.toByteArray());
 		}
 	}
 	
@@ -452,7 +452,7 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void sendUserRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("User");
-		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_INFO, out.toByteArray());
 	}
 	
 	
@@ -502,14 +502,14 @@ public class ChannelManagerImpl implements ChannelManager {
 	private void sendTopRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("LightTop");
-		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_INFO, out.toByteArray());
 	}
 	
 	
 	private void sendMinorTopRequest(@NotNull Player player) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("MinorTop");
-		player.sendPluginMessage(plugin, Portfel.CHANNEL_USERS, out.toByteArray());
+		player.sendPluginMessage(plugin, Portfel.CHANNEL_INFO, out.toByteArray());
 	}
 	
 	

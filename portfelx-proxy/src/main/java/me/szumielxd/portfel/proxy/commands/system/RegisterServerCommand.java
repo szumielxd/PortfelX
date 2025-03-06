@@ -11,7 +11,6 @@ import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
-import me.szumielxd.portfel.proxy.api.managers.AccessManager;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
@@ -39,15 +38,14 @@ public class RegisterServerCommand<C> extends SimpleCommand<C> {
 	@Override
 	public void onCommand(@NotNull CommonSender<C> sender, @NotNull ParsedCommandContext parsedContext) {
 		PortfelProxyImpl<C> pl = (PortfelProxyImpl<C>)this.getPlugin();
-		AccessManager access = pl.getAccessManager();
 		String serverName = parsedContext.argLeft(0);
 		String serverHashKey = parsedContext.argLeft(1);
-		if (access.getServerByName(serverName) != null) {
+		if (pl.getAccessManager().getServerByName(serverName) != null) {
 			ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_ALREADY
 					.draft()
 					.sendPrefixed(sender);
 		} else {
-			pl.getAccessManager().pendingRegistration((ProxyPlayer<C>) sender, serverName, serverHashKey);
+			pl.getAccessManager().getRegistrationManager().requestRegistration((ProxyPlayer<C>) sender, serverName, serverHashKey);
 		}
 	}
 

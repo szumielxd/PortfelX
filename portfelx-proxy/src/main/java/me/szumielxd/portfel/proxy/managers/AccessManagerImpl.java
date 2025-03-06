@@ -1,9 +1,5 @@
 package me.szumielxd.portfel.proxy.managers;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -13,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -22,9 +19,6 @@ import java.util.stream.StreamSupport;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -32,27 +26,29 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSyntaxException;
 
 import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
-import me.szumielxd.portfel.common.utils.CryptoUtils;
+import me.szumielxd.portfel.common.communication.coders.EncryptedObject;
+import me.szumielxd.portfel.common.communication.coders.messages.setup.RegistrationRequestMessage;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
-import me.szumielxd.portfel.proxy.api.objects.PluginMessageTarget;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
-import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 
 public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implements AccessManager {
 	
 	
-	private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+	private static final @NotNull Gson GSON = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
+	private static final @NotNull String ORDERS_KEY = "orders";
+	private static final @NotNull String DISPLAY_KEY = "display";
+	private static final @NotNull String HASHKEY_KEY = "hashKey";
 	
 	
 	@Getter private final P plugin;
+	@Getter private final RegistrationManager registrationManager = new RegistrationManager();
 	private final Path file;
 	private JsonObject accessMap = null;
 	
@@ -62,41 +58,29 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 		this.file = this.plugin.getDataDirectory().resolve("access.json");
 	}
 	
+	protected abstract void preInit();
+	protected abstract void postInit();
+	
 	/**
 	 * Initialize this manager.
 	 * 
 	 * @return this object
 	 */
 	public final AccessManagerImpl<P, C> init() {
-		this.preInit();
-		try {
-			if (!Files.exists(this.file.getParent())) {
-				Files.createDirectories(this.file.getParent());
-			}
-			if (!Files.exists(this.file)) {
-				save();
-				return this;
-			}
-		} catch (JsonSyntaxException | JsonIOException | IOException e) {
-			try {
-				Files.move(file, file.getParent().resolve(this.file.getFileName() + ".broken"));
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			e.printStackTrace();
+		preInit();
+		if (!Files.exists(this.file)) {
+			save();
+			return this;
 		}
 		try (var br = Files.newBufferedReader(this.file)) {
 			this.accessMap = GSON.fromJson(br, JsonObject.class);
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			plugin.logger().severe(e, "Couldn't load access.json");
+			moveBrokenFile();
 		}
-		
-		this.postInit();
+		postInit();
 		return this;
 	}
-	
-	protected abstract void preInit();
-	protected abstract void postInit();
 	
 	/**
 	 * Check if server is registered.
@@ -123,7 +107,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 			return false;
 		}
 		JsonObject server = this.accessMap.getAsJsonObject(serverId.toString());
-		JsonArray orders = server.get("orders").getAsJsonArray();
+		JsonArray orders = server.get(ORDERS_KEY).getAsJsonArray();
 		return orders.contains(new JsonPrimitive(order.toLowerCase()));
 	}
 	
@@ -137,7 +121,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	public final @Nullable UUID getServerByName(@NotNull String serverName) {
 		validateAccessMap();
 		return this.accessMap.entrySet().stream()
-				.filter(e -> serverName.equalsIgnoreCase(e.getValue().getAsJsonObject().get("display").getAsString()))
+				.filter(e -> serverName.equalsIgnoreCase(e.getValue().getAsJsonObject().get(DISPLAY_KEY).getAsString()))
 				.map(Entry::getKey).map(UUID::fromString).findAny().orElse(null);
 	}
 	
@@ -153,7 +137,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 			return null;
 		}
 		JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
-		return obj.get("hashKey").getAsString();
+		return obj.get(HASHKEY_KEY).getAsString();
 	}
 	
 	/**
@@ -170,9 +154,9 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 			return false;
 		}
 		JsonObject server = new JsonObject();
-		server.addProperty("display", serverName.toLowerCase());
-		server.add("orders", new JsonArray());
-		server.addProperty("hashKey", hashKey);
+		server.addProperty(DISPLAY_KEY, serverName.toLowerCase());
+		server.add(ORDERS_KEY, new JsonArray());
+		server.addProperty(HASHKEY_KEY, hashKey);
 		this.accessMap.add(serverId.toString(), server);
 		this.save();
 		return true;
@@ -207,7 +191,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 			return false;
 		}
 		JsonObject server = this.accessMap.getAsJsonObject(serverId.toString());
-		JsonArray orders = server.get("orders").getAsJsonArray();
+		JsonArray orders = server.get(ORDERS_KEY).getAsJsonArray();
 		JsonPrimitive val = new JsonPrimitive(order.toLowerCase());
 		if (orders.contains(val)) {
 			return false;
@@ -230,7 +214,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 			return false;
 		}
 		JsonObject server = this.accessMap.getAsJsonObject(serverId.toString());
-		JsonArray orders = server.get("orders").getAsJsonArray();
+		JsonArray orders = server.get(ORDERS_KEY).getAsJsonArray();
 		JsonPrimitive val = new JsonPrimitive(order.toLowerCase());
 		if (!orders.contains(val)) return false;
 		orders.remove(val);
@@ -248,7 +232,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	public final @Nullable List<String> getAllowedOrders(@NotNull UUID serverId) {
 		if (this.canAccess(serverId)) {
 			JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
-			return StreamSupport.stream(obj.getAsJsonArray("orders").spliterator(), false)
+			return StreamSupport.stream(obj.getAsJsonArray(ORDERS_KEY).spliterator(), false)
 					.map(JsonElement::getAsString)
 					.toList();
 		}
@@ -265,7 +249,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 		return this.accessMap.entrySet().stream()
 				.collect(Collectors.toMap(
 						e -> UUID.fromString(e.getKey()),
-						e -> e.getValue().getAsJsonObject().get("display").getAsString()));
+						e -> e.getValue().getAsJsonObject().get(DISPLAY_KEY).getAsString()));
 	}
 	
 	/**
@@ -277,10 +261,11 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	public final @Nullable String getServerName(@NotNull UUID serverId) {
 		if (this.canAccess(serverId)) {
 			JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());
-			return obj.get("display").getAsString();
+			return obj.get(DISPLAY_KEY).getAsString();
 		}
 		return null;
 	}
+	
 	
 	/**
 	 * Save servers list.
@@ -293,185 +278,21 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 			try (var bw = Files.newBufferedWriter(file, StandardCharsets.UTF_8, StandardOpenOption.CREATE)) {
 				GSON.toJson(accessMap, bw);
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (IOException | JsonIOException e) {
+			plugin.logger().severe(e, "Couldn't save access.json file");
 		}
 	}
 	
-	
-	public final void pendingRegistration(ProxyPlayer<C> player, String serverName, String hashKey) {
-		if (player != null) {
-			Optional<ProxyServerConnection<C>> srv = player.getServer();
-			if (srv.isPresent()) {
-				UUID serverId = UUID.randomUUID();
-				UUID operationId = UUID.randomUUID();
-				ByteArrayDataOutput out = ByteStreams.newDataOutput();
-				out.writeUTF("Register"); // subchannel
-				try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
-						DataOutputStream dout = new DataOutputStream(bout);) {
-					dout.writeUTF(operationId.toString()); // operation ID
-					dout.writeUTF(this.plugin.getProxyId().toString()); // proxy ID
-					dout.writeUTF(serverId.toString()); // server ID
-					CryptoUtils.encodeBytesToOutput(out, bout.toByteArray(), hashKey);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				srv.get().sendPluginMessage(Portfel.CHANNEL_SETUP, out.toByteArray());
-				this.registerRequests.put(operationId, new RegistrationHolder(operationId, serverId, serverName, player, hashKey));
-			}
+	private void moveBrokenFile() {
+		var newName = file.getParent().resolve(file.getFileName() + ".broken");
+		for (int i = 1; Files.exists(newName); i++) {
+			newName = file.getParent().resolve(file.getFileName() + ".broken." + i);
 		}
-	}
-	
-	
-	private final Map<UUID, RegistrationHolder> registerRequests = new HashMap<>();
-	
-	
-	protected final boolean isListendChannel(@Nullable String tag) {
-		return Portfel.CHANNEL_SETUP.equals(tag)
-				|| Portfel.CHANNEL_TRANSACTIONS.equals(tag)
-				|| Portfel.CHANNEL_USERS.equals(tag)
-				|| Portfel.CHANNEL_LEGACY_BUNGEE.equals(tag)
-				|| Portfel.CHANNEL_BUNGEE.equals(tag);
-	}
-	
-	
-	@SuppressWarnings("unchecked")
-	protected final Optional<Boolean> onPluginMessage(@NotNull PluginMessageTarget sender, @NotNull PluginMessageTarget target, @NotNull String tag, byte[] message) {
-		if (sender instanceof ProxyServerConnection server && target instanceof ProxyPlayer) {
-			ProxyPlayer<C> player = (ProxyPlayer<C>) target;
-			ByteArrayDataInput in = ByteStreams.newDataInput(message);
-			String subchannel = in.readUTF();
-			
-			if (Portfel.CHANNEL_SETUP.equals(tag)) {
-				if ("Register".equals(subchannel)) return this.onRegistrationCallback(server, player, tag, subchannel, in);
-				if ("Validate".equals(subchannel)) return this.onNonBungeeRegistrationValidCheck(server, player, tag, subchannel, in);
-			}
-			if (Portfel.CHANNEL_BUNGEE.equals(tag) || Portfel.CHANNEL_LEGACY_BUNGEE.equals(tag)) {
-				if ("ForwardToPlayer".equals(subchannel)) return this.onRegistrationValidCheck(server, player, tag, subchannel, in);
-			}
-			
-		}
-		return Optional.empty();
-	}
-	
-	
-	
-	
-	
-	// BungeeCord
-	// ForwardToPlayer
-	private Optional<Boolean> onRegistrationValidCheck(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
-		this.plugin.debug("[%s] onRegistrationValidCheck", "AccessManagerImpl");
-		in.readUTF(); // username
-		String channel = in.readUTF(); // custom channel
-		if (Portfel.CHANNEL_SETUP.equals(channel)) {
-			byte[] bytes = new byte[in.readShort()];
-			in.readFully(bytes);
-			DataInputStream is = new DataInputStream(new ByteArrayInputStream(bytes));
-			try {
-				String ch = is.readUTF(); // 
-				if ("Validate".equals(ch)) { // subchannel...
-					UUID uuid = UUID.fromString(is.readUTF()); // actionId to validate
-					
-					ByteArrayDataOutput out = ByteStreams.newDataOutput();
-					out.writeUTF(subchannel);
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					DataOutputStream os = new DataOutputStream(baos);
-					os.writeUTF("Validate");
-					os.writeUTF(uuid.toString()); // validated actionId
-					os.writeBoolean(this.registerRequests.containsKey(uuid)); // validity result
-					out.writeShort(baos.toByteArray().length);
-					out.write(baos.toByteArray());
-					sender.sendPluginMessage(tag, out.toByteArray());
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			return Optional.of(true);
-		}
-		return Optional.empty();
-	}
-	
-	
-	private Optional<Boolean> onNonBungeeRegistrationValidCheck(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
-		this.plugin.debug("[%s] onNonBungeeRegistrationValidCheck", "AccessManagerImpl");
-		UUID uuid = UUID.fromString(in.readUTF()); // actionId to validate
-		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF("ForwardToPlayer");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		DataOutputStream os = new DataOutputStream(baos); 
 		try {
-			os.writeUTF("Validate");
-			os.writeUTF(uuid.toString());
-			os.writeBoolean(this.registerRequests.containsKey(uuid)); // validity result
+			Files.move(file, newName);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			plugin.logger().severe(e, "Couldn't move `%s` to `%s`", file.getFileName(), newName.getFileName());
 		}
-		// validated actionId
-		out.writeShort(baos.toByteArray().length);
-		out.write(baos.toByteArray());
-		sender.sendPluginMessage(Portfel.CHANNEL_BUNGEE, out.toByteArray());
-		return Optional.of(true);
-	}
-	
-	
-	// Setup
-	// Register
-	private Optional<Boolean> onRegistrationCallback(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
-		this.plugin.debug("[%s] onRegistrationCallback", "AccessManagerImpl");
-		UUID operationId = null;
-		try {
-			operationId = UUID.fromString(in.readUTF());
-		} catch (IllegalArgumentException e) {}
-		if (operationId != null) {
-			RegistrationHolder holder = this.registerRequests.get(operationId);
-			if (holder != null) {
-				holder.done();
-				byte[] data;
-				try {
-					data = CryptoUtils.decodeBytesFromInput(in, holder.getHashKey());
-				} catch (IllegalArgumentException e) {
-					// ignore malformed messages
-					return Optional.of(true);
-				}
-				try (DataInputStream din = new DataInputStream(new ByteArrayInputStream(data))) {
-					String status = din.readUTF();
-					if ("Ok".equals(status)) {
-						UUID proxyId = UUID.fromString(din.readUTF());
-						UUID serverId = UUID.fromString(din.readUTF());
-						if (this.plugin.getProxyId().equals(proxyId) && holder.getServerId().equals(serverId) && this.register(holder.getServerId(), holder.getServerFriendyName(), holder.getHashKey())) {
-							ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_SUCCESS.draft(
-									ProxyLangKey.MAIN_MESSAGE_INSERTION.draft(
-											holder.getServerFriendyName(),
-											ProxyLangKey.COMMAND_VALUENAMES_SERVERFRIENDLYNAME),
-									ProxyLangKey.MAIN_MESSAGE_INSERTION.draft(
-											holder.getServerId().toString(), 
-											ProxyLangKey.COMMAND_VALUENAMES_SERVERID))
-									.sendPrefixed(target);
-							return Optional.of(true);
-						}
-					} else if ("Set".equals(status)) {
-						UUID proxyId = UUID.fromString(din.readUTF());
-						UUID serverId = UUID.fromString(din.readUTF());
-						if (this.plugin.getProxyId().equals(proxyId) && this.canAccess(serverId)) {
-							ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_ALREADY
-									.draft(ProxyLangKey.MAIN_MESSAGE_INSERTION
-											.draft(serverId.toString(), 
-													ProxyLangKey.COMMAND_VALUENAMES_SERVERID))
-									.sendPrefixed(target);
-							return Optional.of(true);
-						}
-					}
-					ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_ERROR
-							.draft()
-							.sendPrefixed(target);
-					return Optional.of(true);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		return Optional.of(true);
 	}
 	
 	private void validateAccessMap() {
@@ -480,36 +301,78 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 		}
 	}
 	
+	private @NotNull String getCryptoKey(@NotNull UUID serverId) {
+		return Objects.requireNonNull(this.plugin.getAccessManager().getHashKey(serverId), "Invalid server");
+	}
 	
-	private class RegistrationHolder {
+	
+	public class RegistrationManager {
 		
-		private final UUID operationId;
-		@Getter private final UUID serverId;
-		@Getter private final String serverFriendyName;
-		@Getter private final CommonPlayer<C> sender;
-		@Getter private final String hashKey;
-		private final ExecutedTask task;
+		private final Map<UUID, RegistrationHolder> registerRequests = new HashMap<>();
 		
-		public RegistrationHolder(@NotNull UUID operationId, @NotNull UUID serverId, @NotNull String serverName, @NotNull CommonPlayer<C> sender, @NotNull String hashKey) {
-			this.operationId = operationId;
-			this.serverId = serverId;
-			this.serverFriendyName = serverName;
-			this.sender = sender;
-			this.hashKey = hashKey;
-			this.task = plugin.getTaskManager().runTaskLater(() -> {
-				this.done();
-				ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT
-						.draft()
-						.sendPrefixed(sender);
-			}, 1, TimeUnit.SECONDS);
+		
+		public @NotNull Optional<RegistrationHolder> getHolder(@NotNull UUID operationId) {
+			return Optional.ofNullable(registerRequests.get(operationId));
 		}
 		
-		public void done() {
-			this.task.cancel();
-			registerRequests.remove(this.operationId);
+		
+		public final void requestRegistration(@NotNull ProxyPlayer<C> player, @NotNull String serverName, @NotNull String hashKey) {
+			player.getServer().ifPresent(server -> {
+				var holder = new RegistrationHolder(UUID.randomUUID(), UUID.randomUUID(), serverName, player, hashKey);
+				registerRequests.put(holder.operationId, holder);
+				server.sendPluginMessage(Portfel.CHANNEL_SETUP, holder.buildRequestPacket().toBytePacket());
+			});
+		}
+		
+		
+		public class RegistrationHolder {
+			
+			@Getter private final UUID operationId;
+			@Getter private final UUID serverId;
+			@Getter private final String serverFriendyName;
+			@Getter private final CommonPlayer<C> sender;
+			@Getter private final String hashKey;
+			private final ExecutedTask task;
+			
+			public RegistrationHolder(@NotNull UUID operationId, @NotNull UUID serverId, @NotNull String serverName, @NotNull CommonPlayer<C> sender, @NotNull String hashKey) {
+				this.operationId = operationId;
+				this.serverId = serverId;
+				this.serverFriendyName = serverName;
+				this.sender = sender;
+				this.hashKey = hashKey;
+				this.task = getPlugin().getTaskManager().runTaskLater(() -> {
+					this.done();
+					ProxyLangKey.COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT
+							.draft()
+							.sendPrefixed(sender);
+				}, 1, TimeUnit.SECONDS);
+			}
+			
+			public void done() {
+				this.task.cancel();
+				registerRequests.remove(this.operationId);
+			}
+			
+			public boolean tryRegister(@NotNull UUID serverId) {
+				return getServerId().equals(serverId)
+						&& register(getServerId(), getServerFriendyName(), getHashKey());
+			}
+			
+			public @NotNull RegistrationRequestMessage buildRequestPacket() {
+				return new RegistrationRequestMessage(
+						operationId,
+						new EncryptedObject<>(
+								RegistrationRequestMessage.CryptoPayload.class,
+								new RegistrationRequestMessage.CryptoPayload(getPlugin().getProxyId(), serverId),
+								hashKey));
+			}
+			
 		}
 		
 	}
+	
+	
+	
 	
 
 }

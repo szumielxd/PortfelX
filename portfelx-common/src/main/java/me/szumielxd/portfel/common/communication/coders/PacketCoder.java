@@ -19,28 +19,19 @@ public class PacketCoder {
 	
 	@SuppressWarnings("unchecked")
 	public <T extends MessagePacket> Optional<T> decode(@NotNull ByteArrayDataInput in, @NotNull Class<T> messageClass) {
-		IdentifiedMessage msgMeta = messageClass.getAnnotation(IdentifiedMessage.class);
-		if (msgMeta == null) {
-			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
-		}
+		fetchMessageMeta(messageClass);
 		return MessageEntryCoder.OBJECT_FETCHER.generateIfValid(messageClass)
 				.map(c -> (T) c.decode(in));
 	}
 	
 	public void encode(@NotNull ByteArrayDataOutput out, @NotNull MessagePacket message) {
-		IdentifiedMessage msgMeta = message.getClass().getAnnotation(IdentifiedMessage.class);
-		if (msgMeta == null) {
-			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
-		}
+		fetchMessageMeta(message.getClass());
 		MessageEntryCoder.OBJECT_FETCHER.generateIfValid(message.getClass())
 				.ifPresent(c -> c.encode(out, message));
 	}
 	
 	public byte[] encodePacket(@NotNull MessagePacket message) {
-		IdentifiedMessage msgMeta = message.getClass().getAnnotation(IdentifiedMessage.class);
-		if (msgMeta == null) {
-			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
-		}
+		IdentifiedMessage msgMeta = fetchMessageMeta(message.getClass());
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF(msgMeta.value());
 		encode(out, message);
@@ -60,6 +51,15 @@ public class PacketCoder {
 			}
 		}
 		return entryMeta;
+	}
+	
+	
+	private IdentifiedMessage fetchMessageMeta(@NotNull Class<?> messageClass) {
+		IdentifiedMessage msgMeta = messageClass.getAnnotation(IdentifiedMessage.class);
+		if (msgMeta == null) {
+			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
+		}
+		return msgMeta;
 	}
 	
 

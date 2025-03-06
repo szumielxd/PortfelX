@@ -125,9 +125,8 @@ public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
 		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_SETUP));
-		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_USERS));
+		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_INFO));
 		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_TRANSACTIONS));
-		this.getProxy().getChannelRegistrar().register(MinecraftChannelIdentifier.from(CHANNEL_BUNGEE));
 		
 		this.sendMotd();
 		
@@ -174,7 +173,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 		this.getProxy().getEventManager().unregisterListeners(this);
 		this.getLogger().info("Unregistering channels");
 		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_SETUP));
-		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_USERS));
+		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_INFO));
 		this.getProxy().getChannelRegistrar().unregister(MinecraftChannelIdentifier.from(CHANNEL_TRANSACTIONS));
 		this.unload();
 		this.getLogger().info("Everything OK, miss you");
