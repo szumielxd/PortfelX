@@ -100,7 +100,7 @@ public enum ProxyLangKey implements LangKey {
 	
 	COMMAND_SYSTEM_REGISTERSERVER_DESCRIPTION("command.system.registerserver.description", "Register your current server with given friendly name."),
 	COMMAND_SYSTEM_REGISTERSERVER_TIMEOUT("command.system.registerserver.timeout", "<red>Are you sure, you provided valid hashKey and server you want to register has up to date version of Portfel? He's not responding..."),
-	COMMAND_SYSTEM_REGISTERSERVER_ALREADY("command.system.registerserver.already", "Is there any intelligent reason to register already registered server? Pro Tip: Check ID <aqua><underlined>{o}</underlined></aqua>."),
+	COMMAND_SYSTEM_REGISTERSERVER_ALREADY("command.system.registerserver.already", "Is there any intelligent reason to register already registered server? Pro Tip: Check ID <aqua><underlined>{0}</underlined></aqua>."),
 	COMMAND_SYSTEM_REGISTERSERVER_SUCCESS("command.system.registerserver.success", "<light_purple>You did it! You registered new portfel server with friendly name <aqua><underlined>{0}</underlined></aqua> and ID <aqua><underlined>{1}</underlined></aqua>!"),
 	COMMAND_SYSTEM_REGISTERSERVER_ERROR("command.system.registerserver.error", "<dark_red>This... This was very interesting. Server returned an unknown response."),
 	COMMAND_SYSTEM_REGISTERSERVER_SERVERNAME_NEEDED("command.system.registerserver.servername-needed", "We need a user friendly and memorable text for use as shorthand of server ID. Please provide id."),
