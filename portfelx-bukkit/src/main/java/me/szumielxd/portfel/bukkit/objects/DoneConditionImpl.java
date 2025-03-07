@@ -26,11 +26,6 @@ public class DoneConditionImpl implements DoneCondition {
 		String left = this.left;
 		String right = this.right;
 		try {
-			Class.forName("be.maximvdw.placeholderapi.PlaceholderAPI");
-			left = be.maximvdw.placeholderapi.PlaceholderAPI.replacePlaceholders(player, left);
-			right = be.maximvdw.placeholderapi.PlaceholderAPI.replacePlaceholders(player, right);
-		} catch (ClassNotFoundException e) {}
-		try {
 			Class.forName("me.clip.placeholderapi.PlaceholderAPI");
 			left = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, left);
 			right = me.clip.placeholderapi.PlaceholderAPI.setPlaceholders(player, right);
