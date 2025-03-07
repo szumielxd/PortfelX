@@ -24,6 +24,13 @@ public interface CommonPlayer<C> extends CommonSender<C> {
 	public @NotNull UUID getUniqueId();
 	
 	/**
+	 * Check if player is already connected to server.
+	 * 
+	 * @return true if is connected, false otherwise
+	 */
+	public boolean isConnected();
+	
+	/**
 	 * Kicks player with custom kick message.
 	 * 
 	 * @param reason kick message

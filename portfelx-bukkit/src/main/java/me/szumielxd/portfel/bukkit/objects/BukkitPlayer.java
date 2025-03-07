@@ -61,6 +61,15 @@ public class BukkitPlayer extends BukkitSender implements CommonPlayer<Component
 	}
 	
 	/**
+	 * Check if player is already connected to server.
+	 * 
+	 * @return true if is connected, false otherwise
+	 */
+	public boolean isConnected() {
+		return this.player.isOnline();
+	}
+	
+	/**
 	 * Kicks player with custom kick message.
 	 * 
 	 * @param reason kick message

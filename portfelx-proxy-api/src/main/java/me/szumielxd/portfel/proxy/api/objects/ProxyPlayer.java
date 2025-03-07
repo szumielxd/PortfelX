@@ -29,13 +29,6 @@ public interface ProxyPlayer<C> extends CommonPlayer<C>, ProxySender<C>, PluginM
 	public boolean isModded();
 	
 	/**
-	 * Check if player is already connected to proxy.
-	 * 
-	 * @return true if is connected, false otherwise
-	 */
-	public boolean isConnected();
-	
-	/**
 	 * Get player's server.
 	 * 
 	 * @return An Optional containing player's actual server, or empty Optional if player isn't actually connected to any server

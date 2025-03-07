@@ -1,5 +1,6 @@
 package me.szumielxd.portfel.bukkit.objects;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,6 +37,20 @@ public class BukkitOperableUser extends User {
 	}
 	
 	/**
+	 * Real hero and true worker of user instance.
+	 * 
+	 * @param plugin instance of PortfelBungee
+	 * @param uuid unique identifier of user
+	 * @param name last known name of user
+	 * @param online online status of user
+	 * @param deniedInTop true if user can be visible in top
+	 * @param balance user's current balance
+	 */
+	public BukkitOperableUser(@NotNull PortfelBukkitImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean deniedInTop, long balance, long minorBalance, @NotNull UUID proxyId, @NotNull String serverName) {
+		this(plugin, uuid, name, Optional.ofNullable(plugin.getCommonServer().getPlayer(uuid)).filter(BukkitPlayer::isConnected).isPresent(), deniedInTop, balance, minorBalance, proxyId, serverName);
+	}
+	
+	/**
 	 * Add specified amount of money to user's balance and log it.
 	 * 
 	 * @implNote <b>Unsupported for Bukkit instance</b>
@@ -48,7 +63,7 @@ public class BukkitOperableUser extends User {
 	 */
 	@Override
 	public @NotNull CompletableFuture<Void> addBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
+		throw buildBalanceSelfModificationException();
 	}
 	
 	/**
@@ -64,7 +79,7 @@ public class BukkitOperableUser extends User {
 	 */
 	@Override
 	public @NotNull CompletableFuture<Void> takeBalance(long amount, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
+		throw buildBalanceSelfModificationException();
 	}
 	
 	/**
@@ -80,7 +95,7 @@ public class BukkitOperableUser extends User {
 	 */
 	@Override
 	public @NotNull CompletableFuture<Void> setBalance(long newBalance, @NotNull ActionExecutor executor, @NotNull String server, @NotNull String orderName) throws IllegalArgumentException {
-		throw new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
+		throw buildBalanceSelfModificationException();
 	}
 	
 	/**
@@ -228,6 +243,10 @@ public class BukkitOperableUser extends User {
 			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
 			this.plugin.getChannelManager().requestPlayer(player);
 		});
+	}
+	
+	private @NotNull UnsupportedOperationException buildBalanceSelfModificationException() {
+		return new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
 	}
 
 }

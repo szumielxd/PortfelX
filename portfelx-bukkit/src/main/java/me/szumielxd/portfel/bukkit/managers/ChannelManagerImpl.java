@@ -357,7 +357,7 @@ public class ChannelManagerImpl implements ChannelManager {
 					long balance = in.readLong(); // balance
 					boolean deniedInTop = in.readBoolean(); // deniedInTop
 					long minorBalance = in.readLong(); // minorBalance
-					user = new BukkitOperableUser(this.plugin, uuid, username, true, deniedInTop, balance, minorBalance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
+					user = new BukkitOperableUser(this.plugin, uuid, username, deniedInTop, balance, minorBalance, proxyId, this.plugin.getConfiguration().getString(BukkitConfigKey.SERVER_NAME));
 				} else {
 					user.setName(in.readUTF()); // username
 					user.setPlainBalance(in.readLong()); // balance
