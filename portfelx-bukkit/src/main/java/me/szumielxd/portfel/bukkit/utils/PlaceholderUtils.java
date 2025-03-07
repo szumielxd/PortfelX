@@ -2,19 +2,16 @@ package me.szumielxd.portfel.bukkit.utils;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,6 +25,7 @@ import com.google.gson.JsonSyntaxException;
 import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.szumielxd.portfel.api.objects.User;
+import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
@@ -40,7 +38,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 public class PlaceholderUtils {
 	
 	
-	private static final @NotNull Pattern INTERNAL_PLACEHOLDERS = Pattern.compile("%(player(Id)?|balance)%");
+	private static final @NotNull Pattern INTERNAL_PLACEHOLDERS = Pattern.compile("%(player(id)?|(minor)?balance)%", Pattern.CASE_INSENSITIVE);
 	private static final @NotNull Pattern RGB_NEEDLE = Pattern.compile("&(#[a-fA-F0-9]{6})");
 	private static final @NotNull BiFunction<OfflinePlayer, String, String> REPLACE_PAPI;
 	private static final @NotNull BiFunction<OfflinePlayer, String, String> REPLACE_COLORED_PAPI;
@@ -97,14 +95,9 @@ public class PlaceholderUtils {
 	 * @param json json object
 	 */
 	public static void replacePlaceholdersInJson(@NotNull User user, @NotNull JsonObject json) {
-		Objects.requireNonNull(user, "user cannot be null");
-		Objects.requireNonNull(json, "json cannot be null");
-		replacePlaceholdersInJson(json, Bukkit.getOfflinePlayer(user.getUniqueId()), (match) -> {
-			if (match.group().equals("%player%")) return user.getName();
-			if (match.group().equals("%playerIp%")) return user.getUniqueId().toString();
-			if (match.group().equals("%balance%")) return String.valueOf(user.getBalance());
-			return "null";
-		});
+		replacePlaceholdersInJson(json,
+				Bukkit.getOfflinePlayer(user.getUniqueId()),
+				internalPlaceholdersReplacer(Lang.def(), user));
 	}
 	
 	/**
@@ -115,14 +108,9 @@ public class PlaceholderUtils {
 	 * @param json json array
 	 */
 	public static void replacePlaceholdersInJson(@NotNull User user, @NotNull JsonArray json) {
-		Objects.requireNonNull(user, "user cannot be null");
-		Objects.requireNonNull(json, "json cannot be null");
-		replacePlaceholdersInJson(json, Bukkit.getOfflinePlayer(user.getUniqueId()), match -> {
-			if (match.group().equals("%player%")) return user.getName();
-			if (match.group().equals("%playerIp%")) return user.getUniqueId().toString();
-			if (match.group().equals("%balance%")) return String.valueOf(user.getBalance());
-			return "null";
-		});
+		replacePlaceholdersInJson(json,
+				Bukkit.getOfflinePlayer(user.getUniqueId()),
+				internalPlaceholdersReplacer(Lang.def(), user));
 	}
 	
 	/**
@@ -132,16 +120,10 @@ public class PlaceholderUtils {
 	 * @param player OfflinePlayer representation of target for placeholders
 	 * @param text text to operate
 	 */
-	public static @NotNull String replacePlaceholders(@NotNull User user, OfflinePlayer player, @NotNull String text) {
-		Objects.requireNonNull(text, "text cannot be null");
-		Objects.requireNonNull(user, "user cannot be null");
-		Objects.requireNonNull(player, "player cannot be null");
-		return REPLACE_COLORED_PAPI.apply(player, MiscUtils.replaceAll(INTERNAL_PLACEHOLDERS.matcher(text), match -> {
-			if (match.group().equals("%player%")) return user.getName();
-			if (match.group().equals("%playerIp%")) return user.getUniqueId().toString();
-			if (match.group().equals("%balance%")) return String.valueOf(user.getBalance());
-			return "null";
-		}));
+	public static @NotNull String replacePlaceholders(@NotNull User user, @NotNull OfflinePlayer player, @NotNull String text) {
+		return REPLACE_COLORED_PAPI.apply(player,
+				MiscUtils.replaceAll(INTERNAL_PLACEHOLDERS.matcher(text),
+						internalPlaceholdersReplacer(Lang.def(), user)));
 	}
 	
 	/**
@@ -152,28 +134,27 @@ public class PlaceholderUtils {
 	 * @param component component to operate
 	 */
 	public static @NotNull Component replacePlaceholders(@NotNull User user, @NotNull OfflinePlayer player, @NotNull Component component) {
-		Objects.requireNonNull(component, "component cannot be null");
-		Objects.requireNonNull(user, "user cannot be null");
-		Objects.requireNonNull(player, "player cannot be null");
-		if (component instanceof TextComponent) {
-			TextComponent text = (TextComponent) component;
+		if (component instanceof TextComponent text) {
 			TextComponent replacement = LegacyComponentSerializer.legacySection()
 					.deserialize(replacePlaceholders(user, player, text.content()));
 			if (replacement.children().isEmpty() && !replacement.hasStyling()) {
 				component = text.content(replacement.content());
 			} else {
-				component = text.content("").children(Stream.concat(Stream.of(replacement), text.children().stream())
-						.collect(Collectors.toList()));
+				component = text.content("").children(
+						Stream.concat(Stream.of(replacement), text.children().stream())
+								.toList());
 			}
 			
 		}
 		if (component.hoverEvent() != null) {
 			HoverEvent<?> hover = component.hoverEvent();
-			if (hover.value() instanceof Component) {
-				component = component.hoverEvent(replacePlaceholders(user, player, (Component) hover.value()));
+			if (hover.value() instanceof Component hoverComp) {
+				component = component.hoverEvent(replacePlaceholders(user, player, hoverComp));
 			}
 		}
-		component = component.children(component.children().stream().map(ch -> replacePlaceholders(user, player, ch)).collect(Collectors.toList()));
+		component = component.children(component.children().stream()
+				.map(ch -> replacePlaceholders(user, player, ch))
+				.toList());
 		return component;
 	}
 	
@@ -186,9 +167,6 @@ public class PlaceholderUtils {
 	 * @return parsed component
 	 */
 	public static @NotNull Component parseComponent(@NotNull String text, @NotNull User user, @NotNull OfflinePlayer player) {
-		Objects.requireNonNull(text, "text cannot be null");
-		Objects.requireNonNull(user, "user cannot be null");
-		Objects.requireNonNull(player, "player cannot be null");
 		try {
 			JsonObject json = new Gson().fromJson(text, JsonObject.class);
 			replacePlaceholdersInJson(user, json);
@@ -196,6 +174,14 @@ public class PlaceholderUtils {
 		} catch (JsonSyntaxException e) {
 			return LegacyComponentSerializer.legacySection().deserialize(replacePlaceholders(user, player, coloredString(text)));
 		}
+	}
+	
+	
+	private @NotNull Function<MatchResult, String> internalPlaceholdersReplacer(@NotNull Lang lang, @NotNull User user) {
+		var placeholders = userPlaceholders(user);
+		return match -> Optional.ofNullable(placeholders.get(match.group(1)))
+					.map(d -> d.buildPlain(lang))
+					.orElse("null");
 	}
 	
 	
@@ -241,7 +227,7 @@ public class PlaceholderUtils {
 	}
 	
 	private static @NotNull String coloredString(@NotNull String text) {
-		return RGB_NEEDLE.matcher(ChatColor.translateAlternateColorCodes('&', text)).replaceAll("§$1");
+		return RGB_NEEDLE.matcher(text).replaceAll("§$1");
 	}
 	
 
