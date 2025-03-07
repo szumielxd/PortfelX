@@ -2,9 +2,9 @@ package me.szumielxd.portfel.proxy.managers;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -28,7 +28,7 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	
 	public ProxyUserManagerImpl(PortfelProxyImpl<C> plugin) {
 		this.plugin = plugin;
-		this.users = new HashMap<>();
+		this.users = new ConcurrentHashMap<>();
 	}
 	
 	// TODO: loadOrCreate for array of UUIDs
@@ -88,11 +88,10 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	@Override
 	public @Nullable ProxyOperableUser getOrLoadUser(@NotNull UUID uuid) throws Exception {
 		this.validate();
-		ProxyOperableUser user = this.users.get(uuid);
-		if (user != null) return user;
-		user = (ProxyOperableUser) this.plugin.getDatabase().loadUser(uuid);
-		if (user != null) this.users.put(uuid, user);
-		return user;
+		if (!users.containsKey(uuid)) {
+			users.putIfAbsent(uuid, plugin.getDatabase().loadUser(uuid));
+		}
+		return users.get(uuid);
 	}
 	
 	/**
@@ -106,10 +105,17 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	@Override
 	public @Nullable ProxyOperableUser getOrLoadUser(@NotNull String username) throws Exception {
 		this.validate();
-		ProxyOperableUser user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
-		if (user != null) return user;
-		user = (ProxyOperableUser) this.plugin.getDatabase().loadUserByName(username, false);
-		if (user != null) this.users.put(user.getUniqueId(), user);
+		ProxyOperableUser user = this.users.values().stream()
+				.filter(u -> u.getName().equalsIgnoreCase(username))
+				.findAny()
+				.orElse(null);
+		if (user != null) {
+			return user;
+		}
+		user = plugin.getDatabase().loadUserByName(username, false);
+		if (user != null) {
+			this.users.put(user.getUniqueId(), user);
+		}
 		return user;
 	}
 	
@@ -118,16 +124,27 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	 * 
 	 * @implNote <b>Thread Unsafe</b>
 	 * @param uuid unique identifier of user
+	 * @param username last known name of user
 	 * @return already loaded user or new one if not loaded already
 	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @NotNull ProxyOperableUser getOrCreateUser(@NotNull UUID uuid) throws Exception {
+	public @NotNull ProxyOperableUser getOrCreateUser(@NotNull UUID uuid, @NotNull String username) throws Exception {
 		this.validate();
 		ProxyOperableUser user = this.users.get(uuid);
-		if (user != null) return user;
-		user = (ProxyOperableUser) this.plugin.getDatabase().loadOrCreateUser(uuid);
+		if (user != null) {
+			return user;
+		}
+		user = plugin.getDatabase().loadOrCreateUser(uuid, username);
 		this.users.put(uuid, user);
+		return user;
+	}
+	
+	public @NotNull ProxyOperableUser getOrCreateUser(@NotNull UUID uuid, @NotNull String username, boolean markJoined) throws Exception {
+		var user = getOrCreateUser(uuid, username);
+		if (markJoined) {
+			plugin.getDatabase().bumpLastJoin(user);
+		}
 		return user;
 	}
 	

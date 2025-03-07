@@ -20,7 +20,7 @@ public abstract class UserListener<T extends PortfelProxyImpl<C>, C> {
 		this.plugin.debug("UserListener::onConnect(%s, %s)", player, server);
 		this.plugin.getTaskManager().runTaskAsynchronously(() -> {
 			try {
-				ProxyOperableUser user = this.plugin.getUserManager().getOrCreateUser(player.getUniqueId());
+				ProxyOperableUser user = this.plugin.getUserManager().getOrCreateUser(player.getUniqueId(), player.getName(), true);
 				user.setRemoteIdAndName(null, null);
 				player.getServer()
 						.filter(server::equals)

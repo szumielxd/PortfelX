@@ -1,5 +1,6 @@
 package me.szumielxd.portfel.proxy.objects;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -14,6 +15,7 @@ import me.szumielxd.portfel.common.communication.coders.messages.common.UserIden
 import me.szumielxd.portfel.common.communication.coders.messages.info.UserInfoMessage;
 import me.szumielxd.portfel.common.utils.ExceptionalRunnable;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
+import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 
 public class ProxyOperableUser extends User {
@@ -39,6 +41,20 @@ public class ProxyOperableUser extends User {
 	public ProxyOperableUser(@NotNull PortfelProxyImpl<?> plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, long minorBalance) {
 		super(uuid, name, online, deniedInTop, balance, minorBalance);
 		this.plugin = plugin;
+	}
+	
+
+	/**
+	 * Real hero and true worker of user instance.
+	 * 
+	 * @param plugin instance of PortfelBungee
+	 * @param uuid unique identifier of user
+	 * @param name last known name of user
+	 * @param deniedInTop true if user can be visible in top
+	 * @param balance user's current balance
+	 */
+	public ProxyOperableUser(@NotNull PortfelProxyImpl<?> plugin, @NotNull UUID uuid, @NotNull String name, boolean deniedInTop, long balance, long minorBalance) {
+		this(plugin, uuid, name, Optional.ofNullable(plugin.getCommonServer().getPlayer(uuid)).filter(ProxyPlayer::isConnected).isPresent(), deniedInTop, balance, minorBalance);
 	}
 	
 	/**

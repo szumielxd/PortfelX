@@ -34,7 +34,7 @@ public class TestmodeCommand extends SimpleCommand<Component> {
 	public void onCommand(@NotNull CommonSender<Component> sender, @NotNull ParsedCommandContext parsedContext) {
 		
 		try {
-			User user = this.getPlugin().getUserManager().getOrCreateUser(((CommonPlayer<Component>) sender).getUniqueId());
+			User user = this.getPlugin().getUserManager().getOrCreateUser(((CommonPlayer<Component>) sender).getUniqueId(), sender.getName());
 			if (user instanceof BukkitOperableUser operableUser) {
 				BukkitLangKey.COMMAND_TESTMODE_EXECUTE
 						.draft(operableUser.toggleTestMode() ? MainLangKey.MAIN_VALUE_ON : MainLangKey.MAIN_VALUE_OFF)

@@ -1,12 +1,8 @@
 package me.szumielxd.portfel.proxy.database.hikari;
 
 import java.nio.file.Path;
-import java.util.AbstractMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -17,17 +13,16 @@ import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 public class H2DB<C> extends HikariDB<C> {
 	
 	
-	public static final Map<Pattern, String> mapping = Stream.of(
-			new AbstractMap.SimpleEntry<>(Pattern.compile("VARCHAR([^ ]*) BINARY", Pattern.CASE_INSENSITIVE), "VARCHAR_CASESENSITIVE$1"),
-			new AbstractMap.SimpleEntry<>(Pattern.compile(" CHARSET=[^ ;]+", Pattern.CASE_INSENSITIVE), ""),
-			new AbstractMap.SimpleEntry<>(Pattern.compile(" COLLATE [^ ;]+", Pattern.CASE_INSENSITIVE), ""),
-			new AbstractMap.SimpleEntry<>(Pattern.compile("(?<= )LIKE(?= )", Pattern.CASE_INSENSITIVE), "ILIKE"),
-			new AbstractMap.SimpleEntry<>(Pattern.compile(" UNSIGNED(?= )", Pattern.CASE_INSENSITIVE), ""),
-			new AbstractMap.SimpleEntry<>(Pattern.compile(" CHARACTER SET [^ ;]+", Pattern.CASE_INSENSITIVE), ""),
-			new AbstractMap.SimpleEntry<>(Pattern.compile(" ENGINE = [^ ;]+", Pattern.CASE_INSENSITIVE), ""),
-			new AbstractMap.SimpleEntry<>(Pattern.compile("UNIX_TIMESTAMP\\(\\)"), "DATEDIFF\\('SECOND', DATE '1970-01-01', CURRENT_TIMESTAMP\\(\\)\\) * 1000"),
-			new AbstractMap.SimpleEntry<>(Pattern.compile("^ALTER TABLE ([^ ]+) ADD INDEX ([^ ]+)\\(([^ ]+)\\)$", Pattern.CASE_INSENSITIVE), "CREATE INDEX $2 ON $1 \\($3\\)")
-	).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+	public static final Map<Pattern, String> mapping = Map.of(
+			Pattern.compile("VARCHAR([^ ]*) BINARY", Pattern.CASE_INSENSITIVE), "VARCHAR_CASESENSITIVE$1",
+			Pattern.compile(" CHARSET=[^ ;]+", Pattern.CASE_INSENSITIVE), "",
+			Pattern.compile(" COLLATE [^ ;]+", Pattern.CASE_INSENSITIVE), "",
+			Pattern.compile("(?<= )LIKE(?= )", Pattern.CASE_INSENSITIVE), "ILIKE",
+			Pattern.compile(" UNSIGNED(?= )", Pattern.CASE_INSENSITIVE), "",
+			Pattern.compile(" CHARACTER SET [^ ;]+", Pattern.CASE_INSENSITIVE), "",
+			Pattern.compile(" ENGINE = [^ ;]+", Pattern.CASE_INSENSITIVE), "",
+			Pattern.compile("UNIX_TIMESTAMP\\(\\)"), "DATEDIFF\\('SECOND', DATE '1970-01-01', CURRENT_TIMESTAMP\\(\\)\\) * 1000",
+			Pattern.compile("^ALTER TABLE ([^ ]+) ADD INDEX ([^ ]+)\\(([^ ]+)\\)$", Pattern.CASE_INSENSITIVE), "CREATE INDEX $2 ON $1 \\($3\\)");
 	
 
 	public H2DB(PortfelProxyImpl<C> plugin) {
@@ -43,11 +38,13 @@ public class H2DB<C> extends HikariDB<C> {
 	 */
 	@Override
 	protected @NotNull String mapQuery(@NotNull String query) {
-		Objects.requireNonNull(query, "query cannot be null");
-		for (Map.Entry<Pattern, String> entry : mapping.entrySet()) {
+		for (var entry : mapping.entrySet()) {
 			query = entry.getKey().matcher(query).replaceAll(entry.getValue());
 		}
-		this.plugin.debug("[QUERY] \u001b[36m%s\u001b[0m", query);
+		plugin.debug("[QUERY] \u001b[36m%s\u001b[0m", query);
+		if (!query.endsWith(";")) {
+			query += ";";
+		}
 		return query;
 	}
 	

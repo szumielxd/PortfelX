@@ -41,7 +41,7 @@ public class InfoChannelListener<T extends PortfelProxyImpl<C>, C> extends Speci
 	private boolean onUserData(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag) {
 		getPlugin().getTaskManager().runTaskAsynchronously(() -> {
 			try {
-				var user = getPlugin().getUserManager().getOrCreateUser(target.getUniqueId());
+				var user = getPlugin().getUserManager().getOrCreateUser(target.getUniqueId(), target.getName());
 				sender.sendPluginMessage(tag, user.buildInfoPacket().toBytePacket());
 			} catch (Exception e) {	
 				getPlugin().logger().severe(e, "An exception occurred while processing UserInfo response");

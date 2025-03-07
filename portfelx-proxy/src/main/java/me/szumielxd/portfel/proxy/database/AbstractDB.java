@@ -61,7 +61,7 @@ public interface AbstractDB {
 	 * @return user related to given name or null when username does not exists in database
 	 * @throws Exception when something went wrong
 	 */
-	public @Nullable User loadUserByName(@NotNull String name, boolean strict) throws Exception;
+	public @Nullable ProxyOperableUser loadUserByName(@NotNull String name, boolean strict) throws Exception;
 	
 	/**
 	 * Load User with given UUID from database.
@@ -71,17 +71,18 @@ public interface AbstractDB {
 	 * @return user related to given UUID or null when UUID does not exists in database
 	 * @throws Exception when something went wrong
 	 */
-	public @Nullable User loadUser(@NotNull UUID uuid) throws Exception;
+	public @Nullable ProxyOperableUser loadUser(@NotNull UUID uuid) throws Exception;
 	
 	/**
 	 * Load User with given UUID from database or create new one when user does not exists in database.
 	 * 
 	 * @implNote Thread unsafe.
 	 * @param uuid unique identifier of user
+	 * @param username last known name of user
 	 * @return user related to given UUID
 	 * @throws Exception when something went wrong
 	 */
-	public @NotNull User loadOrCreateUser(@NotNull UUID uuid) throws Exception;
+	public @NotNull ProxyOperableUser loadOrCreateUser(@NotNull UUID uuid, @NotNull String username) throws Exception;
 	
 	/**
 	 * Get position of given users in balance top. If user doesn't exist in top, then returned position is null.
@@ -91,7 +92,7 @@ public interface AbstractDB {
 	 * @return array of positions in the same order as given users array
 	 * @throws SQLException when something went wrong
 	 */
-	public @NotNull Integer[] getTopPos(User... users) throws Exception;
+	public @NotNull Integer[] getTopPos(@NotNull User... users) throws Exception;
 	
 	/**
 	 * Update given user.
@@ -102,6 +103,15 @@ public interface AbstractDB {
 	 * @throws Exception when something went wrong
 	 */
 	public List<ProxyOperableUser> updateUsers(@NotNull ProxyOperableUser... users) throws Exception;
+	
+	/**
+	 * Set last join time in database to now.
+	 * 
+	 * @implNote Thread unsafe.
+	 * @param users array of users to update
+	 * @throws Exception when something went wrong
+	 */
+	public void bumpLastJoin(@NotNull User... users) throws Exception;
 	
 	/**
 	 * Save user values marked as changed.

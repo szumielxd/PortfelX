@@ -137,7 +137,7 @@ public class BukkitUserManagerImpl extends UserManagerImpl<Component> {
 	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @NotNull User getOrCreateUser(@NotNull UUID uuid) throws Exception {
+	public @NotNull User getOrCreateUser(@NotNull UUID uuid, @NotNull String username) throws Exception {
 		return this.users.computeIfAbsent(uuid, key -> new BukkitImaginaryUser(this.plugin, key));
 	}
 	

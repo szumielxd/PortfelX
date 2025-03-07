@@ -6,8 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +22,11 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import me.szumielxd.portfel.api.configuration.Config;
+import me.szumielxd.portfel.api.managers.TopManager;
 import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.api.objects.User;
-import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
-import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.database.AbstractDB;
 import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 
@@ -50,6 +47,7 @@ public abstract class HikariDB<C> implements AbstractDB {
 	private final String USERS_BALANCE;
 	private final String USERS_MINORBALANCE;
 	private final String USERS_IGNORETOP;
+	private final String USERS_LASTJOIN;
 	
 	private final String LOGS_ID;
 	private final String LOGS_UUID;
@@ -74,9 +72,9 @@ public abstract class HikariDB<C> implements AbstractDB {
 	}
 	
 	
-	protected HikariDB(PortfelProxyImpl<C> plugin) {
+	protected HikariDB(@NotNull PortfelProxyImpl<C> plugin) {
 		this.plugin = plugin;
-		Config cfg = this.plugin.getConfiguration();
+		Config cfg = plugin.getConfiguration();
 		
 		DB_HOST = cfg.getString(ProxyConfigKey.DATABASE_HOST);
 		DB_NAME = cfg.getString(ProxyConfigKey.DATABASE_DATABASE);
@@ -91,6 +89,7 @@ public abstract class HikariDB<C> implements AbstractDB {
 		USERS_BALANCE = escapeSql(cfg.getString(ProxyConfigKey.DATABASE_TABLE_USERS_COLLUMN_BALANCE));
 		USERS_MINORBALANCE = escapeSql(cfg.getString(ProxyConfigKey.DATABASE_TABLE_USERS_COLLUMN_MINORBALANCE));
 		USERS_IGNORETOP = escapeSql(cfg.getString(ProxyConfigKey.DATABASE_TABLE_USERS_COLLUMN_IGNORETOP));
+		USERS_LASTJOIN = escapeSql(cfg.getString(ProxyConfigKey.DATABASE_TABLE_USERS_COLLUMN_LASTJOIN));
 		
 		LOGS_ID = escapeSql(cfg.getString(ProxyConfigKey.DATABASE_TABLE_LOGS_COLLUMN_ID));
 		LOGS_UUID = escapeSql(cfg.getString(ProxyConfigKey.DATABASE_TABLE_LOGS_COLLUMN_UUID));
@@ -133,7 +132,7 @@ public abstract class HikariDB<C> implements AbstractDB {
 		HikariConfig config = new HikariConfig();
 		config.setPoolName("portfel-hikari");
 		final String[] host = DB_HOST.split(":");
-		int port = this.getDefaultPort();
+		int port = getDefaultPort();
 		if (host.length > 1) {
 			try {
 				port = Integer.parseInt(host[1]);
@@ -141,11 +140,11 @@ public abstract class HikariDB<C> implements AbstractDB {
 				// fallback to default port
 			}
 		}
-		this.setupDatabase(config, host[0], port, DB_NAME, DB_USER, DB_PASSWD);
+		setupDatabase(config, host[0], port, DB_NAME, DB_USER, DB_PASSWD);
 		
-		Config cfg = this.plugin.getConfiguration();
+		Config cfg = plugin.getConfiguration();
 		Map<String, String> properties = cfg.getStringMap(ProxyConfigKey.DATABASE_POOL_PROPERTIES);
-		this.setupProperties(config, properties);
+		setupProperties(config, properties);
 		
 		config.setMaximumPoolSize(cfg.getInt(ProxyConfigKey.DATABASE_POOL_MAXSIZE));
 		config.setMinimumIdle(cfg.getInt(ProxyConfigKey.DATABASE_POOL_MINIDLE));
@@ -154,12 +153,12 @@ public abstract class HikariDB<C> implements AbstractDB {
 		config.setConnectionTimeout(cfg.getInt(ProxyConfigKey.DATABASE_POOL_TIMEOUT));
 		config.setInitializationFailTimeout(-1);
 		
-		this.hikari = new HikariDataSource(config);
+		hikari = new HikariDataSource(config);
 		
-		if (!this.tablesChecked) {
+		if (!tablesChecked) {
 			try {
-				this.setupTables();
-				this.tablesChecked = true;
+				setupTables();
+				tablesChecked = true;
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -193,10 +192,15 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 * @throws SQLException when cannot establish database connection
 	 */
 	@Override
-	public Connection connect() throws SQLException {
-		if (this.hikari == null) throw new SQLException("Unable to get a connection from the pool. (hikari is null)");
-		Connection conn = this.hikari.getConnection();
-		if (conn == null) throw new SQLException("Unable to get a connection from the pool. (connection is null)");
+	public @NotNull Connection connect() throws SQLException {
+		if (hikari == null) {
+			throw new SQLException("Unable to get a connection from the pool. (hikari is null)");
+		}
+		checkConnection();
+		Connection conn = hikari.getConnection();
+		if (conn == null) {
+			throw new SQLException("Unable to get a connection from the pool. (connection is null)");
+		}
 		return conn;
 	}
 	
@@ -207,7 +211,16 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public boolean isConnected() {
-		return this.isValid() && !this.hikari.isClosed();
+		return isValid() && !hikari.isClosed();
+	}
+	
+	/**
+	 * Check if connection can be obtained, otherwise creates new one.
+	 */
+	public void checkConnection() {
+		if (!isConnected()) {
+			setup();
+		}
 	}
 	
 	/**
@@ -217,7 +230,7 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public boolean isValid() {
-		return this.hikari != null;
+		return hikari != null;
 	}
 	
 	/**
@@ -225,7 +238,9 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void shutdown() {
-		if (this.hikari != null) this.hikari.close();
+		if (hikari != null) {
+			hikari.close();
+		}
 	}
 	
 	/**
@@ -238,17 +253,16 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	@Override
-	public @Nullable User loadUserByName(@NotNull String name, boolean strict) throws SQLException {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` =%s ?;", USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_NAME, (strict ? " BINARY" : "")));
-		try (Connection conn = this.connect()) {
+	public @Nullable ProxyOperableUser loadUserByName(@NotNull String name, boolean strict) throws SQLException {
+		String sql = mapQuery("SELECT `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` =%s ? ORDEE BY `%s` DESC LIMIT 1"
+				.formatted(USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_NAME, (strict ? " BINARY" : ""), USERS_LASTJOIN));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setString(1, name);
 				try (ResultSet rs = stm.executeQuery()) {
 					if (rs.next()) {
 						UUID uuid = UUID.fromString(rs.getString(1));
-						ProxyPlayer<C> player = this.plugin.getCommonServer().getPlayer(uuid);
-						return new ProxyOperableUser(this.plugin, uuid, rs.getString(2), player != null && player.isConnected(), rs.getBoolean(5), rs.getLong(3), rs.getLong(4));
+						return new ProxyOperableUser(plugin, uuid, rs.getString(2), rs.getBoolean(5), rs.getLong(3), rs.getLong(4));
 					}
 					return null;
 				}
@@ -265,33 +279,33 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	@Override
-	public @Nullable User loadUser(@NotNull UUID uuid) throws SQLException {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?;", USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID));
-		ProxyPlayer<C> player = this.plugin.getCommonServer().getPlayer(uuid);
-		try (Connection conn = this.connect()) {
-			try (PreparedStatement stm = conn.prepareStatement(sql)) {
-				stm.setString(1, uuid.toString());
-				try (ResultSet rs = stm.executeQuery()) {
-					if (rs.next()) {
-						return new ProxyOperableUser(this.plugin, uuid, rs.getString(1), player != null && player.isConnected(), rs.getBoolean(4), rs.getLong(2), rs.getLong(3));
-					}
+	public @Nullable ProxyOperableUser loadUser(@NotNull UUID uuid) throws SQLException {
+		try (Connection conn = connect()) {
+			return executeLoadUser(conn, uuid);
+		}
+	}
+	
+	private @Nullable ProxyOperableUser executeLoadUser(@NotNull Connection conn, @NotNull UUID uuid) throws SQLException {
+		String sql = mapQuery("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?"
+				.formatted(USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID));
+		try (PreparedStatement stm = conn.prepareStatement(sql)) {
+			stm.setString(1, uuid.toString());
+			try (ResultSet rs = stm.executeQuery()) {
+				if (rs.next()) {
+					return new ProxyOperableUser(plugin, uuid, rs.getString(1), rs.getBoolean(4), rs.getLong(2), rs.getLong(3));
 				}
 			}
-			
-			// fallback to old username offline-mode system
-			if (!MiscUtils.isOnlineModeUUID(uuid) && player != null) {
-				sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = BINARY ? AND `%s` IS NULL;", USERS_UUID, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_NAME, USERS_UUID));
-				try (PreparedStatement stm = conn.prepareStatement(sql)) {
-					stm.setString(1, player.getName());
-					try (ResultSet rs = stm.executeQuery()) {
-						if (rs.next()) {
-							return new ProxyOperableUser(this.plugin, uuid, rs.getString(1), player.isConnected(), rs.getBoolean(4), rs.getLong(2), rs.getLong(3));
-						}
-					}
-				}
-			}
-			return null;
+		}
+		return null;
+	}
+	
+	private void executeUpdateUserName(@NotNull Connection conn, @NotNull UUID uuid, @NotNull String username) throws SQLException {
+		String sql = mapQuery("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?"
+				.formatted(TABLE_USERS, USERS_NAME, USERS_UUID));
+		try (PreparedStatement stm = conn.prepareStatement(sql)) {
+			stm.setString(1, username);
+			stm.setString(2, uuid.toString());
+			stm.executeUpdate();
 		}
 	}
 	
@@ -304,60 +318,24 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	@Override
-	public @NotNull User loadOrCreateUser(@NotNull UUID uuid) throws SQLException, IllegalStateException {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ?;", USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID));
-		ProxyPlayer<C> player = this.plugin.getCommonServer().getPlayer(uuid);
-		ProxyOperableUser user = null;
-		try (Connection conn = this.connect()) {
-			try (PreparedStatement stm = conn.prepareStatement(sql)) {
-				stm.setString(1, uuid.toString());
-				try (ResultSet rs = stm.executeQuery()) {
-					if (rs.next()) {
-						user = new ProxyOperableUser(this.plugin, uuid, rs.getString(1), player != null && player.isConnected(), rs.getBoolean(4), rs.getLong(2), rs.getLong(3));
-					}
-				}
-			}
-			
-			if (user != null && player != null) {
-				if (user.getName().equals(player.getName())) {
-					user.setName(player.getName());
-					sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?;", TABLE_USERS, USERS_NAME, USERS_UUID));
-					try (PreparedStatement stm = conn.prepareStatement(sql)) {
-						stm.setString(1, user.getName());
-						stm.setString(2, user.getUniqueId().toString());
-					}
+	public @NotNull ProxyOperableUser loadOrCreateUser(@NotNull UUID uuid, @NotNull String username) throws SQLException, IllegalStateException {
+		try (Connection conn = connect()) {
+			// load user
+			ProxyOperableUser user = executeLoadUser(conn, uuid);
+			if (user != null) {
+				// check for name update
+				if (user.getName().equals(username)) {
+					executeUpdateUserName(conn, uuid, username);
+					user.setName(username);
 				}
 				return user;
 			}
 			
-			if (player == null) throw new IllegalStateException("Cannot create new user for offline player");
-			
-			// fallback to old username offline-mode system
-			/*if (!MiscUtils.isOnlineModeUUID(uuid)) {
-				sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = BINARY ? AND `%s` IS NULL;", USERS_UUID, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_NAME, USERS_UUID));
-				try (PreparedStatement stm = conn.prepareStatement(sql)) {
-					stm.setString(1, player.getName());
-					try (ResultSet rs = stm.executeQuery()) {
-						if (rs.next()) {
-							user = new ProxyOperableUser(this.plugin, uuid, rs.getString(1), player.isConnected(), rs.getBoolean(4), rs.getLong(2), rs.getLong(3));
-						}
-					}
-				}
-				if (user != null) {
-					sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = BINARY ? AND `%s` IS NULL LIMIT 1;", TABLE_USERS, USERS_UUID, USERS_NAME, USERS_UUID));
-					try (PreparedStatement stm = conn.prepareStatement(sql)) {
-						stm.setString(1, player.getName());
-						stm.executeQuery();
-					}
-					return user;
-				}
-			}*/
-			
 			// create new user
-			sql = this.mapQuery(String.format("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?);", TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP));
+			String sql = mapQuery("INSERT INTO `%s` (`%s`, `%s`, `%s`, `%s`, `%s`) VALUES (?, ?, ?, ?, ?)"
+					.formatted(TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP));
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
-				user = new ProxyOperableUser(this.plugin, uuid, player.getName(), player.isConnected(), false, 0, 0);
+				user = new ProxyOperableUser(plugin, uuid, username, false, 0, 0);
 				stm.setString(1, user.getUniqueId().toString());
 				stm.setString(2, user.getName());
 				stm.setLong(3, user.getBalance());
@@ -379,24 +357,29 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	public @NotNull Integer[] getTopPos(User... users) throws SQLException {
 		Integer[] arr = new Integer[users.length];
-		if (users.length == 0) return arr;
-		UUID[] uuids = Stream.of(users).map(User::getUniqueId).toArray(UUID[]::new);
-		this.checkConnection();
-		final String uuidMarks = String.join(", ", Stream.of(uuids).map(s -> "?").toArray(String[]::new));
-		final String sql = this.mapQuery(String.format("SELECT CAST(`pos` as INT), `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `%s` IN (%s);", USERS_UUID, USERS_UUID, TABLE_USERS, USERS_IGNORETOP, USERS_BALANCE, USERS_UUID, uuidMarks));
-		try (Connection conn = this.connect(); PreparedStatement stm = conn.prepareStatement(sql)) {
-			int index = 0;
-			// fill query with UUIDs
-			for (; index < uuids.length; index++) {
-				stm.setString(index+1, uuids[index].toString());
-			}
-			try (ResultSet rs = stm.executeQuery()) {
-				while (rs.next()) {
-					int pos = rs.getInt(1);
-					UUID uuid = UUID.fromString(rs.getString(2));
-					for (int i = 0; i < uuids.length; i++) {
-						if (uuids[i].equals(uuid)) {
-							arr[i] = pos;
+		if (users.length == 0) {
+			return arr;
+		}
+		UUID[] uuids = Stream.of(users)
+				.map(User::getUniqueId)
+				.toArray(UUID[]::new);
+		final String uuidMarks = ", ?".repeat(uuids.length).substring(2);
+		final String sql = mapQuery("SELECT CAST(`pos` as INT), `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `%s` IN (%s)"
+				.formatted(USERS_UUID, USERS_UUID, TABLE_USERS, USERS_IGNORETOP, USERS_BALANCE, USERS_UUID, uuidMarks));
+		try (Connection conn = connect()) {
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				// fill query with UUIDs
+				for (int index = 0; index < uuids.length; index++) {
+					stm.setString(index + 1, uuids[index].toString());
+				}
+				try (ResultSet rs = stm.executeQuery()) {
+					while (rs.next()) {
+						int pos = rs.getInt(1);
+						UUID uuid = UUID.fromString(rs.getString(2));
+						for (int i = 0; i < uuids.length; i++) {
+							if (uuids[i].equals(uuid)) {
+								arr[i] = pos;
+							}
 						}
 					}
 				}
@@ -415,24 +398,29 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	public @NotNull Integer[] getMinorTopPos(User... users) throws SQLException {
 		Integer[] arr = new Integer[users.length];
-		if (users.length == 0) return arr;
-		UUID[] uuids = Stream.of(users).map(User::getUniqueId).toArray(UUID[]::new);
-		this.checkConnection();
-		final String uuidMarks = String.join(", ", Stream.of(uuids).map(s -> "?").toArray(String[]::new));
-		final String sql = this.mapQuery(String.format("SELECT CAST(`pos` as INT), `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `%s` IN (%s);", USERS_UUID, USERS_UUID, TABLE_USERS, USERS_IGNORETOP, USERS_MINORBALANCE, USERS_UUID, uuidMarks));
-		try (Connection conn = this.connect(); PreparedStatement stm = conn.prepareStatement(sql)) {
-			int index = 0;
-			// fill query with UUIDs
-			for (; index < uuids.length; index++) {
-				stm.setString(index+1, uuids[index].toString());
-			}
-			try (ResultSet rs = stm.executeQuery()) {
-				while (rs.next()) {
-					int pos = rs.getInt(1);
-					UUID uuid = UUID.fromString(rs.getString(2));
-					for (int i = 0; i < uuids.length; i++) {
-						if (uuids[i].equals(uuid)) {
-							arr[i] = pos;
+		if (users.length == 0) {
+			return arr;
+		}
+		UUID[] uuids = Stream.of(users)
+				.map(User::getUniqueId)
+				.toArray(UUID[]::new);
+		final String uuidMarks = ", ?".repeat(uuids.length).substring(2);
+		final String sql = mapQuery("SELECT CAST(`pos` as INT), `%s` FROM (SELECT (@i:=@i + 1) AS `pos`, `%s` FROM `%s`, (SELECT @i:=0) AS `i` WHERE `%s` = false ORDER BY `%s` DESC) as `top` WHERE `%s` IN (%s)"
+				.formatted(USERS_UUID, USERS_UUID, TABLE_USERS, USERS_IGNORETOP, USERS_MINORBALANCE, USERS_UUID, uuidMarks));
+		try (Connection conn = connect()) {
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				// fill query with UUIDs
+				for (int index = 0; index < uuids.length; index++) {
+					stm.setString(index + 1, uuids[index].toString());
+				}
+				try (ResultSet rs = stm.executeQuery()) {
+					while (rs.next()) {
+						int pos = rs.getInt(1);
+						UUID uuid = UUID.fromString(rs.getString(2));
+						for (int i = 0; i < uuids.length; i++) {
+							if (uuids[i].equals(uuid)) {
+								arr[i] = pos;
+							}
 						}
 					}
 				}
@@ -440,6 +428,31 @@ public abstract class HikariDB<C> implements AbstractDB {
 		}
 		return arr;
 	}
+	
+	/**
+	 * Set last join time in database to now.
+	 * 
+	 * @implNote Thread unsafe.
+	 * @param users array of users to update
+	 * @throws Exception when something went wrong
+	 */
+	public void bumpLastJoin(@NotNull User... users) throws SQLException {
+		UUID[] uuids = Stream.of(users)
+				.map(User::getUniqueId)
+				.toArray(UUID[]::new);
+		final String uuidMarks = ", ?".repeat(uuids.length).substring(2);
+		String sql = "UPDATE `%s` SET `%s` = DEFAULT WHERE `%s` IN (%s)"
+				.formatted(TABLE_USERS, USERS_LASTJOIN, USERS_UUID, uuidMarks);
+		try (Connection conn = connect()) {
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				for (int i = 1; i <= uuids.length; i++) {
+					stm.setString(i, uuids[i].toString());
+				}
+				stm.executeUpdate();
+			}
+		}
+	}
+	
 	/**
 	 * Update given user.
 	 * 
@@ -451,29 +464,33 @@ public abstract class HikariDB<C> implements AbstractDB {
 	@Override
 	public List<ProxyOperableUser> updateUsers(@NotNull ProxyOperableUser... users) throws SQLException {
 		List<ProxyOperableUser> updatedUsers = new ArrayList<>();
-		if (users.length == 0) return updatedUsers;
-		this.checkConnection();
-		
+		if (users.length == 0) {
+			return updatedUsers;
+		}
 		// map users by UUID
-		final Map<UUID, ProxyOperableUser> map = Stream.of(users).collect(Collectors.toMap(User::getUniqueId, Function.identity(), (a, b) -> a));
+		final Map<UUID, ProxyOperableUser> map = Stream.of(users)
+				.collect(Collectors.toMap(User::getUniqueId, Function.identity(), (a, b) -> a));
 		// generate right amount of `?` characters to insert into query
-		final String uuidMarks = String.join(", ", map.keySet().stream().map(s -> "?").toArray(String[]::new));
-		final String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` IN (%s);", USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID, uuidMarks));
-		try (Connection conn = this.connect(); PreparedStatement stm = conn.prepareStatement(sql)) {
-			int index = 0;
-			// fill query with UUIDs
-			for (UUID uuid : map.keySet()) {
-				stm.setString(++index, uuid.toString());
-			}
-			try (ResultSet rs = stm.executeQuery()) {
-				while (rs.next()) {
-					UUID uuid = UUID.fromString(rs.getString(1));
-					ProxyOperableUser user = map.get(uuid);
-					user.setName(rs.getString(2));
-					user.setPlainBalance(rs.getLong(3));
-					user.setPlainMinorBalance(rs.getLong(4));
-					user.setPlainDeniedInTop(rs.getBoolean(5));
-					updatedUsers.add(user);
+		final String uuidMarks = ", ?".repeat(map.size()).substring(2);
+		final String sql = mapQuery("SELECT `%s`, `%s`, `%s`, `%s`, `%s` FROM `%s` WHERE `%s` IN (%s)"
+				.formatted(USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, TABLE_USERS, USERS_UUID, uuidMarks));
+		try (Connection conn = connect()) {
+			try (PreparedStatement stm = conn.prepareStatement(sql)) {
+				int index = 0;
+				// fill query with UUIDs
+				for (UUID uuid : map.keySet()) {
+					stm.setString(++index, uuid.toString());
+				}
+				try (ResultSet rs = stm.executeQuery()) {
+					while (rs.next()) {
+						UUID uuid = UUID.fromString(rs.getString(1));
+						ProxyOperableUser user = map.get(uuid);
+						user.setName(rs.getString(2));
+						user.setPlainBalance(rs.getLong(3));
+						user.setPlainMinorBalance(rs.getLong(4));
+						user.setPlainDeniedInTop(rs.getBoolean(5));
+						updatedUsers.add(user);
+					}
 				}
 			}
 		}
@@ -489,26 +506,28 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void saveChanges(@NotNull ProxyOperableUser... users) throws Exception {
-		this.checkConnection();
-		Iterator<ProxyOperableUser> iterator = Arrays.stream(users).iterator();
-		try (Connection conn = this.hikari.getConnection()) {
-			while (iterator.hasNext()) {
-				ProxyOperableUser user = iterator.next();
+		try (Connection conn = connect()) {
+			for (var user : users) {
 				synchronized (user) {
 					// format items to change
 					List<String> toChange = new LinkedList<>();
 					if (user.isMinorBalanceChanged()) {
-						toChange.add(String.format("`%s` = ?", USERS_MINORBALANCE));
+						toChange.add("`%s` = ?".formatted(USERS_MINORBALANCE));
 					}
 					
 					if (!toChange.isEmpty()) {
-						String sql = this.mapQuery(String.format("UPDATE `%s` SET %s WHERE `%s` = ?;", TABLE_USERS, String.join(", ", toChange), USERS_UUID));
+						String sql = mapQuery("UPDATE `%s` SET %s WHERE `%s` = ?"
+								.formatted(TABLE_USERS, String.join(", ", toChange), USERS_UUID));
 						try (PreparedStatement stm = conn.prepareStatement(sql)) {
 							int index = 0;
 							// dynamically fill prepared statement 
-							if (user.isMinorBalanceChanged()) stm.setLong(++index, user.getMinorBalance());
+							if (user.isMinorBalanceChanged()) {
+								stm.setLong(++index, user.getMinorBalance());
+							}
 							stm.setString(++index, user.getUniqueId().toString());
-							if (stm.executeUpdate() == 0) throw new SQLException("Unable to save a userdata. (inexistent uuid)");
+							if (stm.executeUpdate() == 0) {
+								throw new SQLException("Unable to save a userdata. (inexistent uuid)");
+							}
 							user.setUnchanged();
 						}
 					}
@@ -527,13 +546,15 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void addBalance(@NotNull ProxyOperableUser user, long amount) throws Exception {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = `%s` + ? WHERE `%s` = ?;", TABLE_USERS, USERS_BALANCE, USERS_BALANCE, USERS_UUID));
-		try (Connection conn = this.hikari.getConnection()) {
+		String sql = mapQuery("UPDATE `%s` SET `%s` = `%s` + ? WHERE `%s` = ?"
+				.formatted(TABLE_USERS, USERS_BALANCE, USERS_BALANCE, USERS_UUID));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setLong(1, amount);
 				stm.setString(2, user.getUniqueId().toString());
-				if (stm.executeUpdate() == 0) throw new SQLException("Unable to update a user's balance. (inexistent uuid)");
+				if (stm.executeUpdate() == 0) {
+					throw new SQLException("Unable to update a user's balance. (inexistent uuid)");
+				}
 			}
 		}
 	}
@@ -548,13 +569,15 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void addMinorBalance(@NotNull ProxyOperableUser user, long amount) throws Exception {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = `%s` + ? WHERE `%s` = ?;", TABLE_USERS, USERS_MINORBALANCE, USERS_MINORBALANCE, USERS_UUID));
-		try (Connection conn = this.hikari.getConnection()) {
+		String sql = mapQuery("UPDATE `%s` SET `%s` = `%s` + ? WHERE `%s` = ?"
+				.formatted(TABLE_USERS, USERS_MINORBALANCE, USERS_MINORBALANCE, USERS_UUID));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setLong(1, amount);
 				stm.setString(2, user.getUniqueId().toString());
-				if (stm.executeUpdate() == 0) throw new SQLException("Unable to update a user's minor balance. (inexistent uuid)");
+				if (stm.executeUpdate() == 0) {
+					throw new SQLException("Unable to update a user's minor balance. (inexistent uuid)");
+				}
 			}
 		}
 	}
@@ -569,13 +592,15 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void takeBalance(@NotNull ProxyOperableUser user, long amount) throws SQLException {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?;", TABLE_USERS, USERS_BALANCE, USERS_BALANCE, USERS_UUID));
-		try (Connection conn = this.hikari.getConnection()) {
+		String sql = mapQuery("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?"
+				.formatted(TABLE_USERS, USERS_BALANCE, USERS_BALANCE, USERS_UUID));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setLong(1, amount);
 				stm.setString(2, user.getUniqueId().toString());
-				if (stm.executeUpdate() == 0) throw new SQLException("Unable to update a user's balance. (inexistent uuid)");
+				if (stm.executeUpdate() == 0) {
+					throw new SQLException("Unable to update a user's balance. (inexistent uuid)");
+				}
 			}
 		}
 	}
@@ -590,13 +615,15 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void takeMinorBalance(@NotNull ProxyOperableUser user, long amount) throws SQLException {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?;", TABLE_USERS, USERS_MINORBALANCE, USERS_MINORBALANCE, USERS_UUID));
-		try (Connection conn = this.hikari.getConnection()) {
+		String sql = mapQuery("UPDATE `%s` SET `%s` = `%s` - ? WHERE `%s` = ?"
+				.formatted(TABLE_USERS, USERS_MINORBALANCE, USERS_MINORBALANCE, USERS_UUID));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setLong(1, amount);
 				stm.setString(2, user.getUniqueId().toString());
-				if (stm.executeUpdate() == 0) throw new SQLException("Unable to update a user's balance. (inexistent uuid)");
+				if (stm.executeUpdate() == 0) {
+					throw new SQLException("Unable to update a user's balance. (inexistent uuid)");
+				}
 			}
 		}
 	}
@@ -611,13 +638,15 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void setBalance(@NotNull ProxyOperableUser user, long balance) throws SQLException {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?;", TABLE_USERS, USERS_BALANCE, USERS_UUID));
-		try (Connection conn = this.hikari.getConnection()) {
+		String sql = mapQuery("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?"
+				.formatted(TABLE_USERS, USERS_BALANCE, USERS_UUID));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setLong(1, balance);
 				stm.setString(2, user.getUniqueId().toString());
-				if (stm.executeUpdate() == 0) throw new SQLException("Unable to update a user's balance. (inexistent uuid)");
+				if (stm.executeUpdate() == 0) {
+					throw new SQLException("Unable to update a user's balance. (inexistent uuid)");
+				}
 			}
 		}
 	}
@@ -632,13 +661,15 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void setMinorBalance(@NotNull ProxyOperableUser user, long balance) throws SQLException {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?;", TABLE_USERS, USERS_MINORBALANCE, USERS_UUID));
-		try (Connection conn = this.hikari.getConnection()) {
+		String sql = mapQuery("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?"
+				.formatted(TABLE_USERS, USERS_MINORBALANCE, USERS_UUID));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setLong(1, balance);
 				stm.setString(2, user.getUniqueId().toString());
-				if (stm.executeUpdate() == 0) throw new SQLException("Unable to update a user's minor balance. (inexistent uuid)");
+				if (stm.executeUpdate() == 0) {
+					throw new SQLException("Unable to update a user's minor balance. (inexistent uuid)");
+				}
 			}
 		}
 	}
@@ -653,13 +684,15 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 */
 	@Override
 	public void setDeniedInTop(@NotNull ProxyOperableUser user, boolean deniedInTop) throws SQLException {
-		this.checkConnection();
-		String sql = this.mapQuery(String.format("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?;", TABLE_USERS, USERS_IGNORETOP, USERS_UUID));
-		try (Connection conn = this.hikari.getConnection()) {
+		String sql = mapQuery("UPDATE `%s` SET `%s` = ? WHERE `%s` = ?"
+				.formatted(TABLE_USERS, USERS_IGNORETOP, USERS_UUID));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setBoolean(1, deniedInTop);
 				stm.setString(2, user.getUniqueId().toString());
-				if (stm.executeUpdate() == 0) throw new SQLException("Unable to update a user's deniedInTop state. (inexistent uuid)");
+				if (stm.executeUpdate() == 0) {
+					throw new SQLException("Unable to update a user's deniedInTop state. (inexistent uuid)");
+				}
 			}
 		}
 	}
@@ -673,10 +706,10 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 * @throws Exception when something went wrong
 	 */
 	public @NotNull List<TopEntry> getTop(int limit) throws SQLException {
-		this.checkConnection();
-		List<TopEntry> list = new ArrayList<>();
-		String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? ORDER BY `%s` DESC LIMIT ?;", USERS_UUID, USERS_NAME, USERS_BALANCE, TABLE_USERS, USERS_IGNORETOP, USERS_BALANCE));
-		try (Connection conn = this.hikari.getConnection()) {
+		List<TopEntry> list = new ArrayList<>(limit);
+		String sql = mapQuery("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? ORDER BY `%s` DESC LIMIT ?"
+				.formatted(USERS_UUID, USERS_NAME, USERS_BALANCE, TABLE_USERS, USERS_IGNORETOP, USERS_BALANCE));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setBoolean(1, false);
 				stm.setInt(2, limit);
@@ -700,10 +733,10 @@ public abstract class HikariDB<C> implements AbstractDB {
 	 * @throws Exception when something went wrong
 	 */
 	public @NotNull List<TopEntry> getMinorTop(int limit) throws SQLException {
-		this.checkConnection();
-		List<TopEntry> list = new ArrayList<>();
-		String sql = this.mapQuery(String.format("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? ORDER BY `%s` DESC LIMIT ?;", USERS_UUID, USERS_NAME, USERS_MINORBALANCE, TABLE_USERS, USERS_IGNORETOP, USERS_MINORBALANCE));
-		try (Connection conn = this.hikari.getConnection()) {
+		List<TopEntry> list = new ArrayList<>(limit);
+		String sql = mapQuery("SELECT `%s`, `%s`, `%s` FROM `%s` WHERE `%s` = ? ORDER BY `%s` DESC LIMIT ?"
+				.formatted(USERS_UUID, USERS_NAME, USERS_MINORBALANCE, TABLE_USERS, USERS_IGNORETOP, USERS_MINORBALANCE));
+		try (Connection conn = connect()) {
 			try (PreparedStatement stm = conn.prepareStatement(sql)) {
 				stm.setBoolean(1, false);
 				stm.setInt(2, limit);
@@ -719,31 +752,23 @@ public abstract class HikariDB<C> implements AbstractDB {
 	}
 	
 	/**
-	 * Check if connection can be obtained, otherwise creates new one.
-	 */
-	public void checkConnection() {
-		if (!this.isConnected()) this.setup();
-	}
-	
-	/**
 	 * Check for tables existence and create them if not exists already.
 	 * 
 	 * @throws SQLException when cannot establish the connection to the database
 	 */
 	private void setupTables() throws SQLException {
-		this.checkConnection();
-		String usersTable = this.mapQuery(String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(16) NOT NULL,"
+		String usersTable = mapQuery(("CREATE TABLE IF NOT EXISTS `%s` (`%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(16) NOT NULL,"
 				+ "`%s` INT UNSIGNED NOT NULL DEFAULT '0', `%s` INT UNSIGNED NOT NULL DEFAULT '0', `%s` BOOLEAN NOT NULL DEFAULT FALSE,"
-				+ "PRIMARY KEY (`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
-				TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, USERS_UUID));
-		String logsTable = this.mapQuery(String.format("CREATE TABLE IF NOT EXISTS `%s` (`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT, `%s` VARCHAR(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,"
+				+ "PRIMARY KEY (`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci")
+						.formatted(TABLE_USERS, USERS_UUID, USERS_NAME, USERS_BALANCE, USERS_MINORBALANCE, USERS_IGNORETOP, USERS_UUID));
+		String logsTable = mapQuery(("CREATE TABLE IF NOT EXISTS `%s` (`%s` INT UNSIGNED NOT NULL AUTO_INCREMENT, `%s` VARCHAR(36) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,"
 				+ "`%s` VARCHAR(16) NOT NULL, `%s` VARCHAR(24) NOT NULL, `%s` VARCHAR(32) NOT NULL, `%s` VARCHAR(36) NOT NULL,"
 				+ "`%s` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, `%s` VARCHAR(36) NOT NULL, `%s` VARCHAR(8) NOT NULL,"
 				+ "`%s` INT UNSIGNED NOT NULL, `%s` INT UNSIGNED NOT NULL, PRIMARY KEY (`%s`), "
-				+ "FOREIGN KEY (`%s`) REFERENCES `%s`(`%s`)) ENGINE = InnoDB CHARSET=ascii COLLATE ascii_general_ci;",
-				TABLE_LOGS, LOGS_ID, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER, LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_TIME, LOGS_ORDERNAME,
-				LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE, LOGS_ID, LOGS_UUID, TABLE_USERS, USERS_UUID));
-		try (Connection conn = this.hikari.getConnection()) {
+				+ "FOREIGN KEY (`%s`) REFERENCES `%s`(`%s`)) CHARSET=ascii COLLATE ascii_general_ci")
+						.formatted(TABLE_LOGS, LOGS_ID, LOGS_UUID, LOGS_USERNAME, LOGS_SERVER, LOGS_EXECUTOR, LOGS_EXECUTORUUID, LOGS_TIME, LOGS_ORDERNAME,
+								LOGS_ACTION, LOGS_VALUE, LOGS_BALANCE, LOGS_ID, LOGS_UUID, TABLE_USERS, USERS_UUID));
+		try (Connection conn = connect()) {
 			try (Statement stm = conn.createStatement()) {
 				// users
 				stm.addBatch(usersTable);
@@ -767,7 +792,7 @@ public abstract class HikariDB<C> implements AbstractDB {
 	}
 	
 	private String buildIndexQuery(@NotNull String table, @NotNull String column) {
-		return this.mapQuery(String.format("ALTER TABLE `%s` ADD INDEX `%s`(`%s`);", table, table+"|"+column, column));
+		return mapQuery(String.format("ALTER TABLE `%s` ADD INDEX `%s`(`%s`)", table, table+"|"+column, column));
 	}
 
 }

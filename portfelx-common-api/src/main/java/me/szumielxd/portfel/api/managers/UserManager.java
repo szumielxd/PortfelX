@@ -63,10 +63,11 @@ public interface UserManager {
 	 * 
 	 * @implNote <b>Thread Unsafe</b>
 	 * @param uuid unique identifier of user
+	 * @param username last known name of user
 	 * @return already loaded user or new one if not loaded already
 	 * @throws Exception if something went wrong
 	 */
-	public @NotNull User getOrCreateUser(@NotNull UUID uuid) throws Exception;
+	public @NotNull User getOrCreateUser(@NotNull UUID uuid, @NotNull String username) throws Exception;
 	
 	/**
 	 * Get unmodifiable list of all currently loaded users.

@@ -32,6 +32,7 @@ public enum ProxyConfigKey implements AbstractKey {
 	DATABASE_TABLE_USERS_COLLUMN_BALANCE("database.table.users.collumn.balance", "balance"),
 	DATABASE_TABLE_USERS_COLLUMN_MINORBALANCE("database.table.users.collumn.minor-balance", "minor_balance"),
 	DATABASE_TABLE_USERS_COLLUMN_IGNORETOP("database.table.users.collumn.intop", "ignore_top"),
+	DATABASE_TABLE_USERS_COLLUMN_LASTJOIN("database.table.users.collumn.last-join", "last_join"),
 	//
 	DATABASE_TABLE_LOGS_NAME("database.table.logs.name", "wallet_logs"),
 	DATABASE_TABLE_LOGS_COLLUMN_ID("database.table.logs.collumn.id", "id"),
