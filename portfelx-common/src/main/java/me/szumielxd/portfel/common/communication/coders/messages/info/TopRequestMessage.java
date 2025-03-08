@@ -20,6 +20,6 @@ import me.szumielxd.portfel.common.communication.coders.MessagePacket;
 @EqualsAndHashCode
 public class TopRequestMessage implements MessagePacket {
 	
-	@Getter @MessageEntry(MessageEntryCoders.ASCII) private @NotNull EcoType type;
+	@Getter @MessageEntry(MessageEntryCoders.ENUM) private @NotNull EcoType type;
 
 }
