@@ -3,6 +3,7 @@ package me.szumielxd.portfel.common.utils;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -10,7 +11,9 @@ import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -299,6 +302,15 @@ public class MiscUtils {
 			time.append(MainLangKey.MAIN_VALUE_TIME_SECONDS.draft(sec).buildPlain(lang)); // seconds
 		}
 		return time.toString();
+	}
+	
+	public static <E extends Enum<E>, T> EnumMap<E, T> mapOfEachEnum(Class<E> type, Function<E, T> valueGenerator) {
+		return Stream.of(type.getEnumConstants())
+				.collect(Collectors.toMap(
+						Function.identity(),
+						valueGenerator,
+						(a, b) -> a,
+						() -> new EnumMap<>(type)));
 	}
 	
 
