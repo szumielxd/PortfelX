@@ -8,6 +8,7 @@ import com.google.common.io.ByteArrayDataInput;
 
 import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.common.communication.coders.SubchannelName;
 import me.szumielxd.portfel.common.communication.coders.messages.common.UserIdentifier;
 import me.szumielxd.portfel.common.communication.coders.messages.info.ServerInfoMessage;
 import me.szumielxd.portfel.common.communication.coders.messages.info.TopMessage;
@@ -27,11 +28,11 @@ public class InfoChannelListener<T extends PortfelProxyImpl<C>, C> extends Speci
 
 
 	@Override
-	public void onPluginMessage(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	public void onPluginMessage(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in) {
 		switch (subchannel) {
-			case "UserInfo" -> onUserData(sender, target, tag);
-			case "ServerInfo" -> onServerData(target, tag, subchannel, in);
-			case "Top" -> onTopData(sender, tag, subchannel, in);
+			case USER_INFO -> onUserData(sender, target, tag);
+			case SERVER_INFO -> onServerData(target, tag, subchannel, in);
+			case TOP_INFO -> onTopData(sender, tag, subchannel, in);
 			default -> { /* ignore */}
 		}
 	}
@@ -52,7 +53,7 @@ public class InfoChannelListener<T extends PortfelProxyImpl<C>, C> extends Speci
 	
 	
 	// user channel
-	private boolean onServerData(@NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onServerData(@NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			Optional.ofNullable(getPlugin().getUserManager().getUser(target.getUniqueId())).ifPresent(user -> {
 				var serverInfo = decode(ServerInfoMessage.class, tag, subchannel, in);
@@ -68,7 +69,7 @@ public class InfoChannelListener<T extends PortfelProxyImpl<C>, C> extends Speci
 	
 	
 	// user channel
-	private boolean onTopData(@NotNull ProxyServerConnection<C> sender, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onTopData(@NotNull ProxyServerConnection<C> sender, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			var request = decode(TopRequestMessage.class, tag, subchannel, in);
 			var type = request.getType();

@@ -12,8 +12,9 @@ import me.szumielxd.portfel.common.communication.coders.IdentifiedMessage;
 import me.szumielxd.portfel.common.communication.coders.MessageEntry;
 import me.szumielxd.portfel.common.communication.coders.MessageEntryCoders;
 import me.szumielxd.portfel.common.communication.coders.MessagePacket;
+import me.szumielxd.portfel.common.communication.coders.SubchannelName;
 
-@IdentifiedMessage("Top")
+@IdentifiedMessage(SubchannelName.TOP_INFO)
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString

@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import me.szumielxd.portfel.common.communication.coders.EncryptedObject;
 import me.szumielxd.portfel.common.communication.coders.MessagePacket;
 import me.szumielxd.portfel.common.communication.coders.PacketCoder;
+import me.szumielxd.portfel.common.communication.coders.SubchannelName;
 import me.szumielxd.portfel.common.utils.CryptoUtils.DecryptionException;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
@@ -26,7 +27,7 @@ public abstract class SpecificChannelListener<T extends PortfelProxyImpl<C>, C> 
 	
 	public abstract @NotNull String getListenedChannel();
 	
-	public abstract void onPluginMessage(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in);
+	public abstract void onPluginMessage(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in);
 	
 	public boolean isListening(@NotNull String channel) {
 		return getListenedChannel().equals(channel);
@@ -46,23 +47,23 @@ public abstract class SpecificChannelListener<T extends PortfelProxyImpl<C>, C> 
 		return Objects.requireNonNull(this.plugin.getAccessManager().getHashKey(serverId), "Invalid server");
 	}
 	
-	protected <E extends MessagePacket> E decode(Class<E> clazz, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	protected <E extends MessagePacket> E decode(Class<E> clazz, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in) {
 		return PacketCoder.decode(in, clazz)
 				.orElseThrow(() -> new IllegalArgumentException(
-						"Unknown packet structure for subchannel `%s` in channel `%s`".formatted(subchannel, tag)));
+						"Unknown packet structure for subchannel `%s` in channel `%s`".formatted(subchannel.getName(), tag)));
 	}
 	
-	protected @NotNull <E> Optional<E> decrypt(@NotNull EncryptedObject<E> obj, @NotNull String cryptoKey, @NotNull ProxyPlayer<C> player, @NotNull String subchannel, @NotNull String tag) {
+	protected @NotNull <E> Optional<E> decrypt(@NotNull EncryptedObject<E> obj, @NotNull String cryptoKey, @NotNull ProxyPlayer<C> player, @NotNull SubchannelName subchannel, @NotNull String tag) {
 		try {
 			return Optional.of(obj.decrypt(cryptoKey));
 		} catch (DecryptionException e) {
 			plugin.logger().warn(e, "Couldn't decrypt data for player `%s` in subchannel `%s` in channel `%s`"
-					.formatted(player.getName(), subchannel, tag));
+					.formatted(player.getName(), subchannel.getName(), tag));
 			return Optional.empty();
 		}
 	}
 	
-	protected @NotNull <E> Optional<E> decrypt(@NotNull EncryptedObject<E> obj, @NotNull UUID serverId, @NotNull ProxyPlayer<C> player, @NotNull String subchannel, @NotNull String tag) {
+	protected @NotNull <E> Optional<E> decrypt(@NotNull EncryptedObject<E> obj, @NotNull UUID serverId, @NotNull ProxyPlayer<C> player, @NotNull SubchannelName subchannel, @NotNull String tag) {
 		return decrypt(obj, getCryptoKey(serverId), player, subchannel, tag);
 	}
 

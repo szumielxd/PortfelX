@@ -12,6 +12,7 @@ import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.enums.TransactionStatus;
 import me.szumielxd.portfel.common.communication.coders.EncryptedObject;
+import me.szumielxd.portfel.common.communication.coders.SubchannelName;
 import me.szumielxd.portfel.common.communication.coders.messages.eco.MinorEcoGiveRequestMessage;
 import me.szumielxd.portfel.common.communication.coders.messages.eco.MinorEcoGiveResultMessage;
 import me.szumielxd.portfel.common.communication.coders.messages.eco.MinorEcoTakeRequestMessage;
@@ -33,18 +34,18 @@ public class TransactionsChannelListener<T extends PortfelProxyImpl<C>, C> exten
 
 
 	@Override
-	public void onPluginMessage(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	public void onPluginMessage(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in) {
 		switch (subchannel) {
-			case "Buy" -> onTransaction(sender, target, tag, subchannel, in);
-			case "MinorTake" -> onMinorEcoTake(sender, target, tag, subchannel, in);
-			case "MinorGive" -> onMinorEcoGive(sender, target, tag, subchannel, in);
+			case BUY -> onTransaction(sender, target, tag, subchannel, in);
+			case MINORECO_TAKE -> onMinorEcoTake(sender, target, tag, subchannel, in);
+			case MINORECO_GIVE -> onMinorEcoGive(sender, target, tag, subchannel, in);
 			default -> { /* ignore */}
 		}
 	}
 	
 
 	// transaction channel
-	private boolean onTransaction(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onTransaction(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in) {
 		var request = decode(TransactionRequestMessage.class, tag, subchannel, in);
 		try {
 			var serverId = request.getServerId();
@@ -60,7 +61,7 @@ public class TransactionsChannelListener<T extends PortfelProxyImpl<C>, C> exten
 	}
 	
 	// transaction channel
-	private boolean onMinorEcoGive(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onMinorEcoGive(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			var request = decode(MinorEcoGiveRequestMessage.class, tag, subchannel, in);
 			var serverId = request.getServerId();
@@ -76,7 +77,7 @@ public class TransactionsChannelListener<T extends PortfelProxyImpl<C>, C> exten
 	}
 	
 	// transaction channel
-	private boolean onMinorEcoTake(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull String subchannel, @NotNull ByteArrayDataInput in) {
+	private boolean onMinorEcoTake(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag, @NotNull SubchannelName subchannel, @NotNull ByteArrayDataInput in) {
 		try {
 			var request = decode(MinorEcoTakeRequestMessage.class, tag, subchannel, in);
 			var serverId = request.getServerId();

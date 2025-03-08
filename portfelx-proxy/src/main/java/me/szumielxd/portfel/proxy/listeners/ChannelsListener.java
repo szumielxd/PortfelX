@@ -13,6 +13,7 @@ import com.google.common.io.ByteStreams;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import me.szumielxd.portfel.common.communication.coders.SubchannelName;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.PluginMessageTarget;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
@@ -45,9 +46,10 @@ public abstract class ChannelsListener<T extends PortfelProxyImpl<C>, C> {
 			ProxyServerConnection<C> server = (ProxyServerConnection<C>) sender;
 			ProxyPlayer<C> player = (ProxyPlayer<C>) target;
 			ByteArrayDataInput in = ByteStreams.newDataInput(message);
-			String subchannel = in.readUTF();
-			var channel = Objects.requireNonNull(listenedChannels.get(tag), "channel cannot be null");
-			channel.onPluginMessage(server, player, tag, subchannel, in);
+			SubchannelName.getByName(in.readUTF()).ifPresent(subchannel -> {
+				var channel = Objects.requireNonNull(listenedChannels.get(tag), "channel cannot be null");
+				channel.onPluginMessage(server, player, tag, subchannel, in);
+			});
 		}
 		return Optional.of(true);
 	}

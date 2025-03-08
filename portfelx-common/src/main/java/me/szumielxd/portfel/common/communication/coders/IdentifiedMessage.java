@@ -11,6 +11,6 @@ import org.jetbrains.annotations.NotNull;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IdentifiedMessage {
 	
-	@NotNull String value();
+	@NotNull SubchannelName value();
 
 }

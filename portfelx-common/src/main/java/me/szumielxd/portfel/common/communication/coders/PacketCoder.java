@@ -18,7 +18,7 @@ public class PacketCoder {
 	
 	
 	@SuppressWarnings("unchecked")
-	public <T extends MessagePacket> Optional<T> decode(@NotNull ByteArrayDataInput in, @NotNull Class<T> messageClass) {
+	public <T extends MessagePacket> @NotNull Optional<T> decode(@NotNull ByteArrayDataInput in, @NotNull Class<T> messageClass) {
 		fetchMessageMeta(messageClass);
 		return MessageEntryCoder.OBJECT_FETCHER.generateIfValid(messageClass)
 				.map(c -> (T) c.decode(in));
@@ -31,11 +31,14 @@ public class PacketCoder {
 	}
 	
 	public byte[] encodePacket(@NotNull MessagePacket message) {
-		IdentifiedMessage msgMeta = fetchMessageMeta(message.getClass());
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
-		out.writeUTF(msgMeta.value());
+		out.writeUTF(getSubchannel(message.getClass()).getName());
 		encode(out, message);
 		return out.toByteArray();
+	}
+	
+	public static @NotNull SubchannelName getSubchannel(@NotNull Class<? extends MessagePacket> messageClass) {
+		return fetchMessageMeta(messageClass).value();
 	}
 	
 	
@@ -54,7 +57,7 @@ public class PacketCoder {
 	}
 	
 	
-	private IdentifiedMessage fetchMessageMeta(@NotNull Class<?> messageClass) {
+	private @NotNull IdentifiedMessage fetchMessageMeta(@NotNull Class<?> messageClass) {
 		IdentifiedMessage msgMeta = messageClass.getAnnotation(IdentifiedMessage.class);
 		if (msgMeta == null) {
 			throw new IllegalArgumentException("Cannot find @MessageIdentifier annotation within given `message` class");
