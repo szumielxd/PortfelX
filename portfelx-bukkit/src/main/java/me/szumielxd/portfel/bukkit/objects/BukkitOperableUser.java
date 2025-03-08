@@ -11,6 +11,7 @@ import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager.BalanceUpdateResult;
+import me.szumielxd.portfel.common.communication.coders.messages.info.UserInfoMessage;
 import me.szumielxd.portfel.common.utils.ExceptionalRunnable;
 
 public class BukkitOperableUser extends User {
@@ -245,8 +246,30 @@ public class BukkitOperableUser extends User {
 		});
 	}
 	
+	public void updateInfo(@NotNull UserInfoMessage message) {
+		setName(message.getUser().getUsername());
+		setPlainBalance(message.getBalance());
+		setPlainMinorBalance(message.getMinorBalance());
+		setPlainDeniedInTop(message.isDeniedInTop());
+		if (this.getRemoteId() != message.getProxyId()) {
+			setRemoteId(message.getProxyId());
+			this.serverName = null;
+		}
+	}
+	
 	private @NotNull UnsupportedOperationException buildBalanceSelfModificationException() {
 		return new UnsupportedOperationException("Bukkit instance cannot modify user's balance by itself.");
+	}
+	
+	public static @NotNull BukkitOperableUser buildFromUserInfoMessage(@NotNull PortfelBukkitImpl plugin, @NotNull UserInfoMessage message) {
+		return new BukkitOperableUser(plugin,
+				message.getUser().getUniqueId(),
+				message.getUser().getUsername(),
+				message.isDeniedInTop(),
+				message.getBalance(),
+				message.getMinorBalance(),
+				message.getProxyId(),
+				null);
 	}
 
 }
