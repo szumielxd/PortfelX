@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -258,6 +259,7 @@ public abstract class AccessManagerImpl<P extends PortfelProxyImpl<C>, C> implem
 	 * @return string display name
 	 */
 	@Override
+	@Contract("null -> null")
 	public final @Nullable String getServerName(@NotNull UUID serverId) {
 		if (this.canAccess(serverId)) {
 			JsonObject obj = this.accessMap.getAsJsonObject(serverId.toString());

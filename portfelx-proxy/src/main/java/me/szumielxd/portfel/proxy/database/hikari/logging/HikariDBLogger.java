@@ -299,10 +299,10 @@ public class HikariDBLogger<C> implements AbstractDBLogger {
 		this.validate();
 		this.plugin.getCommonServer().getPlayers().forEach(player -> {
 			if (player.isConnected() && player.hasPermission("portfel.verbose")) {
-				User user = this.plugin.getUserManager().getUser(player.getUniqueId());
+				var user = this.plugin.getUserManager().getUser(player.getUniqueId());
 				if (user != null) {
 					var exec = log.getExecutor().getDisplayName() + Optional.of(log.getServer())
-							.filter(n -> !n.equals(user.getServerName()))
+							.filter(n -> !n.equals(user.getRemoteName()))
 							.map("@"::concat)
 							.orElse("");
 					withLogPrefix(ProxyLangKey.LOG_MESSAGE_LINE1.draft(

@@ -9,7 +9,6 @@ import me.szumielxd.portfel.api.configuration.AbstractKey;
 
 public enum BukkitConfigKey implements AbstractKey {
 	
-	SERVER_NAME("server.name", "UNKNOWN"),
 	SHOP_TERMS_OF_SERVICE("shop.terms-of-service", "http://example.com/terms"),
 	SHOP_MENU_BACKGROUND("shop.menu-background", Material.getMaterial("WOOL") != null? "WOOL:15" : "BLACK_WOOL"),
 	SHOP_MENU_ROWS("shop.menu-rows", 5),

@@ -9,15 +9,14 @@ import org.jetbrains.annotations.Nullable;
 public abstract class User {
 	
 	
-	protected UUID uuid;
-	protected String name;
+	protected @NotNull UUID uuid;
+	protected @NotNull String name;
 	protected boolean online;
 	protected long lastUpdated;
 	protected boolean deniedInTop;
 	protected long balance;
 	protected long minorBalance;
-	protected String serverName;
-	protected UUID remoteId;
+	protected @Nullable UUID remoteId;
 	
 	
 	/**
@@ -140,15 +139,6 @@ public abstract class User {
 	 */
 	public @NotNull String getName() {
 		return this.name;
-	}
-	
-	/**
-	 * Get name of user's current server
-	 * 
-	 * @return server name
-	 */
-	public @Nullable String getServerName() {
-		return this.serverName;
 	}
 	
 	/**

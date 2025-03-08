@@ -180,9 +180,12 @@ public class ProxyOperableUser extends User {
 	 * @param serverId UUID of server
 	 * @param serverName name of server
 	 */
-	public void setRemoteIdAndName(@Nullable UUID serverId, @Nullable String serverName) {
+	public void setRemoteId(@Nullable UUID serverId) {
 		this.remoteId = serverId;
-		this.serverName = serverName;
+	}
+	
+	public @Nullable String getRemoteName() {
+		return plugin.getAccessManager().getServerName(getRemoteId());
 	}
 	
 	/**

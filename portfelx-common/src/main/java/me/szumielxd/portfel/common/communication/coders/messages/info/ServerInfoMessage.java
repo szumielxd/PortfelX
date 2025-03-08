@@ -22,6 +22,5 @@ import me.szumielxd.portfel.common.communication.coders.MessagePacket;
 public class ServerInfoMessage implements MessagePacket {
 	
 	@Getter @MessageEntry(MessageEntryCoders.UUID) private @NotNull UUID serverId;
-	@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull String serverName;
 
 }

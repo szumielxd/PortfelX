@@ -57,7 +57,7 @@ public class InfoChannelListener<T extends PortfelProxyImpl<C>, C> extends Speci
 			Optional.ofNullable(getPlugin().getUserManager().getUser(target.getUniqueId())).ifPresent(user -> {
 				var serverInfo = decode(ServerInfoMessage.class, tag, subchannel, in);
 				if (canAccess(serverInfo.getServerId())) {
-					user.setRemoteIdAndName(serverInfo.getServerId(), serverInfo.getServerName());
+					user.setRemoteId(serverInfo.getServerId());
 				}
 			});
 		} catch (Exception e) {	

@@ -22,7 +22,6 @@ import com.google.common.io.ByteStreams;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
-import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
@@ -32,6 +31,7 @@ import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
 import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 import me.szumielxd.portfel.proxy.objects.PrizeToken;
+import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
 
 public class TokenManager<C> {
 	
@@ -55,7 +55,7 @@ public class TokenManager<C> {
 	
 	
 	public void tryValidateToken(@NotNull ProxyPlayer<C> target, @NotNull String token) {
-		User user = this.plugin.getUserManager().getUser(target.getUniqueId());
+		var user = this.plugin.getUserManager().getUser(target.getUniqueId());
 		if (user == null) {
 			MainLangKey.ERROR_COMMAND_USER_NOT_LOADED.draft()
 					.sendPrefixed(target);
@@ -72,7 +72,7 @@ public class TokenManager<C> {
 			return;
 		}
 		try {
-			this.executeValidation(target, user, target, token);
+			executeValidation(target, user, target, token);
 		} catch (Exception e) {
 			e.printStackTrace();
 			MainLangKey.ERROR_COMMAND_EXECUTION.draft()
@@ -121,18 +121,19 @@ public class TokenManager<C> {
 	}
 	
 	
-	private void executeValidation(@NotNull ProxyPlayer<C> target, @NotNull User user, @NotNull CommonPlayer<C> sender, @NotNull String token) throws Exception {
+	private void executeValidation(@NotNull ProxyPlayer<C> target, @NotNull ProxyOperableUser user, @NotNull CommonPlayer<C> sender, @NotNull String token) throws Exception {
 		PrizeToken prize = this.plugin.getTokenDatabase().getToken(token);
 		if (prize != null) {
+			String serverName = user.getRemoteName();
 			boolean valid = switch (prize.getSelectorType()) {
 				case ANY -> true;
-				case REGISTERED -> user.getServerName() != null;
-				case WHITELIST -> prize.getServerNames().contains(user.getServerName());
+				case REGISTERED -> plugin.getAccessManager().canAccess(user.getRemoteId());
+				case WHITELIST -> prize.getServerNames().contains(serverName);
 			};
 			if (valid) {
 				if (this.plugin.getTokenDatabase().destroyToken(token)) {
 					this.cachedTokens.removeIf(t -> token.equals(t.getToken()));
-					this.plugin.getTransactionLogger().logTokenUse(user, user.getServerName(), prize);
+					this.plugin.getTransactionLogger().logTokenUse(user, serverName != null ? serverName : "UNKNOWN", prize);
 					long executed = this.plugin.getPrizesManager().getOrders().values().stream()
 							.filter(o -> o.examine(user, prize.getOrder(), token))
 							.count();

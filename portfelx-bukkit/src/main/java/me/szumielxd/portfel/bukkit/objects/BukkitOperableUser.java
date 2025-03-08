@@ -17,7 +17,7 @@ import me.szumielxd.portfel.common.utils.ExceptionalRunnable;
 public class BukkitOperableUser extends User {
 	
 	
-	private final PortfelBukkitImpl plugin;
+	private final @NotNull PortfelBukkitImpl plugin;
 	private boolean testmode = false;
 	
 	/**
@@ -30,11 +30,10 @@ public class BukkitOperableUser extends User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public BukkitOperableUser(@NotNull PortfelBukkitImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, long minorBalance, @NotNull UUID proxyId, @NotNull String serverName) {
+	public BukkitOperableUser(@NotNull PortfelBukkitImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean online, boolean deniedInTop, long balance, long minorBalance, @NotNull UUID proxyId) {
 		super(uuid, name, online, deniedInTop, balance, minorBalance);
 		this.plugin = plugin;
 		this.remoteId = proxyId;
-		this.serverName = serverName;
 	}
 	
 	/**
@@ -47,8 +46,8 @@ public class BukkitOperableUser extends User {
 	 * @param deniedInTop true if user can be visible in top
 	 * @param balance user's current balance
 	 */
-	public BukkitOperableUser(@NotNull PortfelBukkitImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean deniedInTop, long balance, long minorBalance, @NotNull UUID proxyId, @NotNull String serverName) {
-		this(plugin, uuid, name, Optional.ofNullable(plugin.getCommonServer().getPlayer(uuid)).filter(BukkitPlayer::isConnected).isPresent(), deniedInTop, balance, minorBalance, proxyId, serverName);
+	public BukkitOperableUser(@NotNull PortfelBukkitImpl plugin, @NotNull UUID uuid, @NotNull String name, boolean deniedInTop, long balance, long minorBalance, @NotNull UUID proxyId) {
+		this(plugin, uuid, name, Optional.ofNullable(plugin.getCommonServer().getPlayer(uuid)).filter(BukkitPlayer::isConnected).isPresent(), deniedInTop, balance, minorBalance, proxyId);
 	}
 	
 	/**
@@ -253,7 +252,6 @@ public class BukkitOperableUser extends User {
 		setPlainDeniedInTop(message.isDeniedInTop());
 		if (this.getRemoteId() != message.getProxyId()) {
 			setRemoteId(message.getProxyId());
-			this.serverName = null;
 		}
 	}
 	
@@ -268,8 +266,7 @@ public class BukkitOperableUser extends User {
 				message.isDeniedInTop(),
 				message.getBalance(),
 				message.getMinorBalance(),
-				message.getProxyId(),
-				null);
+				message.getProxyId());
 	}
 
 }
