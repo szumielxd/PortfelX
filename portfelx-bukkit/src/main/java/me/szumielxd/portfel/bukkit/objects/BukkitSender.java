@@ -93,8 +93,22 @@ public class BukkitSender implements CommonSender<Component> {
 	 * @return CommonSender or its subclass
 	 */
 	public static @NotNull BukkitSender wrap(@NotNull PortfelBukkitImpl plugin, @NotNull CommandSender sender) {
-		if (Objects.requireNonNull(sender, "sender cannot be null") instanceof Player) return new BukkitPlayer(plugin, (Player) sender);
+		if (Objects.requireNonNull(sender, "sender cannot be null") instanceof Player player) {
+			return new BukkitPlayer(plugin, player);
+		}
 		return new BukkitSender(plugin, sender);
+	}
+	
+	
+	/**
+	 * Creates CommonPlayer.
+	 * 
+	 * @param plugin Portfel instance
+	 * @param player player to wrap
+	 * @return CommonSender or its subclass
+	 */
+	public static @NotNull BukkitPlayer player(@NotNull PortfelBukkitImpl plugin, @NotNull Player player) {
+		return new BukkitPlayer(plugin, player);
 	}
 	
 	@Override

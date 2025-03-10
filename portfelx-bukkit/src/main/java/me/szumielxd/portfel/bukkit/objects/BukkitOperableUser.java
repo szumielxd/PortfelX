@@ -10,9 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
-import me.szumielxd.portfel.bukkit.api.managers.ChannelManager.BalanceUpdateResult;
 import me.szumielxd.portfel.common.communication.coders.messages.info.UserInfoMessage;
-import me.szumielxd.portfel.common.utils.ExceptionalRunnable;
+import me.szumielxd.portfel.common.utils.future.ExceptionalRunnable;
 
 public class BukkitOperableUser extends User {
 	
@@ -185,11 +184,12 @@ public class BukkitOperableUser extends User {
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
 	public @NotNull CompletableFuture<Void> giveMinorBalance(long amount) {
-		return ExceptionalRunnable.runAsync(() -> {
-			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
-			BalanceUpdateResult result = this.plugin.getChannelManager().requestGiveMinorBalance(player, amount);
-			this.minorBalance = result.getNewBalance();
-		});
+		Player player = plugin.getServer().getPlayer(this.getUniqueId());
+		if (player == null || !player.isOnline()) {
+			return CompletableFuture.failedFuture(new IllegalStateException("player is offline"));
+		}
+		return plugin.getChannelManager().requestGiveMinorBalance(player, amount)
+				.thenAccept(result -> this.minorBalance = result.getNewBalance());
 	}
 	
 	/**
@@ -199,14 +199,15 @@ public class BukkitOperableUser extends User {
 	 * @return A future that will be completed with true if succeeded, otherwise false
 	 */
 	public @NotNull CompletableFuture<Void> takeMinorBalance(long amount) {
-		return ExceptionalRunnable.runAsync(() -> {
-			if (this.minorBalance < amount) {
-				throw new IllegalArgumentException("`amount` cannot be smaller than user's current minor balance");
-			}
-			Player player = this.plugin.getServer().getPlayer(this.getUniqueId());
-			BalanceUpdateResult result = this.plugin.getChannelManager().requestTakeMinorBalance(player, amount);
-			this.minorBalance = result.getNewBalance();
-		});
+		if (this.minorBalance < amount) {
+			return CompletableFuture.failedFuture(new IllegalArgumentException("`amount` cannot be smaller than user's current minor balance"));
+		}
+		Player player = plugin.getServer().getPlayer(this.getUniqueId());
+		if (player == null || !player.isOnline()) {
+			return CompletableFuture.failedFuture(new IllegalStateException("player is offline"));
+		}
+		return plugin.getChannelManager().requestTakeMinorBalance(player, amount)
+				.thenAccept(result -> this.minorBalance = result.getNewBalance());
 	}
 	
 	/**
