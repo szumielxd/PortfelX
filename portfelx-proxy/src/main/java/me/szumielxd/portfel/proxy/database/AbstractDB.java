@@ -203,6 +203,16 @@ public interface AbstractDB {
 	public @NotNull List<TopEntry> getTop(int limit) throws Exception;
 	
 	/**
+	 * Set whether user should be visible in balance top.
+	 * 
+	 * @implNote Internal use only, try {@link TopManager} instead. Thread unsafe.
+	 * @param limit max size of top
+	 * @return list of top entries sorted from first to last
+	 * @throws Exception when something went wrong
+	 */
+	public @NotNull List<TopEntry> getMinorTop(int limit) throws Exception;
+	
+	/**
 	 * Check if connection can be obtained, otherwise creates new one.
 	 */
 	public void checkConnection();
