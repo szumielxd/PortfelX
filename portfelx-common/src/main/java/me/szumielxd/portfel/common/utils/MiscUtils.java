@@ -31,7 +31,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 @UtilityClass
 public class MiscUtils {
 	
-	
+	@Deprecated
 	public final @NotNull Component PREFIX = MiniMessage.miniMessage().deserialize("<b><aqua>[<dark_purple>P</dark_purple>]</aqua></b><dark_aqua> ");
 	
 	
@@ -111,6 +111,7 @@ public class MiscUtils {
 	 * @param elements the elements to join together
 	 * @return a new String that is composed of the elements separated by the delimiter
 	 */
+	@Deprecated
 	public static @NotNull Component join(@NotNull String delimer, @NotNull Component... elements) {
 		return join(Component.text(delimer), elements);
 	}
@@ -122,6 +123,7 @@ public class MiscUtils {
 	 * @param elements the elements to join together
 	 * @return a new String that is composed of the elements separated by the delimiter
 	 */
+	@Deprecated
 	public static @NotNull Component join(@NotNull String delimer, @NotNull List<Component> elements) {
 		return join(Component.text(delimer), elements);
 	}
@@ -133,6 +135,7 @@ public class MiscUtils {
 	 * @param elements the elements to join together
 	 * @return a new String that is composed of the elements separated by the delimiter
 	 */
+	@Deprecated
 	public static @NotNull Component join(@NotNull Component delimer, @NotNull Component... elements) {
 		return join(delimer, Arrays.asList(elements));
 	}
@@ -144,6 +147,7 @@ public class MiscUtils {
 	 * @param elements the elements to join together
 	 * @return a new String that is composed of the elements separated by the delimiter
 	 */
+	@Deprecated
 	public static @NotNull Component join(@NotNull Component delimer, @NotNull List<Component> elements) {
 		Component comp = Component.empty();
 		List<Component> childs = new ArrayList<>();
@@ -183,6 +187,7 @@ public class MiscUtils {
 	 * @param text text to parse
 	 * @return parsed component
 	 */
+	@Deprecated
 	public static @NotNull Component parseComponent(@NotNull String text) {
 		if (Objects.requireNonNull(text, "text cannot be null").isEmpty()) {
 			return Component.empty();
@@ -196,6 +201,7 @@ public class MiscUtils {
 	 * @param text text to parse
 	 * @return parsed component
 	 */
+	@Deprecated
 	public static @NotNull Component parseComponent(@NotNull String text, @NotNull Pattern pattern, @NotNull Function<MatchResult, String> replacer) {
 		Objects.requireNonNull(text, "text cannot be null");
 		Objects.requireNonNull(pattern, "pattern cannot be null");
