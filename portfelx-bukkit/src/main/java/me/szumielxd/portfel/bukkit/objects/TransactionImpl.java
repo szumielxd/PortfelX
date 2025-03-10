@@ -1,6 +1,8 @@
 package me.szumielxd.portfel.bukkit.objects;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,7 +11,9 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
@@ -21,28 +25,26 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.enums.TransactionStatus;
-import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.audience.Audience;
 
-public class TransactionImpl implements Transaction {
+public class TransactionImpl extends CompletableFuture<Transaction.TransactionResult> implements Transaction {
 		
 	
 	private final PortfelBukkitImpl plugin;
-	private final User user;
+	private final BukkitOperableUser user;
 	private final UUID transactionId;
 	private final OrderDataOnAir order;
 	
-	private TransactionResult result = null;
-	
-	public TransactionImpl(@NotNull PortfelBukkitImpl plugin, @NotNull User user, @NotNull UUID transactionId, @NotNull OrderDataOnAir order) {
+	public TransactionImpl(@NotNull PortfelBukkitImpl plugin, @NotNull BukkitOperableUser user, @NotNull UUID transactionId, @NotNull OrderDataOnAir order) {
 		this.plugin = plugin;
 		this.user = user;
 		this.transactionId = transactionId;
 		this.order = order;
+		this.complete(getResult());
 	}
 	
 	
@@ -52,7 +54,7 @@ public class TransactionImpl implements Transaction {
 	 * @return user related with this transaction
 	 */
 	@Override
-	public @NotNull User getUser() {
+	public @NotNull BukkitOperableUser getUser() {
 		return this.user;
 	}
 	
@@ -83,7 +85,52 @@ public class TransactionImpl implements Transaction {
 	 */
 	@Override
 	public @Nullable TransactionResult getResult() {
-		return this.result;
+		return getNow(null);
+	}
+	
+	@Override
+	public void obtrudeValue(@Nullable TransactionResult result) {
+		super.obtrudeValue(result);
+		long oldBalance = user.getBalance();
+		user.setPlainBalance(result.getNewBalance());
+		
+		if (result.getStatus() == TransactionStatus.OK) {
+			// replacements: %player% %playerId%
+			Pattern pattern = Pattern.compile("%((player(Id)?)|(order))%", Pattern.CASE_INSENSITIVE);
+			Function<MatchResult, String> replacer = match -> {
+				if (match.group().equalsIgnoreCase("%order%")) return this.order.getOrderName();
+				if (match.group().equalsIgnoreCase("%player%")) return this.user.getName(); // %player%
+				return this.user.getUniqueId().toString(); // %playerId%
+			};
+			
+			// broadcast
+			Audience all = plugin.getServer() instanceof Audience srv ? srv : plugin.adventure().all();
+			getOrder().getActions().broadcasts().stream()
+					.map(msg -> MiscUtils.parseComponent(msg, pattern, replacer))
+					.forEach(all::sendMessage);
+			
+			// message
+			Audience player = Audience.class.isAssignableFrom(Player.class) ? Bukkit.getPlayer(user.getUniqueId()) : this.plugin.adventure().player(user.getUniqueId());
+			getOrder().getActions().messages().stream()
+					.map(msg -> MiscUtils.parseComponent(msg, pattern, replacer))
+					.forEach(player::sendMessage);
+			
+			// command
+			var console = plugin.getServer().getConsoleSender();
+			plugin.getTaskManager().runTask(() -> getOrder().getActions().commands().stream()
+					.map(cmd -> cmd.startsWith("/") ? cmd.substring(1) : cmd)
+					.map(cmd -> MiscUtils.replaceAll(pattern.matcher(cmd), replacer))
+					.forEach(cmd -> plugin.getServer().dispatchCommand(console, cmd)));
+			
+			OfflinePlayer target = Bukkit.getOfflinePlayer(user.getUniqueId());
+			String ip = Optional.ofNullable(target.getPlayer().getAddress())
+					.map(InetSocketAddress::getAddress)
+					.map(InetAddress::getHostAddress)
+					.orElse("offline");
+			
+			log("%s(%s) successfully bought `%s` for %s$. Old balance: %s$, new balance: %s$"
+					.formatted(user.getName(), ip, order.getOrderName(), order.getPrice(), oldBalance, user.getBalance()));
+		}
 	}
 	
 	/**
@@ -96,44 +143,9 @@ public class TransactionImpl implements Transaction {
 	 */
 	@Override
 	public boolean finish(@NotNull TransactionResult result) throws RuntimeException {
-		if (this.plugin.getServer().isPrimaryThread()) throw new RuntimeException("Transaction cannot be finished in main thread.");
-		if (this.result != null) return false;
-		if (!this.transactionId.equals(result.getTransactionId())) return false;
-		this.result = result;
-		
-		long oldBalance = this.user.getBalance();
-		
-		((BukkitOperableUser)this.user).setPlainBalance(this.result.getNewBalance());
-		
-		if (!this.result.getStatus().equals(TransactionStatus.OK)) return true;
-		
-		// replacements: %player% %playerId%
-		Pattern pattern = Pattern.compile("%((player(Id)?)|(order))%", Pattern.CASE_INSENSITIVE);
-		Function<MatchResult, String> replacer = match -> {
-			if (match.group().equalsIgnoreCase("%order%")) return this.order.getOrderName();
-			if (match.group().equalsIgnoreCase("%player%")) return this.user.getName(); // %player%
-			return this.user.getUniqueId().toString(); // %playerId%
-		};
-		
-		// broadcast
-		Audience all = this.plugin.getServer() instanceof Audience ? this.plugin.getServer() : this.plugin.adventure().all();
-		this.getOrder().getActions().broadcasts().forEach(msg -> all.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer)));
-		
-		// message
-		Audience player = Audience.class.isAssignableFrom(Player.class) ? Bukkit.getPlayer(user.getUniqueId()) : this.plugin.adventure().player(user.getUniqueId());
-		this.getOrder().getActions().messages().forEach(msg -> player.sendMessage(MiscUtils.parseComponent(msg, pattern, replacer)));
-		
-		// command
-		this.plugin.getTaskManager().runTask(() -> this.getOrder().getActions().commands().forEach(cmd -> {
-			if (cmd.startsWith("/")) cmd = cmd.substring(1, cmd.length());
-			this.plugin.getServer().dispatchCommand(this.plugin.getServer().getConsoleSender(), MiscUtils.replaceAll(pattern.matcher(cmd), replacer));
-		}));
-		
-		OfflinePlayer target = Bukkit.getOfflinePlayer(user.getUniqueId());
-		String ip = target.isOnline()? target.getPlayer().getAddress().getAddress().getHostAddress() : "offline";
-		this.log(String.format("%s(%s) successfully bought `%s` for %s$. Old balance: %s$, new balance: %s$", user.getName(), ip, order.getOrderName(), order.getPrice(), oldBalance, user.getBalance()));
-		
-		return true; 
+		Objects.requireNonNull(result, "result cannot be null");
+		if (plugin.getServer().isPrimaryThread()) throw new RuntimeException("Transaction cannot be finished in main thread.");
+		return complete(result);
 	}
 	
 	
@@ -148,6 +160,19 @@ public class TransactionImpl implements Transaction {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	public static TransactionImpl completed(@NotNull PortfelBukkitImpl plugin, @NotNull BukkitOperableUser user, @NotNull UUID transactionId, @NotNull OrderDataOnAir order, @NotNull TransactionResult result) {
+		var t = new TransactionImpl(plugin, user, transactionId, order);
+		t.complete(result);
+		return t;
+	}
+	
+	
+	public static TransactionImpl completedDummy(@NotNull PortfelBukkitImpl plugin, @NotNull BukkitOperableUser user, @NotNull UUID transactionId, @NotNull OrderDataOnAir order) {
+		return completed(plugin, user, transactionId, order,
+				new TransactionResult(transactionId, TransactionStatus.OK, user.getBalance(), 0, null));
 	}
 	
 

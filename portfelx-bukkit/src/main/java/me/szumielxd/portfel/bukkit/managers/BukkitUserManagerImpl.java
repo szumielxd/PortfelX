@@ -1,14 +1,12 @@
 package me.szumielxd.portfel.bukkit.managers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import org.bukkit.Server;
@@ -90,55 +88,62 @@ public class BukkitUserManagerImpl extends UserManagerImpl<Component> {
 	/**
 	 * Get loaded user or load user assigned to given UUID.
 	 * 
-	 * @implNote <b>Thread Unsafe</b>
 	 * @param uuid unique identifier of user
 	 * @return already loaded user or new one if not loaded already
 	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @Nullable User getOrLoadUser(@NotNull UUID uuid) throws Exception {
+	public @NotNull CompletableFuture<@Nullable ? extends User> getOrLoadUser(@NotNull UUID uuid) {
 		this.validate();
 		User user = this.users.get(uuid);
-		if (user != null) return user;
-		Player player = this.plugin.getServer().getPlayer(uuid);
-		if (player == null) return null;
-		user = this.plugin.getChannelManager().requestPlayer(player);
-		this.users.put(uuid, user);
-		return user;
+		if (user != null) {
+			return CompletableFuture.completedFuture(user);
+		}
+		return loadUser(plugin.getServer().getPlayer(uuid));
 	}
 	
 	/**
 	 * Get loaded user or load user assigned to given username.
 	 * 
-	 * @implNote <b>Thread Unsafe</b>
 	 * @param username name of user
 	 * @return already loaded user or new one if not loaded already
 	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @Nullable User getOrLoadUser(@NotNull String username) throws Exception {
+	public @NotNull CompletableFuture<@Nullable ? extends User> getOrLoadUser(@NotNull String username) {
 		this.validate();
-		User user = this.users.values().stream().filter(u -> u.getName().equalsIgnoreCase(username)).findAny().orElse(null);
-		if (user != null) return user;
-		Player player = this.plugin.getServer().getPlayerExact(username);
-		if (player == null) throw new IllegalArgumentException("Bukkit implementation only allows online players");
-		
-		user = this.plugin.getChannelManager().requestPlayer(player);
-		this.users.put(user.getUniqueId(), user);
-		return user;
+		var user = this.users.values().stream()
+				.filter(u -> u.getName().equalsIgnoreCase(username))
+				.findAny()
+				.orElse(null);
+		if (user != null) {
+			return CompletableFuture.completedFuture(user);
+		}
+		return loadUser(plugin.getServer().getPlayerExact(username));
+	}
+	
+	private @NotNull CompletableFuture<? extends User> loadUser(@Nullable Player player) {
+		if (player == null || !player.isOnline()) {
+			return CompletableFuture.failedFuture(new IllegalArgumentException("Bukkit implementation only allows online players"));
+		}
+		return plugin.getChannelManager().requestPlayer(player)
+				.whenComplete((u, ex) -> {
+					if (ex == null) {
+						this.users.put(u.getUniqueId(), u);
+					}
+				});
 	}
 	
 	/**
 	 * Get loaded user or load user assigned to given UUID. When UUID doesn't match any existent user, new one is created.
 	 * 
-	 * @implNote <b>Unsupported for Bukkit instance</b>
 	 * @param uuid unique identifier of user
 	 * @return already loaded user or new one if not loaded already
 	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @NotNull User getOrCreateUser(@NotNull UUID uuid, @NotNull String username) throws Exception {
-		return this.users.computeIfAbsent(uuid, key -> new BukkitImaginaryUser(this.plugin, key));
+	public @NotNull CompletableFuture<@NotNull User> getOrCreateUser(@NotNull UUID uuid, @NotNull String username) {
+		return CompletableFuture.completedFuture(this.users.computeIfAbsent(uuid, key -> new BukkitImaginaryUser(plugin, key)));
 	}
 	
 	/**
@@ -149,7 +154,7 @@ public class BukkitUserManagerImpl extends UserManagerImpl<Component> {
 	@Override
 	public @NotNull Collection<User> getLoadedUsers() {
 		this.validate();
-		return Collections.unmodifiableCollection(new ArrayList<>(this.users.values()));
+		return Collections.unmodifiableCollection(this.users.values());
 	}
 	
 	/**
@@ -159,19 +164,16 @@ public class BukkitUserManagerImpl extends UserManagerImpl<Component> {
 	 * @throws Exception when cannot establish the connection to the database
 	 */
 	@Override
-	public void updateUsers(User... users) throws Exception {
+	public CompletableFuture<Void> updateUsers(User... users) {
 		this.validate();
 		ChannelManager mgr = this.plugin.getChannelManager();
 		Server srv = this.plugin.getServer();
-		Stream.of(users).map(User::getUniqueId).map(srv::getPlayer).filter(Objects::nonNull).forEach(t -> {
-			try {
-				mgr.requestPlayer(t);
-			} catch (InterruptedException | ExecutionException | TimeoutException e) {
-				Thread.currentThread().interrupt();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		});
+		return CompletableFuture.allOf(Stream.of(users)
+				.map(User::getUniqueId)
+				.map(srv::getPlayer)
+				.filter(Objects::nonNull)
+				.map(mgr::requestPlayer)
+				.toArray(CompletableFuture[]::new));
 	}
 	
 	/**

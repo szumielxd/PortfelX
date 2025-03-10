@@ -1,7 +1,6 @@
 package me.szumielxd.portfel.bukkit.managers;
 
 import java.util.AbstractMap.SimpleEntry;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.bukkit.entity.Player;
@@ -23,6 +23,7 @@ import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
 import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.objects.BukkitImaginaryUser;
 import me.szumielxd.portfel.common.managers.TopManagerImpl;
+import me.szumielxd.portfel.common.utils.future.CompletableUtils;
 import net.kyori.adventure.text.Component;
 
 @RequiredArgsConstructor
@@ -43,35 +44,36 @@ public class BukkitTopManagerImpl extends TopManagerImpl<Component> implements B
 	 * Update top.
 	 */
 	@Override
-	protected void update() {
-		try {
-			final ChannelManager channel = this.plugin.getChannelManager();
-			Map<UUID, Player> distinctServers = this.plugin.getUserManager().getLoadedUsers()
-					.stream()
-					.filter(User::isOnline)
-					.filter(u -> !(u instanceof BukkitImaginaryUser))
-					.map(u -> new SimpleEntry<>(u.getRemoteId(), this.plugin.getServer().getPlayer(u.getUniqueId())))
-					.filter(e -> e.getValue() != null)
-					.collect(Collectors.toMap(Entry::getKey, Entry::getValue, (p, q) -> p));
-			this.cachedTop = distinctServers.entrySet().parallelStream()
-					.collect(Collectors.toMap(Entry::getKey, entry -> {
-						try{
-							return channel.requestTop(entry.getValue());
-						} catch(Exception e) {
-							e.printStackTrace();
-							return new ArrayList<>();
-						}}, (p, q) -> p));
-			this.cachedMinorTop = distinctServers.entrySet().parallelStream()
-					.collect(Collectors.toMap(Entry::getKey, entry -> {
-						try{
-							return channel.requestMinorTop(entry.getValue());
-						} catch(Exception e) {
-							e.printStackTrace();
-							return new ArrayList<>();
-						}}, (p, q) -> p));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	protected @NotNull CompletableFuture<Void> update() {
+		final ChannelManager channel = this.plugin.getChannelManager();
+		Map<UUID, Player> distinctServers = this.plugin.getUserManager().getLoadedUsers().stream()
+				.filter(User::isOnline)
+				.filter(u -> !BukkitImaginaryUser.class.isInstance(u))
+				.map(u -> new SimpleEntry<>(u.getRemoteId(), plugin.getServer().getPlayer(u.getUniqueId())))
+				.filter(e -> e.getValue() != null)
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue, (p, q) -> p));
+		
+		return CompletableFuture.allOf(
+				updateMainTop(channel, distinctServers),
+				updateMinorTop(channel, distinctServers));
+	}
+	
+	private @NotNull CompletableFuture<Map<UUID, List<TopEntry>>> updateMainTop(@NotNull ChannelManager channel, @NotNull Map<UUID, Player> distinctServers) {
+		return distinctServers.entrySet().parallelStream()
+				.map(e -> Map.entry(e.getKey(), channel.requestTop(e.getValue())))
+				.collect(CompletableUtils.mergedCompletableMap())
+				.whenComplete(CompletableUtils.handleResult(
+						map -> this.cachedTop = map,
+						ex -> getPlugin().logger().warn(ex, "Couldn't update major eco top")));
+	}
+	
+	private @NotNull CompletableFuture<Map<UUID, List<TopEntry>>> updateMinorTop(@NotNull ChannelManager channel, @NotNull Map<UUID, Player> distinctServers) {
+		return distinctServers.entrySet().parallelStream()
+				.map(e -> Map.entry(e.getKey(), channel.requestMinorTop(e.getValue())))
+				.collect(CompletableUtils.mergedCompletableMap())
+				.whenComplete(CompletableUtils.handleResult(
+						map -> this.cachedMinorTop = map,
+						ex -> getPlugin().logger().warn(ex, "Couldn't update minor eco top")));
 	}
 	
 	/**
@@ -129,7 +131,7 @@ public class BukkitTopManagerImpl extends TopManagerImpl<Component> implements B
 	@Override
 	public @NotNull List<TopEntry> getFullTopCopy(@Nullable UUID proxyId) {
 		try {
-			return new ArrayList<>(this.cachedTop.get(proxyId));
+			return List.copyOf(this.cachedTop.get(proxyId));
 		} catch (NullPointerException e) {
 			return Collections.emptyList();
 		}
@@ -190,11 +192,13 @@ public class BukkitTopManagerImpl extends TopManagerImpl<Component> implements B
 	@Override
 	public @NotNull List<TopEntry> getFullMinorTopCopy(@Nullable UUID proxyId) {
 		try {
-			return new ArrayList<>(this.cachedMinorTop.get(proxyId));
+			return List.copyOf(this.cachedMinorTop.get(proxyId));
 		} catch (NullPointerException e) {
 			return Collections.emptyList();
 		}
 	}
+	
+	
 	
 
 }

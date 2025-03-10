@@ -1,12 +1,15 @@
 package me.szumielxd.portfel.bukkit.api.managers;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import me.szumielxd.portfel.api.enums.TransactionStatus;
 import me.szumielxd.portfel.api.managers.TopManager.TopEntry;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
@@ -20,9 +23,8 @@ public interface ChannelManager {
 	 * 
 	 * @param player the player
 	 * @return {@link User} representation of given player
-	 * @throws Exception when something went wrong
 	 */
-	public @NotNull User requestPlayer(@NotNull Player player) throws Exception;
+	public @NotNull CompletableFuture<? extends User> requestPlayer(@NotNull Player player);
 	
 	/**
 	 * Add given amount to user's minor balance.
@@ -30,9 +32,8 @@ public interface ChannelManager {
 	 * @param player the player
 	 * @param amount amount of balance to give
 	 * @return {@link BalanceUpdateResult} representation of request result
-	 * @throws Exception when something went wrong
 	 */
-	public @Nullable BalanceUpdateResult requestGiveMinorBalance(@NotNull Player player, long amount) throws Exception;
+	public @Nullable CompletableFuture<BalanceUpdateResult> requestGiveMinorBalance(@NotNull Player player, long amount);
 	
 	/**
 	 * Remove given amount to user's minor balance.
@@ -40,41 +41,31 @@ public interface ChannelManager {
 	 * @param player the player
 	 * @param amount amount of balance to take
 	 * @return {@link BalanceUpdateResult} representation of request result
-	 * @throws Exception when something went wrong
 	 */
-	public @Nullable BalanceUpdateResult requestTakeMinorBalance(@NotNull Player player, long amount) throws Exception;
+	public @Nullable CompletableFuture<BalanceUpdateResult> requestTakeMinorBalance(@NotNull Player player, long amount);
 	
 	/**
-	 * Cancel user update task if actually pending.
+	 * Cancel any update task related to given player if actually pending.
 	 * 
 	 * @param player player to check
 	 */
-	public void ensureNotUserUpdating(@NotNull Player player);
+	public void clearAwaitingUpdates(@NotNull Player player);
 	
 	/**
 	 * Request top update from proxy the player belongs to.
 	 * 
 	 * @param player to determine proxy
 	 * @return list of all top entries from given proxy (miscellaneous size)
-	 * @throws Exception when something went wrong
 	 */
-	public @NotNull List<TopEntry> requestTop(@NotNull Player player) throws Exception;
+	public @NotNull CompletableFuture<List<TopEntry>> requestTop(@NotNull Player player);
 	
 	/**
 	 * Request minor top update from proxy the player belongs to.
 	 * 
 	 * @param player to determine proxy
 	 * @return list of all minor top entries from given proxy (miscellaneous size)
-	 * @throws Exception when something went wrong
 	 */
-	public @NotNull List<TopEntry> requestMinorTop(@NotNull Player player) throws Exception;
-	
-	/**
-	 * Cancel top update task if given player is used as source for this request.
-	 * 
-	 * @param player player to check
-	 */
-	public void ensureNotTopRequestSource(@NotNull Player player);
+	public @NotNull CompletableFuture<List<TopEntry>> requestMinorTop(@NotNull Player player);
 	
 	/**
 	 * Request transaction for given player with given order.
@@ -83,14 +74,14 @@ public interface ChannelManager {
 	 * @param order order to complete
 	 * @return transaction, with completed state on success
 	 */
-	public @Nullable Transaction requestTransaction(@NotNull Player player, @NotNull OrderDataOnAir order);
+	public @Nullable CompletableFuture<Transaction> requestTransaction(@NotNull Player player, @NotNull OrderDataOnAir order);
 	
 	
 	@AllArgsConstructor
 	@Getter
 	public class BalanceUpdateResult {
 		
-		private final boolean success;
+		private final TransactionStatus success;
 		private final long newBalance;
 		
 	}
