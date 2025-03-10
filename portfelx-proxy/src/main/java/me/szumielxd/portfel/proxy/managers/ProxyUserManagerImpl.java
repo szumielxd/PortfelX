@@ -3,7 +3,9 @@ package me.szumielxd.portfel.proxy.managers;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
@@ -14,6 +16,8 @@ import org.jetbrains.annotations.Nullable;
 import me.szumielxd.portfel.api.objects.ExecutedTask;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.managers.UserManagerImpl;
+import me.szumielxd.portfel.common.utils.future.ExceptionalRunnable;
+import me.szumielxd.portfel.common.utils.future.ExceptionalSupplier;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.PortfelProxy;
 import me.szumielxd.portfel.proxy.objects.ProxyOperableUser;
@@ -80,72 +84,65 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	/**
 	 * Get loaded user or load user assigned to given UUID.
 	 * 
-	 * @implNote <b>Thread Unsafe</b>
 	 * @param uuid unique identifier of user
 	 * @return already loaded user or new one if not loaded already
-	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @Nullable ProxyOperableUser getOrLoadUser(@NotNull UUID uuid) throws Exception {
+	public @NotNull CompletableFuture<@Nullable ProxyOperableUser> getOrLoadUser(@NotNull UUID uuid) {
 		this.validate();
-		if (!users.containsKey(uuid)) {
-			users.putIfAbsent(uuid, plugin.getDatabase().loadUser(uuid));
+		var user = users.get(uuid);
+		if (user != null) {
+			return CompletableFuture.completedFuture(user);
 		}
-		return users.get(uuid);
+		return ExceptionalSupplier.supplyAsync(() -> plugin.getDatabase().loadUser(uuid))
+				.whenComplete((res, ex) -> Optional.ofNullable(res)
+						.ifPresent(x -> users.putIfAbsent(x.getUniqueId(), x)));
 	}
 	
 	/**
 	 * Get loaded user or load user assigned to given username.
 	 * 
-	 * @implNote <b>Thread Unsafe</b>
 	 * @param username name of user
 	 * @return already loaded user or new one if not loaded already
-	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @Nullable ProxyOperableUser getOrLoadUser(@NotNull String username) throws Exception {
+	public @NotNull CompletableFuture<@Nullable ProxyOperableUser> getOrLoadUser(@NotNull String username) {
 		this.validate();
-		ProxyOperableUser user = this.users.values().stream()
+		var user = this.users.values().stream()
 				.filter(u -> u.getName().equalsIgnoreCase(username))
 				.findAny()
 				.orElse(null);
 		if (user != null) {
-			return user;
+			return CompletableFuture.completedFuture(user);
 		}
-		user = plugin.getDatabase().loadUserByName(username, false);
-		if (user != null) {
-			this.users.put(user.getUniqueId(), user);
-		}
-		return user;
+		return ExceptionalSupplier.supplyAsync(() -> plugin.getDatabase().loadUserByName(username, false))
+				.whenComplete((res, ex) -> Optional.ofNullable(res)
+						.ifPresent(x -> users.putIfAbsent(x.getUniqueId(), x)));
 	}
 	
 	/**
 	 * Get loaded user or load user assigned to given UUID. When UUID doesn't match any existent user, new one is created.
 	 * 
-	 * @implNote <b>Thread Unsafe</b>
 	 * @param uuid unique identifier of user
 	 * @param username last known name of user
 	 * @return already loaded user or new one if not loaded already
-	 * @throws Exception if something went wrong
 	 */
 	@Override
-	public @NotNull ProxyOperableUser getOrCreateUser(@NotNull UUID uuid, @NotNull String username) throws Exception {
+	public @NotNull CompletableFuture<@NotNull ProxyOperableUser> getOrCreateUser(@NotNull UUID uuid, @NotNull String username) {
 		this.validate();
-		ProxyOperableUser user = this.users.get(uuid);
+		var user = users.get(uuid);
 		if (user != null) {
-			return user;
+			return CompletableFuture.completedFuture(user);
 		}
-		user = plugin.getDatabase().loadOrCreateUser(uuid, username);
-		this.users.put(uuid, user);
-		return user;
+		return ExceptionalSupplier.supplyAsync(() -> plugin.getDatabase().loadOrCreateUser(uuid, username))
+				.whenComplete((res, ex) -> Optional.ofNullable(res)
+						.ifPresent(x -> users.putIfAbsent(x.getUniqueId(), x)));
 	}
 	
-	public @NotNull ProxyOperableUser getOrCreateUser(@NotNull UUID uuid, @NotNull String username, boolean markJoined) throws Exception {
-		var user = getOrCreateUser(uuid, username);
-		if (markJoined) {
-			plugin.getDatabase().bumpLastJoin(user);
-		}
-		return user;
+	public @NotNull CompletableFuture<@NotNull ProxyOperableUser> getOrCreateUser(@NotNull UUID uuid, @NotNull String username, boolean markJoined) {
+		return getOrCreateUser(uuid, username)
+				.whenCompleteAsync((res, ex) -> Optional.ofNullable(res)
+						.ifPresent(x -> ExceptionalRunnable.runAsync(() -> plugin.getDatabase().bumpLastJoin(x))));
 	}
 	
 	/**
@@ -166,11 +163,13 @@ public class ProxyUserManagerImpl<C> extends UserManagerImpl<C> {
 	 * @throws Exception when cannot establish the connection to the database
 	 */
 	@Override
-	public void updateUsers(User... users) throws Exception {
+	public CompletableFuture<Void> updateUsers(User... users) {
 		this.validate();
-		// update only users
-		this.plugin.getDatabase().updateUsers(Stream.of(users).map(ProxyOperableUser.class::cast)
-				.filter(ProxyOperableUser::isNotChanged).toArray(ProxyOperableUser[]::new));
+		return ExceptionalRunnable.runAsync(() -> plugin.getDatabase().updateUsers(
+				Stream.of(users)
+						.map(ProxyOperableUser.class::cast)
+						.filter(ProxyOperableUser::isNotChanged)
+						.toArray(ProxyOperableUser[]::new)));
 	}
 	
 	public void saveChangedUsers() throws Exception {

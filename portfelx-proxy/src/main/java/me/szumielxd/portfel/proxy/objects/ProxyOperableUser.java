@@ -13,7 +13,7 @@ import me.szumielxd.portfel.api.objects.ActionExecutor;
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.common.communication.coders.messages.common.UserIdentifier;
 import me.szumielxd.portfel.common.communication.coders.messages.info.UserInfoMessage;
-import me.szumielxd.portfel.common.utils.ExceptionalRunnable;
+import me.szumielxd.portfel.common.utils.future.ExceptionalRunnable;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;

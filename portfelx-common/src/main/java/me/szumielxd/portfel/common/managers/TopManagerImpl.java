@@ -1,5 +1,6 @@
 package me.szumielxd.portfel.common.managers;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +64,7 @@ public abstract class TopManagerImpl<C> implements TopManager {
 	/**
 	 * Update top.
 	 */
-	protected abstract void update();
+	protected abstract CompletableFuture<Void> update();
 	
 	/**
 	 * Get Portfel instance

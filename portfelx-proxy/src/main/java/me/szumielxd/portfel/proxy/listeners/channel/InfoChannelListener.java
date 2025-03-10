@@ -14,6 +14,7 @@ import me.szumielxd.portfel.common.communication.coders.messages.info.ServerInfo
 import me.szumielxd.portfel.common.communication.coders.messages.info.TopMessage;
 import me.szumielxd.portfel.common.communication.coders.messages.info.TopMessage.TopUser;
 import me.szumielxd.portfel.common.communication.coders.messages.info.TopRequestMessage;
+import me.szumielxd.portfel.common.utils.future.CompletableUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyServerConnection;
@@ -40,14 +41,10 @@ public class InfoChannelListener<T extends PortfelProxyImpl<C>, C> extends Speci
 	
 	// user channel
 	private boolean onUserData(@NotNull ProxyServerConnection<C> sender, @NotNull ProxyPlayer<C> target, @NotNull String tag) {
-		getPlugin().getTaskManager().runTaskAsynchronously(() -> {
-			try {
-				var user = getPlugin().getUserManager().getOrCreateUser(target.getUniqueId(), target.getName());
-				sender.sendPluginMessage(tag, user.buildInfoPacket().toBytePacket());
-			} catch (Exception e) {	
-				getPlugin().logger().severe(e, "An exception occurred while processing UserInfo response");
-			}
-		});
+		getPlugin().getUserManager().getOrCreateUser(target.getUniqueId(), target.getName())
+				.whenComplete(CompletableUtils.handleResult(
+						user -> sender.sendPluginMessage(tag, user.buildInfoPacket().toBytePacket()),
+						e -> getPlugin().logger().severe(e, "An exception occurred while processing UserInfo response")));
 		return true;
 	}
 	

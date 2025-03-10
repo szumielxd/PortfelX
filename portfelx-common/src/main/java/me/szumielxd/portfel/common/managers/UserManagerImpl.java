@@ -1,6 +1,7 @@
 package me.szumielxd.portfel.common.managers;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.NotNull;
@@ -51,11 +52,11 @@ public abstract class UserManagerImpl<C> implements UserManager {
 	@Override
 	public void updateUsers() {
 		this.validate();
-		try {
-			this.updateUsers(this.getLoadedUsers().stream().filter(User::isOnline).toArray(User[]::new));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		updateUsers(getLoadedUsers().stream()
+				.filter(User::isOnline)
+				.toArray(User[]::new))
+				.whenComplete((res, ex) -> Optional.ofNullable(ex)
+						.ifPresent(e -> getPlugin().logger().warn(ex, "Couldn't update users")));
 	}
 	
 	@Override

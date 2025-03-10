@@ -3,6 +3,7 @@ package me.szumielxd.portfel.proxy.managers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,6 +13,8 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.szumielxd.portfel.common.managers.TopManagerImpl;
+import me.szumielxd.portfel.common.utils.future.CompletableUtils;
+import me.szumielxd.portfel.common.utils.future.ExceptionalSupplier;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
 import me.szumielxd.portfel.proxy.api.managers.ProxyTopManager;
@@ -23,6 +26,7 @@ public class ProxyTopManagerImpl<C> extends TopManagerImpl<C> implements ProxyTo
 	 * Portfel instance
 	 */
 	@Getter(AccessLevel.PROTECTED) @NonNull private final @NotNull PortfelProxyImpl<C> plugin;
+	
 	private List<TopEntry> cachedTop = Collections.emptyList();
 	private List<TopEntry> cachedMinorTop = Collections.emptyList();
 	
@@ -41,13 +45,25 @@ public class ProxyTopManagerImpl<C> extends TopManagerImpl<C> implements ProxyTo
 	 * Update top.
 	 */
 	@Override
-	protected void update() {
-		try {
-			this.cachedTop = this.plugin.getDatabase().getTop(this.getPlugin().getConfiguration().getInt(ProxyConfigKey.MAIN_TOP_SIZE));
-			this.cachedMinorTop = this.plugin.getDatabase().getTop(this.getPlugin().getConfiguration().getInt(ProxyConfigKey.MAIN_TOP_SIZE));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	protected CompletableFuture<Void> update() {
+		int size = getPlugin().getConfiguration().getInt(ProxyConfigKey.MAIN_TOP_SIZE);
+		return CompletableFuture.allOf(
+				updateMainTop(size),
+				updateMinorTop(size));
+	}
+	
+	private CompletableFuture<List<TopEntry>> updateMainTop(int size) {
+		return ExceptionalSupplier.supplyAsync(() -> plugin.getDatabase().getTop(size))
+				.whenComplete(CompletableUtils.handleResult(
+						map -> this.cachedTop = map,
+						ex -> getPlugin().logger().warn(ex, "Couldn't update major eco top")));
+	}
+	
+	private CompletableFuture<List<TopEntry>> updateMinorTop(int size) {
+		return ExceptionalSupplier.supplyAsync(() -> plugin.getDatabase().getMinorTop(size))
+				.whenComplete(CompletableUtils.handleResult(
+						map -> this.cachedMinorTop = map,
+						ex -> getPlugin().logger().warn(ex, "Couldn't update minor eco top")));
 	}
 	
 	/**
