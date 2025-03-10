@@ -16,6 +16,7 @@ public enum SubchannelName {
 	BUY("Buy"),
 	MINORECO_GIVE("MinorGive"),
 	MINORECO_TAKE("MinorTake"),
+	TOKEN("Token"),
 	
 	USER_INFO("UserInfo"),
 	SERVER_INFO("ServerInfo"),
