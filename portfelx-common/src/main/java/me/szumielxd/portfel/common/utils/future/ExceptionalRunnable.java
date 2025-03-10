@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.common.utils;
+package me.szumielxd.portfel.common.utils.future;
 
 import java.util.concurrent.CompletableFuture;
 
