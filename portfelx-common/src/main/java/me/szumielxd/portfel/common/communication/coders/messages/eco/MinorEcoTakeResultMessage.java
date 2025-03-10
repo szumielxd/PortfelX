@@ -33,7 +33,7 @@ public class MinorEcoTakeResultMessage implements MessagePacket {
 	@EqualsAndHashCode
 	public static class CryptoPayload {
 		
-		@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull String transactionId;
+		@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull UUID transactionId;
 		@Getter @MessageEntry(MessageEntryCoders.LONG) private @NotNull long newBalance;
 		@Getter @MessageEntry(MessageEntryCoders.ENUM) private @NotNull TransactionStatus status;
 		@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull String error;

@@ -92,7 +92,7 @@ public class TransactionsChannelListener<T extends PortfelProxyImpl<C>, C> exten
 		return true;
 	}
 	
-	private void giveMinorEconomy(@NotNull ProxyServerConnection<C> sender, @NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer<C> target, long value) {
+	private void giveMinorEconomy(@NotNull ProxyServerConnection<C> sender, @NotNull UUID transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer<C> target, long value) {
 		var user = getPlugin().getUserManager().getUser(target.getUniqueId());
 		Optional.ofNullable(user)
 				.map(u -> u.giveMinorBalance(value))
@@ -114,7 +114,7 @@ public class TransactionsChannelListener<T extends PortfelProxyImpl<C>, C> exten
 				});
 	}
 	
-	private void takeMinorEconomy(@NotNull ProxyServerConnection<C> sender, @NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer<C> target, long value) {
+	private void takeMinorEconomy(@NotNull ProxyServerConnection<C> sender, @NotNull UUID transactionId, @NotNull UUID serverId, @NotNull ProxyPlayer<C> target, long value) {
 		var user = getPlugin().getUserManager().getUser(target.getUniqueId());
 		Optional.ofNullable(user)
 				.map(u -> u.takeMinorBalance(value))
@@ -137,7 +137,7 @@ public class TransactionsChannelListener<T extends PortfelProxyImpl<C>, C> exten
 	}
 	
 	
-	private void runTransaction(@NotNull String transactionId, @NotNull UUID serverId, @NotNull ProxyServerConnection<C> srv, @NotNull ProxyPlayer<C> target, @NotNull String pluginName, @NotNull String order, long value) {
+	private void runTransaction(@NotNull UUID transactionId, @NotNull UUID serverId, @NotNull ProxyServerConnection<C> srv, @NotNull ProxyPlayer<C> target, @NotNull String pluginName, @NotNull String order, long value) {
 		var user = getPlugin().getUserManager().getUser(target.getUniqueId());
 		var server = getPlugin().getAccessManager().getServerName(serverId);
 		var pluginExecutor = ProxyActionExecutor.plugin(pluginName);

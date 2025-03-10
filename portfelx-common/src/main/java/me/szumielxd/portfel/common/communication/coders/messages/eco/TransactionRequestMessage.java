@@ -32,7 +32,7 @@ public class TransactionRequestMessage implements MessagePacket {
 	@EqualsAndHashCode
 	public static class CryptoPayload {
 		
-		@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull String transactionId;
+		@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull UUID transactionId;
 		@Getter @MessageEntry(MessageEntryCoders.LONG) private @NotNull long value;
 		@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull String plugin;
 		@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull String order;
