@@ -32,7 +32,7 @@ public class MinorEcoGiveRequestMessage implements MessagePacket {
 	@EqualsAndHashCode
 	public static class CryptoPayload {
 		
-		@Getter @MessageEntry(MessageEntryCoders.UTF) private @NotNull UUID transactionId;
+		@Getter @MessageEntry(MessageEntryCoders.UUID) private @NotNull UUID transactionId;
 		@Getter @MessageEntry(MessageEntryCoders.LONG) private @NotNull long value;
 		
 	}

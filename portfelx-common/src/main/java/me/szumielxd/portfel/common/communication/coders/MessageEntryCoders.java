@@ -1,5 +1,6 @@
 package me.szumielxd.portfel.common.communication.coders;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
@@ -24,11 +25,11 @@ public enum MessageEntryCoders {
 		this.coderCreator = coderCreator;
 	}
 	
-	public Optional<? extends MessageEntryCoder<?>> getIfValid(Class<?> clazz) {
-		return this.coderCreator.generateIfValid(clazz);
+	public Optional<? extends MessageEntryCoder<?>> getIfValid(Type type) {
+		return this.coderCreator.generateIfValid(type);
 	}
 	
-	public boolean isApplicable(Class<?> type) {
+	public boolean isApplicable(Type type) {
 		return this.coderCreator.isApplicable(type);
 	}
 

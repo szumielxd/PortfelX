@@ -6,9 +6,11 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import me.szumielxd.portfel.common.utils.CryptoUtils;
 
+@EqualsAndHashCode
 @RequiredArgsConstructor
 public class EncryptedObject<T> {
 	

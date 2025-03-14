@@ -21,17 +21,18 @@ import org.jetbrains.annotations.NotNull;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public abstract class MessageEntryCoder<T> {
 	
-	protected final Class<? extends T> targetClass;
+	protected final Type targetClass;
 
 	protected static final MessageEntryCoderCreator<Boolean> BOOLEAN = new MessageEntryCoderCreator<>(ByteArrayDataInput::readBoolean, ByteArrayDataOutput::writeBoolean, List.of(Boolean.class, boolean.class)::contains);
 	protected static final MessageEntryCoderCreator<Integer> INTEGER = new MessageEntryCoderCreator<>(ByteArrayDataInput::readInt, ByteArrayDataOutput::writeInt, List.of(Integer.class, int.class, Long.class, long.class, Number.class)::contains);
 	protected static final MessageEntryCoderCreator<Long> LONG = new MessageEntryCoderCreator<>(ByteArrayDataInput::readLong, ByteArrayDataOutput::writeLong, List.of(Long.class, long.class, Number.class)::contains);
-	protected static final MessageEntryCoderCreator<String> UTF = new MessageEntryCoderCreator<>(ByteArrayDataInput::readUTF, ByteArrayDataOutput::writeUTF, cl -> String.class.equals(cl) || cl.isEnum());
+	protected static final MessageEntryCoderCreator<String> UTF = new MessageEntryCoderCreator<>(ByteArrayDataInput::readUTF, ByteArrayDataOutput::writeUTF, cl -> String.class.equals(cl));
 	protected static final MessageEntryCoderCreator<String> ASCII = new MessageEntryCoderCreator<>(
 			in -> IntStream.range(0, in.readByte() + 128)
 					.mapToObj(j -> in.readByte())
@@ -60,7 +61,7 @@ public abstract class MessageEntryCoder<T> {
 	protected static final MessageEntryCoderCreator<Enum<?>> ENUM = new MessageEntryCoderCreator<>(
 			MessageEntryCoder::decodeEnum,
 			MessageEntryCoder::encodeEnum,
-			Class::isEnum);
+			type -> type instanceof Class<?> clazz && clazz.isEnum());
 	protected static final MessageEntryCoderCreator<EncryptedObject<?>> CRYPTO = new MessageEntryCoderCreator<>(
 			MessageEntryCoder::decodeCrypto,
 			MessageEntryCoder::encodeCrypto,
@@ -99,15 +100,10 @@ public abstract class MessageEntryCoder<T> {
 		ASCII.encoder.accept(out, e.name());
 	}
 	
-	private static boolean validateCrypto(@NotNull Class<?> clazz) {
-		try {
-			clazz.getConstructor();
-			return Stream.of(clazz.getDeclaredFields())
-					.map(MessageEntryCoder::checkIfApplicable)
-					.allMatch(Optional::isPresent);
-		} catch (NoSuchMethodException | SecurityException e1) {
-			return false;
-		}
+	private static boolean validateCrypto(@NotNull Type type) {
+		return type instanceof ParameterizedType param
+				&& param.getRawType() instanceof Class<?> clazz
+				&& EncryptedObject.class.isAssignableFrom(clazz);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -121,13 +117,13 @@ public abstract class MessageEntryCoder<T> {
 		e.writeBytes(out);
 	}
 	
-	private static boolean validateObject(@NotNull Class<?> clazz) {
+	private static boolean validateObject(@NotNull Type type) {
 		try {
-			clazz.getConstructor();
-			return Stream.of(clazz.getDeclaredFields())
-					.map(MessageEntryCoder::checkIfApplicable)
-					.allMatch(Optional::isPresent);
-		} catch (NoSuchMethodException | SecurityException e1) {
+			return type instanceof Class<?> clazz
+					&& Stream.of(clazz.getDeclaredFields())
+							.map(MessageEntryCoder::checkIfApplicable)
+							.allMatch(Optional::isPresent);
+		} catch (SecurityException e1) {
 			return false;
 		}
 	}
@@ -194,10 +190,8 @@ public abstract class MessageEntryCoder<T> {
 	private static @NotNull Optional<? extends MessageEntryCoder<?>> checkIfApplicable(@NotNull Field field) {
 		var entryMeta = field.getAnnotation(MessageEntry.class);
 		if (entryMeta != null) {
-			var entryType = field.getType();
-			while (entryType.isArray()) {
-				entryType = entryType.getComponentType();
-			}
+			var entryType = field.getGenericType();
+			entryType = unwrapArrayType(entryType);
 			if (!entryMeta.value().isApplicable(entryType)) {
 				throw new IllegalArgumentException("Cannot apply `%s` to field of type `%s`".formatted(entryMeta.value().name(), field.getType()));
 			}
@@ -206,28 +200,34 @@ public abstract class MessageEntryCoder<T> {
 		return Optional.empty();
 	}
 	
-	@RequiredArgsConstructor
+	private static @NotNull Type unwrapArrayType(@NotNull Type type) {
+		while (type instanceof Class<?> clazz && clazz.isArray()) {
+			type = clazz.getComponentType();
+		}
+		return type;
+	}
+	
+	@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 	protected static class MessageEntryCoderCreator<T> {
 		
 		private final @NotNull BiFunction<@NotNull ByteArrayDataInput, Type, @NotNull T> decoder;
 		private final @NotNull BiConsumer<@NotNull ByteArrayDataOutput, @NotNull T> encoder;
-		private final @NotNull Predicate<Class<?>> typeValidator;
+		private final @NotNull Predicate<Type> typeValidator;
 		
-		public MessageEntryCoderCreator(@NotNull Function<@NotNull ByteArrayDataInput, @NotNull T> decoder, @NotNull BiConsumer<@NotNull ByteArrayDataOutput, @NotNull T> encoder, @NotNull Predicate<Class<?>> typeValidator) {
+		private MessageEntryCoderCreator(@NotNull Function<@NotNull ByteArrayDataInput, @NotNull T> decoder, @NotNull BiConsumer<@NotNull ByteArrayDataOutput, @NotNull T> encoder, @NotNull Predicate<Type> typeValidator) {
 			this((in, clazz) -> decoder.apply(in), encoder, typeValidator);
 		}
 		
-		public boolean isApplicable(@NotNull Class<?> clazz) {
+		public boolean isApplicable(@NotNull Type clazz) {
 			return this.typeValidator.test(clazz);
 		}
 		
-		@SuppressWarnings("unchecked")
-		public @NotNull Optional<MessageEntryCoder<T>> generateIfValid(Class<?> type) {
-			if (this.isApplicable(type)) {
-				return Optional.of(new MessageEntryCoder<T>((Class<? extends T>) type) {
+		public @NotNull Optional<MessageEntryCoder<T>> generateIfValid(Type type) {
+			if (isApplicable(type)) {
+				return Optional.of(new MessageEntryCoder<T>(type) {
 					@Override
 					public @NotNull T decode(@NotNull ByteArrayDataInput in) {
-						return decoder.apply(in, this.targetClass);
+						return decoder.apply(in, type);
 					}
 
 					@Override

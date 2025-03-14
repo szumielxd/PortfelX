@@ -25,7 +25,7 @@ import me.szumielxd.portfel.common.communication.coders.messages.common.UserIden
 public class TopMessage implements MessagePacket {
 
 	@Getter @MessageEntry(MessageEntryCoders.UUID) private @NotNull UUID proxyId;
-	@Getter @MessageEntry(MessageEntryCoders.ASCII) private @NotNull EcoType type;
+	@Getter @MessageEntry(MessageEntryCoders.ENUM) private @NotNull EcoType type;
 	@Getter @MessageEntry(MessageEntryCoders.OBJECT) private @NotNull TopUser[] entries;
 	
 	@AllArgsConstructor
