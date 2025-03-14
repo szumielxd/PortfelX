@@ -18,7 +18,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class CompletableUtils {
 	
-	public <T> @NotNull Collector<CompletableFuture<T>, List<CompletableFuture<T>>, CompletableFuture<List<T>>> mergedCompletable() {
+	public <T> @NotNull Collector<CompletableFuture<T>, ?, CompletableFuture<List<T>>> mergedCompletable() {
 		return Collectors.collectingAndThen(Collectors.toList(), CompletableUtils::mergeCompletable);
 	}
 	
@@ -29,7 +29,7 @@ public class CompletableUtils {
 						.toList());
 	}
 	
-	public <K, V> @NotNull Collector<Entry<K, CompletableFuture<V>>, Map<K, CompletableFuture<V>>, CompletableFuture<Map<K, V>>> mergedCompletableMap() {
+	public <K, V> @NotNull Collector<Entry<K, CompletableFuture<V>>, ?, CompletableFuture<Map<K, V>>> mergedCompletableMap() {
 		return Collectors.collectingAndThen(Collectors.toList(), CompletableUtils::mergeCompletableEntries);
 	}
 	
