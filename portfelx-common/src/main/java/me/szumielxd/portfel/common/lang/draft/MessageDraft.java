@@ -20,6 +20,9 @@ import com.google.gson.JsonElement;
 
 import lombok.RequiredArgsConstructor;
 import me.szumielxd.legacyminiadventure.VersionableObject.ChatVersion;
+import me.szumielxd.portfel.api.Portfel;
+import me.szumielxd.portfel.api.objects.CommonAudience;
+import me.szumielxd.portfel.api.objects.CommonGroupAudience;
 import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.lang.Lang;
@@ -34,6 +37,8 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 public abstract class MessageDraft {
 	
 	protected abstract @NotNull Component toComponent(@NotNull Lang lang, @NotNull ChatVersion chatVersion);
+	
+	public abstract @NotNull String toMinimessageString(@NotNull Lang lang, @NotNull ChatVersion chatVersion);
 	
 	protected final Component replaceClickAndInsertion(Component comp, Pattern pattern, Function<MatchResult, String> replacer) {
 		var click = comp.clickEvent();
@@ -83,6 +88,10 @@ public abstract class MessageDraft {
 				.collect(Collectors.toMap(Entry::getKey, e -> plain(e.getValue()))));
 	}
 	
+	public final @NotNull MessageDraft deepPlaceholders(@NotNull Pattern pattern, @NotNull Function<String, MessageDraft> replacer) {
+		return deepPlaceholders(this, pattern, replacer);
+	}
+	
 	public final @NotNull MessageDraft prefixed() {
 		return MainLangKey.PREFIX.draft().append(this);
 	}
@@ -100,12 +109,23 @@ public abstract class MessageDraft {
 				toComponent(Lang.get(sender), ChatVersion.getCorrect(protocolId)));
 	}
 	
+	public <C> @NotNull C buildDefaultComponent(@NotNull Portfel<C> plugin) {
+		return plugin.getComponentMapper().kyori().kyoriToComponent(
+				toComponent(Lang.def(), ChatVersion.NORMAL));
+	}
+	
 	public @NotNull String buildPlain(@NotNull Lang lang) {
 		return PlainTextComponentSerializer.plainText().serialize(toComponent(lang, ChatVersion.NORMAL));
 	}
 	
-	public <C> void send(@NotNull CommonSender<C> sender) {
-		send(sender, false);
+	public <C> void send(@NotNull CommonAudience<C> audience) {
+		if (audience instanceof CommonGroupAudience<?>) {
+			((CommonGroupAudience<C>) audience).getAudience().forEach(a -> send(a));
+		} else if (audience instanceof CommonSender<?>) {
+			audience.sendMessage(buildComponent((CommonSender<C>) audience));
+		} else {
+			audience.sendMessage(buildDefaultComponent(audience.getPlugin()));
+		}
 	}
 	
 	public <C> void send(@NotNull CommonSender<C> sender, boolean prefix) {
@@ -117,7 +137,7 @@ public abstract class MessageDraft {
 	}
 	
 	public <C> void sendPrefixed(@NotNull CommonSender<C> sender) {
-		this.prefixed().send(sender);
+		prefixed().send(sender);
 	}
 	
 	
@@ -203,6 +223,18 @@ public abstract class MessageDraft {
 	
 	public static @NotNull MiniMessageDraft minimessage(@NotNull String text) {
 		return new MiniMessageDraft(text);
+	}
+	
+	public static @NotNull LegacyMessageDraft legacy(@NotNull String text) {
+		return new LegacyMessageDraft(text);
+	}
+	
+	public static @NotNull DeepPlaceholdersMessageDraft deepPlaceholders(@NotNull String text, @NotNull Pattern pattern, @NotNull Function<String, MessageDraft> replacer) {
+		return deepPlaceholders(minimessage(text), pattern, replacer);
+	}
+	
+	public static @NotNull DeepPlaceholdersMessageDraft deepPlaceholders(@NotNull MessageDraft draft, @NotNull Pattern pattern, @NotNull Function<String, MessageDraft> replacer) {
+		return new DeepPlaceholdersMessageDraft(draft, pattern, replacer);
 	}
 	
 	

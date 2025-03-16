@@ -17,7 +17,12 @@ public class LangMessageDraft extends MessageDraft {
 	
 	@Override
 	protected @NotNull Component toComponent(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
-		return LegacyMiniadventure.get().deserialize(chatVersion, lang.getValue(key));
+		return LegacyMiniadventure.get().deserialize(chatVersion, toMinimessageString(lang, chatVersion));
+	}
+	
+	@Override
+	public @NotNull String toMinimessageString(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
+		return lang.getValue(key);
 	}
 
 }

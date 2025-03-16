@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import me.szumielxd.legacyminiadventure.VersionableObject.ChatVersion;
 import me.szumielxd.portfel.common.lang.Lang;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
@@ -28,6 +29,11 @@ public class ParameterizedMessageDraft extends MessageDraft {
 		comp = comp.replaceText(b -> b.match(pattern)
 				.replacement((match, bu) -> matchComponentArgument(lang, chatVersion, match.group(1))));
 		return replaceClickAndInsertion(comp, pattern, match -> matchPlainArgument(lang, chatVersion, match.group(1)));
+	}
+	
+	@Override
+	public @NotNull String toMinimessageString(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
+		return MiniMessage.miniMessage().serialize(toComponent(lang, chatVersion));
 	}
 	
 	private String matchPlainArgument(@NotNull Lang lang, @NotNull ChatVersion chatVersion, String index) {

@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import me.szumielxd.legacyminiadventure.VersionableObject.ChatVersion;
 import me.szumielxd.portfel.common.lang.Lang;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class ComboMessageDraft extends MessageDraft {
@@ -30,6 +31,11 @@ public class ComboMessageDraft extends MessageDraft {
 			return appendToLastChild(comp, toAppend);
 		}
 		return comp.append(toAppend);
+	}
+	
+	@Override
+	public @NotNull String toMinimessageString(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
+		return MiniMessage.miniMessage().serialize(toComponent(lang, chatVersion));
 	}
 	
 	private @NotNull Component appendToLastChild(@NotNull Component comp, @NotNull Component toAppend) {

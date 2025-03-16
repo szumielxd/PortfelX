@@ -9,6 +9,7 @@ import me.szumielxd.legacyminiadventure.VersionableObject.ChatVersion;
 import me.szumielxd.portfel.common.lang.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class PlainMessageDraft extends MessageDraft {
@@ -29,6 +30,11 @@ public class PlainMessageDraft extends MessageDraft {
 			return comp.asComponent();
 		}
 		return Component.text(String.valueOf(obj));
+	}
+	
+	@Override
+	public @NotNull String toMinimessageString(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
+		return MiniMessage.miniMessage().escapeTags(String.valueOf(base));
 	}
 
 }
