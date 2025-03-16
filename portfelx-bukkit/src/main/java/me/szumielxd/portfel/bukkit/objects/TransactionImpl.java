@@ -10,17 +10,15 @@ import java.nio.file.StandardOpenOption;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-import java.util.regex.MatchResult;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,8 +26,8 @@ import me.szumielxd.portfel.api.enums.TransactionStatus;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.api.objects.Transaction;
-import me.szumielxd.portfel.common.utils.MiscUtils;
-import net.kyori.adventure.audience.Audience;
+import me.szumielxd.portfel.bukkit.utils.PlaceholderUtils;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 
 public class TransactionImpl extends CompletableFuture<Transaction.TransactionResult> implements Transaction {
 		
@@ -95,35 +93,30 @@ public class TransactionImpl extends CompletableFuture<Transaction.TransactionRe
 		user.setPlainBalance(result.getNewBalance());
 		
 		if (result.getStatus() == TransactionStatus.OK) {
-			// replacements: %player% %playerId%
-			Pattern pattern = Pattern.compile("%((player(Id)?)|(order))%", Pattern.CASE_INSENSITIVE);
-			Function<MatchResult, String> replacer = match -> {
-				if (match.group().equalsIgnoreCase("%order%")) return this.order.getOrderName();
-				if (match.group().equalsIgnoreCase("%player%")) return this.user.getName(); // %player%
-				return this.user.getUniqueId().toString(); // %playerId%
-			};
+			var player = Bukkit.getPlayer(user.getUniqueId());
+			var plainReplacements = Map.of("order", order.getOrderName());
+			var replacements = plainReplacements.entrySet().stream()
+					.collect(Collectors.toUnmodifiableMap(Entry::getKey, e -> MessageDraft.plain(e.getValue())));
 			
 			// broadcast
-			Audience all = plugin.getServer() instanceof Audience srv ? srv : plugin.adventure().all();
 			getOrder().getActions().broadcasts().stream()
-					.map(msg -> MiscUtils.parseComponent(msg, pattern, replacer))
-					.forEach(all::sendMessage);
-			
+					.map(msg -> PlaceholderUtils.getDraft(msg, player, user, replacements))
+					.forEach(msg -> msg.send(plugin.getCommonServer()));
+	
 			// message
-			Audience player = Audience.class.isAssignableFrom(Player.class) ? Bukkit.getPlayer(user.getUniqueId()) : this.plugin.adventure().player(user.getUniqueId());
+			var wrapped = BukkitSender.player(plugin, player);
 			getOrder().getActions().messages().stream()
-					.map(msg -> MiscUtils.parseComponent(msg, pattern, replacer))
-					.forEach(player::sendMessage);
+					.map(msg -> PlaceholderUtils.getDraft(msg, player, user, replacements))
+					.forEach(msg -> msg.send(wrapped));
 			
 			// command
 			var console = plugin.getServer().getConsoleSender();
 			plugin.getTaskManager().runTask(() -> getOrder().getActions().commands().stream()
 					.map(cmd -> cmd.startsWith("/") ? cmd.substring(1) : cmd)
-					.map(cmd -> MiscUtils.replaceAll(pattern.matcher(cmd), replacer))
+					.map(cmd -> PlaceholderUtils.getPlain(cmd, player, user, plainReplacements))
 					.forEach(cmd -> plugin.getServer().dispatchCommand(console, cmd)));
 			
-			OfflinePlayer target = Bukkit.getOfflinePlayer(user.getUniqueId());
-			String ip = Optional.ofNullable(target.getPlayer().getAddress())
+			String ip = Optional.ofNullable(player.getAddress())
 					.map(InetSocketAddress::getAddress)
 					.map(InetAddress::getHostAddress)
 					.orElse("offline");
