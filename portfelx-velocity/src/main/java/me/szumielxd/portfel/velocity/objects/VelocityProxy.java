@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.proxy.api.objects.CommonProxy;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
 import me.szumielxd.portfel.proxy.api.objects.ProxyScheduler;
@@ -85,6 +86,12 @@ public class VelocityProxy implements CommonProxy<Component> {
 	@Override
 	public @NotNull ProxyScheduler getScheduler() {
 		return this.scheduler;
+	}
+
+
+	@Override
+	public Portfel<Component> getPlugin() {
+		return this.plugin;
 	}
 	
 

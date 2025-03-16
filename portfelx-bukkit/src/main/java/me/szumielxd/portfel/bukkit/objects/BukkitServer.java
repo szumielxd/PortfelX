@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonServer;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import net.kyori.adventure.text.Component;
@@ -47,6 +48,12 @@ public class BukkitServer implements CommonServer<Component> {
 	@Override
 	public @NotNull BukkitSender getConsole() {
 		return BukkitSender.wrap(this.plugin, this.plugin.getServer().getConsoleSender());
+	}
+
+
+	@Override
+	public @NotNull Portfel<Component> getPlugin() {
+		return plugin;
 	}
 	
 

@@ -2,16 +2,7 @@ package me.szumielxd.portfel.api.objects;
 
 import org.jetbrains.annotations.NotNull;
 
-import me.szumielxd.portfel.api.Portfel;
-
-public interface CommonSender<C> {
-	
-	/**
-	 * Send message to this sender.
-	 * 
-	 * @param message message to send
-	 */
-	public void sendMessage(@NotNull C message);
+public interface CommonSender<C> extends CommonAudience<C> {
 	
 	/**
 	 * Checks if this user has the specified permission node.
@@ -34,8 +25,6 @@ public interface CommonSender<C> {
 	 * @param command command to execute
 	 */
 	public void executeProxyCommand(@NotNull String command);
-	
-	public Portfel<C> getPlugin();
 	
 
 }

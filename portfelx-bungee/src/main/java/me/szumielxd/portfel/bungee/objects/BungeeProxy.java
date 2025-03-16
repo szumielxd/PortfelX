@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.bungee.PortfelBungeeImpl;
 import me.szumielxd.portfel.proxy.api.objects.CommonProxy;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
@@ -83,6 +84,12 @@ public class BungeeProxy implements CommonProxy<BaseComponent[]> {
 	@Override
 	public @NotNull ProxyScheduler getScheduler() {
 		return this.scheduler;
+	}
+
+
+	@Override
+	public Portfel<BaseComponent[]> getPlugin() {
+		return this.plugin;
 	}
 	
 
