@@ -19,7 +19,7 @@ import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.utils.CollectionUtils;
 
 public abstract class ParentCommand<C> extends SimpleCommand<C> implements ParentLikeCommand<C> {
 
@@ -73,7 +73,7 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> implements Paren
 			String str = args[cmdArgs.size()];
 			SimpleCommand<C> cmd = this.childrens.get(str.toLowerCase());
 			if (cmd != null && cmd.canUse(sender)) {
-				return cmd.onTabComplete(sender, MiscUtils.mergeArrays(label, Arrays.copyOf(args, cmdArgs.size() + 1)), MiscUtils.popArray(args, cmdArgs.size() + 1));
+				return cmd.onTabComplete(sender, CollectionUtils.mergeArrays(label, Arrays.copyOf(args, cmdArgs.size() + 1)), CollectionUtils.popArray(args, cmdArgs.size() + 1));
 			}
 		}
 		return List.of();

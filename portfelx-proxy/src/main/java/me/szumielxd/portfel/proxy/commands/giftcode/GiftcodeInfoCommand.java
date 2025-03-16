@@ -18,7 +18,7 @@ import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.utils.FormatUtils;
 import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 import me.szumielxd.portfel.proxy.objects.PrizeToken;
 
@@ -56,7 +56,7 @@ public class GiftcodeInfoCommand<C> extends SimpleCommand<C> {
 		var accessibility = ProxyLangKey.COMMAND_GIFTCODE_INFO_ACCESSIBILITY
 				.draft();
 		var accessType = ProxyLangKey.COMMAND_GIFTCODE_INFO_ACCESSTYPE
-				.draft(MiscUtils.firstToUpper(token.getSelectorType().name(), true));
+				.draft(FormatUtils.firstToUpper(token.getSelectorType().name(), true));
 		var accessList = ProxyLangKey.COMMAND_GIFTCODE_INFO_ACCESSLIST
 				.draft(token.getServerNames().stream()
 						.map(ProxyLangKey.COMMAND_GIFTCODE_INFO_ACCESSLIST_FORMAT::draft)

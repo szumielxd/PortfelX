@@ -31,7 +31,7 @@ import me.szumielxd.portfel.common.communication.coders.messages.info.TopMessage
 import me.szumielxd.portfel.common.communication.coders.messages.info.TopRequestMessage;
 import me.szumielxd.portfel.common.communication.coders.messages.info.UserInfoMessage;
 import me.szumielxd.portfel.common.communication.coders.messages.info.UserInfoRequestMessage;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.utils.CollectionUtils;
 import me.szumielxd.portfel.common.utils.future.CompletableUtils;
 
 public class InfoChannelManager extends SpecificChannelManager {
@@ -40,8 +40,8 @@ public class InfoChannelManager extends SpecificChannelManager {
 
 	private @Nullable Consumer<BukkitOperableUser> registerer = null;
 	
-	private final @NotNull Map<EcoType, Map<UUID, CompletableFuture<List<TopEntry>>>> awaitingTopUpdates = MiscUtils.mapOfEachEnum(EcoType.class, v -> new ConcurrentHashMap<>()); // ecoType -> { remoteId -> future with list }
-	private final @NotNull Map<EcoType, Map<UUID, CompletableFuture<List<TopEntry>>>> topUpdatesByUser = MiscUtils.mapOfEachEnum(EcoType.class, v -> new ConcurrentHashMap<>()); // ecoType -> { userId -> remoteId }
+	private final @NotNull Map<EcoType, Map<UUID, CompletableFuture<List<TopEntry>>>> awaitingTopUpdates = CollectionUtils.mapOfEachEnum(EcoType.class, v -> new ConcurrentHashMap<>()); // ecoType -> { remoteId -> future with list }
+	private final @NotNull Map<EcoType, Map<UUID, CompletableFuture<List<TopEntry>>>> topUpdatesByUser = CollectionUtils.mapOfEachEnum(EcoType.class, v -> new ConcurrentHashMap<>()); // ecoType -> { userId -> remoteId }
 	
 	private final @NotNull Map<UUID, CompletableFuture<BukkitOperableUser>> awaitingUserUpdates = new HashMap<>();
 	

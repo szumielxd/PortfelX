@@ -24,7 +24,7 @@ import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.utils.FormatUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.database.token.AbstractTokenDB.DateCondition;
 import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
@@ -159,7 +159,7 @@ public class ListgiftcodesCommand<C> extends SimpleCommand<C> {
 		var expiration = ProxyLangKey.COMMAND_LISTGIFTCODES_EXPIRATION
 				.draft(expirationTime);
 
-		var duration = MiscUtils.formatDuration(lang, System.currentTimeMillis()-token.getCreationDate().getTime(), true);
+		var duration = FormatUtils.formatDuration(lang, System.currentTimeMillis()-token.getCreationDate().getTime(), true);
 		
 		ProxyLangKey.COMMAND_LISTGIFTCODES_ENTRY_FIRSTLINE.draft(
 				expiration,

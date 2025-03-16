@@ -26,7 +26,7 @@ import me.szumielxd.portfel.common.commands.SimpleCommand;
 import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.utils.FormatUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.commands.CommonArgs;
 import me.szumielxd.portfel.proxy.database.AbstractDBLogger.ActionType;
@@ -170,7 +170,7 @@ public class ReadLogCommand<C> extends SimpleCommand<C> {
 						LogEntry log = logs.get(i + offset);
 						ProxyLangKey.COMMAND_LOG_READ_LINE1.draft(
 								"#" + log.getLogId(),
-								MiscUtils.formatDuration(lang, System.currentTimeMillis() - log.getTime().getTime(), true),
+								FormatUtils.formatDuration(lang, System.currentTimeMillis() - log.getTime().getTime(), true),
 								ProxyLangKey.LOG_MESSAGE_LINE1.draft(
 										prepareInteractive(MessageDraft.plain(log.getExecutor().getDisplayName() + "@" + log.getServer()), log.getExecutor().getDisplayName(), log.getExecutor().getUniqueId()),
 										prepareInteractive(MessageDraft.plain(log.getTargetName()), log.getTargetName(), log.getTargetUniqueId())))

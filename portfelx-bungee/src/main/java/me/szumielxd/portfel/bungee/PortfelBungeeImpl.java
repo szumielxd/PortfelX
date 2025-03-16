@@ -102,7 +102,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 		this.getProxy().getPluginManager().registerListener(this, new BungeeChannelListener(this));
 		this.getLogger().info("Registering commands...");
 		this.command = new MainCommand<>(this, "dpb", "portfel.command", "devportfelbungee");
-		this.tokenCommand = new MainTokenCommand<>(this, this.configuration.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.configuration.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(new String[0]));
+		this.tokenCommand = new MainTokenCommand<>(this, this.configuration.getString(ProxyConfigKey.TOKEN_COMMAND_NAME), this.configuration.getStringList(ProxyConfigKey.TOKEN_COMMAND_ALIASES).toArray(String[]::new));
 		this.registerCommand(this.command);
 		this.registerCommand(this.tokenCommand);
 		this.getProxy().registerChannel(CHANNEL_SETUP);
@@ -121,9 +121,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 	
 	public void load() {
 		this.getLogger().info("Loading configuration...");
-		this.configuration = new ConfigImpl(this).init(Stream.of(ConfigKey.values(), ProxyConfigKey.values())
-				.flatMap(Stream::of)
-				.toArray(AbstractKey[]::new));
+		this.configuration = new ConfigImpl(this).init(Stream.concat(Stream.of(ConfigKey.values()), Stream.of(ProxyConfigKey.values())).toArray(AbstractKey[]::new));
 		this.getLogger().info("Setup locales...");
 		Lang.load(this.getDataDirectory().resolve("languages"), this);
 		this.ordersManager = new OrdersManager(this).init();

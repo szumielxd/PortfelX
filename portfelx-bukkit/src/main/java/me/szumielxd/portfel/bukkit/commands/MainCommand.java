@@ -25,7 +25,7 @@ import me.szumielxd.portfel.common.commands.common.HelpCommand;
 import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.utils.CollectionUtils;
 import net.kyori.adventure.text.Component;
 
 public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
@@ -79,7 +79,7 @@ public class MainCommand implements ParentLikeCommand<Component>, TabExecutor {
 		} else if (args.length > 1) {
 			SimpleCommand<Component> cmd = this.childrens.get(args[0].toLowerCase());
 			if (cmd != null) {
-				return cmd.onTabComplete(sender, MiscUtils.mergeArrays(label, args[0]), MiscUtils.popArray(args));
+				return cmd.onTabComplete(sender, CollectionUtils.mergeArrays(label, args[0]), CollectionUtils.popArray(args));
 			}
 		}
 		return List.of();

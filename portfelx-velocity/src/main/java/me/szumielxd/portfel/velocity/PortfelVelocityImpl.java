@@ -31,7 +31,6 @@ import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
-import me.szumielxd.portfel.common.utils.MiscUtils;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.configuration.ProxyConfigKey;
 import me.szumielxd.portfel.proxy.api.managers.ProxyTopManager;
@@ -142,7 +141,7 @@ public class PortfelVelocityImpl implements PortfelProxyImpl<Component> {
 	
 	public void load() {
 		this.getLogger().info("Loading configuration...");
-		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(ProxyConfigKey.values()).toArray(AbstractKey[]::new)));
+		this.config = new ConfigImpl(this).init(Stream.concat(Stream.of(ConfigKey.values()), Stream.of(ProxyConfigKey.values())).toArray(AbstractKey[]::new));
 		this.getLogger().info("Setup locales...");
 		Lang.load(this.getDataDirectory().resolve("languages"), this);
 		this.ordersManager = new OrdersManager(this).init();

@@ -13,7 +13,7 @@ import me.szumielxd.portfel.api.objects.CommonPlayer;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.utils.CollectionUtils;
 
 public interface AbstractCommand<C> {
 	
@@ -91,8 +91,8 @@ public interface AbstractCommand<C> {
 		
 		public @NotNull ParsedArguments append(@NotNull ParsedArguments args) {
 			return new ParsedArguments(
-					MiscUtils.mergeArrays(staticArgs, args.staticArgs),
-					MiscUtils.mergeArrays(flyingArgs, args.flyingArgs));
+					CollectionUtils.mergeArrays(staticArgs, args.staticArgs),
+					CollectionUtils.mergeArrays(flyingArgs, args.flyingArgs));
 		}
 		
 	}
@@ -102,15 +102,15 @@ public interface AbstractCommand<C> {
 		public @NotNull ParsedCommandContext chain(@NotNull ParsedCommandContext context) {
 			return new ParsedCommandContext(
 					parsedArgs.append(context.parsedArgs),
-					MiscUtils.mergeArrays(label, context.label),
+					CollectionUtils.mergeArrays(label, context.label),
 					context.argsLeft);
 		}
 		
 		public @NotNull ParsedCommandContext skipArgsLeft(int count) {
 			return new ParsedCommandContext(
 					parsedArgs,
-					MiscUtils.mergeArrays(label, Stream.of(argsLeft).limit(count).toArray(String[]::new)),
-					MiscUtils.popArray(argsLeft, count));
+					CollectionUtils.mergeArrays(label, Stream.of(argsLeft).limit(count).toArray(String[]::new)),
+					CollectionUtils.popArray(argsLeft, count));
 		}
 		
 		public @Nullable String argLeft(int index) {

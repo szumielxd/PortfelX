@@ -53,7 +53,6 @@ import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
-import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.kyori.adventure.text.Component;
 
@@ -141,7 +140,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	public void load() {
 		this.identifierManager = new IdentifierManagerImpl(this).init();
 		this.getLogger().info("Loading configuration...");
-		this.config = new ConfigImpl(this).init(MiscUtils.mergeArrays(Stream.of(ConfigKey.values()).toArray(AbstractKey[]::new), Stream.of(BukkitConfigKey.values()).toArray(AbstractKey[]::new)));
+		this.config = new ConfigImpl(this).init(Stream.concat(Stream.of(ConfigKey.values()), Stream.of(BukkitConfigKey.values())).toArray(AbstractKey[]::new));
 		this.getLogger().info("Setup locales...");
 		Lang.load(getDataDirectory().resolve("languages"), this);
 		this.setupBukkitKey();

@@ -11,7 +11,7 @@ import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.lang.MainLangKey;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.utils.CollectionUtils;
 
 public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 	
@@ -44,7 +44,7 @@ public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 			final int index = args.length-1;
 			String arg = args[index].toLowerCase();
 			if (args.length <= argList.size()) {
-				completions.addAll(argList.get(index).getTabCompletions(sender, MiscUtils.mergeArrays(label, Arrays.copyOf(args, index+1))));
+				completions.addAll(argList.get(index).getTabCompletions(sender, CollectionUtils.mergeArrays(label, Arrays.copyOf(args, index+1))));
 			}
 			flyingArgs.stream().map(a -> {
 				List<String> res = a.getTabCompletions(sender, label);

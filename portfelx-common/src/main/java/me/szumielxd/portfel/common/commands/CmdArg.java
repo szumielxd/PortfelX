@@ -11,9 +11,9 @@ import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
-import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.common.lang.MainLangKey;
-import me.szumielxd.portfel.common.utils.MiscUtils;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
+import me.szumielxd.portfel.common.utils.CollectionUtils;
 
 public class CmdArg {
 	
@@ -174,7 +174,7 @@ public class CmdArg {
 			if (label.length == 0) return Collections.emptyList();
 			String arg = label[label.length-1];
 			if (!arg.toLowerCase().startsWith(getPrefix())) return Collections.emptyList();
-			return this.argCompletions.apply(sender, MiscUtils.mergeArrays(MiscUtils.popArray(label), arg.substring(this.getPrefix().length())));
+			return this.argCompletions.apply(sender, CollectionUtils.mergeArrays(CollectionUtils.popArray(label), arg.substring(this.getPrefix().length())));
 		}
 		return this.argCompletions.apply(sender, label);
 	}
