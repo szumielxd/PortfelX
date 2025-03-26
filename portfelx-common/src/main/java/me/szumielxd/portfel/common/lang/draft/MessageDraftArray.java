@@ -7,11 +7,11 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.NotNull;
 
+import me.szumielxd.legacyminiadventure.LegacyMiniadventure;
 import me.szumielxd.legacyminiadventure.VersionableObject.ChatVersion;
 import me.szumielxd.portfel.common.lang.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 public class MessageDraftArray extends MessageDraft {
 
@@ -31,7 +31,7 @@ public class MessageDraftArray extends MessageDraft {
 	
 	@Override
 	public @NotNull String toMinimessageString(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
-		return MiniMessage.miniMessage().serialize(toComponent(lang, chatVersion));
+		return LegacyMiniadventure.get().serialize(toComponent(lang, chatVersion));
 	}
 	
 	public @NotNull List<MessageDraft> elements() {

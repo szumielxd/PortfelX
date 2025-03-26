@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.gson.JsonElement;
 
 import lombok.RequiredArgsConstructor;
+import me.szumielxd.legacyminiadventure.LegacyMiniadventure;
 import me.szumielxd.legacyminiadventure.VersionableObject.ChatVersion;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonAudience;
@@ -32,7 +33,6 @@ import me.szumielxd.portfel.common.utils.ComponentUtils;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 
 public abstract class MessageDraft {
@@ -292,7 +292,7 @@ public abstract class MessageDraft {
 	}
 	
 	public static @NotNull String stripMiniTags(@NotNull String text) {
-		return MiniMessage.miniMessage().stripTags(text);
+		return LegacyMiniadventure.get().stripTags(text);
 	}
 	
 	public static @NotNull DeepPlaceholdersMessageDraft deepPlaceholders(@NotNull String text, @NotNull Pattern pattern, @NotNull Function<String, MessageDraft> replacer) {

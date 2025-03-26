@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.NotNull;
 
 import lombok.RequiredArgsConstructor;
+import me.szumielxd.legacyminiadventure.LegacyMiniadventure;
 import me.szumielxd.legacyminiadventure.VersionableObject.ChatVersion;
 import me.szumielxd.portfel.common.lang.Lang;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 @RequiredArgsConstructor
 public class PlaceholdersMessageDraft extends MessageDraft {
@@ -35,7 +35,7 @@ public class PlaceholdersMessageDraft extends MessageDraft {
 	
 	@Override
 	public @NotNull String toMinimessageString(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
-		return MiniMessage.miniMessage().serialize(toComponent(lang, chatVersion));
+		return LegacyMiniadventure.get().serialize(toComponent(lang, chatVersion));
 	}
 	
 	private @NotNull Component getReplacementComponent(@NotNull String key, @NotNull Lang lang, @NotNull ChatVersion chatVersion) {
