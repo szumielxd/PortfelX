@@ -30,13 +30,10 @@ import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitOperableUser;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
-import me.szumielxd.portfel.bukkit.utils.ComponentUtils;
 import me.szumielxd.portfel.bukkit.utils.PlaceholderUtils;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 
 public class OrderPortfelGui implements AbstractPortfelGui {
 	
@@ -69,10 +66,9 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	}
 	
 	@Override
-	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player) {
+	public @NotNull MessageDraft getTitle(@NotNull User user, @NotNull Player player) {
 		return this.display.title()
-				.placeholders(PlaceholderUtils.userPlaceholders(user))
-				.buildComponent(BukkitSender.wrap(plugin, player));
+				.placeholders(PlaceholderUtils.userPlaceholders(user));
 	}
 	
 	public int getSlot() {
@@ -175,25 +171,23 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 	
 	private @NotNull ItemStack buildIcon(final @NotNull OrderData order, final @NotNull Player player, final @NotNull User user, @NotNull Availability availability, long price, @NotNull List<PriceDiscount> discounts) {
 		this.plugin.debug("normalItem(%s) %s|%s availability: %s", player.getName(), this.getName(), order.getName(), availability);
-		var wrapper = BukkitSender.wrap(plugin, player);
+		var wrapper = BukkitSender.player(plugin, player);
 		ItemStack item = switch (availability) {
 			case AVAILABLE -> order.getDisplay().icons().icon().clone();
 			case DONE -> order.getDisplay().icons().iconDone().clone();
 			case DENIED -> order.getDisplay().icons().iconDenied().clone();
 		};
 		ItemMeta meta = item.getItemMeta();
-		BukkitUtils.setDisplayName(meta, MessageDraft.minimessage(order.getDisplay().displayName())
-				.placeholders(PlaceholderUtils.userPlaceholders(user))
-				.buildComponent(wrapper));
+		BukkitUtils.setDisplayName(meta, wrapper, MessageDraft.minimessage(order.getDisplay().displayName())
+				.placeholders(PlaceholderUtils.userPlaceholders(user)));
 		
-		BukkitUtils.setLore(meta, List.of(ComponentUtils.splitByNewline(BukkitLangKey.SHOP_ORDER_LORE.draft(
+		BukkitUtils.setLore(meta, wrapper, BukkitLangKey.SHOP_ORDER_LORE.draft(
 				buildPriceBlock(user, price, discounts),
 				buildDescriptionMessageLines(order),
 				buildDeniedDescriptionMessageLines(availability, order),
 				buildStatusMessageLine(availability),
 				BukkitLangKey.SHOP_ORDER_TOS_BLOCK
-						.draft(this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_TERMS_OF_SERVICE)))
-				.buildComponent(wrapper))));
+						.draft(this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_TERMS_OF_SERVICE))));
 		
 		item.setItemMeta(meta);
 		return item;
@@ -259,7 +253,7 @@ public class OrderPortfelGui implements AbstractPortfelGui {
 						: BukkitLangKey.SHOP_ORDER_PRICE_DISCOUNT_LINE_LAST_INACTIVE;
 			}
 			discountDrafts.add(discountLang.draft(
-					MiniMessage.miniMessage().stripTags(discount.source().getDisplay().displayName()),
+					MessageDraft.stripMiniTags(discount.source().getDisplay().displayName()),
 					discount.value()));
 		}
 		return formatColoredPrice(user, price)

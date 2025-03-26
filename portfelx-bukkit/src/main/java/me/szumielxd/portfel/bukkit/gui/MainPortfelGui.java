@@ -1,11 +1,8 @@
 package me.szumielxd.portfel.bukkit.gui;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,15 +21,12 @@ import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
-import me.szumielxd.portfel.bukkit.utils.ComponentUtils;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
-import net.kyori.adventure.text.Component;
 
 @SuppressWarnings("deprecation")
 public class MainPortfelGui implements AbstractPortfelGui {
 	
-	private static final Pattern NEWLINE_PATTERN = Pattern.compile("\\n");
 	private static final ItemStack BACKGROUND;
 	
 	
@@ -61,23 +55,22 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	public MainPortfelGui(@NotNull PortfelBukkitImpl plugin, @NotNull OrderPortfelGui... shops) {
 		this.plugin = plugin;
 		Range<Integer> range = Range.closed(0, this.getSize()-1);
-		this.guis = Stream.of(shops).filter(s -> range.contains(s.getSlot())).collect(Collectors.toMap(s -> s.getSlot(), Function.identity(), (a,b) -> b));
+		this.guis = Stream.of(shops)
+				.filter(s -> range.contains(s.getSlot()))
+				.collect(Collectors.toMap(s -> s.getSlot(), Function.identity(), (a,b) -> b));
 	}
 	
 
 	@Override
-	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player) {
-		Objects.requireNonNull(user, "user cannot be null");
-		Objects.requireNonNull(player, "player cannot be null");
+	public @NotNull MessageDraft getTitle(@NotNull User user, @NotNull Player player) {
 		return BukkitLangKey.SHOP_TITLE
 				.draft(MainLangKey.MAIN_CURRENCY_FORMAT
-						.draft(user.getBalance()))
-				.buildComponent(BukkitSender.wrap(this.plugin, player));
+						.draft(user.getBalance()));
 	}
 
 	@Override
 	public int getSize() {
-		return this.plugin.getConfiguration().getInt(BukkitConfigKey.SHOP_MENU_ROWS)*9;
+		return this.plugin.getConfiguration().getInt(BukkitConfigKey.SHOP_MENU_ROWS) * 9;
 	}
 
 	@Override
@@ -96,19 +89,16 @@ public class MainPortfelGui implements AbstractPortfelGui {
 	public void setup(@NotNull Player player, @NotNull Inventory inventory) {
 		ItemStack[] background = new ItemStack[inventory.getSize()];
 		Arrays.fill(background, BACKGROUND);
-		var wrapper = BukkitSender.wrap(plugin, player);
+		var wrapper = BukkitSender.player(plugin, player);
 		this.guis.forEach((i, s) -> {
 			ItemStack item = s.getIcon();
 			ItemMeta meta = item.getItemMeta();
-			BukkitUtils.setDisplayName(meta, s.getDisplayName().buildComponent(wrapper));
-			var lore = BukkitLangKey.SHOP_MAIN_LORE
-					.draft(
-							s.getDescription().stream()
-									.collect(MessageDraft.join(MessageDraft.newline())),
-							this.plugin.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME),
-							s.getName())
-					.buildComponent(wrapper);
-			BukkitUtils.setLore(meta, List.of(ComponentUtils.split(lore, NEWLINE_PATTERN)));
+			BukkitUtils.setDisplayName(meta, wrapper, s.getDisplayName());
+			BukkitUtils.setLore(meta, wrapper, BukkitLangKey.SHOP_MAIN_LORE.draft(
+					s.getDescription().stream()
+							.collect(MessageDraft.join(MessageDraft.newline())),
+					plugin.getConfiguration().getString(BukkitConfigKey.SHOP_COMMAND_NAME),
+					s.getName()));
 			item.setItemMeta(meta);
 			background[i] = item;
 		});

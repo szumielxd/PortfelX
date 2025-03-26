@@ -13,7 +13,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class LegacyMessageDraft extends MessageDraft {
 	
-	private static final @NotNull LegacyComponentSerializer SERIALIZER = LegacyComponentSerializer.builder()
+	static final @NotNull LegacyComponentSerializer SERIALIZER = LegacyComponentSerializer.builder()
 			.hexColors()
 			.character(LegacyComponentSerializer.SECTION_CHAR)
 			.build();

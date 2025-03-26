@@ -5,12 +5,12 @@ import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import me.szumielxd.portfel.api.objects.User;
-import net.kyori.adventure.text.Component;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 
 public interface AbstractPortfelGui {
 	
 	
-	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player);
+	public @NotNull MessageDraft getTitle(@NotNull User user, @NotNull Player player);
 	
 	public int getSize();
 	

@@ -28,11 +28,12 @@ import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
+import me.szumielxd.portfel.common.utils.ComponentUtils;
 import me.szumielxd.portfel.common.utils.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 public abstract class MessageDraft {
 	
@@ -51,6 +52,14 @@ public abstract class MessageDraft {
 		return comp.children(comp.children().stream()
 				.map(c -> replaceClickAndInsertion(c, pattern, replacer))
 				.toList());
+	}
+	
+	protected final @NotNull List<Component> toComponentList(@NotNull Lang lang, @NotNull ChatVersion chatVersion, @NotNull Pattern separator) {
+		return List.of(ComponentUtils.split(toComponent(lang, chatVersion), separator));
+	}
+	
+	protected final @NotNull List<Component> toComponentList(@NotNull Lang lang, @NotNull ChatVersion chatVersion) {
+		return List.of(ComponentUtils.split(toComponent(lang, chatVersion), ComponentUtils.NEWLINE_PATTERN));
 	}
 	
 	public final @NotNull MessageDraft append(@NotNull MessageDraft message, boolean appendToLastChild) {
@@ -101,21 +110,48 @@ public abstract class MessageDraft {
 	}
 	
 	public <C> @NotNull C buildComponent(@NotNull CommonSender<C> sender) {
-		Optional<Integer> protocolId = Optional.of(sender)
-				.filter(CommonPlayer.class::isInstance)
-				.map(CommonPlayer.class::cast)
-				.map(CommonPlayer::protocolId);
-		return sender.getPlugin().getComponentMapper().kyori().kyoriToComponent(
-				toComponent(Lang.get(sender), ChatVersion.getCorrect(protocolId)));
+		return sender.getPlugin().getComponentMapper().kyori().kyoriToComponent(toComponent(sender));
 	}
 	
 	public <C> @NotNull C buildDefaultComponent(@NotNull Portfel<C> plugin) {
 		return plugin.getComponentMapper().kyori().kyoriToComponent(
-				toComponent(Lang.def(), ChatVersion.NORMAL));
+				toComponent(Lang.def()));
 	}
 	
 	public @NotNull String buildPlain(@NotNull Lang lang) {
-		return PlainTextComponentSerializer.plainText().serialize(toComponent(lang, ChatVersion.NORMAL));
+		return PlainMessageDraft.SERIALIZER.serialize(toComponent(lang));
+	}
+	
+	public @NotNull String buildLegacy(@NotNull Lang lang) {
+		return LegacyMessageDraft.SERIALIZER.serialize(toComponent(lang));
+	}
+	
+	public <C> @NotNull String buildLegacy(@NotNull CommonSender<C> sender) {
+		return LegacyMessageDraft.SERIALIZER.serialize(toComponent(sender));
+	}
+	
+	public <C> @NotNull List<C> buildComponentList(@NotNull CommonSender<C> sender) {
+		return toComponentList(sender).stream()
+				.map(sender.getPlugin().getComponentMapper().kyori()::kyoriToComponent)
+				.toList();
+	}
+	
+	public @NotNull List<String> buildPlainList(@NotNull Lang lang) {
+		return toComponentList(lang).stream()
+				.map(PlainMessageDraft.SERIALIZER::serialize)
+				.toList();
+	}
+	
+	public @NotNull List<String> buildLegacyList(@NotNull Lang lang) {
+		return toComponentList(lang).stream()
+				.map(LegacyMessageDraft.SERIALIZER::serialize)
+				.toList();
+	}
+	
+	public <C> @NotNull List<String> buildLegacyList(@NotNull CommonSender<C> sender) {
+		return toComponentList(sender).stream()
+				.map(LegacyMessageDraft.SERIALIZER::serialize)
+				.toList();
 	}
 	
 	public <C> void send(@NotNull CommonAudience<C> audience) {
@@ -138,6 +174,32 @@ public abstract class MessageDraft {
 	
 	public <C> void sendPrefixed(@NotNull CommonSender<C> sender) {
 		prefixed().send(sender);
+	}
+	
+	
+	private @NotNull Component toComponent(@NotNull Lang lang) {
+		return toComponent(lang, ChatVersion.NORMAL);
+	}
+	
+	private @NotNull List<Component> toComponentList(@NotNull Lang lang) {
+		return toComponentList(lang, ChatVersion.NORMAL);
+	}
+	
+	private <C> @NotNull Component toComponent(@NotNull CommonSender<C> sender) {
+		Optional<Integer> protocolId = getProtocolId(sender);
+		return toComponent(Lang.get(sender), ChatVersion.getCorrect(protocolId));
+	}
+	
+	private <C> @NotNull List<Component> toComponentList(@NotNull CommonSender<C> sender) {
+		Optional<Integer> protocolId = getProtocolId(sender);
+		return toComponentList(Lang.get(sender), ChatVersion.getCorrect(protocolId));
+	}
+	
+	private <C> Optional<Integer> getProtocolId(@NotNull CommonSender<C> sender) {
+		return Optional.of(sender)
+				.filter(CommonPlayer.class::isInstance)
+				.map(CommonPlayer.class::cast)
+				.map(CommonPlayer::protocolId);
 	}
 	
 	
@@ -227,6 +289,10 @@ public abstract class MessageDraft {
 	
 	public static @NotNull LegacyMessageDraft legacy(@NotNull String text) {
 		return new LegacyMessageDraft(text);
+	}
+	
+	public static @NotNull String stripMiniTags(@NotNull String text) {
+		return MiniMessage.miniMessage().stripTags(text);
 	}
 	
 	public static @NotNull DeepPlaceholdersMessageDraft deepPlaceholders(@NotNull String text, @NotNull Pattern pattern, @NotNull Function<String, MessageDraft> replacer) {

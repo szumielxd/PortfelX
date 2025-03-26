@@ -11,6 +11,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
@@ -47,6 +48,7 @@ import me.szumielxd.portfel.bukkit.managers.BukkitUserManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.ChannelManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.IdentifierManagerImpl;
 import me.szumielxd.portfel.bukkit.managers.OrdersManager;
+import me.szumielxd.portfel.bukkit.objects.BukkitComponentMapper;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.objects.BukkitServer;
 import me.szumielxd.portfel.common.ConfigImpl;
@@ -75,7 +77,8 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	private PAPIHandler papiHandler;
 	private ContextProvider<Player, Component> luckpermsContextProvider;
 	
-	private final @Accessors(fluent = true) @Getter @NotNull CommonLogger logger = new BukkitLogger(getLogger());
+	@Getter private final @NotNull ComponentMapper<Component> componentMapper = new BukkitComponentMapper();
+	@Accessors(fluent = true) @Getter private final @NotNull CommonLogger logger = new BukkitLogger(getLogger());
 	
 	private String serverHashKey;
 	
@@ -282,6 +285,11 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	
 	
 	private SimpleCommandMap getCommandMap() throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+		try {
+			return (SimpleCommandMap) Bukkit.class.getMethod("getCommandMap").invoke(null);
+		} catch (Exception e) {
+			// fallback to older method
+		}
 		Field f = this.getServer().getPluginManager().getClass().getDeclaredField("commandMap");
 		f.setAccessible(true);
 		return (SimpleCommandMap) f.get(this.getServer().getPluginManager());
@@ -332,14 +340,6 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 			e.printStackTrace();
 		}
 	}
-
-
-	@Override
-	public @NotNull ComponentMapper<Component> getComponentMapper() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
 	@Override
 	public @NotNull Path getDataDirectory() {

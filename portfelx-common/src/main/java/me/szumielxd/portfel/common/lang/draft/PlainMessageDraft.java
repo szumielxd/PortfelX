@@ -10,9 +10,12 @@ import me.szumielxd.portfel.common.lang.Lang;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 @RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 public class PlainMessageDraft extends MessageDraft {
+	
+	static final PlainTextComponentSerializer SERIALIZER = PlainTextComponentSerializer.plainText();
 
 	static final MessageDraft EMPTY = new PlainMessageDraft("");
 	static final MessageDraft NEWLINE = new PlainMessageDraft("\n");

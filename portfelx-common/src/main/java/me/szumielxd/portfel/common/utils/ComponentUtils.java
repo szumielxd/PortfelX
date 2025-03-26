@@ -1,4 +1,4 @@
-package me.szumielxd.portfel.bukkit.utils;
+package me.szumielxd.portfel.common.utils;
 
 import java.util.LinkedList;
 import java.util.List;

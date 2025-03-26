@@ -1,6 +1,5 @@
 package me.szumielxd.portfel.bukkit.gui;
 
-import java.util.List;
 import java.util.Objects;
 
 import org.bukkit.Material;
@@ -14,10 +13,11 @@ import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
 import me.szumielxd.portfel.bukkit.api.objects.OrderData.OrderDataOnAir;
 import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
+import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
 import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.utils.BukkitUtils;
 import me.szumielxd.portfel.common.lang.MainLangKey;
-import net.kyori.adventure.text.Component;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 
 @SuppressWarnings("deprecation")
 public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
@@ -55,13 +55,12 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 
 
 	@Override
-	public @NotNull Component getTitle(@NotNull User user, @NotNull Player player) {
+	public @NotNull MessageDraft getTitle(@NotNull User user, @NotNull Player player) {
 		Objects.requireNonNull(user, "user cannot be null");
 		Objects.requireNonNull(player, "player cannot be null");	
 		return BukkitLangKey.SHOP_CONFIRM_TITLE
 				.draft(MainLangKey.MAIN_CURRENCY_FORMAT
-						.draft(this.order.getPrice()))
-						.buildComponent(BukkitSender.wrap(this.plugin, player));
+						.draft(this.order.getPrice()));
 	}
 
 
@@ -88,38 +87,28 @@ public class ConfirmOrderPortfelGui implements AbstractPortfelGui {
 		Objects.requireNonNull(inventory, "inventory cannot be null");
 		Objects.requireNonNull(player, "player cannot be null");
 		inventory.clear();
-		var wrapper = BukkitSender.wrap(this.plugin, player);
+		var wrapper = BukkitSender.player(this.plugin, player);
 		inventory.setItem(2, buildRejectButton(wrapper));
 		inventory.setItem(6, buildAcceptButton(wrapper));
 		player.openInventory(inventory);
 	}
 	
-	private ItemStack buildRejectButton(@NotNull BukkitSender wrapper) {
+	private ItemStack buildRejectButton(@NotNull BukkitPlayer wrapper) {
 		ItemStack item = REJECT.clone();
 		ItemMeta meta = item.getItemMeta();
-		BukkitUtils.setDisplayName(meta,
-				BukkitLangKey.SHOP_CONFIRM_NO_TITLE
-						.draft()
-						.buildComponent(wrapper));
-		BukkitUtils.setLore(meta, List.of(
-				BukkitLangKey.SHOP_CONFIRM_NO_TITLE
-						.draft(order.getPrice(), order.getDisplayName())
-						.buildComponent(wrapper)));
+		BukkitUtils.setDisplayName(meta, wrapper, BukkitLangKey.SHOP_CONFIRM_NO_TITLE.draft());
+		BukkitUtils.setLore(meta, wrapper, BukkitLangKey.SHOP_CONFIRM_NO_TITLE
+				.draft(order.getPrice(), order.getDisplayName()));
 		item.setItemMeta(meta);
 		return item;
 	}
 	
-	private ItemStack buildAcceptButton(@NotNull BukkitSender wrapper) {
+	private ItemStack buildAcceptButton(@NotNull BukkitPlayer wrapper) {
 		ItemStack item = ACCEPT.clone();
 		ItemMeta meta = item.getItemMeta();
-		BukkitUtils.setDisplayName(meta,
-				BukkitLangKey.SHOP_CONFIRM_YES_TITLE
-						.draft()
-						.buildComponent(wrapper));
-		BukkitUtils.setLore(meta, List.of(
-				BukkitLangKey.SHOP_CONFIRM_YES_TITLE
-						.draft(order.getPrice(), order.getDisplayName())
-						.buildComponent(wrapper)));
+		BukkitUtils.setDisplayName(meta, wrapper, BukkitLangKey.SHOP_CONFIRM_YES_TITLE.draft());
+		BukkitUtils.setLore(meta, wrapper, BukkitLangKey.SHOP_CONFIRM_YES_TITLE
+				.draft(order.getPrice(), order.getDisplayName()));
 		item.setItemMeta(meta);
 		return item;
 	}

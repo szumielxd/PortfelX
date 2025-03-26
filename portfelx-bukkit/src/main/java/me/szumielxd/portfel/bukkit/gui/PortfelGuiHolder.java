@@ -3,46 +3,35 @@ package me.szumielxd.portfel.bukkit.gui;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import org.bukkit.Server;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import me.szumielxd.portfel.api.objects.User;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
+import me.szumielxd.portfel.bukkit.objects.BukkitSender;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
+import me.szumielxd.portfel.common.utils.KyoriUtils;
+import me.szumielxd.portfel.common.utils.ReflectionUtils;
 
 public class PortfelGuiHolder implements InventoryHolder {
 
 	
-	private static Method Server_createInventory;
-	private static final LegacyComponentSerializer legacy = LegacyComponentSerializer.builder().hexColors().useUnusualXRepeatedCharacterHexFormat().character('§').build();
+	private static @Nullable Method Bukkit_createInventory = ReflectionUtils.tryGetMethod(Bukkit.class, "createInventory", InventoryHolder.class, int.class, KyoriUtils.COMPONENT_CLAZZ);
 	
-	private final PortfelBukkitImpl plugin;
-	private final Inventory inventory;
-	private final AbstractPortfelGui gui;
-	
-	
-	static {
-		try {
-			Server_createInventory = Server.class.getMethod("createInventory", InventoryHolder.class, Integer.TYPE, Component.class);
-		} catch (NoSuchMethodException | SecurityException e) {}
-	}
+	private final @NotNull PortfelBukkitImpl plugin;
+	private final @NotNull Inventory inventory;
+	private final @NotNull AbstractPortfelGui gui;
 	
 	
-	@SuppressWarnings("deprecation")
 	public PortfelGuiHolder(@NotNull PortfelBukkitImpl plugin, @NotNull AbstractPortfelGui gui, @NotNull User user, @NotNull Player player) {
 		this.plugin = plugin;
 		this.gui = gui;
-		Inventory inv;
-		try {
-			inv = (Inventory) Server_createInventory.invoke(this.plugin.getServer(), this, this.gui.getSize(), this.gui.getTitle(user, player));
-		} catch (NullPointerException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			inv = this.plugin.getServer().createInventory(this, this.gui.getSize(), legacy.serialize(this.gui.getTitle(user, player)));
-		}
-		this.inventory = inv;
+		this.inventory = createInventory(BukkitSender.player(plugin, player), this, gui.getSize(), gui.getTitle(user, player));
 	}
 	
 	
@@ -54,6 +43,18 @@ public class PortfelGuiHolder implements InventoryHolder {
 	
 	public @NotNull AbstractPortfelGui getGui() {
 		return this.gui;
+	}
+	
+	@SuppressWarnings("deprecation")
+	private static @NotNull Inventory createInventory(@NotNull BukkitPlayer wrapper, @NotNull InventoryHolder holder, int size, MessageDraft title) {
+		if (Bukkit_createInventory != null) {
+			try {
+				return (Inventory) Bukkit_createInventory.invoke(null, holder, size, KyoriUtils.toCommonKyori(title.buildComponent(wrapper)));
+			} catch (NullPointerException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				// fallback to legacy
+			}
+		}
+		return Bukkit.createInventory(holder, size, title.buildLegacy(wrapper));
 	}
 
 }

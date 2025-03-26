@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
@@ -26,10 +25,10 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 
 import lombok.experimental.UtilityClass;
+import me.szumielxd.portfel.bukkit.objects.BukkitPlayer;
+import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.common.utils.KyoriUtils;
 import me.szumielxd.portfel.common.utils.ReflectionUtils;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 @UtilityClass
 public class BukkitUtils {
@@ -48,34 +47,29 @@ public class BukkitUtils {
 	private final @Nullable Method ENCHANTMENT_GETTARGET = ReflectionUtils.tryGetMethod(Enchantment.class, "getItemTarget");
 	
 	private final boolean LEGACY_MATERIALS = Material.getMaterial("RED_WOOL") == null;
-	private final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
 	private final Pattern ITEM_PATTERN = Pattern.compile("(\\*)?([a-zA-Z_]+)(:(0|[1-9]\\d*))?(#([a-fA-F0-9]{6}))?(\\|((?:[A-Za-z\\d+/]{4})*(?:[A-Za-z\\d+/]{3}=|[A-Za-z\\d+/]{2}==)?))? ?([1-9]\\d*)?");
 	private final Function<ItemOptions, ItemStack> ITEM_CONSTRUCTOR = LEGACY_MATERIALS ? BukkitUtils::buildLegacyItem : BukkitUtils::buildNewItem;
 	
-	
-	public void setDisplayName(@NotNull ItemMeta meta, @Nullable Component display) {
-		Objects.requireNonNull(meta, "meta cannot be null");
+	public void setDisplayName(@NotNull ItemMeta meta, @NotNull BukkitPlayer player, @Nullable MessageDraft display) {
 		try {
 			if (ITEMMETA_DISPLAYNAME != null) {
-				ITEMMETA_DISPLAYNAME.invoke(meta, display == null ? null : KyoriUtils.toCommonKyori(display));
+				ITEMMETA_DISPLAYNAME.invoke(meta, display == null ? null : KyoriUtils.toCommonKyori(display.buildComponent(player)));
 			} else {
-				ITEMMETA_SETDISPLAYNAME.invoke(meta, display == null ? null : LEGACY.serialize(display));
+				ITEMMETA_SETDISPLAYNAME.invoke(meta, display == null ? null : display.buildLegacy(player));
 			}
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	public void setLore(@NotNull ItemMeta meta, @Nullable List<Component> lore) {
+	public void setLore(@NotNull ItemMeta meta, @NotNull BukkitPlayer player, @Nullable MessageDraft lore) {
 		try {
 			if (ITEMMETA_LORE != null) {
-				ITEMMETA_LORE.invoke(meta, lore == null ? null : lore.stream()
+				ITEMMETA_LORE.invoke(meta, lore == null ? null : lore.buildComponentList(player).stream()
 						.map(KyoriUtils::toCommonKyori)
 						.toList());
 			} else {
-				ITEMMETA_SETLORE.invoke(meta, lore == null ? null : lore.stream()
-						.map(LEGACY::serialize)
-						.toList());
+				ITEMMETA_SETLORE.invoke(meta, lore == null ? null : lore.buildLegacyList(player));
 			}
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e);
