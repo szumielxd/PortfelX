@@ -7,6 +7,13 @@
 		<version>${revision}</version>
 	</parent>
 	<dependencies>
+		<!-- Tests -->
+		<dependency>
+			<groupId>org.mockbukkit.mockbukkit</groupId>
+			<artifactId>mockbukkit-v1.21</artifactId>
+		</dependency>
+		
+		<!-- Not Tests -->
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>portfelx-common</artifactId>

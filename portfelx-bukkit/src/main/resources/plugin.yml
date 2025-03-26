@@ -2,7 +2,7 @@ name: ${pluginName}
 description: ${description}
 version: ${version}
 authors: [${author}]
-main: ${bukkitMainClass}
+main: me.szumielxd.portfel.bukkit.PortfelBukkitImpl
 website: ${parent.url}
 softdepend: [PlaceholderAPI]
 
