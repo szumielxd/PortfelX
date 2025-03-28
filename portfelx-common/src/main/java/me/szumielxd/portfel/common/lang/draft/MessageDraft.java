@@ -156,7 +156,7 @@ public abstract class MessageDraft {
 	
 	public <C> void send(@NotNull CommonAudience<C> audience) {
 		if (audience instanceof CommonGroupAudience<?>) {
-			((CommonGroupAudience<C>) audience).getAudience().forEach(a -> send(a));
+			((CommonGroupAudience<C>) audience).getAudience().forEach(this::send);
 		} else if (audience instanceof CommonSender<?>) {
 			audience.sendMessage(buildComponent((CommonSender<C>) audience));
 		} else {
