@@ -35,11 +35,11 @@ import me.szumielxd.portfel.api.objects.ComponentMapper;
 import me.szumielxd.portfel.bukkit.api.PortfelBukkit;
 import me.szumielxd.portfel.bukkit.api.configuration.BukkitConfigKey;
 import me.szumielxd.portfel.bukkit.api.managers.BukkitTopManager;
-import me.szumielxd.portfel.bukkit.api.managers.ChannelManager;
 import me.szumielxd.portfel.bukkit.api.managers.IdentifierManager;
 import me.szumielxd.portfel.bukkit.commands.MainCommand;
 import me.szumielxd.portfel.bukkit.commands.WalletCommand;
 import me.szumielxd.portfel.bukkit.hooks.PAPIHandler;
+import me.szumielxd.portfel.bukkit.lang.BukkitLangKey;
 import me.szumielxd.portfel.bukkit.listeners.GuiListener;
 import me.szumielxd.portfel.bukkit.listeners.UserListener;
 import me.szumielxd.portfel.bukkit.managers.BukkitTaskManagerImpl;
@@ -53,6 +53,8 @@ import me.szumielxd.portfel.bukkit.objects.BukkitSender;
 import me.szumielxd.portfel.bukkit.objects.BukkitServer;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
+import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -145,6 +147,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 		this.getLogger().info("Loading configuration...");
 		this.config = new ConfigImpl(this).init(Stream.concat(Stream.of(ConfigKey.values()), Stream.of(BukkitConfigKey.values())).toArray(AbstractKey[]::new));
 		this.getLogger().info("Setup locales...");
+		LangKey.registerAll(MainLangKey.class, BukkitLangKey.class);
 		Lang.load(getDataDirectory().resolve("languages"), this);
 		this.setupBukkitKey();
 		this.ordersManager = new OrdersManager(this).init();
@@ -159,6 +162,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	
 	
 	public void unload() {
+		LangKey.killThemAll();
 		this.getLogger().info("Unregistering external hooks");
 		if(this.papiHandler != null) this.papiHandler.oldUnregister();
 		if(this.luckpermsContextProvider != null) this.luckpermsContextProvider.unregisterAll();
@@ -237,7 +241,7 @@ public class PortfelBukkitImpl extends JavaPlugin implements PortfelBukkit<Compo
 	 * @return channel manager
 	 */
 	@Override
-	public @NotNull ChannelManager getChannelManager() {
+	public @NotNull ChannelManagerImpl getChannelManager() {
 		return this.channelManager;
 	}
 	

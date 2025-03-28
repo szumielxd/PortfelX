@@ -27,6 +27,8 @@ import me.szumielxd.portfel.bungee.objects.BungeeComponentMapper;
 import me.szumielxd.portfel.bungee.objects.BungeeProxy;
 import me.szumielxd.portfel.common.ConfigImpl;
 import me.szumielxd.portfel.common.lang.Lang;
+import me.szumielxd.portfel.common.lang.MainLangKey;
+import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.luckperms.ContextProvider;
 import me.szumielxd.portfel.common.managers.PrizesManager;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
@@ -39,6 +41,7 @@ import me.szumielxd.portfel.proxy.commands.MainTokenCommand;
 import me.szumielxd.portfel.proxy.database.AbstractDB;
 import me.szumielxd.portfel.proxy.database.AbstractDBLogger;
 import me.szumielxd.portfel.proxy.database.token.AbstractTokenDB;
+import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
 import me.szumielxd.portfel.proxy.managers.AccessManagerImpl;
 import me.szumielxd.portfel.proxy.managers.OrdersManager;
 import me.szumielxd.portfel.proxy.managers.ProxyTaskManagerImpl;
@@ -123,6 +126,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 		this.getLogger().info("Loading configuration...");
 		this.configuration = new ConfigImpl(this).init(Stream.concat(Stream.of(ConfigKey.values()), Stream.of(ProxyConfigKey.values())).toArray(AbstractKey[]::new));
 		this.getLogger().info("Setup locales...");
+		LangKey.registerAll(MainLangKey.class, ProxyLangKey.class);
 		Lang.load(this.getDataDirectory().resolve("languages"), this);
 		this.ordersManager = new OrdersManager(this).init();
 		this.prizesManager = new PrizesManager<>(this).init();
@@ -133,6 +137,7 @@ public class PortfelBungeeImpl extends Plugin implements PortfelProxyImpl<BaseCo
 	
 	
 	public void unload() {
+		LangKey.killThemAll();
 		this.getLogger().info("Unregistering external hooks");
 		if (this.luckpermsContextProvider != null) {
 			this.luckpermsContextProvider.unregisterAll();

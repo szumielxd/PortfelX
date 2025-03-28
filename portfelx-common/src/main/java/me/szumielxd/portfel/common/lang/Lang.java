@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -71,12 +72,25 @@ public class Lang {
 					}));
 		}
 		
+		@SafeVarargs
+		public static void registerAll(@NotNull Class<? extends Enum<? extends LangKey>>... langKeyClasses) {
+			for (var langKeyClass : langKeyClasses) {
+				register(langKeyClass);
+			}
+		}
+		
 		public static JsonObject asJsonObject() {
 			JsonObject json = new JsonObject();
 			for (LangKey key : LangKey.values()) {
 				if (key.isModifiable()) json.addProperty(key.getPath(), key.getDefString().replace('§', '&').replace("\n", "\\n"));
 			}
 			return json;
+		}
+		
+		public static void killThemAll() {
+			langByLocale.clear();
+			KEYS_BY_PATH.clear();
+			defaultLocale = null;
 		}
 		
 		
@@ -88,7 +102,7 @@ public class Lang {
 	private static final Map<String, LangKey> KEYS_BY_PATH = new HashMap<>();
 	
 	private static Map<Locale, Lang> langByLocale = new HashMap<>();
-	private static Locale defaultLocale;
+	private static Locale defaultLocale = null;
 	private static final Pattern FILE_PATTERN = Pattern.compile("messages-[a-z]{2}(_[A-Z]{2})?\\.json");
 	private static final Gson GSON_SERIALIZER = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 	
@@ -116,7 +130,7 @@ public class Lang {
 		}
 		try (Stream<Path> files = Files.find(dir, 0, (path, attr) -> FILE_PATTERN.matcher(path.getFileName().toString()).matches())) {
 			files.forEach(f -> Optional.ofNullable(Translator.parseLocale(f.getFileName().toString().transform(s -> s.substring(9, s.length()-5))))
-					.map(loc -> new Lang(loc, f))
+					.map(loc -> new Lang(plugin, loc, f))
 					.ifPresent(lang -> langByLocale.put(lang.getLocale(), lang)));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -131,9 +145,9 @@ public class Lang {
 					Files.deleteIfExists(f);
 					Files.createFile(f);
 				}
-				langByLocale.put(Locale.US, new Lang(Locale.US, f));
+				langByLocale.put(Locale.US, new Lang(plugin, Locale.US, f));
 			} catch (IOException e) {
-				e.printStackTrace();
+				plugin.logger().severe(e, "Couldn't load default locale from file `%s`. Falling back to internal strings", f);
 				langByLocale.put(Locale.US, new Lang(Locale.US, LangKey.asJsonObject()));
 			}
 		}
@@ -172,6 +186,9 @@ public class Lang {
 	}
 	
 	public static @NotNull Lang def() {
+		if (defaultLocale == null) {
+			throw new IllegalStateException("Default locale cannot be null");
+		}
 		return langByLocale.get(defaultLocale);
 	}
 	
@@ -181,8 +198,9 @@ public class Lang {
 	
 	private final @Getter Locale locale;
 	private final Map<LangKey, String> texts = new HashMap<>();
+	private boolean loaded = false;
 	
-	private Lang(@NotNull Locale locale, @NotNull Path f) {
+	private Lang(@NotNull Portfel<?> plugin, @NotNull Locale locale, @NotNull Path f) {
 		this.locale = locale;
 		try (BufferedReader fr = Files.newBufferedReader(f)) {
 			JsonObject json = Optional.ofNullable(GSON_SERIALIZER.fromJson(fr, JsonObject.class))
@@ -191,7 +209,7 @@ public class Lang {
 				saveToFile(json, f);
 			}
 		} catch (JsonIOException | IOException e) {
-			e.printStackTrace();
+			plugin.logger().severe(e, "Couldn't load file `%s` for locale `%s`", f, locale);
 		}
 	}
 	
@@ -210,6 +228,9 @@ public class Lang {
 	
 	private int loadLang(@NotNull JsonObject json) {
 		int modified = 0;
+		if (KEYS_BY_PATH.isEmpty()) {
+			throw new IllegalStateException("No LangKey has been registered");
+		}
 		for (LangKey key : LangKey.values()) {
 			if (key.isModifiable()) {
 				if (!json.has(key.getPath())) {
@@ -217,8 +238,12 @@ public class Lang {
 					modified++;
 				}
 				texts.put(key, json.get(key.getPath()).getAsString());
+			} else {
+				texts.put(key, key.getDefString());
 			}
+			
 		}
+		loaded = true;
 		return modified;
 	}
 	
@@ -231,7 +256,14 @@ public class Lang {
 	}*/
 	
 	public @NotNull String getValue(@NotNull LangKey key) {
-		return this.texts.get(key);
+		validateLoaded();
+		return Objects.requireNonNull(this.texts.get(key), () -> "Couldn't find lang value for key `%s`".formatted(key));
+	}
+	
+	private void validateLoaded() {
+		if (!this.loaded) {
+			throw new IllegalStateException("Lang hasn't been loaded");
+		}
 	}
 	
 	/*public @NotNull Component translateComponent(Component comp) {
