@@ -24,12 +24,12 @@ public enum MainLangKey implements LangKey {
 	COMMAND_USAGE_ARGUMENT_MANDATORY("command.usage.argument.mandatory", "{0}<{1}>"),
 
 	COMMAND_MAIN_RUNNING("command.main.running", "<dark_purple>Running <light_purple>{0}</light_purple>."),
-	COMMAND_MAIN_USE("command.main.use", "<dark_aqua>Use <aqua><hover:show_text:{1}><click:run_command:{0}><insert:{0}>{0}</insert><click></hover></aqua> to view available commands."),
-	COMMAND_MAIN_SUBCOMMANDS_LINE("command.main.subcommands.line", "<light_purple>> <hover:show_text:{2}><click:run_command:{0}><insert:{0}><aqua>{0}{1]"),
+	COMMAND_MAIN_USE("command.main.use", "<dark_aqua>Use <aqua><hover:show_text:\"{1}\"><click:run_command:{0}><insert:{0}>{0}</insert></click></hover></aqua> to view available commands."),
+	COMMAND_MAIN_SUBCOMMANDS_LINE("command.main.subcommands.line", "<light_purple>> <hover:show_text:\"{2}\"><click:run_command:{0}><insert:{0}><aqua>{0}{1}"),
 	
 	COMMAND_SUBCOMMANDS_TITLE("command.subcommands.title", "<light_purple>{0} Sub Commands: <gray>(/{1}...)"),
-	COMMAND_SUBCOMMANDS_LINE_WITHARGS("command.subcommands.line.with-args", "<hover:show_text:{2}><insert:{3}><click:run_command:{3}><light_purple><bold>> </bold><aqua>{0} <darg_purple>-</dark_purple> {1}"),
-	COMMAND_SUBCOMMANDS_LINE_WITHOUTARGS("command.subcommands.line.without-args", "<hover:show_text:{1}><insert:{2}><click:run_command:{2}><light_purple><bold>> </bold><aqua>{0}"),
+	COMMAND_SUBCOMMANDS_LINE_WITHARGS("command.subcommands.line.with-args", "<hover:show_text:\"{2}\"><insert:{3}><click:run_command:{3}><light_purple><bold>> </bold><aqua>{0} <darg_purple>-</dark_purple> {1}"),
+	COMMAND_SUBCOMMANDS_LINE_WITHOUTARGS("command.subcommands.line.without-args", "<hover:show_text:\"{1}\"><insert:{2}><click:run_command:{2}><light_purple><bold>> </bold><aqua>{0}"),
 	COMMAND_SUBCOMMANDS_EXECUTE("command.subcommands.execution", "<dark_gray>» <gray>Click to execute this command"),
 	COMMAND_SUBCOMMANDS_INSERT("command.subcommands.insertion", "<dark_gray>» <gray>Click+Shift to insert this command"),
 	
@@ -37,7 +37,7 @@ public enum MainLangKey implements LangKey {
 	COMMAND_SYSTEM_RELOAD_DESCRIPTION("command.system.reload.description", "Reload partially plugin's configuration."),
 	COMMAND_SYSTEM_RELOAD_EXECUTE("command.system.reload.execute", "<gray>Reloading plugin..."),
 	COMMAND_SYSTEM_RELOAD_SUCCESS("command.system.reload.success", "<green>Successfully reloaded <aqua>{0} {1}."),
-	COMMAND_SYSTEM_RELOAD_ERROR("command.system.reload.success", "<hover:show_text:<red>{0}><dark_red>An error occured while attempting to reload this plugin. Hover this text or see console for more informations."),
+	COMMAND_SYSTEM_RELOAD_ERROR("command.system.reload.error", "<hover:show_text:\"<red>{0}\"><dark_red>An error occured while attempting to reload this plugin. Hover this text or see console for more informations."),
 	
 	COMMAND_HELP_DESCRIPTION("command.help.decription", "List all available portfel subcommands."),
 	

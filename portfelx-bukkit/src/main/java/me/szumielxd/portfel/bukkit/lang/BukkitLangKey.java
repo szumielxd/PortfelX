@@ -34,7 +34,7 @@ public enum BukkitLangKey implements LangKey {
 	
 	SHOP_ORDER_STATUS_PURCHASED("shop.order.status.purchased", "<green>Purchased"),
 	SHOP_ORDER_STATUS_DENIED("shop.order.status.denied", "<red>Denied!"),
-	SHOP_ORDER_STATUS_AVAILABLE("shop.order.status.denied", "<yellow>Click to buy!"),
+	SHOP_ORDER_STATUS_AVAILABLE("shop.order.status.available", "<yellow>Click to buy!"),
 	
 	SHOP_ORDER_TOS_BLOCK("shop.order.tos.block", "Terms of service:\\n{0}"),
 	//
