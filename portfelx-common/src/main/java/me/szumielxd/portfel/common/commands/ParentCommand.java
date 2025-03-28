@@ -27,7 +27,7 @@ public abstract class ParentCommand<C> extends SimpleCommand<C> implements Paren
 	private HashMap<String, SimpleCommand<C>> childrens;
 	
 	
-	protected ParentCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent, @NotNull String name, @NotNull String... aliases) {
+	protected ParentCommand(@NotNull Portfel<C> plugin, @NotNull ParentLikeCommand<C> parent, @NotNull String name, @NotNull String... aliases) {
 		super(plugin, parent, name, aliases);
 	}
 	

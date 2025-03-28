@@ -1,8 +1,10 @@
 package me.szumielxd.portfel.bukkit.api.objects;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.entity.Player;
@@ -16,7 +18,7 @@ public interface DoneCondition extends Predicate<Player> {
 	
 	
 	
-	public static enum OperationType {
+	public enum OperationType {
 		
 		
 		EQUAL("==", (s1, s2) -> {
@@ -87,6 +89,21 @@ public interface DoneCondition extends Predicate<Player> {
 		
 		
 	}
+	
+	public static @NotNull Optional<ConditionParseResult> tryParse(@NotNull String str) {
+		for (DoneCondition.OperationType type : DoneCondition.OperationType.values()) {
+			Matcher match = type.getPattern().matcher(str);
+			if (match.matches()) {
+				return Optional.of(new ConditionParseResult(
+						type,
+						match.group(1).replace("\\" + type.getSign(), type.getSign()),
+						match.group(3).replace("\\" + type.getSign(), type.getSign())));
+			}
+		}
+		return Optional.empty();
+	}
+	
+	public static record ConditionParseResult(@NotNull OperationType type, @NotNull String left, @NotNull String right) {}
 	
 
 }

@@ -44,18 +44,21 @@ public class BukkitUserManagerImpl extends UserManagerImpl<Component> {
 	@Override
 	public @NotNull BukkitUserManagerImpl init() {
 		super.init();
-		((ChannelManagerImpl)this.plugin.getChannelManager()).setRegisterer(user -> {
-			if (user == null) return;
-			User main = this.users.get(user.getUniqueId());
-			if (main instanceof BukkitImaginaryUser imaginaryUser) { // change user class to operable one
-				user.setTestmode(imaginaryUser.inTestmode());
-				this.users.put(user.getUniqueId(), user);
-			} else if (main instanceof BukkitOperableUser operableUser) { // update user status
-				operableUser.setPlainBalance(user.getBalance());
-				operableUser.setPlainDeniedInTop(user.isDeniedInTop());
-				operableUser.setOnline(this.plugin.getServer().getPlayer(user.getUniqueId()) != null);
-			} else { // insert new user
-				this.users.put(user.getUniqueId(), user);
+		plugin.getChannelManager().setRegisterer(user -> {
+			if (user != null) {
+				User main = this.users.get(user.getUniqueId());
+				switch (main) {
+						case BukkitImaginaryUser imaginaryUser -> { // change user class to operable one
+							user.setTestmode(imaginaryUser.inTestmode());
+			  				users.put(user.getUniqueId(), user);
+						}
+						case BukkitOperableUser operableUser -> { // update user status
+							operableUser.setPlainBalance(user.getBalance());
+							operableUser.setPlainDeniedInTop(user.isDeniedInTop());
+							operableUser.setOnline(plugin.getServer().getPlayer(user.getUniqueId()) != null);
+						}
+						default -> users.put(user.getUniqueId(), user); // insert new user
+				}
 			}
 		});
 		return this;
