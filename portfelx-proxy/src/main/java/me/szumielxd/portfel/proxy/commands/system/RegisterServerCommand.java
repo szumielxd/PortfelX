@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.objects.ProxyPlayer;
@@ -31,7 +31,7 @@ public class RegisterServerCommand<C> extends SimpleCommand<C> {
 	@Getter private final @NotNull CommandAccess access = CommandAccess.PLAYERS;
 	
 	
-	public RegisterServerCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
+	public RegisterServerCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull ParentLikeCommand<C> parent) {
 		super(plugin, parent, "registerserver", "createserver");
 	}
 

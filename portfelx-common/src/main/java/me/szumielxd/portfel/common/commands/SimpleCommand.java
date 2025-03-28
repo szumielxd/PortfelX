@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.common.utils.CollectionUtils;
 
@@ -19,13 +20,13 @@ public abstract class SimpleCommand<C> implements AbstractCommand<C> {
 	protected final List<String> emptyList = List.of();
 	protected final List<CmdArg> emptyArgList = List.of();
 	@Getter private final Portfel<C> plugin;
-	@Getter private final AbstractCommand<C> parent;
+	@Getter private final ParentLikeCommand<C> parent;
 	@Getter private final String name;
 	@Getter private final String permission;
 	@Getter private final String[] aliases;
 	
 	
-	protected SimpleCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent, @NotNull String name, @NotNull String... aliases) {
+	protected SimpleCommand(@NotNull Portfel<C> plugin, @NotNull ParentLikeCommand<C> parent, @NotNull String name, @NotNull String... aliases) {
 		this.plugin = plugin;
 		this.name = name;
 		this.aliases = aliases;

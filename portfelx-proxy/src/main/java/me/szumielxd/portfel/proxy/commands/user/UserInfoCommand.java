@@ -10,9 +10,9 @@ import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
 import me.szumielxd.portfel.proxy.lang.ProxyLangKey;
@@ -25,7 +25,7 @@ public class UserInfoCommand<C> extends SimpleCommand<C> {
 	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_USER_INFO_DESCRIPTION;
 	
 
-	public UserInfoCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
+	public UserInfoCommand(@NotNull Portfel<C> plugin, @NotNull ParentLikeCommand<C> parent) {
 		super(plugin, parent, "info", "information", "informations", "get", "about");
 	}
 

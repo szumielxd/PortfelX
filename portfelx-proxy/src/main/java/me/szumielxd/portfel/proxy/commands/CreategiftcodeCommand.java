@@ -11,9 +11,9 @@ import com.github.curiousoddman.rgxgen.RgxGen;
 
 import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
@@ -54,7 +54,7 @@ public class CreategiftcodeCommand<C> extends SimpleCommand<C> {
 	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_CREATEGIFTCODE_DESCRIPTION;
 	
 
-	public CreategiftcodeCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull AbstractCommand<C> parent) {
+	public CreategiftcodeCommand(@NotNull PortfelProxyImpl<C> plugin, @NotNull ParentLikeCommand<C> parent) {
 		super(plugin, parent, "creategiftcode", "creategift", "createcode");
 	}
 

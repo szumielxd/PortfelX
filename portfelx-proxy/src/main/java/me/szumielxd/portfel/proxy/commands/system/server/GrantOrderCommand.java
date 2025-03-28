@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
@@ -26,7 +26,7 @@ public class GrantOrderCommand<C> extends SimpleCommand<C> {
 	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_SYSTEM_SERVER_GRANT_DESCRIPTION;
 	
 	
-	public GrantOrderCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
+	public GrantOrderCommand(@NotNull Portfel<C> plugin, @NotNull ParentLikeCommand<C> parent) {
 		super(plugin, parent, "grant");
 	}
 

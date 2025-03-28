@@ -20,9 +20,9 @@ import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.api.objects.User;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.draft.MessageDraft;
@@ -133,7 +133,7 @@ public class ReadLogCommand<C> extends SimpleCommand<C> {
 	
 	
 
-	public ReadLogCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
+	public ReadLogCommand(@NotNull Portfel<C> plugin, @NotNull ParentLikeCommand<C> parent) {
 		super(plugin, parent, "read", "get");
 	}
 

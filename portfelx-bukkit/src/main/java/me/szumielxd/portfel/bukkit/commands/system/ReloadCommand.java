@@ -9,9 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import lombok.Getter;
 import me.szumielxd.portfel.api.objects.CommonSender;
 import me.szumielxd.portfel.bukkit.PortfelBukkitImpl;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.common.lang.MainLangKey;
 import net.kyori.adventure.text.Component;
@@ -24,7 +24,7 @@ public class ReloadCommand extends SimpleCommand<Component> {
 	@Getter private final @NotNull LangKey description = MainLangKey.COMMAND_SYSTEM_RELOAD_DESCRIPTION;
 	
 
-	public ReloadCommand(@NotNull PortfelBukkitImpl plugin, @NotNull AbstractCommand<Component> parent) {
+	public ReloadCommand(@NotNull PortfelBukkitImpl plugin, @NotNull ParentLikeCommand<Component> parent) {
 		super(plugin, parent, "reload", "rl");
 	}
 

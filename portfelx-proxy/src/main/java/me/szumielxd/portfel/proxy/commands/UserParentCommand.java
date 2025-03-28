@@ -6,9 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.ParentCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.commands.user.EcoParentCommand;
 import me.szumielxd.portfel.proxy.commands.user.MinorEcoParentCommand;
@@ -25,7 +25,7 @@ public class UserParentCommand<C> extends ParentCommand<C> {
 	
 	
 
-	public UserParentCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
+	public UserParentCommand(@NotNull Portfel<C> plugin, @NotNull ParentLikeCommand<C> parent) {
 		super(plugin, parent, "user");
 		this.register(List.of(
 				new UserInfoCommand<>(plugin, this),

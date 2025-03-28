@@ -8,9 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import lombok.Getter;
 import me.szumielxd.portfel.api.Portfel;
 import me.szumielxd.portfel.api.objects.CommonSender;
-import me.szumielxd.portfel.common.commands.AbstractCommand;
 import me.szumielxd.portfel.common.commands.CmdArg;
 import me.szumielxd.portfel.common.commands.SimpleCommand;
+import me.szumielxd.portfel.common.commands.common.ParentLikeCommand;
 import me.szumielxd.portfel.common.lang.Lang.LangKey;
 import me.szumielxd.portfel.proxy.PortfelProxyImpl;
 import me.szumielxd.portfel.proxy.api.managers.AccessManager;
@@ -34,7 +34,7 @@ public class RevokeOrderCommand<C> extends SimpleCommand<C> {
 	@Getter private final @NotNull LangKey description = ProxyLangKey.COMMAND_SYSTEM_SERVER_REVOKE_DESCRIPTION;
 
 	
-	public RevokeOrderCommand(@NotNull Portfel<C> plugin, @NotNull AbstractCommand<C> parent) {
+	public RevokeOrderCommand(@NotNull Portfel<C> plugin, @NotNull ParentLikeCommand<C> parent) {
 		super(plugin, parent, "revoke");
 	}
 
