@@ -16,8 +16,7 @@ public class MiscUtils {
 	 * @return true if this is premium UUID, otherwise false
 	 */
 	public static boolean isOnlineModeUUID(@Nullable UUID uuid) {
-		if(uuid != null && uuid.version() == 4) return true;
-		return false;
+		return uuid != null && uuid.version() == 4;
 	}
 	
 
